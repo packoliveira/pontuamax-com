@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ const nav: NavItem[] = [
   { to: "/lojista/clientes", label: "Clientes", icon: Users },
   { to: "/lojista/produtos", label: "Produtos", icon: Package },
   { to: "/lojista/resgates", label: "Resgates", icon: Gift },
+  { to: "/lojista/campanhas", label: "Campanhas", icon: Megaphone },
   { to: "/lojista/configuracoes", label: "Configurações", icon: Settings },
 ];
 
