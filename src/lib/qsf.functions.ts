@@ -135,6 +135,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         nps_enabled: z.boolean().optional(),
         nps_ask_comment: z.boolean().optional(),
         nps_template: z.string().min(1).max(2000).optional(),
+        voucher_validade_dias: z.number().int().min(1).max(365).optional(),
       })
       .parse(input),
   )
