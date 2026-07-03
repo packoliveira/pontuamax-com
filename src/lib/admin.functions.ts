@@ -71,7 +71,15 @@ export const updateStoreSubscription = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, any> = {};
+    const patch: {
+      subscription_status?: "pending_payment" | "active" | "suspended" | "cancelled";
+      plan?: "starter" | "pro" | "premium";
+      mrr_amount?: number;
+      setup_paid_at?: string | null;
+      activated_at?: string;
+      cancelled_at?: string;
+      admin_notes?: string | null;
+    } = {};
     if (data.subscription_status !== undefined) {
       patch.subscription_status = data.subscription_status;
       if (data.subscription_status === "active") patch.activated_at = new Date().toISOString();
