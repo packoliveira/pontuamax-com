@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Store, User } from "lucide-react";
+import { Sparkles, Store } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,19 +39,19 @@ function Index() {
           Cada loja tem sua própria página personalizada. Escolha pontos, cashback ou ambos.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link to="/lojista/login">
+          <Link to="/lojista/onboarding">
             <Button size="lg" className="w-full sm:w-auto">
-              <Store className="h-4 w-4" /> Sou lojista
+              <Store className="h-4 w-4" /> Criar minha loja
             </Button>
           </Link>
-          <Link to="/$slug" params={{ slug: "lojademo" }}>
+          <Link to="/lojista/login">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              <User className="h-4 w-4" /> Ver loja demo
+              Já sou lojista, entrar
             </Button>
           </Link>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
-          Loja demo: qsfclub.com/<span className="font-mono">lojademo</span>
+          Cada loja terá seu próprio link: qsfclub.com/<span className="font-mono">nomedaloja</span>
         </p>
       </section>
     </div>

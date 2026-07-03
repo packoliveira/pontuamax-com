@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore } from "@/lib/mock-store";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/login")({
   ssr: false,
@@ -14,14 +15,16 @@ export const Route = createFileRoute("/lojista/login")({
 
 function Login() {
   const navigate = useNavigate();
-  const login = useStore((s) => s.loginLojista);
-  const lojas = useStore((s) => s.lojas);
-  const [email, setEmail] = useState("demo@qsfclub.com");
-  const [senha, setSenha] = useState("demo1234");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(lojas[0]?.id ?? "loja_demo");
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    setLoading(false);
+    if (error) return toast.error(error.message);
     navigate({ to: "/lojista" });
   };
 
@@ -33,22 +36,22 @@ function Login() {
             <Sparkles className="h-6 w-6" />
           </div>
           <CardTitle className="mt-4">Painel do lojista</CardTitle>
-          <CardDescription>Entre para gerenciar seu programa de fidelidade</CardDescription>
+          <CardDescription>Entre com o email cadastrado</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="senha">Senha</Label>
-              <Input id="senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+              <Input id="senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required autoComplete="current-password" />
             </div>
-            <Button type="submit" className="w-full">Entrar</Button>
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? "Entrando..." : "Entrar"}</Button>
             <p className="text-xs text-center text-muted-foreground">
-              Demo: qualquer email/senha entra na loja de exemplo.<br />
-              <Link to="/lojista/onboarding" className="underline">Ou criar nova loja</Link>
+              Ainda não tem loja?{" "}
+              <Link to="/lojista/onboarding" className="underline text-violet-700">Criar minha loja</Link>
             </p>
           </form>
         </CardContent>

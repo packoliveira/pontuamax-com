@@ -1,22 +1,25 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { LojistaShell } from "@/components/lojista-shell";
-import { useStore } from "@/lib/mock-store";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista")({
   ssr: false,
-  beforeLoad: ({ location }) => {
-    const authed = useStore.getState().authedLojaId;
+  beforeLoad: async ({ location }) => {
     const publicos = ["/lojista/login", "/lojista/onboarding"];
-    if (!authed && !publicos.includes(location.pathname)) {
-      throw redirect({ to: "/lojista/login" });
-    }
+    if (publicos.includes(location.pathname)) return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/lojista/login" });
   },
   component: LojistaLayout,
 });
 
 function LojistaLayout() {
-  const authed = useStore((s) => s.authedLojaId);
-  if (!authed) return <Outlet />;
+  const { data: session } = useQuery({
+    queryKey: ["auth-session"],
+    queryFn: async () => (await supabase.auth.getSession()).data.session,
+  });
+  if (!session) return <Outlet />;
   return (
     <LojistaShell>
       <Outlet />

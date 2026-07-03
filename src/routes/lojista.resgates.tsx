@@ -1,10 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useStore, formatBRL, formatDate, type Resgate } from "@/lib/mock-store";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { myStoreQuery, storeTransactionsQuery } from "@/lib/queries";
+import { confirmarResgate } from "@/lib/qsf.functions";
+import { formatBRL, formatDate } from "@/lib/qsf-shared";
+import type { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Gift, Wallet } from "lucide-react";
 import { toast } from "sonner";
+
+type TxRow = Tables<"transactions"> & {
+  profiles: { full_name: string | null } | null;
+  products: { nome: string | null } | null;
+};
 
 export const Route = createFileRoute("/lojista/resgates")({
   ssr: false,
@@ -12,35 +21,41 @@ export const Route = createFileRoute("/lojista/resgates")({
 });
 
 function ResgatesPage() {
-  const lojaId = useStore((s) => s.authedLojaId)!;
-  const resgates = useStore((s) => s.resgates.filter((r) => r.loja_id === lojaId));
-  const clientes = useStore((s) => s.clientes);
-  const produtos = useStore((s) => s.produtos);
-  const confirmar = useStore((s) => s.confirmarResgate);
+  const qc = useQueryClient();
+  const { data: loja } = useQuery(myStoreQuery());
+  const { data: txs = [] } = useQuery(storeTransactionsQuery(loja?.id));
 
+  const confirmar = useMutation({
+    mutationFn: (id: string) => confirmarResgate({ data: { transaction_id: id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["transactions", loja?.id] }),
+  });
+
+  const resgates = txs.filter((t) => t.tipo !== "venda") as unknown as TxRow[];
   const pendentes = resgates.filter((r) => r.status === "pendente");
   const entregues = resgates.filter((r) => r.status === "entregue");
 
-  const Row = ({ r }: { r: Resgate }) => {
-    const cli = clientes.find((c) => c.id === r.cliente_id);
-    const prd = r.produto_id ? produtos.find((p) => p.id === r.produto_id) : null;
+  const Row = ({ r }: { r: TxRow }) => {
+    const nomeCli = r.profiles?.full_name ?? "—";
+    const isProduto = r.tipo === "resgate_produto";
     return (
       <div className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="flex items-start gap-3">
-          <div className={`flex h-9 w-9 items-center justify-center rounded-md ${r.tipo === "produto" ? "bg-violet-100 text-violet-700" : "bg-green-100 text-green-700"}`}>
-            {r.tipo === "produto" ? <Gift className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
+          <div className={`flex h-9 w-9 items-center justify-center rounded-md ${isProduto ? "bg-violet-100 text-violet-700" : "bg-green-100 text-green-700"}`}>
+            {isProduto ? <Gift className="h-4 w-4" /> : <Wallet className="h-4 w-4" />}
           </div>
           <div>
-            <div className="font-medium">{cli?.nome ?? "—"}</div>
+            <div className="font-medium">{nomeCli}</div>
             <div className="text-sm text-muted-foreground">
-              {r.tipo === "produto" ? `${prd?.nome ?? "Produto"} • ${r.valor_usado} pts` : `Voucher de cashback • ${formatBRL(r.valor_usado)}`}
+              {isProduto
+                ? `${r.products?.nome ?? "Produto"} • ${Math.abs(r.pontos_delta)} pts`
+                : `Voucher de cashback • ${formatBRL(Math.abs(Number(r.cashback_delta)))}`}
             </div>
-            <div className="text-xs font-mono mt-1">{r.codigo_voucher}</div>
+            <div className="text-xs font-mono mt-1">{r.voucher_code}</div>
             <div className="text-xs text-muted-foreground">{formatDate(r.created_at)}</div>
           </div>
         </div>
         {r.status === "pendente" ? (
-          <Button size="sm" onClick={() => { confirmar(r.id); toast.success("Confirmado"); }}>
+          <Button size="sm" onClick={() => confirmar.mutate(r.id, { onSuccess: () => toast.success("Confirmado") })}>
             <CheckCircle2 className="h-4 w-4" /> Confirmar entrega
           </Button>
         ) : (
