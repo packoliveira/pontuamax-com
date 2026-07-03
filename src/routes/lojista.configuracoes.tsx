@@ -466,7 +466,7 @@ function AssetUploader({
   aspect,
 }: {
   storeId: string;
-  kind: "logo" | "banner";
+  kind: "logo" | "banner" | "banner-mobile";
   label: string;
   hint: string;
   value: string;
