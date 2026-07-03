@@ -40,6 +40,7 @@ function ConfigPage() {
   const [telefone, setTelefone] = useState("");
   const [logo, setLogo] = useState("");
   const [banner, setBanner] = useState("");
+  const [bannerMobile, setBannerMobile] = useState("");
   const [cor1, setCor1] = useState("#7c3aed");
   const [cor2, setCor2] = useState("#f97316");
   const [modalidade, setModalidade] = useState<Modalidade>("ambos");
@@ -52,6 +53,7 @@ function ConfigPage() {
       setTelefone(loja.telefone ?? "");
       setLogo(loja.logo_url ?? "");
       setBanner(loja.banner_url ?? "");
+      setBannerMobile(loja.banner_url_mobile ?? "");
       setCor1(loja.brand_primary);
       setCor2(loja.brand_secondary);
       setModalidade(loja.modalidade as Modalidade);
@@ -68,6 +70,7 @@ function ConfigPage() {
           telefone: telefone || null,
           logo_url: logo || null,
         banner_url: banner || null,
+        banner_url_mobile: bannerMobile || null,
           brand_primary: cor1,
           brand_secondary: cor2,
           modalidade,
@@ -112,10 +115,19 @@ function ConfigPage() {
             <AssetUploader
               storeId={loja.id}
               kind="banner"
-              label="Banner da página do cliente"
-              hint="Desktop: 1920 × 480 px · Mobile: 1080 × 720 px. JPG ou PNG até 3 MB."
+              label="Banner (desktop)"
+              hint="Recomendado: 1920 × 480 px. JPG ou PNG até 5 MB."
               value={banner}
               onChange={setBanner}
+              aspect="banner"
+            />
+            <AssetUploader
+              storeId={loja.id}
+              kind="banner-mobile"
+              label="Banner (celular)"
+              hint="Recomendado: 1080 × 720 px (vertical). JPG ou PNG até 5 MB."
+              value={bannerMobile}
+              onChange={setBannerMobile}
               aspect="banner"
             />
             <div className="grid grid-cols-2 gap-3">
