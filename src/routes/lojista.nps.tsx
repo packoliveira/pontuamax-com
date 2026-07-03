@@ -18,7 +18,10 @@ function Page() {
 
   const nameByUser = useMemo(() => {
     const m = new Map<string, string>();
-    for (const c of clientes) m.set(c.user_id, c.nome ?? c.telefone ?? "Cliente");
+    for (const c of clientes) {
+      const p = (c as { profiles?: { full_name?: string | null; phone?: string | null } | null }).profiles;
+      m.set(c.user_id, p?.full_name ?? p?.phone ?? "Cliente");
+    }
     return m;
   }, [clientes]);
 
