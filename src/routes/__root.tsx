@@ -81,8 +81,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "QSF Club — Fidelização de clientes" },
       { name: "description", content: "Fidelize seus clientes com pontos, cashback e uma página personalizada por loja." },
       { name: "author", content: "QSF Club" },
-      { property: "og:title", content: "QSF Club" },
-      { property: "og:description", content: "Fidelização de clientes com pontos e cashback." },
+      { property: "og:title", content: "QSF Club — Fidelização de clientes" },
+      { property: "og:description", content: "Fidelize seus clientes com pontos, cashback e uma página personalizada por loja." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#7c3aed" },
@@ -90,6 +90,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "QSF Club" },
       { name: "mobile-web-app-capable", content: "yes" },
+      { name: "twitter:title", content: "QSF Club — Fidelização de clientes" },
+      { name: "twitter:description", content: "Fidelize seus clientes com pontos, cashback e uma página personalizada por loja." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/334f221d-f044-4467-ad78-35721bb70125/id-preview-88132c5b--62bd2a63-6908-43c2-9917-f4ddac34c65f.lovable.app-1783102843595.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/334f221d-f044-4467-ad78-35721bb70125/id-preview-88132c5b--62bd2a63-6908-43c2-9917-f4ddac34c65f.lovable.app-1783102843595.png" },
     ],
     links: [
       {
