@@ -1,11 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { getMyStoreFull, lookupGiftCardByCodigo } from "./qsf.functions";
-
-// Safe public columns of `stores` accessible from the browser
-const STORE_PUBLIC_COLS =
-  "id, slug, nome_fantasia, logo_url, banner_url, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, subscription_status, plan, created_at";
+import { getMyStoreFull, lookupGiftCardByCodigo, lookupPublicStoreById, lookupPublicStoreBySlug } from "./qsf.functions";
 
 export type StorePublic = Pick<
   Tables<"stores">,
@@ -14,7 +10,7 @@ export type StorePublic = Pick<
   | "regra_pontos" | "percentual_cashback"
   | "indicacao_ativa" | "bonus_indicador" | "bonus_indicado"
   | "whatsapp_enabled" | "nps_enabled"
-  | "subscription_status" | "plan" | "created_at"
+  | "created_at"
 >;
 
 export const myStoreQuery = () =>
@@ -33,9 +29,17 @@ export const storeBySlugQuery = (slug: string) =>
   queryOptions({
     queryKey: ["store", slug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("stores").select(STORE_PUBLIC_COLS).eq("slug", slug).maybeSingle();
-      if (error) throw error;
-      return data;
+      return await lookupPublicStoreBySlug({ data: { slug } });
+    },
+  });
+
+export const publicStoreByIdQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["public-store", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return null;
+      return await lookupPublicStoreById({ data: { id: storeId } });
     },
   });
 

@@ -1281,13 +1281,42 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
   });
 
 // -------- Public lookups (no auth) with safe fields only --------
+const PUBLIC_STORE_SELECT =
+  "id, slug, nome_fantasia, logo_url, banner_url, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at";
+
+export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
+  .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const r = await supabaseAdmin
+      .from("stores")
+      .select(PUBLIC_STORE_SELECT)
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (r.error) throw new Error(r.error.message);
+    return r.data;
+  });
+
+export const lookupPublicStoreById = createServerFn({ method: "GET" })
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const r = await supabaseAdmin
+      .from("stores")
+      .select(PUBLIC_STORE_SELECT)
+      .eq("id", data.id)
+      .maybeSingle();
+    if (r.error) throw new Error(r.error.message);
+    return r.data;
+  });
+
 export const lookupGiftCardByCodigo = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const r = await supabaseAdmin
       .from("gift_cards")
-      .select("id, store_id, pontos, codigo, redeemed_at")
+      .select("id, store_id, pontos, redeemed_at")
       .eq("codigo", data.codigo)
       .maybeSingle();
     if (r.error) throw new Error(r.error.message);

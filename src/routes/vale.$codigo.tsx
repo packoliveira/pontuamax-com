@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { giftCardByCodeQuery } from "@/lib/queries";
+import { giftCardByCodeQuery, publicStoreByIdQuery } from "@/lib/queries";
 import { resgatarGiftCard } from "@/lib/qsf.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,19 +22,7 @@ function Page() {
   const [uid, setUid] = useState<string | null>(null);
   useEffect(() => { supabase.auth.getSession().then(({ data }) => setUid(data.session?.user.id ?? null)); }, []);
 
-  const { data: loja } = useQuery({
-    queryKey: ["store-by-id", card?.store_id],
-    enabled: !!card?.store_id,
-    queryFn: async () => {
-      if (!card?.store_id) return null;
-      const { data } = await supabase
-        .from("stores")
-        .select("id, slug, nome_fantasia, logo_url, brand_primary, brand_secondary")
-        .eq("id", card.store_id)
-        .maybeSingle();
-      return data;
-    },
-  });
+  const { data: loja } = useQuery(publicStoreByIdQuery(card?.store_id));
 
   const resgatar = useMutation({
     mutationFn: () => resgatarGiftCard({ data: { codigo } }),
@@ -59,7 +47,7 @@ function Page() {
           <p className="text-sm text-muted-foreground">{loja?.nome_fantasia ?? ""}</p>
           <div className="text-5xl font-black text-primary">{card.pontos}</div>
           <div className="text-sm text-muted-foreground">pontos</div>
-          <code className="block font-mono text-lg tracking-wider">{card.codigo}</code>
+          <code className="block font-mono text-lg tracking-wider">{codigo}</code>
           {card.redeemed_at ? (
             <p className="text-sm text-red-600">Este vale já foi resgatado.</p>
           ) : uid ? (
