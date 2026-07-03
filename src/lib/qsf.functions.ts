@@ -159,6 +159,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         phone: z.string().min(8).max(20),
         nome: z.string().min(1).max(100),
         store_id: z.string().uuid(),
+        cpf: z.string().max(20).optional(),
       })
       .parse(input),
   )
@@ -168,23 +169,27 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
     if (!owner.data) throw new Error("Você não é dono desta loja.");
     const digits = data.phone.replace(/\D/g, "");
+    const cpfDigits = (data.cpf ?? "").replace(/\D/g, "") || null;
     const email = `${digits}@cliente.qsfclub.local`;
     // Try to find existing user
     let userId: string | undefined;
     const existing = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
     if (existing.data) {
       userId = existing.data.id;
+      if (cpfDigits) {
+        await supabaseAdmin.from("profiles").update({ cpf: cpfDigits }).eq("id", userId);
+      }
     } else {
       const created = await supabaseAdmin.auth.admin.createUser({
         email,
         password: digits,
         email_confirm: true,
-        user_metadata: { full_name: data.nome, phone: digits },
+        user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits },
       });
       if (created.error || !created.data.user) throw new Error(created.error?.message ?? "Falha ao criar cliente");
       userId = created.data.user.id;
       // Ensure profile exists (trigger handles it, but idempotent)
-      await supabaseAdmin.from("profiles").upsert({ id: userId, full_name: data.nome, phone: digits });
+      await supabaseAdmin.from("profiles").upsert({ id: userId, full_name: data.nome, phone: digits, cpf: cpfDigits });
     }
     await supabaseAdmin.from("user_roles").upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id,role" });
     const { data: link, error } = await supabaseAdmin
