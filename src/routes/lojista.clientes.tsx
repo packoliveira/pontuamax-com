@@ -33,17 +33,22 @@ function ClientesPage() {
   const [editing, setEditing] = useState<{ userId: string; value: string } | null>(null);
   const [tagInput, setTagInput] = useState<Record<string, string>>({});
   const [openNew, setOpenNew] = useState(false);
-  const [novo, setNovo] = useState({ nome: "", phone: "" });
+  const [novo, setNovo] = useState({ nome: "", phone: "", cpf: "" });
 
   const criar = useMutation({
     mutationFn: () =>
       cadastrarClientePorTelefone({
-        data: { store_id: loja!.id, nome: novo.nome.trim(), phone: novo.phone.trim() },
+        data: {
+          store_id: loja!.id,
+          nome: novo.nome.trim(),
+          phone: novo.phone.trim(),
+          cpf: novo.cpf.trim() || undefined,
+        },
       }),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
       toast.success(`Cliente cadastrado. Senha temporária: ${res.senha_temporaria}`);
-      setNovo({ nome: "", phone: "" });
+      setNovo({ nome: "", phone: "", cpf: "" });
       setOpenNew(false);
     },
     onError: (e) => toast.error((e as Error).message),
@@ -172,6 +177,10 @@ function ClientesPage() {
             <div>
               <Label htmlFor="novo-tel">Telefone (com DDD)</Label>
               <Input id="novo-tel" value={novo.phone} onChange={(e) => setNovo((s) => ({ ...s, phone: e.target.value }))} placeholder="(11) 99999-9999" inputMode="tel" />
+            </div>
+            <div>
+              <Label htmlFor="novo-cpf">CPF (opcional)</Label>
+              <Input id="novo-cpf" value={novo.cpf} onChange={(e) => setNovo((s) => ({ ...s, cpf: e.target.value }))} placeholder="000.000.000-00" inputMode="numeric" />
             </div>
             <p className="text-xs text-muted-foreground">
               A senha inicial do cliente será o próprio telefone (só números). Ele pode entrar depois na página pública da sua loja.
