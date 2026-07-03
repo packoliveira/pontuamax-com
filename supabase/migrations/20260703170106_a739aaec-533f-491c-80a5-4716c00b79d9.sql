@@ -1,0 +1,1 @@
+UPDATE public.stores SET subscription_status = 'active', activated_at = COALESCE(activated_at, now()), setup_paid_at = COALESCE(setup_paid_at, now()) WHERE id = 'ee9d0358-5e75-4e84-abad-72f22c7639ed';
