@@ -1279,3 +1279,31 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
     await supabaseAdmin.from("raffles").update({ status: "cancelado" }).eq("id", data.id);
     return { ok: true };
   });
+
+// -------- Public lookups (no auth) with safe fields only --------
+export const lookupGiftCardByCodigo = createServerFn({ method: "GET" })
+  .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const r = await supabaseAdmin
+      .from("gift_cards")
+      .select("id, store_id, pontos, codigo, redeemed_at")
+      .eq("codigo", data.codigo)
+      .maybeSingle();
+    if (r.error) throw new Error(r.error.message);
+    return r.data;
+  });
+
+// -------- Full store row for the authenticated owner --------
+export const getMyStoreFull = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const r = await supabaseAdmin
+      .from("stores")
+      .select("*")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (r.error) throw new Error(r.error.message);
+    return r.data;
+  });
