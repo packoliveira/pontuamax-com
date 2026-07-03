@@ -18,6 +18,7 @@ import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ValeCodigoRouteImport } from './routes/vale.$codigo'
 import { Route as NpsIdRouteImport } from './routes/nps.$id'
+import { Route as NotaSlugRouteImport } from './routes/nota.$slug'
 import { Route as LojistaValePresenteRouteImport } from './routes/lojista.vale-presente'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
@@ -77,6 +78,11 @@ const ValeCodigoRoute = ValeCodigoRouteImport.update({
 const NpsIdRoute = NpsIdRouteImport.update({
   id: '/nps/$id',
   path: '/nps/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotaSlugRoute = NotaSlugRouteImport.update({
+  id: '/nota/$slug',
+  path: '/nota/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LojistaValePresenteRoute = LojistaValePresenteRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin': typeof AdminIndexRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
@@ -253,6 +262,7 @@ export interface FileRouteTypes {
     | '/lojista/promocoes'
     | '/lojista/resgates'
     | '/lojista/vale-presente'
+    | '/nota/$slug'
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin/'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/lojista/promocoes'
     | '/lojista/resgates'
     | '/lojista/vale-presente'
+    | '/nota/$slug'
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/lojista/promocoes'
     | '/lojista/resgates'
     | '/lojista/vale-presente'
+    | '/nota/$slug'
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin/'
@@ -318,6 +330,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
+  NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
   ValeCodigoRoute: typeof ValeCodigoRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
@@ -388,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/nps/$id'
       fullPath: '/nps/$id'
       preLoaderRoute: typeof NpsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nota/$slug': {
+      id: '/nota/$slug'
+      path: '/nota/$slug'
+      fullPath: '/nota/$slug'
+      preLoaderRoute: typeof NotaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lojista/vale-presente': {
@@ -549,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
+  NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
   ValeCodigoRoute: ValeCodigoRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
