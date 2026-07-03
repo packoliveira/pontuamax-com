@@ -1,5 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyStoreFull, lookupGiftCardByCodigo } from "./qsf.functions";
+
+// Safe public columns of `stores` accessible from the browser
+const STORE_PUBLIC_COLS =
+  "id, slug, nome_fantasia, logo_url, banner_url, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, subscription_status, plan, created_at";
 
 export const myStoreQuery = () =>
   queryOptions({
@@ -7,13 +12,9 @@ export const myStoreQuery = () =>
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) return null;
-      const { data, error } = await supabase
-        .from("stores")
-        .select("*")
-        .eq("owner_id", session.session.user.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      // Sensitive columns (webhook_secret, evolution_apikey, cnpj, etc.)
+      // are not readable via the client — fetch through an authenticated server fn.
+      return await getMyStoreFull();
     },
   });
 
@@ -21,7 +22,7 @@ export const storeBySlugQuery = (slug: string) =>
   queryOptions({
     queryKey: ["store", slug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("stores").select("*").eq("slug", slug).maybeSingle();
+      const { data, error } = await supabase.from("stores").select(STORE_PUBLIC_COLS).eq("slug", slug).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -188,13 +189,7 @@ export const giftCardByCodeQuery = (codigo: string | undefined) =>
     enabled: !!codigo,
     queryFn: async () => {
       if (!codigo) return null;
-      const { data, error } = await supabase
-        .from("gift_cards")
-        .select("*")
-        .eq("codigo", codigo)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      return await lookupGiftCardByCodigo({ data: { codigo } });
     },
   });
 
