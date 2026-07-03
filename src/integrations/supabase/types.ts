@@ -112,6 +112,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "campaigns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       client_tags: {
@@ -142,6 +149,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tags_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -200,6 +214,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fiscal_notes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       gift_cards: {
@@ -236,6 +257,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_cards_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -276,6 +304,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "integration_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notification_logs: {
@@ -314,6 +349,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notification_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       nps_responses: {
@@ -350,6 +392,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_responses_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
           {
@@ -395,6 +444,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -477,6 +533,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "promotions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       raffles: {
@@ -528,6 +591,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raffles_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -584,6 +654,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_clients_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -790,6 +867,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "transactions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -812,7 +896,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      stores_public: {
+        Row: {
+          banner_url: string | null
+          bonus_indicado: number | null
+          bonus_indicador: number | null
+          brand_primary: string | null
+          brand_secondary: string | null
+          created_at: string | null
+          id: string | null
+          indicacao_ativa: boolean | null
+          logo_url: string | null
+          modalidade: Database["public"]["Enums"]["modalidade"] | null
+          nome_fantasia: string | null
+          nps_enabled: boolean | null
+          percentual_cashback: number | null
+          regra_pontos: number | null
+          slug: string | null
+          whatsapp_enabled: boolean | null
+        }
+        Insert: {
+          banner_url?: string | null
+          bonus_indicado?: number | null
+          bonus_indicador?: number | null
+          brand_primary?: string | null
+          brand_secondary?: string | null
+          created_at?: string | null
+          id?: string | null
+          indicacao_ativa?: boolean | null
+          logo_url?: string | null
+          modalidade?: Database["public"]["Enums"]["modalidade"] | null
+          nome_fantasia?: string | null
+          nps_enabled?: boolean | null
+          percentual_cashback?: number | null
+          regra_pontos?: number | null
+          slug?: string | null
+          whatsapp_enabled?: boolean | null
+        }
+        Update: {
+          banner_url?: string | null
+          bonus_indicado?: number | null
+          bonus_indicador?: number | null
+          brand_primary?: string | null
+          brand_secondary?: string | null
+          created_at?: string | null
+          id?: string | null
+          indicacao_ativa?: boolean | null
+          logo_url?: string | null
+          modalidade?: Database["public"]["Enums"]["modalidade"] | null
+          nome_fantasia?: string | null
+          nps_enabled?: boolean | null
+          percentual_cashback?: number | null
+          regra_pontos?: number | null
+          slug?: string | null
+          whatsapp_enabled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       bootstrap_first_admin: { Args: never; Returns: boolean }
