@@ -32,11 +32,7 @@ function renderTemplate(tpl: string, vars: Record<string, string | number | null
   const rendered = tpl.replace(/\{(\w+)\}/g, (_, k: string) => {
     const raw = vars[k];
     const value = raw === undefined || raw === null ? "" : String(raw).trim();
-    if (value !== "" && value !== "0") return value;
-    // 0 é um valor legítimo p/ pontos, mas ruim de ler ("ganhou 0 pontos") — deixa cair no fallback
-    if (value === "0" && (k === "pontos_ganhos" || k === "pontos_saldo" || k === "pontos_faltantes")) {
-      return value; // 0 é ok mostrar em saldos
-    }
+    if (value !== "") return value;
     return VAR_FALLBACKS[k] ?? "";
   });
   // Higienização final: colapsa espaços duplicados e linhas vazias que sobraram
