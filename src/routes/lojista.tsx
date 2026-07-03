@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { LojistaShell } from "@/components/lojista-shell";
 import { supabase } from "@/integrations/supabase/client";
+import { usePanelTheme } from "@/hooks/use-panel-theme";
 
 export const Route = createFileRoute("/lojista")({
   ssr: false,
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/lojista")({
 });
 
 function LojistaLayout() {
+  usePanelTheme();
   const { data: session } = useQuery({
     queryKey: ["auth-session"],
     queryFn: async () => (await supabase.auth.getSession()).data.session,
