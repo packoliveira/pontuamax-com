@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
-import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente, sincronizarClientesDaLoja } from "@/lib/qsf.functions";
+import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente, sincronizarClientesDaLoja, excluirClienteDaLoja } from "@/lib/qsf.functions";
 import { formatBRL, formatDate, progressoNivel } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trophy } from "lucide-react";
-import { Search, Cake, X, Plus, UserPlus, Pencil, Coins, Minus, RefreshCw } from "lucide-react";
+import { Search, Cake, X, Plus, UserPlus, Pencil, Coins, Minus, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/clientes")({
@@ -127,6 +127,7 @@ function ClientesPage() {
   const [novo, setNovo] = useState({ nome: "", phone: "", cpf: "" });
   const [editInfo, setEditInfo] = useState<{ user_id: string; full_name: string; phone: string; cpf: string } | null>(null);
   const [pontosDlg, setPontosDlg] = useState<{ user_id: string; nome: string; saldo: number; delta: string; motivo: string; op: "add" | "estorno" } | null>(null);
+  const [excluirDlg, setExcluirDlg] = useState<{ user_id: string; nome: string } | null>(null);
 
   const criar = useMutation({
     mutationFn: () => {
@@ -194,6 +195,20 @@ function ClientesPage() {
       qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
       toast.success(`Saldo atualizado: ${res.novo_saldo} pts`);
       setPontosDlg(null);
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const excluir = useMutation({
+    mutationFn: () => {
+      if (!excluirDlg) throw new Error("Sem cliente selecionado.");
+      return excluirClienteDaLoja({ data: { store_id: loja!.id, client_user_id: excluirDlg.user_id } });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
+      qc.invalidateQueries({ queryKey: ["client-tags"] });
+      toast.success("Cliente removido desta loja.");
+      setExcluirDlg(null);
     },
     onError: (e) => toast.error((e as Error).message),
   });
@@ -401,6 +416,14 @@ function ClientesPage() {
                         </Button>
                       </div>
                     )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => setExcluirDlg({ user_id: c.user_id, nome: p?.full_name ?? "—" })}
+                    >
+                      <Trash2 className="h-3 w-3" /> Excluir
+                    </Button>
                   </div>
                 </div>
               );
@@ -557,6 +580,35 @@ function ClientesPage() {
               }
             >
               {ajustarPts.isPending ? "Salvando..." : pontosDlg?.op === "add" ? "Adicionar" : "Estornar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmar exclusão */}
+      <Dialog open={!!excluirDlg} onOpenChange={(o) => !o && setExcluirDlg(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir cliente</DialogTitle>
+          </DialogHeader>
+          {excluirDlg && (
+            <div className="space-y-2 text-sm">
+              <p>
+                Tem certeza que deseja remover <strong>{excluirDlg.nome}</strong> da sua loja?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                O saldo de pontos, cashback e as tags desta loja serão apagados. O histórico de vendas continua no relatório. O cliente pode se cadastrar novamente pela página pública.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setExcluirDlg(null)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => excluir.mutate()}
+              disabled={excluir.isPending}
+            >
+              {excluir.isPending ? "Excluindo..." : "Excluir"}
             </Button>
           </DialogFooter>
         </DialogContent>
