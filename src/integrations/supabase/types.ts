@@ -214,6 +214,59 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          data_fim: string | null
+          data_inicio: string | null
+          dias_semana: number[]
+          hora_fim: string
+          hora_inicio: string
+          id: string
+          multiplicador: number
+          nome: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          dias_semana?: number[]
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          multiplicador?: number
+          nome: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          dias_semana?: number[]
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          multiplicador?: number
+          nome?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_clients: {
         Row: {
           cashback_saldo: number

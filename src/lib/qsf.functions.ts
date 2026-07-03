@@ -3,6 +3,42 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { calcularNivel, gerarVoucher } from "./qsf-shared";
 
+// -------- Promoções: multiplicador ativo agora --------
+function getActiveMultiplier(
+  promos: Array<{
+    multiplicador: number | string;
+    dias_semana: number[];
+    hora_inicio: string;
+    hora_fim: string;
+    data_inicio: string | null;
+    data_fim: string | null;
+  }>,
+): number {
+  // Hora de Brasília
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", weekday: "short", hour12: false,
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
+  const map: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const dow = map[parts.weekday] ?? 0;
+  const date = `${parts.year}-${parts.month}-${parts.day}`;
+  const hm = `${parts.hour}:${parts.minute}`;
+  let mult = 1;
+  for (const p of promos) {
+    if (!p.dias_semana.includes(dow)) continue;
+    if (p.data_inicio && date < p.data_inicio) continue;
+    if (p.data_fim && date > p.data_fim) continue;
+    const hi = p.hora_inicio.slice(0, 5);
+    const hf = p.hora_fim.slice(0, 5);
+    if (hm < hi || hm > hf) continue;
+    const m = Number(p.multiplicador);
+    if (m > mult) mult = m;
+  }
+  return mult;
+}
+
 // -------- LOJISTA: create store after signup --------
 export const criarLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -157,7 +193,14 @@ export const lancarVenda = createServerFn({ method: "POST" })
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
     const inclP = loja.data.modalidade !== "cashback";
     const inclC = loja.data.modalidade !== "pontos";
-    const pontos = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos)) : 0;
+    // Buscar promoções ativas da loja e aplicar multiplicador
+    const promosRes = await supabaseAdmin
+      .from("promotions")
+      .select("multiplicador, dias_semana, hora_inicio, hora_fim, data_inicio, data_fim")
+      .eq("store_id", data.store_id)
+      .eq("ativo", true);
+    const multiplicador = getActiveMultiplier(promosRes.data ?? []);
+    const pontos = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos) * multiplicador) : 0;
     const cashback = inclC ? +(data.valor * (Number(loja.data.percentual_cashback) / 100)).toFixed(2) : 0;
     const novoPontos = link.data.pontos + pontos;
     const novoCashback = +(Number(link.data.cashback_saldo) + cashback).toFixed(2);
@@ -185,7 +228,56 @@ export const lancarVenda = createServerFn({ method: "POST" })
         pontosGanhos: pontos,
       });
     }
-    return { pontos, cashback };
+    return { pontos, cashback, multiplicador };
+  });
+
+// -------- Promoções: CRUD --------
+const promoSchema = z.object({
+  id: z.string().uuid().optional(),
+  nome: z.string().min(1).max(100),
+  multiplicador: z.number().min(1).max(10),
+  dias_semana: z.array(z.number().int().min(0).max(6)).min(1),
+  hora_inicio: z.string().regex(/^\d{2}:\d{2}$/),
+  hora_fim: z.string().regex(/^\d{2}:\d{2}$/),
+  data_inicio: z.string().nullable().optional(),
+  data_fim: z.string().nullable().optional(),
+  ativo: z.boolean().default(true),
+});
+
+export const salvarPromocao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => promoSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const loja = await context.supabase.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    const payload = {
+      store_id: loja.data.id,
+      nome: data.nome,
+      multiplicador: data.multiplicador,
+      dias_semana: data.dias_semana,
+      hora_inicio: data.hora_inicio,
+      hora_fim: data.hora_fim,
+      data_inicio: data.data_inicio || null,
+      data_fim: data.data_fim || null,
+      ativo: data.ativo,
+    };
+    if (data.id) {
+      const { error } = await context.supabase.from("promotions").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase.from("promotions").insert(payload);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const removerPromocao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("promotions").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 // -------- Cliente: resgatar produto --------

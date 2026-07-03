@@ -148,3 +148,19 @@ export const integrationLogsQuery = (storeId: string | undefined) =>
       return data ?? [];
     },
   });
+
+export const storePromotionsQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["promotions", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("promotions")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });

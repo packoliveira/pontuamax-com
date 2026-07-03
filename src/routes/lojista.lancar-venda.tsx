@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { myStoreQuery, storeClientsQuery } from "@/lib/queries";
+import { myStoreQuery, storeClientsQuery, storePromotionsQuery } from "@/lib/queries";
 import { lancarVenda, cadastrarClientePorTelefone } from "@/lib/qsf.functions";
 import { formatBRL, onlyDigits } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ function LancarVenda() {
   const qc = useQueryClient();
   const { data: loja } = useQuery(myStoreQuery());
   const { data: clientes = [] } = useQuery(storeClientsQuery(loja?.id));
+  const { data: promos = [] } = useQuery(storePromotionsQuery(loja?.id));
 
   const [contato, setContato] = useState("");
   const [valor, setValor] = useState("");
@@ -45,6 +46,26 @@ function LancarVenda() {
   const inclP = loja.modalidade !== "cashback";
   const inclC = loja.modalidade !== "pontos";
   const valorNum = parseFloat(valor.replace(",", ".") || "0");
+
+  // Calcula multiplicador ativo agora (Brasília)
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", weekday: "short", hour12: false });
+  const parts = Object.fromEntries(fmt.formatToParts(now).map((p) => [p.type, p.value]));
+  const dowMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const dow = dowMap[parts.weekday] ?? 0;
+  const date = `${parts.year}-${parts.month}-${parts.day}`;
+  const hm = `${parts.hour}:${parts.minute}`;
+  const multiplicador = promos.reduce((max, p) => {
+    if (!p.ativo) return max;
+    if (!(p.dias_semana as number[]).includes(dow)) return max;
+    if (p.data_inicio && date < p.data_inicio) return max;
+    if (p.data_fim && date > p.data_fim) return max;
+    const hi = p.hora_inicio.slice(0, 5);
+    const hf = p.hora_fim.slice(0, 5);
+    if (hm < hi || hm > hf) return max;
+    return Math.max(max, Number(p.multiplicador));
+  }, 1);
+  const promoAtiva = multiplicador > 1;
 
   const findClient = () => {
     const norm = onlyDigits(contato);
@@ -113,7 +134,8 @@ function LancarVenda() {
             )}
             <div className="rounded-md bg-muted p-3 text-sm">
               <div className="font-medium mb-1">Prévia:</div>
-              {inclP && valor && <div>+{Math.floor(valorNum * Number(loja.regra_pontos))} pontos</div>}
+              {promoAtiva && <div className="mb-1 text-orange-700 font-semibold">⚡ Promoção ativa: {multiplicador}x pontos</div>}
+              {inclP && valor && <div>+{Math.floor(valorNum * Number(loja.regra_pontos) * multiplicador)} pontos {promoAtiva && <span className="text-muted-foreground text-xs">({multiplicador}x)</span>}</div>}
               {inclC && valor && <div>+{formatBRL(valorNum * Number(loja.percentual_cashback) / 100)} cashback</div>}
               {!valor && <div className="text-muted-foreground">Digite o valor para ver a prévia</div>}
             </div>

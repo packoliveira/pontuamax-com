@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
+import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
 import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
@@ -65,6 +66,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
   id: '/resgates',
   path: '/resgates',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaPromocoesRoute = LojistaPromocoesRouteImport.update({
+  id: '/promocoes',
+  path: '/promocoes',
   getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaProdutosRoute = LojistaProdutosRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/lojista/login'
     | '/lojista/onboarding'
     | '/lojista/produtos'
+    | '/lojista/promocoes'
     | '/lojista/resgates'
     | '/admin/'
     | '/lojista/'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/lojista/login'
     | '/lojista/onboarding'
     | '/lojista/produtos'
+    | '/lojista/promocoes'
     | '/lojista/resgates'
     | '/admin'
     | '/lojista'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/lojista/login'
     | '/lojista/onboarding'
     | '/lojista/produtos'
+    | '/lojista/promocoes'
     | '/lojista/resgates'
     | '/admin/'
     | '/lojista/'
@@ -292,6 +304,13 @@ declare module '@tanstack/react-router' {
       path: '/resgates'
       fullPath: '/lojista/resgates'
       preLoaderRoute: typeof LojistaResgatesRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/promocoes': {
+      id: '/lojista/promocoes'
+      path: '/promocoes'
+      fullPath: '/lojista/promocoes'
+      preLoaderRoute: typeof LojistaPromocoesRouteImport
       parentRoute: typeof LojistaRoute
     }
     '/lojista/produtos': {
@@ -379,6 +398,7 @@ interface LojistaRouteChildren {
   LojistaLoginRoute: typeof LojistaLoginRoute
   LojistaOnboardingRoute: typeof LojistaOnboardingRoute
   LojistaProdutosRoute: typeof LojistaProdutosRoute
+  LojistaPromocoesRoute: typeof LojistaPromocoesRoute
   LojistaResgatesRoute: typeof LojistaResgatesRoute
   LojistaIndexRoute: typeof LojistaIndexRoute
 }
@@ -392,6 +412,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaLoginRoute: LojistaLoginRoute,
   LojistaOnboardingRoute: LojistaOnboardingRoute,
   LojistaProdutosRoute: LojistaProdutosRoute,
+  LojistaPromocoesRoute: LojistaPromocoesRoute,
   LojistaResgatesRoute: LojistaResgatesRoute,
   LojistaIndexRoute: LojistaIndexRoute,
 }
