@@ -16,17 +16,24 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ValeCodigoRouteImport } from './routes/vale.$codigo'
 import { Route as NpsIdRouteImport } from './routes/nps.$id'
+import { Route as NotaSlugRouteImport } from './routes/nota.$slug'
+import { Route as LojistaWidgetRouteImport } from './routes/lojista.widget'
+import { Route as LojistaValePresenteRouteImport } from './routes/lojista.vale-presente'
+import { Route as LojistaSorteiosRouteImport } from './routes/lojista.sorteios'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
 import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
+import { Route as LojistaNotasRouteImport } from './routes/lojista.notas'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
+import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
@@ -66,10 +73,35 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const ValeCodigoRoute = ValeCodigoRouteImport.update({
+  id: '/vale/$codigo',
+  path: '/vale/$codigo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NpsIdRoute = NpsIdRouteImport.update({
   id: '/nps/$id',
   path: '/nps/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const NotaSlugRoute = NotaSlugRouteImport.update({
+  id: '/nota/$slug',
+  path: '/nota/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojistaWidgetRoute = LojistaWidgetRouteImport.update({
+  id: '/widget',
+  path: '/widget',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaValePresenteRoute = LojistaValePresenteRouteImport.update({
+  id: '/vale-presente',
+  path: '/vale-presente',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaSorteiosRoute = LojistaSorteiosRouteImport.update({
+  id: '/sorteios',
+  path: '/sorteios',
+  getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
   id: '/resgates',
@@ -89,6 +121,11 @@ const LojistaProdutosRoute = LojistaProdutosRouteImport.update({
 const LojistaOnboardingRoute = LojistaOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaNotasRoute = LojistaNotasRouteImport.update({
+  id: '/notas',
+  path: '/notas',
   getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaLoginRoute = LojistaLoginRouteImport.update({
@@ -121,6 +158,11 @@ const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
   path: '/aguardando',
   getParentRoute: () => LojistaRoute,
 } as any)
+const ApiPublicWidgetSlugRoute = ApiPublicWidgetSlugRouteImport.update({
+  id: '/api/public/widget/$slug',
+  path: '/api/public/widget/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
   id: '/api/public/webhook/$origem',
   path: '/api/public/webhook/$origem',
@@ -150,16 +192,23 @@ export interface FileRoutesByFullPath {
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/lojista/widget': typeof LojistaWidgetRoute
+  '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
+  '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -171,16 +220,23 @@ export interface FileRoutesByTo {
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/lojista/widget': typeof LojistaWidgetRoute
+  '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
+  '/vale/$codigo': typeof ValeCodigoRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -195,16 +251,23 @@ export interface FileRoutesById {
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/lojista/widget': typeof LojistaWidgetRoute
+  '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
+  '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,16 +283,23 @@ export interface FileRouteTypes {
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
+    | '/lojista/notas'
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/sorteios'
+    | '/lojista/vale-presente'
+    | '/lojista/widget'
+    | '/nota/$slug'
     | '/nps/$id'
+    | '/vale/$codigo'
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -241,16 +311,23 @@ export interface FileRouteTypes {
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
+    | '/lojista/notas'
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/sorteios'
+    | '/lojista/vale-presente'
+    | '/lojista/widget'
+    | '/nota/$slug'
     | '/nps/$id'
+    | '/vale/$codigo'
     | '/admin'
     | '/lojista'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   id:
     | '__root__'
     | '/'
@@ -264,16 +341,23 @@ export interface FileRouteTypes {
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
+    | '/lojista/notas'
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/sorteios'
+    | '/lojista/vale-presente'
+    | '/lojista/widget'
+    | '/nota/$slug'
     | '/nps/$id'
+    | '/vale/$codigo'
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -282,10 +366,13 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
+  NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
+  ValeCodigoRoute: typeof ValeCodigoRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
+  ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -339,12 +426,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/vale/$codigo': {
+      id: '/vale/$codigo'
+      path: '/vale/$codigo'
+      fullPath: '/vale/$codigo'
+      preLoaderRoute: typeof ValeCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nps/$id': {
       id: '/nps/$id'
       path: '/nps/$id'
       fullPath: '/nps/$id'
       preLoaderRoute: typeof NpsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/nota/$slug': {
+      id: '/nota/$slug'
+      path: '/nota/$slug'
+      fullPath: '/nota/$slug'
+      preLoaderRoute: typeof NotaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lojista/widget': {
+      id: '/lojista/widget'
+      path: '/widget'
+      fullPath: '/lojista/widget'
+      preLoaderRoute: typeof LojistaWidgetRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/vale-presente': {
+      id: '/lojista/vale-presente'
+      path: '/vale-presente'
+      fullPath: '/lojista/vale-presente'
+      preLoaderRoute: typeof LojistaValePresenteRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/sorteios': {
+      id: '/lojista/sorteios'
+      path: '/sorteios'
+      fullPath: '/lojista/sorteios'
+      preLoaderRoute: typeof LojistaSorteiosRouteImport
+      parentRoute: typeof LojistaRoute
     }
     '/lojista/resgates': {
       id: '/lojista/resgates'
@@ -372,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/lojista/onboarding'
       preLoaderRoute: typeof LojistaOnboardingRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/notas': {
+      id: '/lojista/notas'
+      path: '/notas'
+      fullPath: '/lojista/notas'
+      preLoaderRoute: typeof LojistaNotasRouteImport
       parentRoute: typeof LojistaRoute
     }
     '/lojista/login': {
@@ -416,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaAguardandoRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/api/public/widget/$slug': {
+      id: '/api/public/widget/$slug'
+      path: '/api/public/widget/$slug'
+      fullPath: '/api/public/widget/$slug'
+      preLoaderRoute: typeof ApiPublicWidgetSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhook/$origem': {
       id: '/api/public/webhook/$origem'
       path: '/api/public/webhook/$origem'
@@ -457,10 +593,14 @@ interface LojistaRouteChildren {
   LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
   LojistaLoginRoute: typeof LojistaLoginRoute
+  LojistaNotasRoute: typeof LojistaNotasRoute
   LojistaOnboardingRoute: typeof LojistaOnboardingRoute
   LojistaProdutosRoute: typeof LojistaProdutosRoute
   LojistaPromocoesRoute: typeof LojistaPromocoesRoute
   LojistaResgatesRoute: typeof LojistaResgatesRoute
+  LojistaSorteiosRoute: typeof LojistaSorteiosRoute
+  LojistaValePresenteRoute: typeof LojistaValePresenteRoute
+  LojistaWidgetRoute: typeof LojistaWidgetRoute
   LojistaIndexRoute: typeof LojistaIndexRoute
 }
 
@@ -471,10 +611,14 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
   LojistaLoginRoute: LojistaLoginRoute,
+  LojistaNotasRoute: LojistaNotasRoute,
   LojistaOnboardingRoute: LojistaOnboardingRoute,
   LojistaProdutosRoute: LojistaProdutosRoute,
   LojistaPromocoesRoute: LojistaPromocoesRoute,
   LojistaResgatesRoute: LojistaResgatesRoute,
+  LojistaSorteiosRoute: LojistaSorteiosRoute,
+  LojistaValePresenteRoute: LojistaValePresenteRoute,
+  LojistaWidgetRoute: LojistaWidgetRoute,
   LojistaIndexRoute: LojistaIndexRoute,
 }
 
@@ -487,10 +631,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
+  NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
+  ValeCodigoRoute: ValeCodigoRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
+  ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

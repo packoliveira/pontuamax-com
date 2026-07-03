@@ -951,3 +951,329 @@ export const previewDestinatarios = createServerFn({ method: "POST" })
     const destinatarios = await selecionarDestinatarios(loja.data.id, data.segmento);
     return { total: destinatarios.length, amostra: destinatarios.slice(0, 5).map((d) => ({ nome: d.full_name, telefone: d.phone })) };
   });
+// ============================================================
+// VALE-PRESENTE / GIFT CARDS
+// ============================================================
+function randomGiftCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < 8; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
+}
+
+export const criarGiftCards = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      pontos: z.number().int().positive().max(100000),
+      quantidade: z.number().int().min(1).max(100),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    const rows = Array.from({ length: data.quantidade }, () => ({
+      store_id: loja.data!.id,
+      codigo: randomGiftCode(),
+      pontos: data.pontos,
+    }));
+    const { data: inserted, error } = await supabaseAdmin.from("gift_cards").insert(rows).select();
+    if (error) throw new Error(error.message);
+    return inserted ?? [];
+  });
+
+export const removerGiftCard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const gc = await supabaseAdmin.from("gift_cards").select("id, store_id, redeemed_at, stores!inner(owner_id)").eq("id", data.id).maybeSingle();
+    // biome-ignore lint/suspicious/noExplicitAny: join shape
+    if (!gc.data || (gc.data as any).stores.owner_id !== context.userId) throw new Error("Vale não encontrado.");
+    if (gc.data.redeemed_at) throw new Error("Vale já resgatado, não pode remover.");
+    const { error } = await supabaseAdmin.from("gift_cards").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const resgatarGiftCard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const gc = await supabaseAdmin.from("gift_cards").select("*").eq("codigo", data.codigo).maybeSingle();
+    if (!gc.data) throw new Error("Código inválido.");
+    if (gc.data.redeemed_at) throw new Error("Vale já resgatado.");
+    // vincula cliente à loja se ainda não estiver
+    const linkExisting = await supabaseAdmin
+      .from("store_clients").select("*")
+      .eq("store_id", gc.data.store_id).eq("user_id", context.userId).maybeSingle();
+    let link = linkExisting.data;
+    if (!link) {
+      const ins = await supabaseAdmin.from("store_clients").insert({
+        store_id: gc.data.store_id, user_id: context.userId, pontos: 0, cashback_saldo: 0, nivel: "bronze",
+      }).select("*").single();
+      if (ins.error) throw new Error(ins.error.message);
+      link = ins.data;
+    }
+    const novoPontos = link.pontos + gc.data.pontos;
+    const upd = await supabaseAdmin.from("store_clients").update({
+      pontos: novoPontos, nivel: calcularNivel(novoPontos),
+    }).eq("id", link.id);
+    if (upd.error) throw new Error(upd.error.message);
+    const mark = await supabaseAdmin.from("gift_cards").update({
+      redeemed_by: context.userId, redeemed_at: new Date().toISOString(),
+    }).eq("id", gc.data.id).is("redeemed_at", null).select("id").single();
+    if (mark.error) {
+      // rollback pontos
+      await supabaseAdmin.from("store_clients").update({ pontos: link.pontos, nivel: calcularNivel(link.pontos) }).eq("id", link.id);
+      throw new Error("Falha no resgate (concorrência).");
+    }
+    await supabaseAdmin.from("transactions").insert({
+      store_id: gc.data.store_id, client_user_id: context.userId,
+      tipo: "vale_presente", pontos_delta: gc.data.pontos, status: "entregue",
+    });
+    return { pontos: gc.data.pontos };
+  });
+
+// ============================================================
+// NOTA FISCAL — OCR via Lovable AI Gateway
+// ============================================================
+async function sha256Hex(text: string): Promise<string> {
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export const submitNotaFiscal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      store_id: z.string().uuid(),
+      image_path: z.string().min(1),
+      image_base64: z.string().min(100), // data URL sem prefix
+      mime: z.string().default("image/jpeg"),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin.from("stores").select("id, cnpj, regra_pontos, modalidade").eq("id", data.store_id).maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+
+    const hash = await sha256Hex(data.image_base64);
+    const dup = await supabaseAdmin.from("fiscal_notes").select("id").eq("store_id", data.store_id).eq("image_hash", hash).maybeSingle();
+    if (dup.data) throw new Error("Esta nota já foi enviada.");
+
+    // Chama Lovable AI
+    const apiKey = process.env.LOVABLE_API_KEY;
+    let valor: number | null = null;
+    let cnpj: string | null = null;
+    let ocrRaw: unknown = null;
+    if (apiKey) {
+      try {
+        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Lovable-API-Key": apiKey,
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: 'Extraia o VALOR TOTAL (em reais, número) e o CNPJ do estabelecimento desta nota fiscal. Responda APENAS um JSON no formato: {"valor": 12.34, "cnpj": "00.000.000/0000-00"}. Se não conseguir ler algum campo, use null. Sem comentários.',
+                  },
+                  { type: "image_url", image_url: { url: `data:${data.mime};base64,${data.image_base64}` } },
+                ],
+              },
+            ],
+          }),
+        });
+        const j = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
+        ocrRaw = j;
+        const raw = j.choices?.[0]?.message?.content ?? "";
+        const jsonStr = raw.match(/\{[\s\S]*\}/)?.[0] ?? "{}";
+        const parsed = JSON.parse(jsonStr);
+        valor = typeof parsed.valor === "number" ? parsed.valor : parsed.valor ? Number(String(parsed.valor).replace(/[^\d.,]/g, "").replace(",", ".")) : null;
+        cnpj = parsed.cnpj ? String(parsed.cnpj).replace(/\D/g, "") : null;
+      } catch (e) {
+        ocrRaw = { error: (e as Error).message };
+      }
+    }
+
+    // Status inicial: pendente (lojista revisa)
+    const { data: inserted, error } = await supabaseAdmin.from("fiscal_notes").insert({
+      store_id: data.store_id,
+      client_user_id: context.userId,
+      image_path: data.image_path,
+      image_hash: hash,
+      valor,
+      cnpj_extraido: cnpj,
+      ocr_raw: ocrRaw as never,
+      status: "pendente",
+    }).select("*").single();
+    if (error) throw new Error(error.message);
+    return inserted;
+  });
+
+export const aprovarNotaFiscal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      id: z.string().uuid(),
+      valor_final: z.number().positive(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const nota = await supabaseAdmin.from("fiscal_notes").select("*, stores!inner(owner_id, regra_pontos, modalidade)").eq("id", data.id).maybeSingle();
+    // biome-ignore lint/suspicious/noExplicitAny: join
+    const n: any = nota.data;
+    if (!n || n.stores.owner_id !== context.userId) throw new Error("Nota não encontrada.");
+    if (n.status !== "pendente") throw new Error("Nota já processada.");
+
+    const inclP = n.stores.modalidade !== "cashback";
+    const pontos = inclP ? Math.floor(data.valor_final * Number(n.stores.regra_pontos)) : 0;
+
+    // credita
+    const link = await supabaseAdmin.from("store_clients").select("*")
+      .eq("store_id", n.store_id).eq("user_id", n.client_user_id).maybeSingle();
+    if (!link.data) throw new Error("Cliente não vinculado.");
+    const novoPontos = link.data.pontos + pontos;
+    await supabaseAdmin.from("store_clients").update({
+      pontos: novoPontos, nivel: calcularNivel(novoPontos),
+    }).eq("id", link.data.id);
+    await supabaseAdmin.from("transactions").insert({
+      store_id: n.store_id, client_user_id: n.client_user_id,
+      tipo: "nota_fiscal", valor: data.valor_final, pontos_delta: pontos, status: "entregue",
+    });
+    await supabaseAdmin.from("fiscal_notes").update({
+      status: "aprovada", valor: data.valor_final, pontos_creditados: pontos,
+    }).eq("id", data.id);
+
+    const { notifyClient } = await import("./notify.server");
+    await notifyClient({ event: "pontos_ganhos", storeId: n.store_id, clientUserId: n.client_user_id, pontosGanhos: pontos });
+    return { pontos };
+  });
+
+export const rejeitarNotaFiscal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid(), motivo: z.string().max(300) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const nota = await supabaseAdmin.from("fiscal_notes").select("id, stores!inner(owner_id)").eq("id", data.id).maybeSingle();
+    // biome-ignore lint/suspicious/noExplicitAny: join
+    if (!nota.data || (nota.data as any).stores.owner_id !== context.userId) throw new Error("Nota não encontrada.");
+    await supabaseAdmin.from("fiscal_notes").update({ status: "rejeitada", motivo_rejeicao: data.motivo }).eq("id", data.id);
+    return { ok: true };
+  });
+
+// ============================================================
+// CLIENT TAGS
+// ============================================================
+export const addClientTag = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    store_id: z.string().uuid(), client_user_id: z.string().uuid(), tag: z.string().min(1).max(30),
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin.from("stores").select("owner_id").eq("id", data.store_id).maybeSingle();
+    if (!loja.data || loja.data.owner_id !== context.userId) throw new Error("Loja inválida.");
+    const { error } = await supabaseAdmin.from("client_tags").insert({
+      store_id: data.store_id, client_user_id: data.client_user_id, tag: data.tag.trim().toLowerCase(),
+    });
+    if (error && !error.message.includes("duplicate")) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const removeClientTag = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const t = await supabaseAdmin.from("client_tags").select("id, stores:store_id(owner_id)").eq("id", data.id).maybeSingle();
+    // biome-ignore lint/suspicious/noExplicitAny: join
+    if (!t.data || (t.data as any).stores.owner_id !== context.userId) throw new Error("Tag não encontrada.");
+    await supabaseAdmin.from("client_tags").delete().eq("id", data.id);
+    return { ok: true };
+  });
+
+// ============================================================
+// SORTEIOS
+// ============================================================
+export const salvarSorteio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    titulo: z.string().min(1).max(80),
+    premio: z.string().min(1).max(160),
+    filtro_tag: z.string().max(30).nullable().optional(),
+    filtro_nivel_min: z.enum(["bronze","prata","ouro"]).nullable().optional(),
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    const { data: inserted, error } = await supabaseAdmin.from("raffles").insert({
+      store_id: loja.data.id,
+      titulo: data.titulo, premio: data.premio,
+      filtro_tag: data.filtro_tag ?? null,
+      filtro_nivel_min: data.filtro_nivel_min ?? null,
+      status: "aberto",
+    }).select().single();
+    if (error) throw new Error(error.message);
+    return inserted;
+  });
+
+export const sortearGanhador = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const raffle = await supabaseAdmin.from("raffles").select("*, stores!inner(owner_id, nome_fantasia)").eq("id", data.id).maybeSingle();
+    // biome-ignore lint/suspicious/noExplicitAny: join
+    const r: any = raffle.data;
+    if (!r || r.stores.owner_id !== context.userId) throw new Error("Sorteio não encontrado.");
+    if (r.status !== "aberto") throw new Error("Sorteio já finalizado.");
+
+    // elegíveis: clientes vinculados; filtra por nível e (se tag) por tag
+    let q = supabaseAdmin.from("store_clients").select("user_id, nivel").eq("store_id", r.store_id);
+    if (r.filtro_nivel_min === "prata") q = q.in("nivel", ["prata","ouro"]);
+    else if (r.filtro_nivel_min === "ouro") q = q.eq("nivel", "ouro");
+    const linkRes = await q;
+    if (linkRes.error) throw new Error(linkRes.error.message);
+    let userIds = (linkRes.data ?? []).map((l) => l.user_id);
+    if (r.filtro_tag) {
+      const tagRes = await supabaseAdmin.from("client_tags")
+        .select("client_user_id").eq("store_id", r.store_id).eq("tag", r.filtro_tag);
+      const tagged = new Set((tagRes.data ?? []).map((t) => t.client_user_id));
+      userIds = userIds.filter((u) => tagged.has(u));
+    }
+    if (userIds.length === 0) throw new Error("Nenhum cliente elegível.");
+    const winner = userIds[Math.floor(Math.random() * userIds.length)];
+    const prof = await supabaseAdmin.from("profiles").select("full_name").eq("id", winner).maybeSingle();
+    await supabaseAdmin.from("raffles").update({
+      ganhador_user_id: winner,
+      ganhador_nome: prof.data?.full_name ?? null,
+      status: "sorteado",
+      sorted_at: new Date().toISOString(),
+    }).eq("id", r.id);
+    return { winner_user_id: winner, winner_name: prof.data?.full_name ?? null, total_elegiveis: userIds.length };
+  });
+
+export const cancelarSorteio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const r = await supabaseAdmin.from("raffles").select("id, stores!inner(owner_id)").eq("id", data.id).maybeSingle();
+    // biome-ignore lint/suspicious/noExplicitAny: join
+    if (!r.data || (r.data as any).stores.owner_id !== context.userId) throw new Error("Sorteio não encontrado.");
+    await supabaseAdmin.from("raffles").update({ status: "cancelado" }).eq("id", data.id);
+    return { ok: true };
+  });

@@ -164,3 +164,103 @@ export const storePromotionsQuery = (storeId: string | undefined) =>
       return data ?? [];
     },
   });
+// ============ Novas queries (vale-presente, notas, tags, sorteios) ============
+
+export const storeGiftCardsQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["gift-cards", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("gift_cards")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+export const giftCardByCodeQuery = (codigo: string | undefined) =>
+  queryOptions({
+    queryKey: ["gift-card", codigo],
+    enabled: !!codigo,
+    queryFn: async () => {
+      if (!codigo) return null;
+      const { data, error } = await supabase
+        .from("gift_cards")
+        .select("*")
+        .eq("codigo", codigo)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const storeFiscalNotesQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["fiscal-notes", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("fiscal_notes")
+        .select("*, profiles:client_user_id(full_name, phone)")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+export const myFiscalNotesQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["my-fiscal-notes", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) return [];
+      const { data, error } = await supabase
+        .from("fiscal_notes")
+        .select("*")
+        .eq("store_id", storeId)
+        .eq("client_user_id", sess.session.user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+export const clientTagsQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["client-tags", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("client_tags")
+        .select("*")
+        .eq("store_id", storeId);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+export const storeRafflesQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["raffles", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("raffles")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
