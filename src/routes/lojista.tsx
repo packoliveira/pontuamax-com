@@ -10,6 +10,17 @@ export const Route = createFileRoute("/lojista")({
     if (publicos.includes(location.pathname)) return;
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/lojista/login" });
+    // Bloqueia acesso ao painel se assinatura não estiver ativa
+    if (location.pathname !== "/lojista/aguardando") {
+      const { data: store } = await supabase
+        .from("stores")
+        .select("subscription_status")
+        .eq("owner_id", data.session.user.id)
+        .maybeSingle();
+      if (store && store.subscription_status !== "active") {
+        throw redirect({ to: "/lojista/aguardando" });
+      }
+    }
   },
   component: LojistaLayout,
 });
@@ -20,6 +31,10 @@ function LojistaLayout() {
     queryFn: async () => (await supabase.auth.getSession()).data.session,
   });
   if (!session) return <Outlet />;
+  // Tela aguardando é standalone (sem shell)
+  if (typeof window !== "undefined" && window.location.pathname === "/lojista/aguardando") {
+    return <Outlet />;
+  }
   return (
     <LojistaShell>
       <Outlet />

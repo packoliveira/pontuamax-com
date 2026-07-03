@@ -167,7 +167,11 @@ function Onboarding() {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <Button onClick={() => navigate({ to: "/lojista" })} className="w-full max-w-xs">Ir para o painel <ArrowRight className="h-4 w-4" /></Button>
+            <div className="rounded-lg border bg-amber-50 border-amber-200 p-3 text-sm text-amber-900 text-left">
+              <p className="font-medium">Próximo passo: liberação de acesso</p>
+              <p className="text-xs mt-1">Sua loja foi criada mas o painel só é liberado após o pagamento da implementação. Nossa equipe entrará em contato.</p>
+            </div>
+            <Button onClick={() => navigate({ to: "/lojista/aguardando" })} className="w-full max-w-xs">Continuar <ArrowRight className="h-4 w-4" /></Button>
           </CardContent></Card>
         )}
       </div>

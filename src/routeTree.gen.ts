@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
 import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
@@ -20,11 +23,22 @@ import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
+import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
   path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -41,6 +55,11 @@ const LojistaIndexRoute = LojistaIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LojistaRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
   id: '/resgates',
@@ -77,6 +96,11 @@ const LojistaClientesRoute = LojistaClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => LojistaRoute,
 } as any)
+const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
+  id: '/aguardando',
+  path: '/aguardando',
+  getParentRoute: () => LojistaRoute,
+} as any)
 const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
   id: '/api/public/webhook/$origem',
   path: '/api/public/webhook/$origem',
@@ -86,7 +110,10 @@ const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
+  '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -94,12 +121,15 @@ export interface FileRoutesByFullPath {
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/cadastro': typeof CadastroRoute
+  '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -107,6 +137,7 @@ export interface FileRoutesByTo {
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
@@ -114,7 +145,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
+  '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -122,6 +156,7 @@ export interface FileRoutesById {
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
@@ -130,7 +165,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/admin'
+    | '/cadastro'
     | '/lojista'
+    | '/lojista/aguardando'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -138,12 +176,15 @@ export interface FileRouteTypes {
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/resgates'
+    | '/admin/'
     | '/lojista/'
     | '/api/public/webhook/$origem'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$slug'
+    | '/cadastro'
+    | '/lojista/aguardando'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -151,13 +192,17 @@ export interface FileRouteTypes {
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/resgates'
+    | '/admin'
     | '/lojista'
     | '/api/public/webhook/$origem'
   id:
     | '__root__'
     | '/'
     | '/$slug'
+    | '/admin'
+    | '/cadastro'
     | '/lojista'
+    | '/lojista/aguardando'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -165,6 +210,7 @@ export interface FileRouteTypes {
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/resgates'
+    | '/admin/'
     | '/lojista/'
     | '/api/public/webhook/$origem'
   fileRoutesById: FileRoutesById
@@ -172,6 +218,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
 }
@@ -183,6 +231,20 @@ declare module '@tanstack/react-router' {
       path: '/lojista'
       fullPath: '/lojista'
       preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -205,6 +267,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lojista/'
       preLoaderRoute: typeof LojistaIndexRouteImport
       parentRoute: typeof LojistaRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/lojista/resgates': {
       id: '/lojista/resgates'
@@ -255,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaClientesRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/lojista/aguardando': {
+      id: '/lojista/aguardando'
+      path: '/aguardando'
+      fullPath: '/lojista/aguardando'
+      preLoaderRoute: typeof LojistaAguardandoRouteImport
+      parentRoute: typeof LojistaRoute
+    }
     '/api/public/webhook/$origem': {
       id: '/api/public/webhook/$origem'
       path: '/api/public/webhook/$origem'
@@ -265,7 +341,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface LojistaRouteChildren {
+  LojistaAguardandoRoute: typeof LojistaAguardandoRoute
   LojistaClientesRoute: typeof LojistaClientesRoute
   LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
@@ -277,6 +364,7 @@ interface LojistaRouteChildren {
 }
 
 const LojistaRouteChildren: LojistaRouteChildren = {
+  LojistaAguardandoRoute: LojistaAguardandoRoute,
   LojistaClientesRoute: LojistaClientesRoute,
   LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
@@ -293,6 +381,8 @@ const LojistaRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
+  AdminRoute: AdminRouteWithChildren,
+  CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
 }
