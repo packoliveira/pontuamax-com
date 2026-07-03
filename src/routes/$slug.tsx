@@ -15,7 +15,7 @@ import {
   resgatarProduto,
   resgatarCashback,
 } from "@/lib/qsf.functions";
-import { formatBRL, formatDate, calcularNivel, progressoNivel, phoneToEmail, formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
+import { formatBRL, formatDate, calcularNivel, progressoNivel, cpfToEmail, formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -166,8 +166,8 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
 
 function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Promise<void> }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
-  const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
+  const [phone, setPhone] = useState("");
   const [senha, setSenha] = useState("");
   const [senha2, setSenha2] = useState("");
   const [nome, setNome] = useState("");
@@ -184,21 +184,21 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAviso(null);
-    const phoneDigits = onlyDigits(phone);
-    if (phoneDigits.length < 10) return toast.error("Telefone inválido");
+    const cpfDigits = onlyDigits(cpf);
+    if (!isValidCPF(cpfDigits)) return toast.error("CPF inválido");
     if (senha.length < 6) return toast.error("A senha precisa ter no mínimo 6 caracteres.");
     if (mode === "signup" && senha !== senha2) return toast.error("As senhas não coincidem");
     setLoading(true);
     try {
-      const email = phoneToEmail(phoneDigits);
+      const email = cpfToEmail(cpfDigits);
       if (mode === "signup") {
         if (!nome.trim()) throw new Error("Informe seu nome");
-        const cpfDigits = onlyDigits(cpf);
-        if (cpfDigits && !isValidCPF(cpfDigits)) throw new Error("CPF inválido");
+        const phoneDigits = onlyDigits(phone);
+        if (phoneDigits && phoneDigits.length < 10) throw new Error("Telefone inválido");
         const { error } = await supabase.auth.signUp({
           email,
           password: senha,
-          options: { data: { full_name: nome.trim(), phone: phoneDigits, cpf: cpfDigits || null } },
+          options: { data: { full_name: nome.trim(), phone: phoneDigits || null, cpf: cpfDigits } },
         });
         if (error) throw error;
         // If session not returned (email confirm), sign in
@@ -207,24 +207,26 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
           const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
           if (liErr) throw liErr;
         }
+        try { sessionStorage.setItem(`justSignedUp:${loja.id}`, "1"); } catch { /* ignore */ }
         await vincularClienteALoja({ data: { store_id: loja.id } });
         toast.success(`Bem-vindo(a), ${nome}!`);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) throw error;
-        // Ensure link exists
+        // Ensure link exists (marca como "acabou de entrar" para evitar sign-out
+        // se a query my-link demorar 1 tick para refletir o vínculo)
+        try { sessionStorage.setItem(`justSignedUp:${loja.id}`, "1"); } catch { /* ignore */ }
         await vincularClienteALoja({ data: { store_id: loja.id } });
         toast.success("Bem-vindo(a) de volta!");
       }
       await onAuthenticated();
     } catch (err) {
-      // Auto-switch: cadastro com telefone já existente → login
+      // Auto-switch: cadastro com CPF já existente → login
       if (mode === "signup" && isUsuarioJaCadastrado(err)) {
-        switchTo("login", "Você já tem uma conta com esse telefone. Entre com sua senha abaixo.");
+        switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
       } else if (mode === "login" && isCredenciaisInvalidas(err)) {
-        // Login falhou: telefone não cadastrado OU senha errada.
-        // Sugere cadastro mantendo o telefone preenchido.
-        switchTo("signup", "Não encontramos uma conta com esse telefone. Cadastre-se abaixo — se você já tem conta, tente a senha novamente.");
+        // Login falhou: CPF não cadastrado OU senha errada.
+        switchTo("signup", "Não encontramos uma conta com esse CPF. Cadastre-se abaixo — se você já tem conta, confira a senha.");
       } else {
         toast.error(traduzirErroAuth(err));
       }
@@ -237,7 +239,7 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
     <div className="max-w-md mx-auto p-4 -mt-6">
       <Card>
         <CardHeader>
-          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu telefone"}</CardTitle>
+          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-3">
@@ -247,12 +249,12 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
               </div>
             )}
             <div>
-              <Label>Telefone</Label>
+              <Label>CPF</Label>
               <Input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(11) 98765-4321"
-                inputMode="tel"
+                value={cpf}
+                onChange={(e) => setCpf(formatCPF(e.target.value))}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
                 autoComplete="username"
               />
             </div>
@@ -263,12 +265,12 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
                   <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" />
                 </div>
                 <div>
-                  <Label>CPF (opcional)</Label>
+                  <Label>Telefone (opcional)</Label>
                   <Input
-                    value={cpf}
-                    onChange={(e) => setCpf(formatCPF(e.target.value))}
-                    placeholder="000.000.000-00"
-                    inputMode="numeric"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="(11) 98765-4321"
+                    inputMode="tel"
                   />
                 </div>
               </>
@@ -304,7 +306,7 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
             </button>
             {mode === "login" && (
               <p className="text-[11px] text-center text-muted-foreground">
-                Se a loja cadastrou você, sua senha inicial é o seu próprio telefone (só números).
+                Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
               </p>
             )}
           </form>
