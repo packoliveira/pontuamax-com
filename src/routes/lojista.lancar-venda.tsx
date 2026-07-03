@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { myStoreQuery, storeClientsQuery, storePromotionsQuery, storeTransactionsQuery } from "@/lib/queries";
 import { lancarVenda, cadastrarClientePorTelefone, estornarVenda } from "@/lib/qsf.functions";
 import { formatBRL, onlyDigits, isValidCPF, formatCPF } from "@/lib/qsf-shared";
