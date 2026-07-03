@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LojistaRouteImport } from './routes/lojista'
 import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
@@ -32,6 +33,11 @@ const LojistaRoute = LojistaRouteImport.update({
 const CadastroRoute = CadastroRouteImport.update({
   id: '/cadastro',
   path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -98,6 +104,7 @@ const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRoute
   '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/aguardando': typeof LojistaAguardandoRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRoute
   '/cadastro': typeof CadastroRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/clientes': typeof LojistaClientesRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/admin': typeof AdminRoute
   '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/aguardando': typeof LojistaAguardandoRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/admin'
     | '/cadastro'
     | '/lojista'
     | '/lojista/aguardando'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$slug'
+    | '/admin'
     | '/cadastro'
     | '/lojista/aguardando'
     | '/lojista/clientes'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$slug'
+    | '/admin'
     | '/cadastro'
     | '/lojista'
     | '/lojista/aguardando'
@@ -196,6 +208,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
+  AdminRoute: typeof AdminRoute
   CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
@@ -215,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/cadastro'
       fullPath: '/cadastro'
       preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -334,6 +354,7 @@ const LojistaRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
+  AdminRoute: AdminRoute,
   CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
