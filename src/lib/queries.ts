@@ -274,3 +274,20 @@ export const storeRafflesQuery = (storeId: string | undefined) =>
       return data ?? [];
     },
   });
+
+export const storeNpsResponsesQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["nps-responses", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("nps_responses")
+        .select("id, score, comment, created_at, client_user_id, transaction_id")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
