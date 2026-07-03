@@ -319,6 +319,8 @@ export type Database = {
           last_purchase_at: string | null
           nivel: Database["public"]["Enums"]["nivel_cliente"]
           pontos: number
+          referral_bonus_paid: boolean
+          referrer_user_id: string | null
           store_id: string
           user_id: string
         }
@@ -332,6 +334,8 @@ export type Database = {
           last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
           pontos?: number
+          referral_bonus_paid?: boolean
+          referrer_user_id?: string | null
           store_id: string
           user_id: string
         }
@@ -345,6 +349,8 @@ export type Database = {
           last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
           pontos?: number
+          referral_bonus_paid?: boolean
+          referrer_user_id?: string | null
           store_id?: string
           user_id?: string
         }
@@ -363,6 +369,8 @@ export type Database = {
           activated_at: string | null
           admin_notes: string | null
           banner_url: string | null
+          bonus_indicado: number
+          bonus_indicador: number
           brand_primary: string
           brand_secondary: string
           cancelled_at: string | null
@@ -372,6 +380,7 @@ export type Database = {
           evolution_instance: string | null
           evolution_url: string | null
           id: string
+          indicacao_ativa: boolean
           logo_url: string | null
           modalidade: Database["public"]["Enums"]["modalidade"]
           mrr_amount: number
@@ -403,6 +412,8 @@ export type Database = {
           activated_at?: string | null
           admin_notes?: string | null
           banner_url?: string | null
+          bonus_indicado?: number
+          bonus_indicador?: number
           brand_primary?: string
           brand_secondary?: string
           cancelled_at?: string | null
@@ -412,6 +423,7 @@ export type Database = {
           evolution_instance?: string | null
           evolution_url?: string | null
           id?: string
+          indicacao_ativa?: boolean
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
           mrr_amount?: number
@@ -443,6 +455,8 @@ export type Database = {
           activated_at?: string | null
           admin_notes?: string | null
           banner_url?: string | null
+          bonus_indicado?: number
+          bonus_indicador?: number
           brand_primary?: string
           brand_secondary?: string
           cancelled_at?: string | null
@@ -452,6 +466,7 @@ export type Database = {
           evolution_instance?: string | null
           evolution_url?: string | null
           id?: string
+          indicacao_ativa?: boolean
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
           mrr_amount?: number
@@ -587,7 +602,11 @@ export type Database = {
         | "suspended"
         | "cancelled"
       transaction_status: "pendente" | "entregue"
-      transaction_tipo: "venda" | "resgate_produto" | "resgate_cashback"
+      transaction_tipo:
+        | "venda"
+        | "resgate_produto"
+        | "resgate_cashback"
+        | "indicacao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -726,7 +745,12 @@ export const Constants = {
         "cancelled",
       ],
       transaction_status: ["pendente", "entregue"],
-      transaction_tipo: ["venda", "resgate_produto", "resgate_cashback"],
+      transaction_tipo: [
+        "venda",
+        "resgate_produto",
+        "resgate_cashback",
+        "indicacao",
+      ],
     },
   },
 } as const
