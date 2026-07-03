@@ -243,12 +243,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
   const nivel = calcularNivel(link.pontos);
   const prog = progressoNivel(link.pontos);
 
-  const nomeCliente = useMemo(async () => {
-    const { data } = await supabase.auth.getUser();
-    return data.user?.user_metadata?.full_name ?? "Cliente";
-  }, []);
   const [nome, setNome] = useState("Cliente");
-  useEffect(() => { nomeCliente.then(setNome); }, [nomeCliente]);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data.user?.user_metadata as { full_name?: string } | undefined;
+      setNome(meta?.full_name ?? "Cliente");
+    });
+  }, []);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
