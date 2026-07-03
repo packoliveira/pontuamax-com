@@ -23,6 +23,7 @@ import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
 import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
+import { Route as LojistaNotasRouteImport } from './routes/lojista.notas'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
@@ -103,6 +104,11 @@ const LojistaOnboardingRoute = LojistaOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => LojistaRoute,
 } as any)
+const LojistaNotasRoute = LojistaNotasRouteImport.update({
+  id: '/notas',
+  path: '/notas',
+  getParentRoute: () => LojistaRoute,
+} as any)
 const LojistaLoginRoute = LojistaLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
+    | '/lojista/notas'
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/promocoes'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
+    | '/lojista/notas'
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/promocoes'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
+    | '/lojista/notas'
     | '/lojista/onboarding'
     | '/lojista/produtos'
     | '/lojista/promocoes'
@@ -413,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaOnboardingRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/lojista/notas': {
+      id: '/lojista/notas'
+      path: '/notas'
+      fullPath: '/lojista/notas'
+      preLoaderRoute: typeof LojistaNotasRouteImport
+      parentRoute: typeof LojistaRoute
+    }
     '/lojista/login': {
       id: '/lojista/login'
       path: '/login'
@@ -496,6 +515,7 @@ interface LojistaRouteChildren {
   LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
   LojistaLoginRoute: typeof LojistaLoginRoute
+  LojistaNotasRoute: typeof LojistaNotasRoute
   LojistaOnboardingRoute: typeof LojistaOnboardingRoute
   LojistaProdutosRoute: typeof LojistaProdutosRoute
   LojistaPromocoesRoute: typeof LojistaPromocoesRoute
@@ -511,6 +531,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
   LojistaLoginRoute: LojistaLoginRoute,
+  LojistaNotasRoute: LojistaNotasRoute,
   LojistaOnboardingRoute: LojistaOnboardingRoute,
   LojistaProdutosRoute: LojistaProdutosRoute,
   LojistaPromocoesRoute: LojistaPromocoesRoute,
