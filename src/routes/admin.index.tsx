@@ -28,7 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2 } from "lucide-react";
+import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown } from "lucide-react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
@@ -86,6 +87,8 @@ function AdminDashboard() {
   });
 
   const [editing, setEditing] = useState<StoreRow | null>(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | StoreRow["subscription_status"]>("all");
 
   if (loadingAdmin) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
@@ -126,10 +129,33 @@ function AdminDashboard() {
 
   const list = stores ?? [];
   const mrrTotal = list.filter((s) => s.subscription_status === "active").reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
+  const mrrPotencial = list.filter((s) => s.subscription_status === "pending_payment").reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
   const ativas = list.filter((s) => s.subscription_status === "active").length;
   const aguardando = list.filter((s) => s.subscription_status === "pending_payment").length;
   const suspensas = list.filter((s) => s.subscription_status === "suspended").length;
   const canceladas = list.filter((s) => s.subscription_status === "cancelled").length;
+
+  const now = new Date();
+  const inicioMes = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const novasMes = list.filter((s) => new Date(s.created_at).getTime() >= inicioMes).length;
+  const churnMes = list.filter((s) => s.cancelled_at && new Date(s.cancelled_at).getTime() >= inicioMes).length;
+  const arr = mrrTotal * 12;
+  const ticketMedio = ativas > 0 ? mrrTotal / ativas : 0;
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return list.filter((s) => {
+      if (filter !== "all" && s.subscription_status !== filter) return false;
+      if (!q) return true;
+      return (
+        s.nome_fantasia.toLowerCase().includes(q) ||
+        s.slug.toLowerCase().includes(q) ||
+        (s.owner_name ?? "").toLowerCase().includes(q) ||
+        (s.owner_email ?? "").toLowerCase().includes(q) ||
+        (s.owner_phone ?? s.telefone ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [list, search, filter]);
 
   return (
     <div className="space-y-6">
@@ -140,14 +166,40 @@ function AdminDashboard() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<DollarSign className="h-5 w-5" />} label="MRR" value={`R$ ${mrrTotal.toFixed(2)}`} accent="text-green-600" />
+        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="ARR projetado" value={`R$ ${arr.toFixed(0)}`} accent="text-emerald-600" />
+        <StatCard icon={<DollarSign className="h-5 w-5" />} label="Ticket médio" value={`R$ ${ticketMedio.toFixed(2)}`} />
+        <StatCard icon={<DollarSign className="h-5 w-5" />} label="MRR potencial (aguard.)" value={`R$ ${mrrPotencial.toFixed(2)}`} accent="text-amber-600" />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<Store className="h-5 w-5" />} label="Lojas totais" value={list.length} />
         <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="Ativas" value={ativas} accent="text-green-600" />
-        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="Aguardando" value={aguardando} accent="text-amber-600" />
+        <StatCard icon={<UserPlus className="h-5 w-5" />} label="Novas este mês" value={novasMes} accent="text-blue-600" />
+        <StatCard icon={<TrendingDown className="h-5 w-5" />} label="Churn este mês" value={churnMes} accent={churnMes > 0 ? "text-red-600" : undefined} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Lojas ({list.length})</CardTitle>
+          <div className="flex flex-col gap-3">
+            <CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Lojas ({filtered.length}{filtered.length !== list.length ? ` de ${list.length}` : ""})</CardTitle>
+            <div className="flex flex-col md:flex-row gap-2">
+              <div className="relative flex-1">
+                <Search className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input className="pl-8" placeholder="Buscar por nome, slug, e-mail, telefone..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(["all","active","pending_payment","suspended","cancelled"] as const).map((k) => (
+                  <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>
+                    {k === "all" ? `Todas (${list.length})`
+                      : k === "active" ? `Ativas (${ativas})`
+                      : k === "pending_payment" ? `Aguard. (${aguardando})`
+                      : k === "suspended" ? `Susp. (${suspensas})`
+                      : `Canc. (${canceladas})`}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading && <div className="p-6 text-center text-muted-foreground">Carregando lojas...</div>}
@@ -155,8 +207,11 @@ function AdminDashboard() {
           {!isLoading && list.length === 0 && (
             <div className="p-8 text-center text-sm text-muted-foreground">Nenhuma loja cadastrada ainda.</div>
           )}
+          {!isLoading && list.length > 0 && filtered.length === 0 && (
+            <div className="p-8 text-center text-sm text-muted-foreground">Nenhuma loja corresponde ao filtro.</div>
+          )}
           <div className="divide-y">
-            {list.map((s) => (
+            {filtered.map((s) => (
               <div key={s.id} className="p-4 flex flex-col md:flex-row md:items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -171,6 +226,11 @@ function AdminDashboard() {
                   {s.mrr_amount > 0 && (
                     <div className="text-xs mt-0.5 text-green-700">R$ {Number(s.mrr_amount).toFixed(2)}/mês</div>
                   )}
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                    Criada em {new Date(s.created_at).toLocaleDateString("pt-BR")}
+                    {s.activated_at && ` · Ativada ${new Date(s.activated_at).toLocaleDateString("pt-BR")}`}
+                    {s.cancelled_at && ` · Cancelada ${new Date(s.cancelled_at).toLocaleDateString("pt-BR")}`}
+                  </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button size="sm" variant="outline" onClick={() => setEditing(s)}>
@@ -182,8 +242,6 @@ function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-xs text-muted-foreground">Suspensas: {suspensas} · Canceladas: {canceladas}</div>
 
       <EditDialog store={editing} onClose={() => setEditing(null)} onSaved={() => qc.invalidateQueries({ queryKey: ["admin-stores"] })} />
     </div>
