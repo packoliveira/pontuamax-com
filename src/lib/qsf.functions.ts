@@ -509,7 +509,7 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
       store_id: z.string().uuid(),
       client_user_id: z.string().uuid(),
       // positivo = adicionar; negativo = estornar
-      delta: z.number().int().refine((n) => n !== 0, "Informe uma quantidade diferente de zero.").min(-1_000_000).max(1_000_000),
+      delta: z.number().int().min(-1_000_000).max(1_000_000).refine((n) => n !== 0, "Informe uma quantidade diferente de zero."),
       motivo: z.string().max(200).optional(),
     }).parse(input),
   )
@@ -531,7 +531,7 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
       valor: 0,
       pontos_delta: data.delta,
       cashback_delta: 0,
-      status: "confirmado",
+      status: "entregue",
       origem: data.motivo ? `ajuste_manual:${data.motivo.slice(0, 180)}` : "ajuste_manual",
     });
     if (eIns) throw new Error(eIns.message);
