@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
@@ -25,6 +26,11 @@ import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
   path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -86,6 +92,7 @@ const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/cadastro': typeof CadastroRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
+  '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/cadastro'
     | '/lojista'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$slug'
+    | '/cadastro'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$slug'
+    | '/cadastro'
     | '/lojista'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
@@ -172,6 +184,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
+  CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
 }
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/lojista'
       fullPath: '/lojista'
       preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -293,6 +313,7 @@ const LojistaRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
+  CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
 }
