@@ -26,6 +26,7 @@ function Onboarding() {
   // Auth
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [senha2, setSenha2] = useState("");
   const [respName, setRespName] = useState("");
   // Loja
   const [nome, setNome] = useState("");
@@ -41,6 +42,11 @@ function Onboarding() {
   const [loading, setLoading] = useState(false);
 
   const finalizar = async () => {
+    if (senha !== senha2) {
+      toast.error("As senhas não coincidem");
+      setStep(1);
+      return;
+    }
     setLoading(true);
     try {
       // 1. Signup
@@ -94,7 +100,20 @@ function Onboarding() {
             <div><Label>Seu nome</Label><Input value={respName} onChange={(e) => setRespName(e.target.value)} placeholder="Como quer ser chamado" /></div>
             <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" /></div>
             <div><Label>Senha</Label><PasswordInput value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} /></div>
-            <Button onClick={() => setStep(2)} disabled={!respName || !email || senha.length < 6} className="w-full">Próximo <ArrowRight className="h-4 w-4" /></Button>
+            <div>
+              <Label>Confirmar senha</Label>
+              <PasswordInput value={senha2} onChange={(e) => setSenha2(e.target.value)} placeholder="Repita a senha" minLength={6} />
+              {senha2.length > 0 && senha !== senha2 && (
+                <p className="mt-1 text-[11px] text-destructive">As senhas não coincidem</p>
+              )}
+            </div>
+            <Button
+              onClick={() => setStep(2)}
+              disabled={!respName || !email || senha.length < 6 || senha !== senha2}
+              className="w-full"
+            >
+              Próximo <ArrowRight className="h-4 w-4" />
+            </Button>
           </CardContent></Card>
         )}
 
