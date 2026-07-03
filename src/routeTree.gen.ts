@@ -38,6 +38,7 @@ import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/wid
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
+import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
 
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
@@ -185,6 +186,12 @@ const ApiPublicHooksNotificationsDailyRoute =
     path: '/api/public/hooks/notifications-daily',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksExpirarVouchersRoute =
+  ApiPublicHooksExpirarVouchersRouteImport.update({
+    id: '/api/public/hooks/expirar-vouchers',
+    path: '/api/public/hooks/expirar-vouchers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
@@ -241,6 +249,7 @@ export interface FileRoutesByTo {
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
+  '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
@@ -273,6 +282,7 @@ export interface FileRoutesById {
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/vale/$codigo'
     | '/admin/'
     | '/lojista/'
+    | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/vale/$codigo'
     | '/admin'
     | '/lojista'
+    | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
@@ -366,6 +378,7 @@ export interface FileRouteTypes {
     | '/vale/$codigo'
     | '/admin/'
     | '/lojista/'
+    | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
@@ -381,6 +394,7 @@ export interface RootRouteChildren {
   NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
   ValeCodigoRoute: typeof ValeCodigoRoute
+  ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
@@ -592,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksNotificationsDailyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/expirar-vouchers': {
+      id: '/api/public/hooks/expirar-vouchers'
+      path: '/api/public/hooks/expirar-vouchers'
+      fullPath: '/api/public/hooks/expirar-vouchers'
+      preLoaderRoute: typeof ApiPublicHooksExpirarVouchersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -655,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
   ValeCodigoRoute: ValeCodigoRoute,
+  ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
