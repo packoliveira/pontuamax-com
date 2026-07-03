@@ -92,6 +92,9 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         indicacao_ativa: z.boolean().optional(),
         bonus_indicador: z.number().int().min(0).max(10000).optional(),
         bonus_indicado: z.number().int().min(0).max(10000).optional(),
+        nps_enabled: z.boolean().optional(),
+        nps_ask_comment: z.boolean().optional(),
+        nps_template: z.string().min(1).max(2000).optional(),
       })
       .parse(input),
   )
@@ -247,7 +250,7 @@ export const lancarVenda = createServerFn({ method: "POST" })
     const pontos = pontosBase + bonusIndicado;
     const novoPontos = link.data.pontos + pontos;
     const novoCashback = +(Number(link.data.cashback_saldo) + cashback).toFixed(2);
-    const { error: txErr } = await supabaseAdmin.from("transactions").insert({
+    const { data: txRow, error: txErr } = await supabaseAdmin.from("transactions").insert({
       store_id: data.store_id,
       client_user_id: data.client_user_id,
       tipo: "venda",
@@ -255,7 +258,7 @@ export const lancarVenda = createServerFn({ method: "POST" })
       pontos_delta: pontos,
       cashback_delta: cashback,
       status: "entregue",
-    });
+    }).select("id").single();
     if (txErr) throw new Error(txErr.message);
     const { error: updErr } = await supabaseAdmin
       .from("store_clients")
@@ -302,6 +305,16 @@ export const lancarVenda = createServerFn({ method: "POST" })
         storeId: data.store_id,
         clientUserId: data.client_user_id,
         pontosGanhos: pontos,
+      });
+    }
+    // Envia pedido de NPS (só se lojista ativou)
+    if (txRow?.id) {
+      const { notifyClient } = await import("./notify.server");
+      await notifyClient({
+        event: "nps_request",
+        storeId: data.store_id,
+        clientUserId: data.client_user_id,
+        transactionId: txRow.id,
       });
     }
     return { pontos, cashback, multiplicador, bonusIndicado, bonusIndicador };

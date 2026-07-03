@@ -16,6 +16,7 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as NpsIdRouteImport } from './routes/nps.$id'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
@@ -27,6 +28,7 @@ import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
+import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 
 const LojistaRoute = LojistaRouteImport.update({
@@ -63,6 +65,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const NpsIdRoute = NpsIdRouteImport.update({
+  id: '/nps/$id',
+  path: '/nps/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
   id: '/resgates',
@@ -119,6 +126,11 @@ const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
   path: '/api/public/webhook/$origem',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNpsSubmitRoute = ApiPublicNpsSubmitRouteImport.update({
+  id: '/api/public/nps/submit',
+  path: '/api/public/nps/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksNotificationsDailyRoute =
   ApiPublicHooksNotificationsDailyRouteImport.update({
     id: '/api/public/hooks/notifications-daily',
@@ -142,9 +154,11 @@ export interface FileRoutesByFullPath {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/nps/$id': typeof NpsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRoutesByTo {
@@ -161,9 +175,11 @@ export interface FileRoutesByTo {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/nps/$id': typeof NpsIdRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRoutesById {
@@ -183,9 +199,11 @@ export interface FileRoutesById {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/nps/$id': typeof NpsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRouteTypes {
@@ -206,9 +224,11 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/nps/$id'
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/notifications-daily'
+    | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -225,9 +245,11 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/nps/$id'
     | '/admin'
     | '/lojista'
     | '/api/public/hooks/notifications-daily'
+    | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
   id:
     | '__root__'
@@ -246,9 +268,11 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/nps/$id'
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/notifications-daily'
+    | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
   fileRoutesById: FileRoutesById
 }
@@ -258,7 +282,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
+  NpsIdRoute: typeof NpsIdRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
+  ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
 }
 
@@ -312,6 +338,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/nps/$id': {
+      id: '/nps/$id'
+      path: '/nps/$id'
+      fullPath: '/nps/$id'
+      preLoaderRoute: typeof NpsIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lojista/resgates': {
       id: '/lojista/resgates'
@@ -390,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhookOrigemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/nps/submit': {
+      id: '/api/public/nps/submit'
+      path: '/api/public/nps/submit'
+      fullPath: '/api/public/nps/submit'
+      preLoaderRoute: typeof ApiPublicNpsSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/notifications-daily': {
       id: '/api/public/hooks/notifications-daily'
       path: '/api/public/hooks/notifications-daily'
@@ -447,7 +487,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
+  NpsIdRoute: NpsIdRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
+  ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
 }
 export const routeTree = rootRouteImport

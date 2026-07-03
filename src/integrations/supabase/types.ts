@@ -190,6 +190,51 @@ export type Database = {
           },
         ]
       }
+      nps_responses: {
+        Row: {
+          client_user_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          score: number
+          store_id: string
+          transaction_id: string
+        }
+        Insert: {
+          client_user_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score: number
+          store_id: string
+          transaction_id: string
+        }
+        Update: {
+          client_user_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score?: number
+          store_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_responses_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_responses_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           ativo: boolean
@@ -395,6 +440,9 @@ export type Database = {
           notif_inactivity_days: number
           notif_inactivity_enabled: boolean
           notif_inactivity_template: string
+          nps_ask_comment: boolean
+          nps_enabled: boolean
+          nps_template: string
           owner_id: string
           percentual_cashback: number
           plan: Database["public"]["Enums"]["plan_tier"]
@@ -438,6 +486,9 @@ export type Database = {
           notif_inactivity_days?: number
           notif_inactivity_enabled?: boolean
           notif_inactivity_template?: string
+          nps_ask_comment?: boolean
+          nps_enabled?: boolean
+          nps_template?: string
           owner_id: string
           percentual_cashback?: number
           plan?: Database["public"]["Enums"]["plan_tier"]
@@ -481,6 +532,9 @@ export type Database = {
           notif_inactivity_days?: number
           notif_inactivity_enabled?: boolean
           notif_inactivity_template?: string
+          nps_ask_comment?: boolean
+          nps_enabled?: boolean
+          nps_template?: string
           owner_id?: string
           percentual_cashback?: number
           plan?: Database["public"]["Enums"]["plan_tier"]
