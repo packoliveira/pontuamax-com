@@ -83,6 +83,7 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   const qc = useQueryClient();
   const { data: link, isLoading } = useQuery(myLinkAtStoreQuery(loja.id));
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const [hydrating, setHydrating] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
@@ -93,17 +94,39 @@ function ClienteFlow({ loja }: { loja: Loja }) {
     return () => sub.subscription.unsubscribe();
   }, [qc]);
 
+  const handleAuthSuccess = async () => {
+    setHydrating(true);
+    try {
+      // 1) Aguarda a sessão do Supabase estar realmente ativa
+      let uid: string | null = null;
+      for (let i = 0; i < 20; i++) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user.id) { uid = data.session.user.id; break; }
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      // 2) Força o estado local (não depende só do listener)
+      setSessionUserId(uid);
+      // 3) Invalida especificamente as queries relevantes e aguarda
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["my-link", loja.id] }),
+        qc.invalidateQueries({ queryKey: ["my-transactions", loja.id] }),
+      ]);
+    } finally {
+      setHydrating(false);
+    }
+  };
+
   return (
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
-      {isLoading ? (
+      {isLoading || hydrating ? (
         <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
       ) : sessionUserId && link ? (
         <ClienteLogado loja={loja} link={link} />
       ) : sessionUserId && !link ? (
         <VincularStore loja={loja} />
       ) : (
-        <Auth loja={loja} />
+        <Auth loja={loja} onAuthenticated={handleAuthSuccess} />
       )}
     </>
   );
@@ -141,7 +164,7 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
   );
 }
 
-function Auth({ loja }: { loja: Loja }) {
+function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Promise<void> }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
@@ -150,8 +173,6 @@ function Auth({ loja }: { loja: Loja }) {
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
-
-  const qc = useQueryClient();
 
   const switchTo = (novo: "login" | "signup", msg: string) => {
     setMode(novo);
@@ -195,7 +216,7 @@ function Auth({ loja }: { loja: Loja }) {
         await vincularClienteALoja({ data: { store_id: loja.id } });
         toast.success("Bem-vindo(a) de volta!");
       }
-      qc.invalidateQueries();
+      await onAuthenticated();
     } catch (err) {
       // Auto-switch: cadastro com telefone já existente → login
       if (mode === "signup" && isUsuarioJaCadastrado(err)) {
@@ -276,7 +297,7 @@ function Auth({ loja }: { loja: Loja }) {
               </div>
             )}
             <Button type="submit" disabled={loading} className="w-full text-white" style={{ backgroundColor: "var(--brand-primary)" }}>
-              {loading ? "Aguarde..." : mode === "signup" ? "Criar conta" : "Entrar"}
+              {loading ? "Entrando..." : mode === "signup" ? "Criar conta" : "Entrar"}
             </Button>
             <button type="button" onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }} className="text-xs text-center w-full underline text-muted-foreground">
               {mode === "login" ? "Ainda não tenho conta" : "Já tenho conta, entrar"}
