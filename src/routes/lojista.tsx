@@ -10,14 +10,16 @@ export const Route = createFileRoute("/lojista")({
     if (publicos.includes(location.pathname)) return;
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/lojista/login" });
-    // Bloqueia acesso ao painel se assinatura não estiver ativa
+    // Sem loja ainda? Manda pro onboarding.
+    // Se tem loja mas assinatura não está ativa, tela de aguardando.
     if (location.pathname !== "/lojista/aguardando") {
       const { data: store } = await supabase
         .from("stores")
         .select("subscription_status")
         .eq("owner_id", data.session.user.id)
         .maybeSingle();
-      if (store && store.subscription_status !== "active") {
+      if (!store) throw redirect({ to: "/lojista/onboarding" });
+      if (store.subscription_status !== "active") {
         throw redirect({ to: "/lojista/aguardando" });
       }
     }
