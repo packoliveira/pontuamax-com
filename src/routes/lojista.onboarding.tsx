@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { criarLoja, atualizarLoja } from "@/lib/qsf.functions";
 import { slugify, type Modalidade } from "@/lib/qsf-shared";
@@ -16,6 +16,22 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/onboarding")({
   ssr: false,
+  beforeLoad: async () => {
+    // Se já está logado E já tem loja, não faz sentido cair no onboarding —
+    // manda direto pro painel para evitar o ciclo login → onboarding → login.
+    const { data } = await supabase.auth.getSession();
+    const uid = data.session?.user.id;
+    if (!uid) return;
+    const { data: store } = await supabase
+      .from("stores")
+      .select("id, subscription_status")
+      .eq("owner_id", uid)
+      .maybeSingle();
+    if (store) {
+      if (store.subscription_status !== "active") throw redirect({ to: "/lojista/aguardando" });
+      throw redirect({ to: "/lojista" });
+    }
+  },
   component: Onboarding,
 });
 
@@ -23,6 +39,9 @@ function Onboarding() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
+  // Se o usuário chega aqui já autenticado (ex.: veio do login sem loja),
+  // pré-preenchemos o email e pulamos direto para o passo da loja.
+  const [alreadyAuthed, setAlreadyAuthed] = useState(false);
   // Auth
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -48,25 +67,49 @@ function Onboarding() {
   const [slug, setSlug] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      let prefill: string | null = null;
+      try { prefill = sessionStorage.getItem("onboarding_prefill_email"); } catch { /* ignore */ }
+      const { data } = await supabase.auth.getSession();
+      const sessEmail = data.session?.user.email ?? null;
+      const meta = (data.session?.user.user_metadata ?? {}) as { full_name?: string; phone?: string };
+      if (cancelled) return;
+      if (sessEmail) {
+        setEmail(sessEmail);
+        if (meta.full_name) setRespName(meta.full_name);
+        if (meta.phone) setTelefone(meta.phone);
+        setAlreadyAuthed(true);
+        setStep(2);
+      } else if (prefill) {
+        setEmail(prefill);
+      }
+      try { sessionStorage.removeItem("onboarding_prefill_email"); } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const finalizar = async () => {
-    if (senha !== senha2) {
+    if (!alreadyAuthed && senha !== senha2) {
       toast.error("As senhas não coincidem");
       setStep(1);
       return;
     }
     setLoading(true);
     try {
-      // 1. Signup
-      const { data: signup, error: sErr } = await supabase.auth.signUp({
-        email,
-        password: senha,
-        options: { data: { full_name: respName, phone: telefone } },
-      });
-      if (sErr) throw sErr;
-      // If autoconfirm is on, session is set; otherwise sign in explicitly
-      if (!signup.session) {
-        const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
-        if (liErr) throw liErr;
+      if (!alreadyAuthed) {
+        // 1. Signup — só se não veio já logado do fluxo de login.
+        const { data: signup, error: sErr } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: { data: { full_name: respName, phone: telefone } },
+        });
+        if (sErr) throw sErr;
+        if (!signup.session) {
+          const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
+          if (liErr) throw liErr;
+        }
       }
       const s = slugify(nome);
       const loja = await criarLoja({
@@ -127,10 +170,13 @@ function Onboarding() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 to-orange-50 p-4 py-8">
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <span>Passo {step} de 4</span>
+          <span>Passo {alreadyAuthed ? step - 1 : step} de {alreadyAuthed ? 3 : 4}</span>
+          {alreadyAuthed && email && (
+            <span className="text-xs">• conectado como <strong>{email}</strong></span>
+          )}
         </div>
 
-        {step === 1 && (
+        {step === 1 && !alreadyAuthed && (
           <Card><CardHeader><CardTitle>Sua conta de lojista</CardTitle></CardHeader><CardContent className="space-y-4">
             <div><Label>Seu nome</Label><Input value={respName} onChange={(e) => setRespName(e.target.value)} placeholder="Como quer ser chamado" /></div>
             <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" /></div>
