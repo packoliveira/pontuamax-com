@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ShieldAlert, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { traduzirErroAuth } from "@/lib/auth-errors";
+import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
 export const Route = createFileRoute("/admin/login")({
   ssr: false,
@@ -41,6 +42,7 @@ function AdminLogin() {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [showBootstrap, setShowBootstrap] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +138,13 @@ function AdminLogin() {
               >
                 {loading ? "Verificando..." : "Entrar no painel master"}
               </Button>
+              <button
+                type="button"
+                onClick={() => setForgotOpen(true)}
+                className="block mx-auto text-xs text-slate-400 hover:text-slate-200 underline"
+              >
+                Esqueci minha senha
+              </button>
               {showBootstrap && (
                 <p className="text-[11px] text-center text-slate-400">
                   Se este é o primeiro admin do sistema, o acesso é liberado automaticamente após o login.
@@ -149,6 +158,7 @@ function AdminLogin() {
           <a href="/lojista/login" className="underline hover:text-slate-300">Ir para o login do lojista</a>
         </p>
       </div>
+      <EsqueciSenhaDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} darkTheme />
     </div>
   );
 }
