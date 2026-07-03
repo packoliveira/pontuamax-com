@@ -1444,6 +1444,32 @@ export const removeClientTag = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// -------- LOJISTA: excluir vínculo de um cliente da sua loja --------
+// Remove somente o vínculo (store_clients) — não apaga o usuário do auth,
+// pois ele pode ser cliente de outras lojas. Remove também tags específicas
+// deste cliente nesta loja.
+export const excluirClienteDaLoja = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    store_id: z.string().uuid(),
+    client_user_id: z.string().uuid(),
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
+    if (!owner.data) throw new Error("Você não é dono desta loja.");
+    await supabaseAdmin.from("client_tags").delete().eq("store_id", data.store_id).eq("client_user_id", data.client_user_id);
+    const del = await supabaseAdmin
+      .from("store_clients")
+      .delete()
+      .eq("store_id", data.store_id)
+      .eq("user_id", data.client_user_id)
+      .select("id");
+    if (del.error) throw new Error(del.error.message);
+    if (!del.data || del.data.length === 0) throw new Error("Cliente não estava vinculado a esta loja.");
+    return { ok: true };
+  });
+
 // ============================================================
 // SORTEIOS
 // ============================================================
