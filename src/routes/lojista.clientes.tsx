@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
-import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente } from "@/lib/qsf.functions";
+import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente, sincronizarClientesDaLoja } from "@/lib/qsf.functions";
 import { formatBRL, formatDate, progressoNivel } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trophy } from "lucide-react";
-import { Search, Cake, X, Plus, UserPlus, Pencil, Coins, Minus } from "lucide-react";
+import { Search, Cake, X, Plus, UserPlus, Pencil, Coins, Minus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/clientes")({
@@ -53,6 +53,28 @@ function NivelBadge({ pontos, nivel }: { pontos: number; nivel: string }) {
         <span className="text-[10px] text-muted-foreground">nível máximo</span>
       )}
     </div>
+  );
+}
+
+function SyncClientsButton({ storeId }: { storeId: string }) {
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: () => sincronizarClientesDaLoja(),
+    onSuccess: (r: { criados: number }) => {
+      toast.success(
+        r.criados > 0
+          ? `${r.criados} cliente(s) sincronizado(s).`
+          : "Nenhum cliente novo para sincronizar.",
+      );
+      qc.invalidateQueries({ queryKey: ["store-clients", storeId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Button variant="outline" onClick={() => m.mutate()} disabled={m.isPending}>
+      <RefreshCw className={`h-4 w-4 ${m.isPending ? "animate-spin" : ""}`} />
+      Sincronizar clientes
+    </Button>
   );
 }
 
@@ -230,9 +252,12 @@ function ClientesPage() {
             {filtered.length} de {clientes.length} cliente(s)
           </p>
         </div>
-        <Button onClick={() => setOpenNew(true)}>
-          <UserPlus className="h-4 w-4" /> Cadastrar cliente
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <SyncClientsButton storeId={loja.id} />
+          <Button onClick={() => setOpenNew(true)}>
+            <UserPlus className="h-4 w-4" /> Cadastrar cliente
+          </Button>
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[240px] flex-1 max-w-md">
