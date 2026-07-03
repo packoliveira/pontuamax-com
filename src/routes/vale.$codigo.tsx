@@ -27,7 +27,11 @@ function Page() {
     enabled: !!card?.store_id,
     queryFn: async () => {
       if (!card?.store_id) return null;
-      const { data } = await supabase.from("stores").select("*").eq("id", card.store_id).maybeSingle();
+      const { data } = await supabase
+        .from("stores")
+        .select("id, slug, nome_fantasia, logo_url, brand_primary, brand_secondary")
+        .eq("id", card.store_id)
+        .maybeSingle();
       return data;
     },
   });

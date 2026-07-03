@@ -8,6 +8,7 @@ import {
   activeStoreProductsQuery,
   myLinkAtStoreQuery,
   myTransactionsAtStoreQuery,
+  type StorePublic,
 } from "@/lib/queries";
 import {
   vincularClienteALoja,
@@ -35,7 +36,7 @@ function getStoredReferrer(): string | null {
   } catch { return null; }
 }
 
-type Loja = Tables<"stores">;
+type Loja = StorePublic;
 type Link = Tables<"store_clients">;
 
 export const Route = createFileRoute("/$slug")({
