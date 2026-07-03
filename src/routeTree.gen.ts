@@ -9,38 +9,176 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
+import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
+import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
+import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
+import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
+import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
+import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 
+const LojistaRoute = LojistaRouteImport.update({
+  id: '/lojista',
+  path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LojistaIndexRoute = LojistaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaProdutosRoute = LojistaProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaOnboardingRoute = LojistaOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaLoginRoute = LojistaLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaLancarVendaRoute = LojistaLancarVendaRouteImport.update({
+  id: '/lancar-venda',
+  path: '/lancar-venda',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaConfiguracoesRoute = LojistaConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaClientesRoute = LojistaClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => LojistaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/lojista': typeof LojistaRouteWithChildren
+  '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/': typeof LojistaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista': typeof LojistaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
+  '/lojista': typeof LojistaRouteWithChildren
+  '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/': typeof LojistaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$slug'
+    | '/lojista'
+    | '/lojista/clientes'
+    | '/lojista/configuracoes'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/onboarding'
+    | '/lojista/produtos'
+    | '/lojista/resgates'
+    | '/lojista/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$slug'
+    | '/lojista/clientes'
+    | '/lojista/configuracoes'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/onboarding'
+    | '/lojista/produtos'
+    | '/lojista/resgates'
+    | '/lojista'
+  id:
+    | '__root__'
+    | '/'
+    | '/$slug'
+    | '/lojista'
+    | '/lojista/clientes'
+    | '/lojista/configuracoes'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/onboarding'
+    | '/lojista/produtos'
+    | '/lojista/resgates'
+    | '/lojista/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRoute: typeof SlugRoute
+  LojistaRoute: typeof LojistaRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/lojista': {
+      id: '/lojista'
+      path: '/lojista'
+      fullPath: '/lojista'
+      preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +186,94 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lojista/': {
+      id: '/lojista/'
+      path: '/'
+      fullPath: '/lojista/'
+      preLoaderRoute: typeof LojistaIndexRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/resgates': {
+      id: '/lojista/resgates'
+      path: '/resgates'
+      fullPath: '/lojista/resgates'
+      preLoaderRoute: typeof LojistaResgatesRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/produtos': {
+      id: '/lojista/produtos'
+      path: '/produtos'
+      fullPath: '/lojista/produtos'
+      preLoaderRoute: typeof LojistaProdutosRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/onboarding': {
+      id: '/lojista/onboarding'
+      path: '/onboarding'
+      fullPath: '/lojista/onboarding'
+      preLoaderRoute: typeof LojistaOnboardingRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/login': {
+      id: '/lojista/login'
+      path: '/login'
+      fullPath: '/lojista/login'
+      preLoaderRoute: typeof LojistaLoginRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/lancar-venda': {
+      id: '/lojista/lancar-venda'
+      path: '/lancar-venda'
+      fullPath: '/lojista/lancar-venda'
+      preLoaderRoute: typeof LojistaLancarVendaRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/configuracoes': {
+      id: '/lojista/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/lojista/configuracoes'
+      preLoaderRoute: typeof LojistaConfiguracoesRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/clientes': {
+      id: '/lojista/clientes'
+      path: '/clientes'
+      fullPath: '/lojista/clientes'
+      preLoaderRoute: typeof LojistaClientesRouteImport
+      parentRoute: typeof LojistaRoute
+    }
   }
 }
 
+interface LojistaRouteChildren {
+  LojistaClientesRoute: typeof LojistaClientesRoute
+  LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
+  LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
+  LojistaLoginRoute: typeof LojistaLoginRoute
+  LojistaOnboardingRoute: typeof LojistaOnboardingRoute
+  LojistaProdutosRoute: typeof LojistaProdutosRoute
+  LojistaResgatesRoute: typeof LojistaResgatesRoute
+  LojistaIndexRoute: typeof LojistaIndexRoute
+}
+
+const LojistaRouteChildren: LojistaRouteChildren = {
+  LojistaClientesRoute: LojistaClientesRoute,
+  LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
+  LojistaLancarVendaRoute: LojistaLancarVendaRoute,
+  LojistaLoginRoute: LojistaLoginRoute,
+  LojistaOnboardingRoute: LojistaOnboardingRoute,
+  LojistaProdutosRoute: LojistaProdutosRoute,
+  LojistaResgatesRoute: LojistaResgatesRoute,
+  LojistaIndexRoute: LojistaIndexRoute,
+}
+
+const LojistaRouteWithChildren =
+  LojistaRoute._addFileChildren(LojistaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRoute: SlugRoute,
+  LojistaRoute: LojistaRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
