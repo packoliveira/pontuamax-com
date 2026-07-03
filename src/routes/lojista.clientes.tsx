@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore, formatBRL, formatDate, calcularNivel } from "@/lib/mock-store";
+import { useQuery } from "@tanstack/react-query";
+import { myStoreQuery, storeClientsQuery } from "@/lib/queries";
+import { formatBRL, formatDate } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,17 +20,20 @@ const NIVEL_COR: Record<string, string> = {
 };
 
 function ClientesPage() {
-  const lojaId = useStore((s) => s.authedLojaId)!;
-  const loja = useStore((s) => s.lojas.find((l) => l.id === lojaId))!;
-  const clientes = useStore((s) => s.clientes.filter((c) => c.loja_id === lojaId));
+  const { data: loja } = useQuery(myStoreQuery());
+  const { data: clientes = [] } = useQuery(storeClientsQuery(loja?.id));
   const [q, setQ] = useState("");
 
+  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+
   const filtered = clientes.filter((c) => {
+    if (!q) return true;
     const s = q.toLowerCase();
-    return !s || c.nome.toLowerCase().includes(s) || c.telefone.includes(s) || (c.cpf ?? "").includes(s);
+    const p = c.profiles as unknown as { full_name: string | null; phone: string | null; cpf: string | null } | null;
+    return (p?.full_name ?? "").toLowerCase().includes(s) || (p?.phone ?? "").includes(s) || (p?.cpf ?? "").includes(s);
   });
-  const inclPontos = loja.modalidade !== "cashback";
-  const inclCashback = loja.modalidade !== "pontos";
+  const inclP = loja.modalidade !== "cashback";
+  const inclC = loja.modalidade !== "pontos";
 
   return (
     <div className="space-y-6">
@@ -44,22 +49,22 @@ function ClientesPage() {
         <CardContent className="p-0">
           <div className="divide-y">
             {filtered.map((c) => {
-              const nivel = calcularNivel(c.pontos_saldo);
+              const p = c.profiles as unknown as { full_name: string | null; phone: string | null; cpf: string | null } | null;
               return (
                 <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{c.nome}</span>
-                      {loja.niveis_ativos && inclPontos && (
-                        <Badge className={NIVEL_COR[nivel]} variant="secondary">{nivel}</Badge>
+                      <span className="font-medium">{p?.full_name ?? "—"}</span>
+                      {inclP && (
+                        <Badge className={NIVEL_COR[c.nivel]} variant="secondary">{c.nivel}</Badge>
                       )}
                     </div>
-                    <div className="text-xs text-muted-foreground">{c.telefone || c.cpf}</div>
-                    {c.ultima_compra && <div className="text-xs text-muted-foreground">Última compra: {formatDate(c.ultima_compra)}</div>}
+                    <div className="text-xs text-muted-foreground">{p?.phone || p?.cpf}</div>
+                    <div className="text-xs text-muted-foreground">Cadastrado: {formatDate(c.created_at)}</div>
                   </div>
                   <div className="text-right text-sm">
-                    {inclPontos && <div><span className="font-semibold">{c.pontos_saldo}</span> pts</div>}
-                    {inclCashback && <div className="text-green-700 font-semibold">{formatBRL(c.cashback_saldo)}</div>}
+                    {inclP && <div><span className="font-semibold">{c.pontos}</span> pts</div>}
+                    {inclC && <div className="text-green-700 font-semibold">{formatBRL(Number(c.cashback_saldo))}</div>}
                   </div>
                 </div>
               );

@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useStore, type Modalidade } from "@/lib/mock-store";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { myStoreQuery } from "@/lib/queries";
+import { atualizarLoja } from "@/lib/qsf.functions";
+import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
@@ -16,31 +18,56 @@ export const Route = createFileRoute("/lojista/configuracoes")({
 });
 
 function ConfigPage() {
-  const lojaId = useStore((s) => s.authedLojaId)!;
-  const loja = useStore((s) => s.lojas.find((l) => l.id === lojaId))!;
-  const atualizar = useStore((s) => s.atualizarLoja);
+  const qc = useQueryClient();
+  const { data: loja } = useQuery(myStoreQuery());
 
-  const [nome, setNome] = useState(loja.nome);
-  const [telefone, setTelefone] = useState(loja.telefone);
-  const [logo, setLogo] = useState(loja.logo_url);
-  const [cor1, setCor1] = useState(loja.cor_primaria);
-  const [cor2, setCor2] = useState(loja.cor_secundaria);
-  const [modalidade, setModalidade] = useState<Modalidade>(loja.modalidade);
-  const [regraP, setRegraP] = useState(String(loja.regra_pontos));
-  const [pctC, setPctC] = useState(String(loja.percentual_cashback));
-  const [niveis, setNiveis] = useState(loja.niveis_ativos);
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [logo, setLogo] = useState("");
+  const [cor1, setCor1] = useState("#7c3aed");
+  const [cor2, setCor2] = useState("#f97316");
+  const [modalidade, setModalidade] = useState<Modalidade>("ambos");
+  const [regraP, setRegraP] = useState("1");
+  const [pctC, setPctC] = useState("5");
 
-  const salvar = () => {
-    atualizar(lojaId, {
-      nome, telefone, logo_url: logo, cor_primaria: cor1, cor_secundaria: cor2,
-      modalidade, regra_pontos: parseFloat(regraP) || 1,
-      percentual_cashback: parseFloat(pctC) || 0, niveis_ativos: niveis,
-    });
-    toast.success("Configurações salvas");
-  };
+  useEffect(() => {
+    if (loja) {
+      setNome(loja.nome_fantasia);
+      setTelefone(loja.telefone ?? "");
+      setLogo(loja.logo_url ?? "");
+      setCor1(loja.brand_primary);
+      setCor2(loja.brand_secondary);
+      setModalidade(loja.modalidade as Modalidade);
+      setRegraP(String(loja.regra_pontos));
+      setPctC(String(loja.percentual_cashback));
+    }
+  }, [loja]);
 
-  const inclPontos = modalidade !== "cashback";
-  const inclCashback = modalidade !== "pontos";
+  const salvar = useMutation({
+    mutationFn: () =>
+      atualizarLoja({
+        data: {
+          nome_fantasia: nome,
+          telefone: telefone || null,
+          logo_url: logo || null,
+          brand_primary: cor1,
+          brand_secondary: cor2,
+          modalidade,
+          regra_pontos: parseFloat(regraP) || 1,
+          percentual_cashback: parseFloat(pctC) || 0,
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Configurações salvas");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+
+  const inclP = modalidade !== "cashback";
+  const inclC = modalidade !== "pontos";
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -51,7 +78,7 @@ function ConfigPage() {
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
           <Card><CardHeader><CardTitle className="text-base">Dados da loja</CardTitle></CardHeader><CardContent className="space-y-3">
-            <div><Label>Nome</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
+            <div><Label>Nome fantasia</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
             <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} /></div>
           </CardContent></Card>
 
@@ -72,24 +99,20 @@ function ConfigPage() {
                 </div>
               ))}
             </RadioGroup>
-            {inclPontos && (
+            {inclP && (
               <div><Label>Pontos por R$1 gasto</Label><Input type="number" step="0.1" value={regraP} onChange={(e) => setRegraP(e.target.value)} /></div>
             )}
-            {inclCashback && (
+            {inclC && (
               <div><Label>% de cashback</Label><Input type="number" step="0.1" value={pctC} onChange={(e) => setPctC(e.target.value)} /></div>
             )}
-            {inclPontos && (
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <div>
-                  <div className="text-sm font-medium">Níveis (Bronze/Prata/Ouro)</div>
-                  <div className="text-xs text-muted-foreground">Bronze 0-100 • Prata 101-300 • Ouro 301+</div>
-                </div>
-                <Switch checked={niveis} onCheckedChange={setNiveis} />
-              </div>
-            )}
+            <div className="rounded-md border p-3 text-xs text-muted-foreground">
+              Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente com base nos pontos.
+            </div>
           </CardContent></Card>
 
-          <Button onClick={salvar} size="lg">Salvar alterações</Button>
+          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg">
+            {salvar.isPending ? "Salvando..." : "Salvar alterações"}
+          </Button>
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>

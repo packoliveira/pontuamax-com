@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore, type ProdutoResgate } from "@/lib/mock-store";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { myStoreQuery, storeProductsQuery } from "@/lib/queries";
+import { salvarProduto, removerProduto } from "@/lib/qsf.functions";
+import type { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,21 +13,32 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Plus, Pencil, Trash2, PackageX } from "lucide-react";
 import { toast } from "sonner";
 
+type Produto = Tables<"products">;
+
 export const Route = createFileRoute("/lojista/produtos")({
   ssr: false,
   component: ProdutosPage,
 });
 
 function ProdutosPage() {
-  const lojaId = useStore((s) => s.authedLojaId)!;
-  const loja = useStore((s) => s.lojas.find((l) => l.id === lojaId))!;
-  const produtos = useStore((s) => s.produtos.filter((p) => p.loja_id === lojaId));
-  const criar = useStore((s) => s.criarProduto);
-  const atualizar = useStore((s) => s.atualizarProduto);
-  const remover = useStore((s) => s.removerProduto);
+  const qc = useQueryClient();
+  const { data: loja } = useQuery(myStoreQuery());
+  const { data: produtos = [] } = useQuery(storeProductsQuery(loja?.id));
 
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<ProdutoResgate | null>(null);
+  const [editing, setEditing] = useState<Produto | null>(null);
+
+  const salvar = useMutation({
+    mutationFn: (input: { id?: string; store_id: string; nome: string; descricao?: string | null; custo_pontos: number; ativo: boolean }) =>
+      salvarProduto({ data: input }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["products", loja?.id] }),
+  });
+  const remover = useMutation({
+    mutationFn: (id: string) => removerProduto({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["products", loja?.id] }),
+  });
+
+  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
 
   if (loja.modalidade === "cashback") {
     return (
@@ -37,7 +51,7 @@ function ProdutosPage() {
   }
 
   const openNew = () => { setEditing(null); setOpen(true); };
-  const openEdit = (p: ProdutoResgate) => { setEditing(p); setOpen(true); };
+  const openEdit = (p: Produto) => { setEditing(p); setOpen(true); };
 
   return (
     <div className="space-y-6">
@@ -50,22 +64,19 @@ function ProdutosPage() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {produtos.map((p) => (
-          <Card key={p.id} className="overflow-hidden">
-            <div className="aspect-video bg-muted overflow-hidden">
-              {p.foto_url ? <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" /> : null}
-            </div>
+          <Card key={p.id}>
             <CardContent className="p-4 space-y-2">
               <div>
                 <div className="font-semibold">{p.nome}</div>
                 <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="font-bold text-violet-600">{p.pontos_necessarios} pts</span>
-                <span className="text-muted-foreground">Estoque: {p.estoque}</span>
+                <span className="font-bold text-violet-600">{p.custo_pontos} pts</span>
+                <span className={`text-xs ${p.ativo ? "text-green-700" : "text-muted-foreground"}`}>{p.ativo ? "Ativo" : "Inativo"}</span>
               </div>
               <div className="flex gap-2 pt-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}><Pencil className="h-3 w-3" /> Editar</Button>
-                <Button size="sm" variant="outline" onClick={() => { remover(p.id); toast.success("Removido"); }}><Trash2 className="h-3 w-3" /></Button>
+                <Button size="sm" variant="outline" onClick={() => remover.mutate(p.id, { onSuccess: () => toast.success("Removido") })}><Trash2 className="h-3 w-3" /></Button>
               </div>
             </CardContent>
           </Card>
@@ -78,9 +89,13 @@ function ProdutosPage() {
         onOpenChange={setOpen}
         editing={editing}
         onSave={(data) => {
-          if (editing) { atualizar(editing.id, data); toast.success("Atualizado"); }
-          else { criar({ ...data, loja_id: lojaId, ativo: true }); toast.success("Criado"); }
-          setOpen(false);
+          salvar.mutate(
+            { id: editing?.id, store_id: loja.id, ...data },
+            {
+              onSuccess: () => { toast.success(editing ? "Atualizado" : "Criado"); setOpen(false); },
+              onError: (e) => toast.error((e as Error).message),
+            },
+          );
         }}
       />
     </div>
@@ -90,14 +105,13 @@ function ProdutosPage() {
 function ProdutoDialog({ open, onOpenChange, editing, onSave }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  editing: ProdutoResgate | null;
-  onSave: (data: Omit<ProdutoResgate, "id" | "loja_id" | "ativo">) => void;
+  editing: Produto | null;
+  onSave: (data: { nome: string; descricao: string | null; custo_pontos: number; ativo: boolean }) => void;
 }) {
   const [nome, setNome] = useState(editing?.nome ?? "");
   const [descricao, setDescricao] = useState(editing?.descricao ?? "");
-  const [foto, setFoto] = useState(editing?.foto_url ?? "");
-  const [pontos, setPontos] = useState(String(editing?.pontos_necessarios ?? 100));
-  const [estoque, setEstoque] = useState(String(editing?.estoque ?? 10));
+  const [pontos, setPontos] = useState(String(editing?.custo_pontos ?? 100));
+  const [ativo, setAtivo] = useState(editing?.ativo ?? true);
 
   const key = editing?.id ?? "new";
   return (
@@ -106,15 +120,12 @@ function ProdutoDialog({ open, onOpenChange, editing, onSave }: {
         <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Nome</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-          <div><Label>Descrição</Label><Textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} rows={2} /></div>
-          <div><Label>URL da foto</Label><Input value={foto} onChange={(e) => setFoto(e.target.value)} placeholder="https://..." /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Pontos</Label><Input type="number" value={pontos} onChange={(e) => setPontos(e.target.value)} /></div>
-            <div><Label>Estoque</Label><Input type="number" value={estoque} onChange={(e) => setEstoque(e.target.value)} /></div>
-          </div>
+          <div><Label>Descrição</Label><Textarea value={descricao ?? ""} onChange={(e) => setDescricao(e.target.value)} rows={2} /></div>
+          <div><Label>Custo em pontos</Label><Input type="number" value={pontos} onChange={(e) => setPontos(e.target.value)} /></div>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} /> Ativo</label>
         </div>
         <DialogFooter>
-          <Button onClick={() => onSave({ nome, descricao, foto_url: foto, pontos_necessarios: parseInt(pontos || "0"), estoque: parseInt(estoque || "0") })}>Salvar</Button>
+          <Button onClick={() => onSave({ nome, descricao: descricao || null, custo_pontos: parseInt(pontos || "0"), ativo })}>Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

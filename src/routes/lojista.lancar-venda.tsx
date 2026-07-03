@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore, formatBRL } from "@/lib/mock-store";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { myStoreQuery, storeClientsQuery } from "@/lib/queries";
+import { lancarVenda, cadastrarClientePorTelefone } from "@/lib/qsf.functions";
+import { formatBRL, onlyDigits } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,11 +18,9 @@ export const Route = createFileRoute("/lojista/lancar-venda")({
 });
 
 function LancarVenda() {
-  const lojaId = useStore((s) => s.authedLojaId)!;
-  const loja = useStore((s) => s.lojas.find((l) => l.id === lojaId))!;
-  const buscar = useStore((s) => s.buscarClientePorContato);
-  const criarCliente = useStore((s) => s.criarCliente);
-  const lancar = useStore((s) => s.lancarVenda);
+  const qc = useQueryClient();
+  const { data: loja } = useQuery(myStoreQuery());
+  const { data: clientes = [] } = useQuery(storeClientsQuery(loja?.id));
 
   const [contato, setContato] = useState("");
   const [valor, setValor] = useState("");
@@ -26,32 +28,65 @@ function LancarVenda() {
   const [precisaCadastro, setPrecisaCadastro] = useState(false);
   const [ultimo, setUltimo] = useState<{ pontos: number; cashback: number; cliente: string } | null>(null);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const v = parseFloat(valor.replace(",", "."));
-    if (!contato || !v || v <= 0) return;
+  const cadastrar = useMutation({
+    mutationFn: (input: { phone: string; nome: string; store_id: string }) => cadastrarClientePorTelefone({ data: input }),
+  });
 
-    let cli = buscar(lojaId, contato);
+  const lancar = useMutation({
+    mutationFn: (input: { store_id: string; client_user_id: string; valor: number }) => lancarVenda({ data: input }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
+      qc.invalidateQueries({ queryKey: ["transactions", loja?.id] });
+    },
+  });
+
+  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+
+  const inclP = loja.modalidade !== "cashback";
+  const inclC = loja.modalidade !== "pontos";
+  const valorNum = parseFloat(valor.replace(",", ".") || "0");
+
+  const findClient = () => {
+    const norm = onlyDigits(contato);
+    return clientes.find((c) => {
+      const p = c.profiles as unknown as { phone: string | null; cpf: string | null } | null;
+      return p && (onlyDigits(p.phone ?? "") === norm || onlyDigits(p.cpf ?? "") === norm);
+    });
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contato || !valorNum || valorNum <= 0) return;
+
+    let cli = findClient();
+    let userId = cli?.user_id;
+    let nomeCli = (cli?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? "";
+
     if (!cli) {
       if (!precisaCadastro) { setPrecisaCadastro(true); return; }
       if (!nomeNovo.trim()) { toast.error("Informe o nome do cliente"); return; }
-      const soDigitos = contato.replace(/\D/g, "");
-      cli = criarCliente({
-        loja_id: lojaId,
-        nome: nomeNovo.trim(),
-        telefone: soDigitos,
-      });
+      try {
+        const r = await cadastrar.mutateAsync({ phone: onlyDigits(contato), nome: nomeNovo.trim(), store_id: loja.id });
+        userId = r.user_id;
+        nomeCli = nomeNovo.trim();
+        toast.success(`Cliente cadastrado. Senha temporária: ${r.senha_temporaria}`);
+      } catch (err) {
+        toast.error((err as Error).message);
+        return;
+      }
     }
 
-    const r = lancar({ loja, cliente: cli, valor: v });
-    setUltimo({ pontos: r.pontos, cashback: r.cashback, cliente: cli.nome });
-    setContato(""); setValor(""); setNomeNovo(""); setPrecisaCadastro(false);
-    toast.success("Venda lançada!");
+    try {
+      const r = await lancar.mutateAsync({ store_id: loja.id, client_user_id: userId!, valor: valorNum });
+      setUltimo({ pontos: r.pontos, cashback: r.cashback, cliente: nomeCli });
+      setContato(""); setValor(""); setNomeNovo(""); setPrecisaCadastro(false);
+      toast.success("Venda lançada!");
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   };
 
-  const inclPontos = loja.modalidade !== "cashback";
-  const inclCashback = loja.modalidade !== "pontos";
-  const valorNum = parseFloat(valor.replace(",", ".") || "0");
+  const loading = cadastrar.isPending || lancar.isPending;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -72,17 +107,17 @@ function LancarVenda() {
             </div>
             {precisaCadastro && (
               <div className="space-y-2 rounded-md bg-amber-50 border border-amber-200 p-3">
-                <p className="text-sm text-amber-900">Cliente novo — informe o nome:</p>
+                <p className="text-sm text-amber-900">Cliente novo — informe o nome (senha inicial = telefone):</p>
                 <Input placeholder="Nome do cliente" value={nomeNovo} onChange={(e) => setNomeNovo(e.target.value)} />
               </div>
             )}
             <div className="rounded-md bg-muted p-3 text-sm">
               <div className="font-medium mb-1">Prévia:</div>
-              {inclPontos && valor && <div>+{Math.floor(valorNum * loja.regra_pontos)} pontos</div>}
-              {inclCashback && valor && <div>+{formatBRL(valorNum * loja.percentual_cashback / 100)} cashback</div>}
+              {inclP && valor && <div>+{Math.floor(valorNum * Number(loja.regra_pontos))} pontos</div>}
+              {inclC && valor && <div>+{formatBRL(valorNum * Number(loja.percentual_cashback) / 100)} cashback</div>}
               {!valor && <div className="text-muted-foreground">Digite o valor para ver a prévia</div>}
             </div>
-            <Button type="submit" className="w-full">Lançar venda</Button>
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? "Enviando..." : "Lançar venda"}</Button>
           </form>
         </CardContent>
       </Card>

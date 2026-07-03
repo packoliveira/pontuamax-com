@@ -1,9 +1,11 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useStore } from "@/lib/mock-store";
+import { supabase } from "@/integrations/supabase/client";
+import { myStoreQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
@@ -20,8 +22,15 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const loja = useStore((s) => s.lojas.find((l) => l.id === s.authedLojaId));
-  const logout = useStore((s) => s.logoutLojista);
+  const qc = useQueryClient();
+  const { data: loja } = useQuery(myStoreQuery());
+
+  const doLogout = async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/lojista/login", replace: true });
+  };
 
   const NavList = ({ onClick }: { onClick?: () => void }) => (
     <nav className="flex flex-col gap-1 p-3">
@@ -53,7 +62,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
       </div>
       <div>
         <div className="text-sm font-semibold">QSF Club</div>
-        <div className="text-xs text-muted-foreground truncate max-w-[140px]">{loja?.nome ?? "—"}</div>
+        <div className="text-xs text-muted-foreground truncate max-w-[140px]">{loja?.nome_fantasia ?? "—"}</div>
       </div>
     </div>
   );
@@ -64,7 +73,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
         <Brand />
         <div className="flex-1"><NavList /></div>
         <div className="p-3 border-t">
-          <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { logout(); navigate({ to: "/lojista/login" }); }}>
+          <Button variant="ghost" size="sm" className="w-full justify-start" onClick={doLogout}>
             <LogOut className="h-4 w-4" /> Sair
           </Button>
         </div>
@@ -86,7 +95,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
               <Brand />
               <NavList onClick={() => setOpen(false)} />
               <div className="p-3 border-t">
-                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { logout(); navigate({ to: "/lojista/login" }); setOpen(false); }}>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setOpen(false); doLogout(); }}>
                   <LogOut className="h-4 w-4" /> Sair
                 </Button>
               </div>

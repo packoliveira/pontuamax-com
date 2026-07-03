@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore, type Modalidade } from "@/lib/mock-store";
+import { supabase } from "@/integrations/supabase/client";
+import { criarLoja } from "@/lib/qsf.functions";
+import { slugify, type Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,17 +17,17 @@ export const Route = createFileRoute("/lojista/onboarding")({
   component: Onboarding,
 });
 
-function slugify(s: string) {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "").slice(0, 30) || "loja";
-}
-
 function Onboarding() {
   const navigate = useNavigate();
-  const criarLoja = useStore((s) => s.criarLoja);
-  const loginLojista = useStore((s) => s.loginLojista);
 
   const [step, setStep] = useState(1);
+  // Auth
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [respName, setRespName] = useState("");
+  // Loja
   const [nome, setNome] = useState("");
+  const [cnpj, setCnpj] = useState("");
   const [telefone, setTelefone] = useState("");
   const [logo, setLogo] = useState("");
   const [cor1, setCor1] = useState("#7c3aed");
@@ -34,17 +36,45 @@ function Onboarding() {
   const [regraP, setRegraP] = useState("1");
   const [pctC, setPctC] = useState("5");
   const [slug, setSlug] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const finalizar = () => {
-    const s = slugify(nome);
-    const loja = criarLoja({
-      nome, telefone, slug: s, logo_url: logo, cor_primaria: cor1, cor_secundaria: cor2,
-      modalidade, regra_pontos: parseFloat(regraP) || 1,
-      percentual_cashback: parseFloat(pctC) || 0, niveis_ativos: true,
-    });
-    setSlug(s);
-    loginLojista(loja.id);
-    setStep(4);
+  const finalizar = async () => {
+    setLoading(true);
+    try {
+      // 1. Signup
+      const { data: signup, error: sErr } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: { data: { full_name: respName, phone: telefone } },
+      });
+      if (sErr) throw sErr;
+      // If autoconfirm is on, session is set; otherwise sign in explicitly
+      if (!signup.session) {
+        const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
+        if (liErr) throw liErr;
+      }
+      const s = slugify(nome);
+      await criarLoja({
+        data: {
+          slug: s,
+          nome_fantasia: nome,
+          cnpj: cnpj || null,
+          telefone: telefone || null,
+          logo_url: logo || null,
+          brand_primary: cor1,
+          brand_secondary: cor2,
+          modalidade,
+          regra_pontos: parseFloat(regraP) || 1,
+          percentual_cashback: parseFloat(pctC) || 0,
+        },
+      });
+      setSlug(s);
+      setStep(5);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inclPontos = modalidade !== "cashback";
@@ -52,26 +82,33 @@ function Onboarding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 to-orange-50 p-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">Criar sua loja no QSF Club</h1>
-          <p className="text-sm text-muted-foreground mt-2">Passo {Math.min(step, 4)} de 4</p>
-          <div className="flex justify-center gap-1 mt-4">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className={`h-1.5 w-12 rounded-full ${step >= n ? "bg-violet-600" : "bg-violet-100"}`} />
-            ))}
-          </div>
+      <div className="max-w-3xl mx-auto space-y-4">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <span>Passo {step} de 4</span>
         </div>
 
         {step === 1 && (
-          <Card><CardHeader><CardTitle>Dados da loja</CardTitle></CardHeader><CardContent className="space-y-4">
-            <div><Label>Nome da loja</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Café da Esquina" /></div>
-            <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="(11) 90000-0000" /></div>
-            <Button onClick={() => setStep(2)} disabled={!nome} className="w-full">Próximo <ArrowRight className="h-4 w-4" /></Button>
+          <Card><CardHeader><CardTitle>Sua conta de lojista</CardTitle></CardHeader><CardContent className="space-y-4">
+            <div><Label>Seu nome</Label><Input value={respName} onChange={(e) => setRespName(e.target.value)} placeholder="Como quer ser chamado" /></div>
+            <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" /></div>
+            <div><Label>Senha</Label><Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} /></div>
+            <Button onClick={() => setStep(2)} disabled={!respName || !email || senha.length < 6} className="w-full">Próximo <ArrowRight className="h-4 w-4" /></Button>
           </CardContent></Card>
         )}
 
         {step === 2 && (
+          <Card><CardHeader><CardTitle>Sua loja</CardTitle></CardHeader><CardContent className="space-y-4">
+            <div><Label>Nome fantasia</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Café da Esquina" /></div>
+            <div><Label>CNPJ (opcional)</Label><Input value={cnpj} onChange={(e) => setCnpj(e.target.value)} placeholder="00.000.000/0000-00" /></div>
+            <div><Label>Telefone de contato</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="(11) 90000-0000" /></div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setStep(1)}>Voltar</Button>
+              <Button onClick={() => setStep(3)} disabled={!nome} className="flex-1">Próximo <ArrowRight className="h-4 w-4" /></Button>
+            </div>
+          </CardContent></Card>
+        )}
+
+        {step === 3 && (
           <div className="grid gap-6 md:grid-cols-[1fr_320px]">
             <Card><CardHeader><CardTitle>Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
               <div><Label>URL do logo</Label><Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." /></div>
@@ -80,8 +117,8 @@ function Onboarding() {
                 <div><Label>Cor secundária</Label><div className="flex gap-2"><Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor2} onChange={(e) => setCor2(e.target.value)} /></div></div>
               </div>
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" onClick={() => setStep(1)}>Voltar</Button>
-                <Button onClick={() => setStep(3)} className="flex-1">Próximo</Button>
+                <Button variant="outline" onClick={() => setStep(2)}>Voltar</Button>
+                <Button onClick={() => setStep(4)} className="flex-1">Próximo</Button>
               </div>
             </CardContent></Card>
             <div>
@@ -91,7 +128,7 @@ function Onboarding() {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <Card><CardHeader><CardTitle>Modalidade</CardTitle></CardHeader><CardContent className="space-y-4">
             <RadioGroup value={modalidade} onValueChange={(v) => setModalidade(v as Modalidade)}>
               {[
@@ -111,13 +148,13 @@ function Onboarding() {
             {inclPontos && <div><Label>Pontos por R$1 gasto</Label><Input type="number" step="0.1" value={regraP} onChange={(e) => setRegraP(e.target.value)} /></div>}
             {inclCashback && <div><Label>% de cashback</Label><Input type="number" step="0.1" value={pctC} onChange={(e) => setPctC(e.target.value)} /></div>}
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(2)}>Voltar</Button>
-              <Button onClick={finalizar} className="flex-1">Criar minha loja</Button>
+              <Button variant="outline" onClick={() => setStep(3)}>Voltar</Button>
+              <Button onClick={finalizar} disabled={loading} className="flex-1">{loading ? "Criando..." : "Criar minha loja"}</Button>
             </div>
           </CardContent></Card>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <Card><CardContent className="pt-6 text-center space-y-4">
             <div className="mx-auto h-14 w-14 rounded-full bg-green-100 flex items-center justify-center">
               <Check className="h-7 w-7 text-green-600" />

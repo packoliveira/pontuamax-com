@@ -1,6 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useStore, formatBRL, formatDate, calcularNivel, progressoNivel, type Loja, type Cliente } from "@/lib/mock-store";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+import {
+  storeBySlugQuery,
+  activeStoreProductsQuery,
+  myLinkAtStoreQuery,
+  myTransactionsAtStoreQuery,
+} from "@/lib/queries";
+import {
+  vincularClienteALoja,
+  resgatarProduto,
+  resgatarCashback,
+} from "@/lib/qsf.functions";
+import { formatBRL, formatDate, calcularNivel, progressoNivel, phoneToEmail, onlyDigits } from "@/lib/qsf-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +23,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { Coins, Wallet, LogOut, Trophy, Ticket } from "lucide-react";
 
+type Loja = Tables<"stores">;
+type Link = Tables<"store_clients">;
+
 export const Route = createFileRoute("/$slug")({
   ssr: false,
   component: ClientePage,
@@ -16,17 +33,17 @@ export const Route = createFileRoute("/$slug")({
 
 function ClientePage() {
   const { slug } = Route.useParams();
-  const loja = useStore((s) => s.lojas.find((l) => l.slug === slug));
-  const authedClienteId = useStore((s) => (loja ? s.authedClienteByLoja[loja.id] : undefined));
-  const cliente = useStore((s) => s.clientes.find((c) => c.id === authedClienteId));
+  const { data: loja, isLoading } = useQuery(storeBySlugQuery(slug));
 
   const style = useMemo(
     () =>
       loja
-        ? ({ ["--brand-primary" as string]: loja.cor_primaria, ["--brand-secondary" as string]: loja.cor_secundaria } as React.CSSProperties)
+        ? ({ ["--brand-primary" as string]: loja.brand_primary, ["--brand-secondary" as string]: loja.brand_secondary } as React.CSSProperties)
         : {},
     [loja],
   );
+
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando...</div>;
 
   if (!loja) {
     return (
@@ -41,35 +58,65 @@ function ClientePage() {
 
   return (
     <div style={style} className="min-h-screen bg-slate-50">
-      <Header loja={loja} cliente={cliente} />
-      {cliente ? <ClienteLogado loja={loja} cliente={cliente} /> : <Login lojaId={loja.id} />}
+      <ClienteFlow loja={loja} />
     </div>
   );
 }
 
-function Header({ loja, cliente }: { loja: Loja; cliente?: Cliente }) {
-  const logout = useStore((s) => s.logoutCliente);
+function ClienteFlow({ loja }: { loja: Loja }) {
+  const qc = useQueryClient();
+  const { data: link, isLoading } = useQuery(myLinkAtStoreQuery(loja.id));
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setSessionUserId(s?.user.id ?? null);
+      qc.invalidateQueries();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [qc]);
+
   return (
-    <header
-      className="px-4 py-6 text-white"
-      style={{ background: "linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))" }}
-    >
+    <>
+      <Header loja={loja} showLogout={!!sessionUserId} />
+      {isLoading ? (
+        <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
+      ) : sessionUserId && link ? (
+        <ClienteLogado loja={loja} link={link} />
+      ) : sessionUserId && !link ? (
+        <VincularStore loja={loja} />
+      ) : (
+        <Auth loja={loja} />
+      )}
+    </>
+  );
+}
+
+function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
+  const qc = useQueryClient();
+  const doLogout = async () => {
+    await supabase.auth.signOut();
+    qc.clear();
+  };
+  return (
+    <header className="px-4 py-6 text-white" style={{ background: "linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))" }}>
       <div className="max-w-2xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
           {loja.logo_url ? (
-            <img src={loja.logo_url} alt={loja.nome} className="h-11 w-11 rounded-lg bg-white/20 object-contain p-1" />
+            <img src={loja.logo_url} alt={loja.nome_fantasia} className="h-11 w-11 rounded-lg bg-white/20 object-contain p-1" />
           ) : (
             <div className="h-11 w-11 rounded-lg bg-white/20 flex items-center justify-center font-bold">
-              {loja.nome.charAt(0)}
+              {loja.nome_fantasia.charAt(0)}
             </div>
           )}
           <div>
             <div className="text-xs uppercase tracking-wider opacity-80">Fidelidade</div>
-            <div className="font-bold text-lg leading-tight">{loja.nome}</div>
+            <div className="font-bold text-lg leading-tight">{loja.nome_fantasia}</div>
           </div>
         </div>
-        {cliente && (
-          <Button size="sm" variant="ghost" className="text-white hover:bg-white/10" onClick={() => logout(loja.id)}>
+        {showLogout && (
+          <Button size="sm" variant="ghost" className="text-white hover:bg-white/10" onClick={doLogout}>
             <LogOut className="h-4 w-4" />
           </Button>
         )}
@@ -78,88 +125,153 @@ function Header({ loja, cliente }: { loja: Loja; cliente?: Cliente }) {
   );
 }
 
-function Login({ lojaId }: { lojaId: string }) {
-  const buscar = useStore((s) => s.buscarClientePorContato);
-  const criar = useStore((s) => s.criarCliente);
-  const loginCliente = useStore((s) => s.loginCliente);
-  const [telefone, setTelefone] = useState("");
+function Auth({ loja }: { loja: Loja }) {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [phone, setPhone] = useState("");
+  const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
-  const [precisaCadastro, setPrecisaCadastro] = useState(false);
+  const [cpf, setCpf] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const qc = useQueryClient();
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const digits = telefone.replace(/\D/g, "");
-    if (digits.length < 10) { toast.error("Telefone inválido"); return; }
-    let cli = buscar(lojaId, digits);
-    if (!cli) {
-      if (!precisaCadastro) { setPrecisaCadastro(true); return; }
-      if (!nome.trim()) { toast.error("Informe seu nome"); return; }
-      cli = criar({ loja_id: lojaId, nome: nome.trim(), telefone: digits });
+    const digits = onlyDigits(phone);
+    if (digits.length < 10) return toast.error("Telefone inválido");
+    if (senha.length < 6) return toast.error("Senha deve ter 6+ caracteres");
+    setLoading(true);
+    try {
+      const email = phoneToEmail(digits);
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: { data: { full_name: nome.trim(), phone: digits, cpf: onlyDigits(cpf) || null } },
+        });
+        if (error) throw error;
+        // If session not returned (email confirm), sign in
+        const { data: s2 } = await supabase.auth.getSession();
+        if (!s2.session) {
+          const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
+          if (liErr) throw liErr;
+        }
+        await vincularClienteALoja({ data: { store_id: loja.id } });
+        toast.success(`Bem-vindo(a), ${nome}!`);
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        if (error) throw error;
+        // Ensure link exists
+        await vincularClienteALoja({ data: { store_id: loja.id } });
+        toast.success("Bem-vindo(a) de volta!");
+      }
+      qc.invalidateQueries();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setLoading(false);
     }
-    loginCliente(lojaId, cli.id);
-    toast.success(`Olá, ${cli.nome}!`);
   };
 
   return (
     <div className="max-w-md mx-auto p-4 -mt-6">
       <Card>
-        <CardHeader><CardTitle>Entre com seu telefone</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu telefone"}</CardTitle>
+        </CardHeader>
         <CardContent>
-          <form onSubmit={submit} className="space-y-4">
+          <form onSubmit={submit} className="space-y-3">
             <div>
               <Label>Telefone</Label>
-              <Input value={telefone} onChange={(e) => { setTelefone(e.target.value); setPrecisaCadastro(false); }} placeholder="11987654321" inputMode="numeric" />
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="11987654321" inputMode="numeric" />
             </div>
-            {precisaCadastro && (
-              <div className="space-y-2 rounded-md bg-amber-50 border border-amber-200 p-3">
-                <p className="text-sm text-amber-900">Não encontramos você. Cadastre-se rapidinho:</p>
-                <Input placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} />
-              </div>
+            {mode === "signup" && (
+              <>
+                <div>
+                  <Label>Nome</Label>
+                  <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" />
+                </div>
+                <div>
+                  <Label>CPF (opcional)</Label>
+                  <Input value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="000.000.000-00" />
+                </div>
+              </>
             )}
-            <Button type="submit" className="w-full text-white" style={{ backgroundColor: "var(--brand-primary)" }}>
-              Entrar
+            <div>
+              <Label>Senha</Label>
+              <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"} />
+            </div>
+            <Button type="submit" disabled={loading} className="w-full text-white" style={{ backgroundColor: "var(--brand-primary)" }}>
+              {loading ? "Aguarde..." : mode === "signup" ? "Criar conta" : "Entrar"}
             </Button>
+            <button type="button" onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-xs text-center w-full underline text-muted-foreground">
+              {mode === "login" ? "Ainda não tenho conta" : "Já tenho conta, entrar"}
+            </button>
+            {mode === "login" && (
+              <p className="text-[11px] text-center text-muted-foreground">
+                Se a loja cadastrou você, sua senha inicial é o seu próprio telefone (só números).
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>
-      <p className="text-xs text-center mt-4 text-muted-foreground">
-        Dica demo: use <strong>11987654321</strong> (Ana), <strong>11912345678</strong> (Bruno) ou <strong>11955554444</strong> (Carla).
-      </p>
     </div>
   );
 }
 
-function ClienteLogado({ loja, cliente }: { loja: Loja; cliente: Cliente }) {
-  const produtos = useStore((s) => s.produtos.filter((p) => p.loja_id === loja.id && p.ativo && p.estoque > 0));
-  const txs = useStore((s) => s.transacoes.filter((t) => t.cliente_id === cliente.id));
-  const resgatarProduto = useStore((s) => s.resgatarProduto);
-  const resgatarCashback = useStore((s) => s.resgatarCashback);
+function VincularStore({ loja }: { loja: Loja }) {
+  const qc = useQueryClient();
+  const vincular = useMutation({
+    mutationFn: () => vincularClienteALoja({ data: { store_id: loja.id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-link", loja.id] }),
+  });
+  useEffect(() => { vincular.mutate(); }, []); // eslint-disable-line
+  return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
+}
+
+function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
+  const qc = useQueryClient();
+  const { data: produtos = [] } = useQuery(activeStoreProductsQuery(loja.id));
+  const { data: txs = [] } = useQuery(myTransactionsAtStoreQuery(loja.id));
 
   const [voucher, setVoucher] = useState<string | null>(null);
   const [cashbackModal, setCashbackModal] = useState(false);
   const [cashbackValor, setCashbackValor] = useState("");
 
-  const inclPontos = loja.modalidade !== "cashback";
-  const inclCashback = loja.modalidade !== "pontos";
-  const nivel = calcularNivel(cliente.pontos_saldo);
-  const prog = progressoNivel(cliente.pontos_saldo);
+  const inclP = loja.modalidade !== "cashback";
+  const inclC = loja.modalidade !== "pontos";
+  const nivel = calcularNivel(link.pontos);
+  const prog = progressoNivel(link.pontos);
 
-  const resgatar = (produtoId: string) => {
-    try {
-      const r = resgatarProduto(loja.id, cliente.id, produtoId);
-      setVoucher(r.codigo_voucher);
-    } catch (e) { toast.error((e as Error).message); }
+  const [nome, setNome] = useState("Cliente");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data.user?.user_metadata as { full_name?: string } | undefined;
+      setNome(meta?.full_name ?? "Cliente");
+    });
+  }, []);
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
+    qc.invalidateQueries({ queryKey: ["my-transactions", loja.id] });
   };
+
+  const resgatarP = useMutation({
+    mutationFn: (product_id: string) => resgatarProduto({ data: { store_id: loja.id, product_id } }),
+    onSuccess: (r) => { setVoucher(r.voucher); invalidate(); },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const resgatarC = useMutation({
+    mutationFn: (valor: number) => resgatarCashback({ data: { store_id: loja.id, valor } }),
+    onSuccess: (r) => { setVoucher(r.voucher); setCashbackModal(false); setCashbackValor(""); invalidate(); },
+    onError: (e) => toast.error((e as Error).message),
+  });
 
   const usarCashback = () => {
     const v = parseFloat(cashbackValor.replace(",", "."));
-    if (!v || v <= 0) { toast.error("Valor inválido"); return; }
-    try {
-      const r = resgatarCashback(loja.id, cliente.id, v);
-      setCashbackModal(false);
-      setCashbackValor("");
-      setVoucher(r.codigo_voucher);
-    } catch (e) { toast.error((e as Error).message); }
+    if (!v || v <= 0) return toast.error("Valor inválido");
+    resgatarC.mutate(+v.toFixed(2));
   };
 
   return (
@@ -167,24 +279,22 @@ function ClienteLogado({ loja, cliente }: { loja: Loja; cliente: Cliente }) {
       <Card>
         <CardContent className="pt-6">
           <div className="text-sm text-muted-foreground">Olá,</div>
-          <div className="text-xl font-bold">{cliente.nome}</div>
+          <div className="text-xl font-bold">{nome}</div>
         </CardContent>
       </Card>
 
-      <div className={`grid gap-4 ${inclPontos && inclCashback ? "sm:grid-cols-2" : ""}`}>
-        {inclPontos && (
+      <div className={`grid gap-4 ${inclP && inclC ? "sm:grid-cols-2" : ""}`}>
+        {inclP && (
           <Card className="overflow-hidden">
             <div className="p-5 text-white" style={{ background: "var(--brand-primary)" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm opacity-90"><Coins className="h-4 w-4" /> Seus pontos</div>
-                {loja.niveis_ativos && (
-                  <div className="text-xs uppercase tracking-wide font-semibold flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
-                    <Trophy className="h-3 w-3" /> {nivel}
-                  </div>
-                )}
+                <div className="text-xs uppercase tracking-wide font-semibold flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
+                  <Trophy className="h-3 w-3" /> {nivel}
+                </div>
               </div>
-              <div className="text-4xl font-bold mt-2">{cliente.pontos_saldo}</div>
-              {loja.niveis_ativos && prog.proximo && (
+              <div className="text-4xl font-bold mt-2">{link.pontos}</div>
+              {prog.proximo && (
                 <div className="mt-4">
                   <div className="flex justify-between text-xs opacity-90 mb-1">
                     <span>Próximo: {prog.proximo}</span>
@@ -198,14 +308,14 @@ function ClienteLogado({ loja, cliente }: { loja: Loja; cliente: Cliente }) {
             </div>
           </Card>
         )}
-        {inclCashback && (
+        {inclC && (
           <Card className="overflow-hidden">
             <div className="p-5 text-white" style={{ background: "var(--brand-secondary)" }}>
               <div className="flex items-center gap-2 text-sm opacity-90"><Wallet className="h-4 w-4" /> Seu cashback</div>
-              <div className="text-4xl font-bold mt-2">{formatBRL(cliente.cashback_saldo)}</div>
+              <div className="text-4xl font-bold mt-2">{formatBRL(Number(link.cashback_saldo))}</div>
               <Button
                 size="sm" variant="secondary" className="mt-4"
-                disabled={cliente.cashback_saldo <= 0}
+                disabled={Number(link.cashback_saldo) <= 0}
                 onClick={() => setCashbackModal(true)}
               >
                 Usar no próximo pagamento
@@ -215,23 +325,22 @@ function ClienteLogado({ loja, cliente }: { loja: Loja; cliente: Cliente }) {
         )}
       </div>
 
-      {inclPontos && produtos.length > 0 && (
+      {inclP && produtos.length > 0 && (
         <section>
           <h2 className="font-semibold mb-3">Trocar pontos por produtos</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {produtos.map((p) => {
-              const podeResgatar = cliente.pontos_saldo >= p.pontos_necessarios;
+              const podeResgatar = link.pontos >= p.custo_pontos;
               return (
-                <Card key={p.id} className="overflow-hidden">
-                  <div className="aspect-video bg-muted"><img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" /></div>
+                <Card key={p.id}>
                   <CardContent className="p-3 space-y-2">
                     <div className="font-medium text-sm">{p.nome}</div>
                     <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-bold text-sm" style={{ color: "var(--brand-primary)" }}>{p.pontos_necessarios} pts</span>
+                      <span className="font-bold text-sm" style={{ color: "var(--brand-primary)" }}>{p.custo_pontos} pts</span>
                       <Button
-                        size="sm" disabled={!podeResgatar}
-                        onClick={() => resgatar(p.id)}
+                        size="sm" disabled={!podeResgatar || resgatarP.isPending}
+                        onClick={() => resgatarP.mutate(p.id)}
                         style={podeResgatar ? { backgroundColor: "var(--brand-primary)" } : {}}
                         className="text-white"
                       >
@@ -250,21 +359,23 @@ function ClienteLogado({ loja, cliente }: { loja: Loja; cliente: Cliente }) {
         <h2 className="font-semibold mb-3">Histórico</h2>
         <Card><CardContent className="p-0"><div className="divide-y">
           {txs.length === 0 && <div className="p-6 text-center text-sm text-muted-foreground">Sem movimentações ainda</div>}
-          {txs.map((t) => (
-            <div key={t.id} className="flex items-center justify-between p-3 text-sm">
-              <div>
-                <div className="font-medium">{t.descricao}</div>
-                <div className="text-xs text-muted-foreground">{formatDate(t.created_at)}</div>
+          {txs.map((t) => {
+            const prd = (t.products as unknown as { nome: string | null } | null)?.nome;
+            const descr = t.tipo === "venda" ? "Compra na loja" : t.tipo === "resgate_produto" ? `Resgate: ${prd ?? "produto"}` : `Voucher de cashback`;
+            return (
+              <div key={t.id} className="flex items-center justify-between p-3 text-sm">
+                <div>
+                  <div className="font-medium">{descr}</div>
+                  <div className="text-xs text-muted-foreground">{formatDate(t.created_at)}</div>
+                </div>
+                <div className="text-right text-xs">
+                  {t.tipo === "venda" && <div className="text-muted-foreground">{formatBRL(Number(t.valor))}</div>}
+                  {t.pontos_delta ? <div className={t.pontos_delta > 0 ? "text-green-700" : "text-destructive"}>{t.pontos_delta > 0 ? "+" : ""}{t.pontos_delta} pts</div> : null}
+                  {Number(t.cashback_delta) ? <div className={Number(t.cashback_delta) > 0 ? "text-green-700" : "text-destructive"}>{Number(t.cashback_delta) > 0 ? "+" : ""}{formatBRL(Number(t.cashback_delta))}</div> : null}
+                </div>
               </div>
-              <div className="text-right text-xs">
-                {t.valor_compra != null && <div className="text-muted-foreground">{formatBRL(t.valor_compra)}</div>}
-                {t.pontos_gerados ? <div className="text-green-700">+{t.pontos_gerados} pts</div> : null}
-                {t.cashback_gerado ? <div className="text-green-700">+{formatBRL(t.cashback_gerado)}</div> : null}
-                {t.pontos_usados ? <div className="text-destructive">-{t.pontos_usados} pts</div> : null}
-                {t.cashback_usado ? <div className="text-destructive">-{formatBRL(t.cashback_usado)}</div> : null}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div></CardContent></Card>
       </section>
 
@@ -279,12 +390,12 @@ function ClienteLogado({ loja, cliente }: { loja: Loja; cliente: Cliente }) {
       <Dialog open={cashbackModal} onOpenChange={setCashbackModal}>
         <DialogContent>
           <DialogHeader><DialogTitle>Usar cashback</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Você tem <strong>{formatBRL(cliente.cashback_saldo)}</strong> disponível.</p>
+          <p className="text-sm text-muted-foreground">Você tem <strong>{formatBRL(Number(link.cashback_saldo))}</strong> disponível.</p>
           <div>
             <Label>Quanto usar (R$)</Label>
-            <Input type="number" step="0.01" min="0" max={cliente.cashback_saldo} value={cashbackValor} onChange={(e) => setCashbackValor(e.target.value)} />
+            <Input type="number" step="0.01" min="0" max={Number(link.cashback_saldo)} value={cashbackValor} onChange={(e) => setCashbackValor(e.target.value)} />
           </div>
-          <Button onClick={usarCashback} className="text-white" style={{ backgroundColor: "var(--brand-secondary)" }}>Gerar voucher</Button>
+          <Button onClick={usarCashback} disabled={resgatarC.isPending} className="text-white" style={{ backgroundColor: "var(--brand-secondary)" }}>Gerar voucher</Button>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,84 +1,63 @@
-# QSF Club — MVP com dados mock
+## Objetivo
+Substituir o mock store por Supabase Auth + Postgres, mantendo o comportamento atual do MVP (fluxos de lançar venda, resgate, catálogo, saldo).
 
-Primeira versão 100% frontend com dados em memória (mock store compartilhado). Isso valida o fluxo completo antes de plugar Supabase. Assim que aprovar, ativo Lovable Cloud e migro tabelas + auth.
+## Autenticação
 
-## Escopo desta rodada
+**Lojista** — Supabase email/senha
+- Cadastro em `/lojista/onboarding` cria o user, o `profile` (nome, telefone), e a `store` (nome fantasia, CNPJ, slug, modalidade, branding)
+- Login em `/lojista/login` com email/senha
+- Rota `/lojista/*` protegida via `_authenticated` layout gerenciado + checagem de role `lojista`
 
-Loja demo já cadastrada com modalidade **ambos** (pontos + cashback), níveis ativos, alguns clientes, produtos de resgate e histórico, para você abrir e ver funcionando.
+**Cliente final** — telefone/CPF + senha (Supabase custom flow)
+- Cliente é `auth.users` com email sintético `<phone>@qsf.local` internamente; formulário mostra só telefone e senha
+- Cadastro na primeira visita a `/:slug` (pede telefone, CPF, nome, senha)
+- Login subsequente: telefone + senha
+- Um mesmo cliente pode ter contas em várias lojas — vínculo via tabela `store_clients (store_id, user_id)`
 
-### Rotas
+## Schema
 
+```text
+profiles          (id=auth.users.id, full_name, phone, cpf?, created_at)
+user_roles        (user_id, role: 'lojista'|'cliente')  -- padrão de segurança
+stores            (id, owner_id, slug UNIQUE, nome_fantasia, cnpj, modalidade,
+                   regra_pontos, percentual_cashback, brand_primary, brand_secondary,
+                   logo_url, telefone, created_at)
+store_clients     (id, store_id, user_id, pontos, cashback_saldo, nivel, created_at,
+                   UNIQUE(store_id, user_id))
+products          (id, store_id, nome, custo_pontos, descricao, ativo, created_at)
+transactions      (id, store_id, client_id, tipo: 'venda'|'resgate_produto'|'resgate_cashback',
+                   valor, pontos_delta, cashback_delta, product_id?, voucher_code?,
+                   status: 'pendente'|'entregue', created_at)
 ```
-/                                → landing simples + botões "Sou lojista" / "Ver loja demo"
-/lojista/login                   → login mock (qualquer email/senha entra na loja demo)
-/lojista/onboarding              → wizard 4 passos (dados, marca, modalidade, link)
-/lojista                         → dashboard
-/lojista/lancar-venda            → registra venda por telefone/CPF
-/lojista/clientes                → lista + busca
-/lojista/produtos                → CRUD de produtos de resgate (só se modalidade inclui pontos)
-/lojista/resgates                → fila de resgates pendentes + confirmar entrega
-/lojista/configuracoes           → editar marca, modalidade, regras, níveis
-/$slug                           → página pública do cliente (ex: /lojademo)
-   • login por telefone (mock, sem senha)
-   • saldo pontos + barra de nível (se aplicável)
-   • saldo cashback em R$ (se aplicável)
-   • catálogo de produtos de resgate
-   • botão "usar cashback no próximo pagamento" → gera voucher
-   • histórico de compras e ganhos
-```
 
-Uso rota TanStack `/$slug` (dinâmica) para a página do cliente. Reservo `/lojista` como prefixo para não conflitar.
+RLS resumida:
+- `stores`: SELECT público (para página `/:slug` carregar branding); INSERT/UPDATE só owner
+- `products`: SELECT público por store; write só owner
+- `store_clients`: SELECT/UPDATE o próprio user OU owner da store
+- `transactions`: SELECT o próprio client OU owner da store; INSERT via server function (regras de negócio)
 
-### Regras de negócio
+Funções server (`createServerFn` com `requireSupabaseAuth`):
+- `registerClient(slug, phone, cpf, nome, senha)` — cria auth user + profile + role + store_clients
+- `lancarVenda(client_id, valor)` — calcula pontos/cashback, aplica nível, insere transaction, atualiza store_clients
+- `resgatarProduto(product_id)` / `resgatarCashback(valor)` — valida saldo, gera voucher `QSF-XXXX-XXXX`
+- `entregarResgate(transaction_id)` — muda status
 
-- **Pontos**: `floor(valor_compra * regra_pontos)` — default 1 ponto por R$1
-- **Cashback**: `valor_compra * percentual_cashback / 100` — default 5%
-- **Níveis** (se `niveis_ativos`): Bronze 0–100, Prata 101–300, Ouro 301+ (já aplico o refinamento 1)
-- **Validações** (refinamento 3): bloqueia resgate de produto sem pontos suficientes, bloqueia uso de cashback maior que saldo, decrementa estoque
-- **Preview ao vivo** no onboarding (refinamento 2): card lateral mostra logo + cores aplicadas em tempo real
-- **Detecção de loja pela URL** (refinamento 4): página `/$slug` carrega marca antes do login
+Trigger `handle_new_user` cria profile automaticamente.
 
-### Personalização visual da página do cliente
+## Migração de código
+- Deletar `src/lib/mock-store.ts`
+- Reescrever telas de `/lojista/*` e `/:slug` para usar TanStack Query + server functions
+- `/lojista/onboarding` vira signup completo (email/senha + dados da loja)
+- Página `/:slug` carrega store via server fn pública (SELECT anon) e injeta branding antes do login
+- Manter formatação BRL, cálculo de nível (Bronze/Prata/Ouro), validações
 
-A página `/$slug` injeta `--brand-primary` e `--brand-secondary` como CSS vars no root do container, e usa `<img src={logo_url}>` no header. Todo componente da página do cliente usa `bg-[var(--brand-primary)]` etc., então trocar de loja troca toda a identidade automaticamente.
+## Ordem de execução
+1. Habilitar Lovable Cloud
+2. Migração SQL (tabelas + RLS + grants + trigger + função `has_role`)
+3. Server functions (`.functions.ts`) + middleware bearer
+4. Reescrever telas lojista e página cliente
+5. Deletar mock, atualizar `__root.tsx` (auth listener)
+6. Verificar build
 
-### Design
-
-Mobile-first, moderno. Painel do lojista: shell com sidebar colapsável (sheet no mobile), cards limpos, tabelas responsivas. Página do cliente: hero com logo + saldo em destaque, cards de pontos/cashback lado a lado no desktop / empilhados no mobile, barra de progresso animada para nível, catálogo em grid.
-
-Não vou gerar variações de design — a spec já é específica (mobile-first, gamificação visível, cores dinâmicas por loja). Se quiser explorar direções visuais depois, peça e eu abro opções.
-
-### Mock data store
-
-`src/lib/mock-store.ts` — singleton em memória com `lojas`, `clientes`, `transacoes`, `produtos_resgate`, `resgates`. Zustand para reatividade. Seed inicial:
-
-- 1 loja "Loja Demo" (slug `lojademo`, modalidade `ambos`, cores roxo/laranja, níveis ativos)
-- 3 clientes com saldos variados
-- 4 produtos de resgate
-- ~6 transações no histórico
-- 1 resgate pendente
-
-### Fora desta rodada
-
-- Supabase / auth real / RLS / multi-tenant real (entra depois com Lovable Cloud)
-- Upload real de logo (uso URL/data-url no mock)
-- WhatsApp, Bling/Olist, cobrança de assinatura
-
-## Detalhes técnicos
-
-- TanStack Start file-based routing sob `src/routes/`
-- Estado: Zustand para o mock store; `useSyncExternalStore` via zustand cobre reatividade sem precisar de rede
-- UI: shadcn (já instalado) + Tailwind v4 tokens existentes; adiciono tokens `--brand-*` scoped na página do cliente
-- Sem server functions nem loaders com fetch — tudo cliente por enquanto (evita SSR quebrar com store em memória; rotas do cliente usam `ssr: false` onde necessário)
-- Formatação BRL via `Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })`
-- Voucher: string tipo `QSF-XXXX-XXXX` gerada por random
-
-## Fluxo de teste que você vai conseguir rodar
-
-1. Abrir `/lojista/lancar-venda` → digitar telefone de cliente existente + R$ 200 → sistema credita 200 pontos e R$ 10 cashback
-2. Abrir `/lojademo` em outra aba → logar com o telefone daquele cliente → ver pontos + cashback atualizados
-3. Resgatar um produto por pontos → recebe voucher, saldo decrementa
-4. Clicar "usar cashback" → recebe voucher de desconto
-5. Voltar em `/lojista/resgates` → confirmar os dois → marca como entregue
-
-Ao aprovar, começo pela estrutura de rotas + mock store, depois telas do lojista, depois página do cliente.
+## Nota de segurança
+Cliente com telefone/senha simples é ok pra MVP. Vale documentar que reset de senha por WhatsApp/SMS entra junto com a integração Evolution API mais adiante.

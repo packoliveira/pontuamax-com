@@ -1,5 +1,5 @@
 import { Coins, Wallet } from "lucide-react";
-import type { Modalidade } from "@/lib/mock-store";
+import type { Modalidade } from "@/lib/qsf-shared";
 
 export function BrandPreview({ nome, logo, cor1, cor2, modalidade }: {
   nome: string; logo: string; cor1: string; cor2: string; modalidade: Modalidade;
