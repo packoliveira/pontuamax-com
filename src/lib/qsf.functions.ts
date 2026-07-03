@@ -1235,7 +1235,7 @@ async function selecionarDestinatarios(
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   let q = supabaseAdmin
     .from("store_clients")
-    .select("user_id, pontos, nivel, profiles:user_id(full_name, phone)")
+    .select("user_id, pontos, nivel, profiles:user_id(full_name, phone, birthdate)")
     .eq("store_id", storeId);
   if (segmento === "bronze" || segmento === "prata" || segmento === "ouro") {
     q = q.eq("nivel", segmento);
@@ -1243,8 +1243,15 @@ async function selecionarDestinatarios(
   const { data, error } = await q;
   if (error) throw new Error(error.message);
   let rows = (data ?? []).map((r) => {
-    const p = r.profiles as unknown as { full_name: string | null; phone: string | null } | null;
-    return { user_id: r.user_id, pontos: r.pontos, nivel: String(r.nivel), full_name: p?.full_name ?? null, phone: p?.phone ?? null };
+    const p = r.profiles as unknown as { full_name: string | null; phone: string | null; birthdate: string | null } | null;
+    return {
+      user_id: r.user_id,
+      pontos: r.pontos,
+      nivel: String(r.nivel),
+      full_name: p?.full_name ?? null,
+      phone: p?.phone ?? null,
+      birthdate: p?.birthdate ?? null,
+    };
   }).filter((r) => !!r.phone);
 
   if (segmento.startsWith("inativos_")) {
@@ -1261,8 +1268,100 @@ async function selecionarDestinatarios(
     rows = rows.filter((r) => !ativos.has(r.user_id));
   }
 
+  if (segmento === "aniversariantes") {
+    // Aniversariantes do mês atual (Brasília)
+    const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", month: "2-digit" });
+    const mesAtual = fmt.format(new Date()); // "MM"
+    rows = rows.filter((r) => r.birthdate && r.birthdate.slice(5, 7) === mesAtual);
+  }
+
   return rows;
 }
+
+// Envia uma campanha (usado tanto pelo botão manual quanto pelo cron de agendamento).
+// Não valida ownership — quem chama garante autorização.
+async function processarEnvioCampanha(campaignId: string): Promise<{ enviados: number; falhas: number; total: number }> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
+  const camp = await supabaseAdmin
+    .from("campaigns")
+    .select("*, stores:store_id(nome_fantasia, evolution_url, evolution_apikey, evolution_instance, whatsapp_enabled)")
+    .eq("id", campaignId)
+    .maybeSingle();
+  if (!camp.data) throw new Error("Campanha não encontrada.");
+  const loja = camp.data.stores as unknown as {
+    nome_fantasia: string;
+    evolution_url: string | null;
+    evolution_apikey: string | null;
+    evolution_instance: string | null;
+    whatsapp_enabled: boolean;
+  };
+  if (!loja.evolution_url || !loja.evolution_apikey || !loja.evolution_instance) {
+    await supabaseAdmin.from("campaigns")
+      .update({ status: "falhou" })
+      .eq("id", camp.data.id);
+    throw new Error("Evolution API não configurada nesta loja.");
+  }
+
+  await supabaseAdmin.from("campaigns").update({ status: "enviando" }).eq("id", camp.data.id);
+  const destinatarios = await selecionarDestinatarios(camp.data.store_id, camp.data.segmento as SegmentoTipo);
+
+  let enviados = 0;
+  let falhas = 0;
+  for (const d of destinatarios) {
+    const numero = formatBrazilPhone(d.phone);
+    const texto = renderMsg(camp.data.mensagem, {
+      nome: d.full_name ?? "cliente",
+      pontos: d.pontos,
+      nivel: d.nivel,
+      loja: loja.nome_fantasia,
+    });
+    if (!numero) {
+      await supabaseAdmin.from("campaign_recipients").insert({
+        campaign_id: camp.data.id, client_user_id: d.user_id, telefone: d.phone,
+        mensagem_render: texto, status: "falha", erro: "telefone inválido",
+      });
+      falhas++;
+      continue;
+    }
+    const res = await sendWhatsappRaw({
+      storeId: camp.data.store_id,
+      url: loja.evolution_url,
+      apikey: loja.evolution_apikey,
+      instance: loja.evolution_instance,
+      number: numero,
+      text: texto,
+    });
+    if (res.ok) {
+      enviados++;
+      await supabaseAdmin.from("campaign_recipients").insert({
+        campaign_id: camp.data.id, client_user_id: d.user_id, telefone: numero,
+        mensagem_render: texto, status: "enviado", enviado_em: new Date().toISOString(),
+      });
+    } else {
+      falhas++;
+      await supabaseAdmin.from("campaign_recipients").insert({
+        campaign_id: camp.data.id, client_user_id: d.user_id, telefone: numero,
+        mensagem_render: texto, status: "falha", erro: res.error ?? "erro",
+      });
+    }
+    // pequeno delay para evitar rate-limit da Evolution
+    await new Promise((r) => setTimeout(r, 400));
+  }
+
+  await supabaseAdmin.from("campaigns").update({
+    status: "concluida",
+    total_enviados: enviados,
+    total_falhas: falhas,
+    total_destinatarios: destinatarios.length,
+    enviado_em: new Date().toISOString(),
+  }).eq("id", camp.data.id);
+
+  return { enviados, falhas, total: destinatarios.length };
+}
+
+// Exposto para uso pelo cron `/api/public/hooks/campanhas-agendadas`
+export { processarEnvioCampanha as _processarEnvioCampanhaInternal };
 
 export const criarCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -1271,6 +1370,7 @@ export const criarCampanha = createServerFn({ method: "POST" })
       nome: z.string().min(1).max(100),
       mensagem: z.string().min(1).max(2000),
       segmento: z.enum(["todos", "bronze", "prata", "ouro", "inativos_30", "inativos_60", "inativos_90", "aniversariantes"]),
+      agendada_para: z.string().datetime().optional().nullable(),
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -1278,6 +1378,7 @@ export const criarCampanha = createServerFn({ method: "POST" })
     const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
     const destinatarios = await selecionarDestinatarios(loja.data.id, data.segmento);
+    const agendada = data.agendada_para && new Date(data.agendada_para).getTime() > Date.now() ? data.agendada_para : null;
     const { data: camp, error } = await supabaseAdmin
       .from("campaigns")
       .insert({
@@ -1286,12 +1387,13 @@ export const criarCampanha = createServerFn({ method: "POST" })
         mensagem: data.mensagem,
         segmento: data.segmento,
         total_destinatarios: destinatarios.length,
-        status: "rascunho",
+        status: agendada ? "agendada" : "rascunho",
+        agendada_para: agendada,
       })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    return { id: camp.id, total: destinatarios.length };
+    return { id: camp.id, total: destinatarios.length, agendada };
   });
 
 export const enviarCampanha = createServerFn({ method: "POST" })
@@ -1299,81 +1401,18 @@ export const enviarCampanha = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ campaign_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
     const camp = await supabaseAdmin
       .from("campaigns")
-      .select("*, stores:store_id(owner_id, nome_fantasia, slug, evolution_url, evolution_apikey, evolution_instance, whatsapp_enabled)")
+      .select("id, status, stores:store_id(owner_id)")
       .eq("id", data.campaign_id)
       .maybeSingle();
     if (!camp.data) throw new Error("Campanha não encontrada.");
-    const loja = camp.data.stores as unknown as {
-      owner_id: string; nome_fantasia: string; slug: string;
-      evolution_url: string | null; evolution_apikey: string | null; evolution_instance: string | null;
-      whatsapp_enabled: boolean;
-    };
-    if (loja.owner_id !== context.userId) throw new Error("Não autorizado.");
-    if (!loja.evolution_url || !loja.evolution_apikey || !loja.evolution_instance) {
-      throw new Error("Configure a Evolution API e conecte o WhatsApp antes de enviar.");
-    }
+    const ownerId = (camp.data.stores as unknown as { owner_id: string } | null)?.owner_id;
+    if (ownerId !== context.userId) throw new Error("Não autorizado.");
     if (camp.data.status === "enviando" || camp.data.status === "concluida") {
       throw new Error("Esta campanha já foi enviada.");
     }
-
-    await supabaseAdmin.from("campaigns").update({ status: "enviando" }).eq("id", camp.data.id);
-    const destinatarios = await selecionarDestinatarios(camp.data.store_id, camp.data.segmento as SegmentoTipo);
-
-    let enviados = 0;
-    let falhas = 0;
-    for (const d of destinatarios) {
-      const numero = formatBrazilPhone(d.phone);
-      const texto = renderMsg(camp.data.mensagem, {
-        nome: d.full_name ?? "cliente",
-        pontos: d.pontos,
-        nivel: d.nivel,
-        loja: loja.nome_fantasia,
-      });
-      if (!numero) {
-        await supabaseAdmin.from("campaign_recipients").insert({
-          campaign_id: camp.data.id, client_user_id: d.user_id, telefone: d.phone,
-          mensagem_render: texto, status: "falha", erro: "telefone inválido",
-        });
-        falhas++;
-        continue;
-      }
-      const res = await sendWhatsappRaw({
-        storeId: camp.data.store_id,
-        url: loja.evolution_url,
-        apikey: loja.evolution_apikey,
-        instance: loja.evolution_instance,
-        number: numero,
-        text: texto,
-      });
-      if (res.ok) {
-        enviados++;
-        await supabaseAdmin.from("campaign_recipients").insert({
-          campaign_id: camp.data.id, client_user_id: d.user_id, telefone: numero,
-          mensagem_render: texto, status: "enviado", enviado_em: new Date().toISOString(),
-        });
-      } else {
-        falhas++;
-        await supabaseAdmin.from("campaign_recipients").insert({
-          campaign_id: camp.data.id, client_user_id: d.user_id, telefone: numero,
-          mensagem_render: texto, status: "falha", erro: res.error ?? "erro",
-        });
-      }
-      // pequeno delay para evitar rate-limit da Evolution
-      await new Promise((r) => setTimeout(r, 400));
-    }
-
-    await supabaseAdmin.from("campaigns").update({
-      status: "concluida",
-      total_enviados: enviados,
-      total_falhas: falhas,
-      total_destinatarios: destinatarios.length,
-      enviado_em: new Date().toISOString(),
-    }).eq("id", camp.data.id);
-
-    return { enviados, falhas, total: destinatarios.length };
+    return processarEnvioCampanha(camp.data.id);
   });
 
 export const excluirCampanha = createServerFn({ method: "POST" })
