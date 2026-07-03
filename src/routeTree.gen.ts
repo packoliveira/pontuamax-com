@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as NpsIdRouteImport } from './routes/nps.$id'
+import { Route as LojistaValePresenteRouteImport } from './routes/lojista.vale-presente'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
@@ -70,6 +71,11 @@ const NpsIdRoute = NpsIdRouteImport.update({
   id: '/nps/$id',
   path: '/nps/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LojistaValePresenteRoute = LojistaValePresenteRouteImport.update({
+  id: '/vale-presente',
+  path: '/vale-presente',
+  getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
   id: '/resgates',
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
   '/nps/$id': typeof NpsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
   '/nps/$id': typeof NpsIdRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
   '/nps/$id': typeof NpsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/vale-presente'
     | '/nps/$id'
     | '/admin/'
     | '/lojista/'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/vale-presente'
     | '/nps/$id'
     | '/admin'
     | '/lojista'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/vale-presente'
     | '/nps/$id'
     | '/admin/'
     | '/lojista/'
@@ -345,6 +357,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/nps/$id'
       preLoaderRoute: typeof NpsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/lojista/vale-presente': {
+      id: '/lojista/vale-presente'
+      path: '/vale-presente'
+      fullPath: '/lojista/vale-presente'
+      preLoaderRoute: typeof LojistaValePresenteRouteImport
+      parentRoute: typeof LojistaRoute
     }
     '/lojista/resgates': {
       id: '/lojista/resgates'
@@ -461,6 +480,7 @@ interface LojistaRouteChildren {
   LojistaProdutosRoute: typeof LojistaProdutosRoute
   LojistaPromocoesRoute: typeof LojistaPromocoesRoute
   LojistaResgatesRoute: typeof LojistaResgatesRoute
+  LojistaValePresenteRoute: typeof LojistaValePresenteRoute
   LojistaIndexRoute: typeof LojistaIndexRoute
 }
 
@@ -475,6 +495,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaProdutosRoute: LojistaProdutosRoute,
   LojistaPromocoesRoute: LojistaPromocoesRoute,
   LojistaResgatesRoute: LojistaResgatesRoute,
+  LojistaValePresenteRoute: LojistaValePresenteRoute,
   LojistaIndexRoute: LojistaIndexRoute,
 }
 
