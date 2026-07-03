@@ -264,6 +264,106 @@ function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label
   );
 }
 
+function AdminsSection() {
+  const qc = useQueryClient();
+  const fetchAdmins = useServerFn(listAdmins);
+  const addAdmin = useServerFn(addAdminByEmail);
+  const rmAdmin = useServerFn(removeAdmin);
+  const [email, setEmail] = useState("");
+
+  const { data: admins, isLoading } = useQuery({
+    queryKey: ["admins-list"],
+    queryFn: () => fetchAdmins() as Promise<Array<{ user_id: string; email: string | null; full_name: string | null; is_me: boolean }>>,
+  });
+
+  const add = useMutation({
+    mutationFn: async () => addAdmin({ data: { email: email.trim() } }),
+    onSuccess: () => {
+      toast.success("Admin adicionado com sucesso.");
+      setEmail("");
+      qc.invalidateQueries({ queryKey: ["admins-list"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (user_id: string) => rmAdmin({ data: { user_id } }),
+    onSuccess: () => {
+      toast.success("Admin removido.");
+      qc.invalidateQueries({ queryKey: ["admins-list"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldCheck className="h-4 w-4 text-red-600" /> Administradores Master
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form
+          className="flex flex-col sm:flex-row gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!email.trim()) return;
+            add.mutate();
+          }}
+        >
+          <Input
+            type="email"
+            placeholder="email@dominio.com da conta a promover"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Button type="submit" disabled={add.isPending}>
+            <UserPlus className="h-4 w-4" />
+            {add.isPending ? "Adicionando..." : "Adicionar admin"}
+          </Button>
+        </form>
+        <p className="text-[11px] text-muted-foreground">
+          A pessoa precisa já ter uma conta criada no sistema. O papel de admin é concedido
+          imediatamente e ela poderá acessar em <code>/admin/login</code>.
+        </p>
+
+        <div className="divide-y rounded-md border">
+          {isLoading && <div className="p-4 text-sm text-muted-foreground text-center">Carregando...</div>}
+          {!isLoading && (admins ?? []).length === 0 && (
+            <div className="p-4 text-sm text-muted-foreground text-center">Nenhum admin cadastrado.</div>
+          )}
+          {(admins ?? []).map((a) => (
+            <div key={a.user_id} className="p-3 flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate flex items-center gap-2">
+                  {a.full_name ?? a.email ?? a.user_id}
+                  {a.is_me && <Badge variant="outline" className="text-[10px]">você</Badge>}
+                </div>
+                <div className="text-xs text-muted-foreground truncate">{a.email ?? "sem email"}</div>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                disabled={a.is_me || remove.isPending}
+                onClick={() => {
+                  if (confirm(`Remover acesso admin de ${a.email ?? a.user_id}?`)) {
+                    remove.mutate(a.user_id);
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Remover
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClose: () => void; onSaved: () => void }) {
   const update = useServerFn(updateStoreSubscription);
   const [status, setStatus] = useState<StoreRow["subscription_status"]>("pending_payment");
