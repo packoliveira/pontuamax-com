@@ -10,8 +10,8 @@ import { createFileRoute } from "@tanstack/react-router";
 // {
 //   "id_venda_externa": "12345",     // required, used for idempotency
 //   "valor": 199.90,                  // required, valor total da venda em BRL
-//   "telefone_cliente": "11999999999",// required (ou cpf_cliente)
-//   "cpf_cliente": "12345678900",     // opcional
+//   "cpf_cliente": "12345678900",     // required (11 dígitos) — login do cliente é sempre por CPF
+//   "telefone_cliente": "11999999999",// opcional
 //   "nome_cliente": "Fulano"          // opcional (usado ao criar cliente novo)
 // }
 
@@ -91,7 +91,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         if (!idVenda) return logAndRespond("erro", "id_venda_externa é obrigatório", 400);
         if (!Number.isFinite(valor) || valor <= 0) return logAndRespond("erro", "valor inválido", 400);
-        if (!telefone && !cpf) return logAndRespond("erro", "telefone_cliente ou cpf_cliente obrigatório", 400);
+        if (!cpf || cpf.length !== 11) return logAndRespond("erro", "cpf_cliente é obrigatório (11 dígitos)", 400);
 
         // Idempotência: mesma venda já processada?
         const dup = await supabaseAdmin
@@ -104,22 +104,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         // Busca ou cria cliente por telefone/CPF
         let clientProfile: { id: string } | null = null;
-        if (telefone) {
-          const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
-          if (p.data) clientProfile = p.data;
-        }
-        if (!clientProfile && cpf) {
+        {
           const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
           if (p.data) clientProfile = p.data;
         }
+        if (!clientProfile && telefone) {
+          const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
+          if (p.data) clientProfile = p.data;
+        }
         if (!clientProfile) {
-          const digits = telefone || cpf;
-          const email = `${digits}@cliente.qsfclub.local`;
+          const email = `${cpf}@cpf.qsfclub.local`;
           const created = await supabaseAdmin.auth.admin.createUser({
             email,
-            password: digits,
+            password: cpf,
             email_confirm: true,
-            user_metadata: { full_name: nome, phone: telefone, cpf: cpf || null },
+            user_metadata: { full_name: nome, phone: telefone || null, cpf },
           });
           if (created.error || !created.data.user) {
             return logAndRespond("erro", `falha criando cliente: ${created.error?.message ?? "?"}`, 500);
@@ -129,7 +128,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
             id: clientProfile.id,
             full_name: nome,
             phone: telefone || null,
-            cpf: cpf || null,
+            cpf,
           });
           await supabaseAdmin.from("user_roles").upsert(
             { user_id: clientProfile.id, role: "cliente" as const },

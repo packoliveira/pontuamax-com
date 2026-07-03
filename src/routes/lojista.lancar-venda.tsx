@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { myStoreQuery, storeClientsQuery, storePromotionsQuery } from "@/lib/queries";
 import { lancarVenda, cadastrarClientePorTelefone } from "@/lib/qsf.functions";
-import { formatBRL, onlyDigits } from "@/lib/qsf-shared";
+import { formatBRL, onlyDigits, isValidCPF, formatCPF } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,11 +26,13 @@ function LancarVenda() {
   const [contato, setContato] = useState("");
   const [valor, setValor] = useState("");
   const [nomeNovo, setNomeNovo] = useState("");
+  const [telefoneNovo, setTelefoneNovo] = useState("");
+  const [cpfNovo, setCpfNovo] = useState("");
   const [precisaCadastro, setPrecisaCadastro] = useState(false);
   const [ultimo, setUltimo] = useState<{ pontos: number; cashback: number; cliente: string } | null>(null);
 
   const cadastrar = useMutation({
-    mutationFn: (input: { phone: string; nome: string; store_id: string }) => cadastrarClientePorTelefone({ data: input }),
+    mutationFn: (input: { phone: string; nome: string; store_id: string; cpf: string }) => cadastrarClientePorTelefone({ data: input }),
   });
 
   const lancar = useMutation({
@@ -86,11 +88,18 @@ function LancarVenda() {
     if (!cli) {
       if (!precisaCadastro) { setPrecisaCadastro(true); return; }
       if (!nomeNovo.trim()) { toast.error("Informe o nome do cliente"); return; }
+      if (onlyDigits(telefoneNovo).length < 10) { toast.error("Informe um telefone válido"); return; }
+      if (!isValidCPF(cpfNovo)) { toast.error("CPF inválido"); return; }
       try {
-        const r = await cadastrar.mutateAsync({ phone: onlyDigits(contato), nome: nomeNovo.trim(), store_id: loja.id });
+        const r = await cadastrar.mutateAsync({
+          phone: onlyDigits(telefoneNovo),
+          nome: nomeNovo.trim(),
+          store_id: loja.id,
+          cpf: onlyDigits(cpfNovo),
+        });
         userId = r.user_id;
         nomeCli = nomeNovo.trim();
-        toast.success(`Cliente cadastrado. Senha temporária: ${r.senha_temporaria}`);
+        toast.success(`Cliente cadastrado. Senha inicial (CPF): ${r.senha_temporaria}`);
       } catch (err) {
         toast.error((err as Error).message);
         return;
@@ -100,7 +109,7 @@ function LancarVenda() {
     try {
       const r = await lancar.mutateAsync({ store_id: loja.id, client_user_id: userId!, valor: valorNum });
       setUltimo({ pontos: r.pontos, cashback: r.cashback, cliente: nomeCli });
-      setContato(""); setValor(""); setNomeNovo(""); setPrecisaCadastro(false);
+      setContato(""); setValor(""); setNomeNovo(""); setTelefoneNovo(""); setCpfNovo(""); setPrecisaCadastro(false);
       toast.success("Venda lançada!");
     } catch (err) {
       toast.error((err as Error).message);
@@ -119,8 +128,9 @@ function LancarVenda() {
         <CardContent className="pt-6">
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="contato">Telefone ou CPF do cliente</Label>
-              <Input id="contato" placeholder="11987654321" value={contato} onChange={(e) => { setContato(e.target.value); setPrecisaCadastro(false); }} required />
+              <Label htmlFor="contato">CPF do cliente</Label>
+              <Input id="contato" placeholder="000.000.000-00" value={contato} onChange={(e) => { setContato(e.target.value); setPrecisaCadastro(false); }} inputMode="numeric" required />
+              <p className="text-xs text-muted-foreground">Também aceita telefone para localizar clientes já cadastrados.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="valor">Valor da compra (R$)</Label>
@@ -128,8 +138,13 @@ function LancarVenda() {
             </div>
             {precisaCadastro && (
               <div className="space-y-2 rounded-md bg-amber-50 border border-amber-200 p-3">
-                <p className="text-sm text-amber-900">Cliente novo — informe o nome (senha inicial = telefone):</p>
+                <p className="text-sm text-amber-900">Cliente novo — preencha os dados (login e senha inicial = CPF):</p>
                 <Input placeholder="Nome do cliente" value={nomeNovo} onChange={(e) => setNomeNovo(e.target.value)} />
+                <Input placeholder="Telefone (com DDD)" value={telefoneNovo} onChange={(e) => setTelefoneNovo(e.target.value)} inputMode="tel" />
+                <Input placeholder="CPF (000.000.000-00)" value={cpfNovo} onChange={(e) => setCpfNovo(formatCPF(e.target.value))} inputMode="numeric" />
+                {cpfNovo.trim() && !isValidCPF(cpfNovo) && (
+                  <p className="text-xs text-red-600">CPF inválido</p>
+                )}
               </div>
             )}
             <div className="rounded-md bg-muted p-3 text-sm">

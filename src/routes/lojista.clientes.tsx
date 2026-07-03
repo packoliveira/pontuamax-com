@@ -108,7 +108,7 @@ function ClientesPage() {
 
   const criar = useMutation({
     mutationFn: () => {
-      if (novo.cpf.trim() && !isValidCPF(novo.cpf)) {
+      if (!novo.cpf.trim() || !isValidCPF(novo.cpf)) {
         throw new Error("CPF inválido. Verifique os dígitos informados.");
       }
       return cadastrarClientePorTelefone({
@@ -116,13 +116,13 @@ function ClientesPage() {
           store_id: loja!.id,
           nome: novo.nome.trim(),
           phone: novo.phone.trim(),
-          cpf: novo.cpf.trim() || undefined,
+          cpf: novo.cpf.trim(),
         },
       });
     },
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
-      toast.success(`Cliente cadastrado. Senha temporária: ${res.senha_temporaria}`);
+      toast.success(`Cliente cadastrado. Senha inicial (CPF): ${res.senha_temporaria}`);
       setNovo({ nome: "", phone: "", cpf: "" });
       setOpenNew(false);
     },
@@ -132,7 +132,7 @@ function ClientesPage() {
   const salvarInfo = useMutation({
     mutationFn: () => {
       if (!editInfo) throw new Error("Sem cliente selecionado.");
-      if (editInfo.cpf.trim() && !isValidCPF(editInfo.cpf)) {
+      if (!editInfo.cpf.trim() || !isValidCPF(editInfo.cpf)) {
         throw new Error("CPF inválido. Verifique os dígitos informados.");
       }
       return atualizarClienteInfo({
@@ -141,7 +141,7 @@ function ClientesPage() {
           client_user_id: editInfo.user_id,
           full_name: editInfo.full_name.trim(),
           phone: editInfo.phone.trim(),
-          cpf: editInfo.cpf.trim() || null,
+          cpf: editInfo.cpf.trim(),
         },
       });
     },
@@ -400,14 +400,14 @@ function ClientesPage() {
               <Input id="novo-tel" value={novo.phone} onChange={(e) => setNovo((s) => ({ ...s, phone: formatPhone(e.target.value) }))} placeholder="(11) 99999-9999" inputMode="tel" />
             </div>
             <div>
-              <Label htmlFor="novo-cpf">CPF (opcional)</Label>
+              <Label htmlFor="novo-cpf">CPF (obrigatório)</Label>
               <Input id="novo-cpf" value={novo.cpf} onChange={(e) => setNovo((s) => ({ ...s, cpf: formatCPF(e.target.value) }))} placeholder="000.000.000-00" inputMode="numeric" />
               {novo.cpf.trim() && !isValidCPF(novo.cpf) && (
                 <p className="mt-1 text-xs text-red-600">CPF inválido</p>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              A senha inicial do cliente será o próprio telefone (só números). Ele pode entrar depois na página pública da sua loja.
+              O cliente entra sempre pelo CPF. A senha inicial é o próprio CPF (só números) e pode ser alterada depois na página pública da loja.
             </p>
           </div>
           <DialogFooter>
@@ -418,7 +418,7 @@ function ClientesPage() {
                 criar.isPending ||
                 !novo.nome.trim() ||
                 novo.phone.replace(/\D/g, "").length < 8 ||
-                (!!novo.cpf.trim() && !isValidCPF(novo.cpf))
+                !isValidCPF(novo.cpf)
               }
             >
               {criar.isPending ? "Cadastrando..." : "Cadastrar"}
@@ -459,7 +459,7 @@ function ClientesPage() {
                 <Input id="edit-tel" value={editInfo.phone} onChange={(e) => setEditInfo({ ...editInfo, phone: formatPhone(e.target.value) })} inputMode="tel" />
               </div>
               <div>
-                <Label htmlFor="edit-cpf">CPF</Label>
+                <Label htmlFor="edit-cpf">CPF (obrigatório)</Label>
                 <Input id="edit-cpf" value={editInfo.cpf} onChange={(e) => setEditInfo({ ...editInfo, cpf: formatCPF(e.target.value) })} inputMode="numeric" placeholder="000.000.000-00" />
                 {editInfo.cpf.trim() && !isValidCPF(editInfo.cpf) && (
                   <p className="mt-1 text-xs text-red-600">CPF inválido</p>
@@ -476,7 +476,7 @@ function ClientesPage() {
                 !editInfo ||
                 !editInfo.full_name.trim() ||
                 editInfo.phone.replace(/\D/g, "").length < 8 ||
-                (!!editInfo.cpf.trim() && !isValidCPF(editInfo.cpf))
+                !isValidCPF(editInfo.cpf)
               }
             >
               {salvarInfo.isPending ? "Salvando..." : "Salvar"}

@@ -150,7 +150,7 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
   });
 
 // -------- LOJISTA: cadastrar novo cliente pelo telefone (durante lançar venda) --------
-// Cria auth user com email sintético e senha temporária = telefone
+// Cria auth user com email sintético baseado no CPF e senha temporária = CPF (só dígitos)
 export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -159,7 +159,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         phone: z.string().min(8).max(20),
         nome: z.string().min(1).max(100),
         store_id: z.string().uuid(),
-        cpf: z.string().max(20).optional(),
+        cpf: z.string().min(11).max(20),
       })
       .parse(input),
   )
@@ -169,13 +169,12 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
     if (!owner.data) throw new Error("Você não é dono desta loja.");
     const digits = data.phone.replace(/\D/g, "");
-    const cpfDigits = (data.cpf ?? "").replace(/\D/g, "") || null;
+    const cpfDigits = (data.cpf ?? "").replace(/\D/g, "");
     if (digits.length < 8) throw new Error("Telefone inválido.");
-    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF inválido. Informe os 11 dígitos.");
+    if (cpfDigits.length !== 11) throw new Error("CPF é obrigatório e deve conter 11 dígitos.");
 
     // Bloquear duplicidade nesta loja: procurar profiles com mesmo telefone OU CPF
-    const orClauses = [`phone.eq.${digits}`];
-    if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
+    const orClauses = [`phone.eq.${digits}`, `cpf.eq.${cpfDigits}`];
     const dup = await supabaseAdmin
       .from("profiles")
       .select("id, phone, cpf")
@@ -192,26 +191,28 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         if (conflict?.phone === digits) {
           throw new Error("Já existe um cliente cadastrado nesta loja com este telefone.");
         }
-        if (cpfDigits && conflict?.cpf === cpfDigits) {
+        if (conflict?.cpf === cpfDigits) {
           throw new Error("Já existe um cliente cadastrado nesta loja com este CPF.");
         }
         throw new Error("Já existe um cliente cadastrado nesta loja com este telefone ou CPF.");
       }
     }
 
-    const email = `${digits}@cliente.qsfclub.local`;
-    // Try to find existing user
+    // Login do cliente é SEMPRE pelo CPF
+    const email = `${cpfDigits}@cpf.qsfclub.local`;
+    // Try to find existing user por CPF (fonte da verdade) ou telefone (legado)
     let userId: string | undefined;
-    const existing = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
+    const byCpf = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpfDigits).maybeSingle();
+    const existing = byCpf.data
+      ? byCpf
+      : await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
     if (existing.data) {
       userId = existing.data.id;
-      if (cpfDigits) {
-        await supabaseAdmin.from("profiles").update({ cpf: cpfDigits }).eq("id", userId);
-      }
+      await supabaseAdmin.from("profiles").update({ cpf: cpfDigits, phone: digits }).eq("id", userId);
     } else {
       const created = await supabaseAdmin.auth.admin.createUser({
         email,
-        password: digits,
+        password: cpfDigits,
         email_confirm: true,
         user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits },
       });
@@ -227,7 +228,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { user_id: userId, link, senha_temporaria: digits };
+    return { user_id: userId, link, senha_temporaria: cpfDigits };
   });
 
 // -------- Lançar venda (lojista) --------
@@ -458,7 +459,7 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
       client_user_id: z.string().uuid(),
       full_name: z.string().min(1).max(120),
       phone: z.string().min(8).max(20),
-      cpf: z.string().max(20).optional().nullable(),
+      cpf: z.string().min(11).max(20),
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -473,11 +474,10 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
     const phoneDigits = data.phone.replace(/\D/g, "");
     if (phoneDigits.length < 8) throw new Error("Telefone inválido.");
     const cpfDigits = (data.cpf ?? "").replace(/\D/g, "");
-    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF inválido. Informe os 11 dígitos.");
+    if (cpfDigits.length !== 11) throw new Error("CPF é obrigatório e deve conter 11 dígitos.");
 
     // Duplicidade dentro da mesma loja (outros clientes com mesmo telefone/CPF)
-    const orClauses = [`phone.eq.${phoneDigits}`];
-    if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
+    const orClauses = [`phone.eq.${phoneDigits}`, `cpf.eq.${cpfDigits}`];
     const dup = await supabaseAdmin
       .from("profiles").select("id, phone, cpf").or(orClauses.join(","))
       .neq("id", data.client_user_id);
@@ -488,14 +488,14 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
       if ((links.data ?? []).length > 0) {
         const conflict = dup.data!.find((p) => links.data!.some((l) => l.user_id === p.id));
         if (conflict?.phone === phoneDigits) throw new Error("Já existe outro cliente nesta loja com este telefone.");
-        if (cpfDigits && conflict?.cpf === cpfDigits) throw new Error("Já existe outro cliente nesta loja com este CPF.");
+        if (conflict?.cpf === cpfDigits) throw new Error("Já existe outro cliente nesta loja com este CPF.");
         throw new Error("Já existe outro cliente nesta loja com este telefone ou CPF.");
       }
     }
 
     const { error } = await supabaseAdmin
       .from("profiles")
-      .update({ full_name: data.full_name.trim(), phone: phoneDigits, cpf: cpfDigits || null })
+      .update({ full_name: data.full_name.trim(), phone: phoneDigits, cpf: cpfDigits })
       .eq("id", data.client_user_id);
     if (error) throw new Error(error.message);
     return { ok: true };

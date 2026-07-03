@@ -15,7 +15,7 @@ import {
   resgatarProduto,
   resgatarCashback,
 } from "@/lib/qsf.functions";
-import { formatBRL, formatDate, calcularNivel, progressoNivel, phoneToEmail, onlyDigits } from "@/lib/qsf-shared";
+import { formatBRL, formatDate, calcularNivel, progressoNivel, cpfToEmail, formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,27 +141,30 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
 
 function Auth({ loja }: { loja: Loja }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
-  const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
 
   const qc = useQueryClient();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const digits = onlyDigits(phone);
-    if (digits.length < 10) return toast.error("Telefone inválido");
+    const cpfDigits = onlyDigits(cpf);
+    if (!isValidCPF(cpfDigits)) return toast.error("CPF inválido");
     if (senha.length < 6) return toast.error("Senha deve ter 6+ caracteres");
     setLoading(true);
     try {
-      const email = phoneToEmail(digits);
+      const email = cpfToEmail(cpfDigits);
       if (mode === "signup") {
+        const phoneDigits = onlyDigits(phone);
+        if (phoneDigits.length < 10) throw new Error("Telefone inválido");
+        if (!nome.trim()) throw new Error("Informe seu nome");
         const { error } = await supabase.auth.signUp({
           email,
           password: senha,
-          options: { data: { full_name: nome.trim(), phone: digits, cpf: onlyDigits(cpf) || null } },
+          options: { data: { full_name: nome.trim(), phone: phoneDigits, cpf: cpfDigits } },
         });
         if (error) throw error;
         // If session not returned (email confirm), sign in
@@ -191,13 +194,19 @@ function Auth({ loja }: { loja: Loja }) {
     <div className="max-w-md mx-auto p-4 -mt-6">
       <Card>
         <CardHeader>
-          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu telefone"}</CardTitle>
+          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-3">
             <div>
-              <Label>Telefone</Label>
-              <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="11987654321" inputMode="numeric" />
+              <Label>CPF</Label>
+              <Input
+                value={cpf}
+                onChange={(e) => setCpf(formatCPF(e.target.value))}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+                autoComplete="username"
+              />
             </div>
             {mode === "signup" && (
               <>
@@ -206,8 +215,8 @@ function Auth({ loja }: { loja: Loja }) {
                   <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" />
                 </div>
                 <div>
-                  <Label>CPF (opcional)</Label>
-                  <Input value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="000.000.000-00" />
+                  <Label>Telefone</Label>
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="11987654321" inputMode="tel" />
                 </div>
               </>
             )}
@@ -223,7 +232,7 @@ function Auth({ loja }: { loja: Loja }) {
             </button>
             {mode === "login" && (
               <p className="text-[11px] text-center text-muted-foreground">
-                Se a loja cadastrou você, sua senha inicial é o seu próprio telefone (só números).
+                Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
               </p>
             )}
           </form>
