@@ -638,6 +638,7 @@ export type Database = {
           slug: string
           subscription_status: Database["public"]["Enums"]["subscription_status"]
           telefone: string | null
+          voucher_validade_dias: number
           webhook_last_at: string | null
           webhook_secret: string
           whatsapp_enabled: boolean
@@ -685,6 +686,7 @@ export type Database = {
           slug: string
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           telefone?: string | null
+          voucher_validade_dias?: number
           webhook_last_at?: string | null
           webhook_secret?: string
           whatsapp_enabled?: boolean
@@ -732,6 +734,7 @@ export type Database = {
           slug?: string
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           telefone?: string | null
+          voucher_validade_dias?: number
           webhook_last_at?: string | null
           webhook_secret?: string
           whatsapp_enabled?: boolean
@@ -754,6 +757,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["transaction_tipo"]
           valor: number
           voucher_code: string | null
+          voucher_expires_at: string | null
         }
         Insert: {
           cashback_delta?: number
@@ -769,6 +773,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["transaction_tipo"]
           valor?: number
           voucher_code?: string | null
+          voucher_expires_at?: string | null
         }
         Update: {
           cashback_delta?: number
@@ -784,6 +789,7 @@ export type Database = {
           tipo?: Database["public"]["Enums"]["transaction_tipo"]
           valor?: number
           voucher_code?: string | null
+          voucher_expires_at?: string | null
         }
         Relationships: [
           {
@@ -851,7 +857,7 @@ export type Database = {
         | "active"
         | "suspended"
         | "cancelled"
-      transaction_status: "pendente" | "entregue"
+      transaction_status: "pendente" | "entregue" | "expirado"
       transaction_tipo:
         | "venda"
         | "resgate_produto"
@@ -997,7 +1003,7 @@ export const Constants = {
         "suspended",
         "cancelled",
       ],
-      transaction_status: ["pendente", "entregue"],
+      transaction_status: ["pendente", "entregue", "expirado"],
       transaction_tipo: [
         "venda",
         "resgate_produto",
