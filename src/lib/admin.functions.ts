@@ -8,6 +8,31 @@ async function ensureAdmin(ctx: { supabase: any; userId: string }) {
   if (!data) throw new Error("Acesso negado");
 }
 
+async function writeAudit(params: {
+  actorId: string;
+  action: string;
+  targetType?: string | null;
+  targetId?: string | null;
+  targetLabel?: string | null;
+  details?: Record<string, unknown>;
+}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  let actorEmail: string | null = null;
+  try {
+    const { data } = await supabaseAdmin.auth.admin.getUserById(params.actorId);
+    actorEmail = data?.user?.email ?? null;
+  } catch { /* ignore */ }
+  await supabaseAdmin.from("admin_audit_logs").insert({
+    actor_id: params.actorId,
+    actor_email: actorEmail,
+    action: params.action,
+    target_type: params.targetType ?? null,
+    target_id: params.targetId ?? null,
+    target_label: params.targetLabel ?? null,
+    details: params.details ?? {},
+  });
+}
+
 export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
