@@ -296,7 +296,12 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
     const current = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
     const currentEmail = current.data.user?.email ?? "";
     const cpfEmail = cpfToEmail(cpfDigits);
-    if (!current.data.user || currentEmail === cpfEmail || !currentEmail.endsWith("@cliente.qsfclub.local")) {
+    if (
+      !current.data.user ||
+      currentEmail === cpfEmail ||
+      !currentEmail.endsWith("@cliente.qsfclub.local") ||
+      current.data.user.last_sign_in_at
+    ) {
       return { normalized: false };
     }
 
