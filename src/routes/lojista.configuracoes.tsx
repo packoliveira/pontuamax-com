@@ -627,6 +627,8 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
           </p>
         </div>
 
+        <WhatsappQRConnect storeId={loja.id} />
+
         <div>
           <Label>Template da mensagem "pontos ganhos"</Label>
           <Textarea rows={7} value={template} onChange={(e) => setTemplate(e.target.value)} className="font-mono text-xs" />
