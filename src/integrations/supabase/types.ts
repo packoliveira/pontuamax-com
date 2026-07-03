@@ -14,6 +14,106 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          client_user_id: string
+          created_at: string
+          enviado_em: string | null
+          erro: string | null
+          id: string
+          mensagem_render: string | null
+          status: string
+          telefone: string | null
+        }
+        Insert: {
+          campaign_id: string
+          client_user_id: string
+          created_at?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          mensagem_render?: string | null
+          status?: string
+          telefone?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          client_user_id?: string
+          created_at?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          mensagem_render?: string | null
+          status?: string
+          telefone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          created_at: string
+          enviado_em: string | null
+          id: string
+          mensagem: string
+          nome: string
+          segmento: string
+          segmento_param: string | null
+          status: string
+          store_id: string
+          total_destinatarios: number
+          total_enviados: number
+          total_falhas: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enviado_em?: string | null
+          id?: string
+          mensagem: string
+          nome: string
+          segmento?: string
+          segmento_param?: string | null
+          status?: string
+          store_id: string
+          total_destinatarios?: number
+          total_enviados?: number
+          total_falhas?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enviado_em?: string | null
+          id?: string
+          mensagem?: string
+          nome?: string
+          segmento?: string
+          segmento_param?: string | null
+          status?: string
+          store_id?: string
+          total_destinatarios?: number
+          total_enviados?: number
+          total_falhas?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_logs: {
         Row: {
           created_at: string
