@@ -56,6 +56,28 @@ function NivelBadge({ pontos, nivel }: { pontos: number; nivel: string }) {
   );
 }
 
+function SyncClientsButton({ storeId }: { storeId: string }) {
+  const qc = useQueryClient();
+  const m = useMutation({
+    mutationFn: () => sincronizarClientesDaLoja(),
+    onSuccess: (r: { criados: number }) => {
+      toast.success(
+        r.criados > 0
+          ? `${r.criados} cliente(s) sincronizado(s).`
+          : "Nenhum cliente novo para sincronizar.",
+      );
+      qc.invalidateQueries({ queryKey: ["store-clients", storeId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Button variant="outline" onClick={() => m.mutate()} disabled={m.isPending}>
+      <RefreshCw className={`h-4 w-4 ${m.isPending ? "animate-spin" : ""}`} />
+      Sincronizar clientes
+    </Button>
+  );
+}
+
 // --- helpers de formatação/validação
 function onlyDigits(v: string) {
   return (v ?? "").replace(/\D/g, "");
