@@ -584,6 +584,35 @@ function ClientesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmar exclusão */}
+      <Dialog open={!!excluirDlg} onOpenChange={(o) => !o && setExcluirDlg(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir cliente</DialogTitle>
+          </DialogHeader>
+          {excluirDlg && (
+            <div className="space-y-2 text-sm">
+              <p>
+                Tem certeza que deseja remover <strong>{excluirDlg.nome}</strong> da sua loja?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                O saldo de pontos, cashback e as tags desta loja serão apagados. O histórico de vendas continua no relatório. O cliente pode se cadastrar novamente pela página pública.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setExcluirDlg(null)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => excluir.mutate()}
+              disabled={excluir.isPending}
+            >
+              {excluir.isPending ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
