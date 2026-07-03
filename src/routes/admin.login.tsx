@@ -42,7 +42,23 @@ function AdminLogin() {
         navigate({ to: "/admin" });
         return;
       }
-      // Havia admin e este usuário não é: nega acesso e desloga.
+      // Não é admin e já existe admin no sistema.
+      // Se o usuário for lojista (dono de loja), NÃO desloga — só o manda pro painel dele.
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (uid) {
+        const { data: store } = await supabase
+          .from("stores")
+          .select("id")
+          .eq("owner_id", uid)
+          .maybeSingle();
+        if (store) {
+          toast.info("Esta área é do admin master. Redirecionando para o painel do lojista...");
+          navigate({ to: "/lojista" });
+          return;
+        }
+      }
+      // Usuário sem loja e sem role admin: nega acesso e desloga.
       await supabase.auth.signOut();
       toast.error("Acesso negado: esta área é exclusiva do administrador master do sistema.");
     } catch (err) {
