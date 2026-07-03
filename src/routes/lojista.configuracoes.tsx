@@ -46,6 +46,7 @@ function ConfigPage() {
   const [modalidade, setModalidade] = useState<Modalidade>("ambos");
   const [regraP, setRegraP] = useState("1");
   const [pctC, setPctC] = useState("5");
+  const [validadeVoucher, setValidadeVoucher] = useState("7");
 
   useEffect(() => {
     if (loja) {
@@ -59,6 +60,7 @@ function ConfigPage() {
       setModalidade(loja.modalidade as Modalidade);
       setRegraP(String(loja.regra_pontos));
       setPctC(String(loja.percentual_cashback));
+      setValidadeVoucher(String(loja.voucher_validade_dias ?? 7));
     }
   }, [loja]);
 
@@ -76,6 +78,7 @@ function ConfigPage() {
           modalidade,
           regra_pontos: parseFloat(regraP) || 1,
           percentual_cashback: parseFloat(pctC) || 0,
+          voucher_validade_dias: Math.max(1, Math.min(365, parseInt(validadeVoucher, 10) || 7)),
         },
       }),
     onSuccess: () => {
@@ -151,6 +154,11 @@ function ConfigPage() {
             {inclC && (
               <div><Label>% de cashback</Label><Input type="number" step="0.1" value={pctC} onChange={(e) => setPctC(e.target.value)} /></div>
             )}
+            <div>
+              <Label>Validade do voucher de resgate (dias)</Label>
+              <Input type="number" min="1" max="365" value={validadeVoucher} onChange={(e) => setValidadeVoucher(e.target.value)} />
+              <p className="text-xs text-muted-foreground mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
+            </div>
             <div className="rounded-md border p-3 text-xs text-muted-foreground">
               Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente com base nos pontos.
             </div>
