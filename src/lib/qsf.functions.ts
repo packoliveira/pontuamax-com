@@ -155,6 +155,38 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("user_roles").upsert({ user_id: context.userId, role: "cliente" }, { onConflict: "user_id,role" });
+
+    // Helper: registra tentativa/resultado do vínculo no integration_logs
+    // para o lojista conseguir auditar cadastros vindos da página pública.
+    const logVinculo = async (
+      status: "sucesso" | "erro",
+      mensagem: string | null,
+      payload: Record<string, unknown>,
+    ) => {
+      try {
+        await supabaseAdmin.from("integration_logs").insert({
+          store_id: data.store_id,
+          origem: "pagina_publica",
+          status,
+          mensagem_erro: status === "erro" ? mensagem : null,
+          payload_recebido: payload as never,
+        });
+      } catch {
+        // log é best-effort, nunca deve derrubar o vínculo
+      }
+    };
+
+    // Valida existência da loja antes de qualquer coisa
+    const lojaCheck = await supabaseAdmin
+      .from("stores")
+      .select("id, slug, owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
+    if (!lojaCheck.data) {
+      await logVinculo("erro", "loja não encontrada", { user_id: context.userId });
+      throw new Error("Loja não encontrada.");
+    }
+
     // Verifica se já existe link (para não sobrescrever referrer)
     const existing = await supabaseAdmin
       .from("store_clients")
@@ -162,7 +194,15 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
       .eq("store_id", data.store_id)
       .eq("user_id", context.userId)
       .maybeSingle();
-    if (existing.data) return existing.data;
+    if (existing.data) {
+      await logVinculo("sucesso", null, {
+        user_id: context.userId,
+        store_slug: lojaCheck.data.slug,
+        ja_vinculado: true,
+        link_id: existing.data.id,
+      });
+      return existing.data;
+    }
 
     // Resolve referrer pelo telefone
     let referrer_user_id: string | null = null;
@@ -184,7 +224,40 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
       .insert({ store_id: data.store_id, user_id: context.userId, referrer_user_id })
       .select("*")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      await logVinculo("erro", error.message, {
+        user_id: context.userId,
+        store_slug: lojaCheck.data.slug,
+        referrer_user_id,
+      });
+      throw new Error(error.message);
+    }
+
+    // Validação pós-insert: re-lê a linha exatamente como o painel do lojista lê,
+    // garantindo que store_id/user_id foram gravados corretamente e que o join
+    // com profiles está resolvendo. Se algo estiver inconsistente, registramos.
+    const verify = await supabaseAdmin
+      .from("store_clients")
+      .select("id, store_id, user_id, pontos, cashback_saldo, profiles:user_id(full_name, cpf, phone)")
+      .eq("id", link.id)
+      .maybeSingle();
+
+    const verifyOk =
+      !!verify.data &&
+      verify.data.store_id === data.store_id &&
+      verify.data.user_id === context.userId;
+
+    await logVinculo(verifyOk ? "sucesso" : "erro", verifyOk ? null : (verify.error?.message ?? "verificação pós-insert falhou"), {
+      user_id: context.userId,
+      store_slug: lojaCheck.data.slug,
+      link_id: link.id,
+      profile_encontrado: !!verify.data?.profiles,
+      profile_nome: (verify.data?.profiles as { full_name?: string } | null)?.full_name ?? null,
+    });
+
+    if (!verifyOk) {
+      throw new Error("Cliente foi criado mas não pôde ser confirmado no painel — tente novamente.");
+    }
     return link;
   });
 

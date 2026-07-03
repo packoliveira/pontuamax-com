@@ -246,10 +246,16 @@ function VincularStore({ loja }: { loja: Loja }) {
   const qc = useQueryClient();
   const vincular = useMutation({
     mutationFn: () => vincularClienteALoja({ data: { store_id: loja.id, referrer_phone: getStoredReferrer() } }),
-    onSuccess: () => {
+    onSuccess: (link) => {
       try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+      if (link?.store_id === loja.id) {
+        toast.success(`Cadastro confirmado em ${loja.nome_fantasia}`);
+      } else {
+        toast.error("Cadastro criado mas não foi possível confirmar. Tente novamente.");
+      }
       qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
     },
+    onError: (e) => toast.error((e as Error).message),
   });
   useEffect(() => { vincular.mutate(); }, []); // eslint-disable-line
   return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
