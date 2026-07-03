@@ -60,6 +60,7 @@ export type Database = {
       }
       campaigns: {
         Row: {
+          agendada_para: string | null
           created_at: string
           enviado_em: string | null
           id: string
@@ -75,6 +76,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agendada_para?: string | null
           created_at?: string
           enviado_em?: string | null
           id?: string
@@ -90,6 +92,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agendada_para?: string | null
           created_at?: string
           enviado_em?: string | null
           id?: string
