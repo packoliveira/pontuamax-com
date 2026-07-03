@@ -39,6 +39,7 @@ import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
+import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
 
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
@@ -192,6 +193,12 @@ const ApiPublicHooksExpirarVouchersRoute =
     path: '/api/public/hooks/expirar-vouchers',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCampanhasAgendadasRoute =
+  ApiPublicHooksCampanhasAgendadasRouteImport.update({
+    id: '/api/public/hooks/campanhas-agendadas',
+    path: '/api/public/hooks/campanhas-agendadas',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
@@ -249,6 +257,7 @@ export interface FileRoutesByTo {
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
+  '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
@@ -282,6 +291,7 @@ export interface FileRoutesById {
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/vale/$codigo'
     | '/admin/'
     | '/lojista/'
+    | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/vale/$codigo'
     | '/admin'
     | '/lojista'
+    | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
@@ -378,6 +390,7 @@ export interface FileRouteTypes {
     | '/vale/$codigo'
     | '/admin/'
     | '/lojista/'
+    | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
@@ -394,6 +407,7 @@ export interface RootRouteChildren {
   NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
   ValeCodigoRoute: typeof ValeCodigoRoute
+  ApiPublicHooksCampanhasAgendadasRoute: typeof ApiPublicHooksCampanhasAgendadasRoute
   ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
@@ -613,6 +627,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksExpirarVouchersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/campanhas-agendadas': {
+      id: '/api/public/hooks/campanhas-agendadas'
+      path: '/api/public/hooks/campanhas-agendadas'
+      fullPath: '/api/public/hooks/campanhas-agendadas'
+      preLoaderRoute: typeof ApiPublicHooksCampanhasAgendadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -676,6 +697,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
   ValeCodigoRoute: ValeCodigoRoute,
+  ApiPublicHooksCampanhasAgendadasRoute: ApiPublicHooksCampanhasAgendadasRoute,
   ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,

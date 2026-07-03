@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Send, Trash2, Users, Loader2 } from "lucide-react";
+import { Send, Trash2, Users, Loader2, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/campanhas")({
   ssr: false,
@@ -28,6 +28,7 @@ const SEG_OPTIONS = [
   { v: "inativos_30", label: "Inativos há 30+ dias" },
   { v: "inativos_60", label: "Inativos há 60+ dias" },
   { v: "inativos_90", label: "Inativos há 90+ dias" },
+  { v: "aniversariantes", label: "Aniversariantes do mês" },
 ] as const;
 
 const TEMPLATE_PADRAO =
@@ -39,6 +40,8 @@ function CampanhasPage() {
   const [nome, setNome] = useState("");
   const [mensagem, setMensagem] = useState(TEMPLATE_PADRAO);
   const [segmento, setSegmento] = useState<(typeof SEG_OPTIONS)[number]["v"]>("todos");
+  const [agendar, setAgendar] = useState(false);
+  const [agendaLocal, setAgendaLocal] = useState<string>(""); // datetime-local value (fuso do navegador)
   const [preview, setPreview] = useState<{ total: number; amostra: Array<{ nome: string | null; telefone: string | null }> } | null>(null);
 
   const listQuery = useQuery({
@@ -64,11 +67,26 @@ function CampanhasPage() {
   });
 
   const criarMut = useMutation({
-    mutationFn: async () => criarFn({ data: { nome, mensagem, segmento } }),
+    mutationFn: async () => {
+      let agendada_para: string | null = null;
+      if (agendar && agendaLocal) {
+        const d = new Date(agendaLocal);
+        if (isNaN(d.getTime())) throw new Error("Data/hora inválida.");
+        if (d.getTime() <= Date.now() + 60_000) throw new Error("A data precisa ser pelo menos 1 minuto no futuro.");
+        agendada_para = d.toISOString();
+      }
+      return criarFn({ data: { nome, mensagem, segmento, agendada_para } });
+    },
     onSuccess: (r) => {
-      toast.success(`Campanha criada — ${r.total} destinatários`);
+      toast.success(
+        r.agendada
+          ? `Campanha agendada — ${r.total} destinatários`
+          : `Campanha criada — ${r.total} destinatários`,
+      );
       setNome("");
       setMensagem(TEMPLATE_PADRAO);
+      setAgendar(false);
+      setAgendaLocal("");
       setPreview(null);
       qc.invalidateQueries({ queryKey: ["campaigns", loja?.id] });
     },
@@ -129,12 +147,36 @@ function CampanhasPage() {
             <Label>Mensagem</Label>
             <Textarea rows={5} value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
           </div>
+          <div className="rounded-md border p-3 space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={agendar}
+                onChange={(e) => setAgendar(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <Clock className="h-4 w-4" /> Agendar envio para depois
+            </label>
+            {agendar && (
+              <div className="space-y-1">
+                <Input
+                  type="datetime-local"
+                  value={agendaLocal}
+                  onChange={(e) => setAgendaLocal(e.target.value)}
+                  min={new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Envia automaticamente nesse horário (fuso do seu navegador).
+                </p>
+              </div>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2 items-center">
             <Button variant="outline" onClick={() => previewMut.mutate()} disabled={previewMut.isPending}>
               <Users className="h-4 w-4" /> Ver destinatários
             </Button>
             <Button onClick={() => criarMut.mutate()} disabled={criarMut.isPending || !nome || !mensagem}>
-              Criar campanha
+              {agendar ? "Agendar campanha" : "Criar campanha"}
             </Button>
             {preview && (
               <span className="text-sm text-muted-foreground">
@@ -156,10 +198,25 @@ function CampanhasPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium">{c.nome}</span>
-                  <Badge variant={c.status === "concluida" ? "default" : c.status === "enviando" ? "secondary" : "outline"}>
+                  <Badge
+                    variant={
+                      c.status === "concluida"
+                        ? "default"
+                        : c.status === "enviando"
+                          ? "secondary"
+                          : c.status === "falhou"
+                            ? "destructive"
+                            : "outline"
+                    }
+                  >
                     {c.status}
                   </Badge>
                   <Badge variant="outline">{SEG_OPTIONS.find((s) => s.v === c.segmento)?.label ?? c.segmento}</Badge>
+                  {c.status === "agendada" && c.agendada_para && (
+                    <Badge variant="outline" className="text-blue-700 border-blue-300 gap-1">
+                      <Clock className="h-3 w-3" /> {new Date(c.agendada_para).toLocaleString("pt-BR")}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{c.mensagem}</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -167,10 +224,10 @@ function CampanhasPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                {c.status === "rascunho" && (
+                {(c.status === "rascunho" || c.status === "agendada" || c.status === "falhou") && (
                   <Button size="sm" onClick={() => enviarMut.mutate(c.id)} disabled={enviarMut.isPending}>
                     {enviarMut.isPending && enviarMut.variables === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    Enviar
+                    {c.status === "agendada" ? "Enviar agora" : "Enviar"}
                   </Button>
                 )}
                 <Button size="sm" variant="ghost" onClick={() => {
