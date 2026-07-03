@@ -69,7 +69,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           await supabaseAdmin.from("integration_logs").insert({
             store_id: loja.id,
             origem,
-            payload_recebido: payload,
+            payload_recebido: payload as never,
             status,
             mensagem_erro: status === "erro" ? message : null,
           });
