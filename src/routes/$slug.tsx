@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift } from "lucide-react";
+import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText } from "lucide-react";
 
 const REF_KEY = "qsf_referrer_phone";
 function getStoredReferrer(): string | null {
@@ -383,7 +383,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           {txs.length === 0 && <div className="p-6 text-center text-sm text-muted-foreground">Sem movimentações ainda</div>}
           {txs.map((t) => {
             const prd = (t.products as unknown as { nome: string | null } | null)?.nome;
-            const descr = t.tipo === "venda" ? "Compra na loja" : t.tipo === "resgate_produto" ? `Resgate: ${prd ?? "produto"}` : `Voucher de cashback`;
+            const descr =
+              t.tipo === "venda" ? "Compra na loja" :
+              t.tipo === "resgate_produto" ? `Resgate: ${prd ?? "produto"}` :
+              t.tipo === "vale_presente" ? "Vale-presente" :
+              t.tipo === "nota_fiscal" ? "Nota fiscal aprovada" :
+              t.tipo === "indicacao" ? "Bônus de indicação" :
+              "Voucher de cashback";
             return (
               <div key={t.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
@@ -399,6 +405,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
             );
           })}
         </div></CardContent></Card>
+      </section>
+
+      <section>
+        <Link to="/nota/$slug" params={{ slug: loja.slug }}
+          className="flex items-center justify-center gap-2 rounded-md border border-dashed p-4 text-sm hover:bg-accent">
+          <FileText className="h-4 w-4" /> Enviar foto de nota fiscal para ganhar pontos
+        </Link>
       </section>
 
       <Dialog open={!!voucher} onOpenChange={(v) => !v && setVoucher(null)}>
