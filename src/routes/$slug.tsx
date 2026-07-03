@@ -12,6 +12,7 @@ import {
 } from "@/lib/queries";
 import {
   vincularClienteALoja,
+  prepararLoginClientePorCpf,
   resgatarProduto,
   resgatarCashback,
 } from "@/lib/qsf.functions";
@@ -212,7 +213,12 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
         toast.success(`Bem-vindo(a), ${nome}!`);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-        if (error) throw error;
+        if (error) {
+          const prepared = await prepararLoginClientePorCpf({ data: { store_id: loja.id, cpf: cpfDigits, senha } });
+          if (!prepared.normalized) throw error;
+          const { error: retryError } = await supabase.auth.signInWithPassword({ email, password: senha });
+          if (retryError) throw retryError;
+        }
         // Ensure link exists (marca como "acabou de entrar" para evitar sign-out
         // se a query my-link demorar 1 tick para refletir o vínculo)
         try { sessionStorage.setItem(`justSignedUp:${loja.id}`, "1"); } catch { /* ignore */ }

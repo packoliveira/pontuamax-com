@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, cpfToEmail, gerarVoucher } from "./qsf-shared";
+import { calcularNivel, cpfToEmail, gerarVoucher, isValidCPF } from "./qsf-shared";
 
 // -------- LOJISTA: sincronizar clientes órfãos --------
 // Reprocessa cadastros da página pública: para toda transação/nota fiscal desta
@@ -259,6 +259,60 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
       throw new Error("Cliente foi criado mas não pôde ser confirmado no painel — tente novamente.");
     }
     return link;
+  });
+
+// -------- CLIENTE: normalizar login legado para CPF --------
+// Clientes criados pelo lojista em versões antigas podiam estar com e-mail
+// sintético por telefone. Se o cliente entra com CPF + senha inicial CPF,
+// normalizamos a conta existente vinculada à loja para o e-mail por CPF.
+export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z.object({
+      store_id: z.string().uuid(),
+      cpf: z.string().min(11).max(20),
+      senha: z.string().min(6).max(72),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const cpfDigits = data.cpf.replace(/\D/g, "");
+    if (!isValidCPF(cpfDigits) || data.senha !== cpfDigits) return { normalized: false };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profile = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, phone, cpf")
+      .eq("cpf", cpfDigits)
+      .maybeSingle();
+    if (!profile.data) return { normalized: false };
+
+    const link = await supabaseAdmin
+      .from("store_clients")
+      .select("id")
+      .eq("store_id", data.store_id)
+      .eq("user_id", profile.data.id)
+      .maybeSingle();
+    if (!link.data) return { normalized: false };
+
+    const current = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
+    const currentEmail = current.data.user?.email ?? "";
+    const cpfEmail = cpfToEmail(cpfDigits);
+    if (!current.data.user || currentEmail === cpfEmail || !currentEmail.endsWith("@cliente.qsfclub.local")) {
+      return { normalized: false };
+    }
+
+    const updated = await supabaseAdmin.auth.admin.updateUserById(profile.data.id, {
+      email: cpfEmail,
+      password: cpfDigits,
+      email_confirm: true,
+      user_metadata: {
+        ...(current.data.user.user_metadata ?? {}),
+        full_name: profile.data.full_name,
+        phone: profile.data.phone,
+        cpf: cpfDigits,
+      },
+    });
+    if (updated.error) return { normalized: false };
+    return { normalized: true };
   });
 
 // -------- LOJISTA: cadastrar novo cliente pelo CPF (durante lançar venda) --------
