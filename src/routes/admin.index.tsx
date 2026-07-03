@@ -10,6 +10,8 @@ import {
   listAdmins,
   addAdminByEmail,
   removeAdmin,
+  listAuditLogs,
+  changeMyPassword,
 } from "@/lib/admin.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2 } from "lucide-react";
+import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
@@ -249,6 +251,8 @@ function AdminDashboard() {
       <EditDialog store={editing} onClose={() => setEditing(null)} onSaved={() => qc.invalidateQueries({ queryKey: ["admin-stores"] })} />
 
       <AdminsSection />
+      <ChangePasswordSection />
+      <AuditLogSection />
     </div>
   );
 }
