@@ -154,8 +154,11 @@ export type Database = {
       }
       stores: {
         Row: {
+          activated_at: string | null
+          admin_notes: string | null
           brand_primary: string
           brand_secondary: string
+          cancelled_at: string | null
           cnpj: string | null
           created_at: string
           evolution_apikey: string | null
@@ -164,11 +167,15 @@ export type Database = {
           id: string
           logo_url: string | null
           modalidade: Database["public"]["Enums"]["modalidade"]
+          mrr_amount: number
           nome_fantasia: string
           owner_id: string
           percentual_cashback: number
+          plan: Database["public"]["Enums"]["plan_tier"]
           regra_pontos: number
+          setup_paid_at: string | null
           slug: string
+          subscription_status: Database["public"]["Enums"]["subscription_status"]
           telefone: string | null
           webhook_last_at: string | null
           webhook_secret: string
@@ -176,8 +183,11 @@ export type Database = {
           whatsapp_template_pontos: string
         }
         Insert: {
+          activated_at?: string | null
+          admin_notes?: string | null
           brand_primary?: string
           brand_secondary?: string
+          cancelled_at?: string | null
           cnpj?: string | null
           created_at?: string
           evolution_apikey?: string | null
@@ -186,11 +196,15 @@ export type Database = {
           id?: string
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
+          mrr_amount?: number
           nome_fantasia: string
           owner_id: string
           percentual_cashback?: number
+          plan?: Database["public"]["Enums"]["plan_tier"]
           regra_pontos?: number
+          setup_paid_at?: string | null
           slug: string
+          subscription_status?: Database["public"]["Enums"]["subscription_status"]
           telefone?: string | null
           webhook_last_at?: string | null
           webhook_secret?: string
@@ -198,8 +212,11 @@ export type Database = {
           whatsapp_template_pontos?: string
         }
         Update: {
+          activated_at?: string | null
+          admin_notes?: string | null
           brand_primary?: string
           brand_secondary?: string
+          cancelled_at?: string | null
           cnpj?: string | null
           created_at?: string
           evolution_apikey?: string | null
@@ -208,11 +225,15 @@ export type Database = {
           id?: string
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
+          mrr_amount?: number
           nome_fantasia?: string
           owner_id?: string
           percentual_cashback?: number
+          plan?: Database["public"]["Enums"]["plan_tier"]
           regra_pontos?: number
+          setup_paid_at?: string | null
           slug?: string
+          subscription_status?: Database["public"]["Enums"]["subscription_status"]
           telefone?: string | null
           webhook_last_at?: string | null
           webhook_secret?: string
@@ -316,9 +337,15 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "lojista" | "cliente"
+      app_role: "lojista" | "cliente" | "admin"
       modalidade: "pontos" | "cashback" | "ambos"
       nivel_cliente: "bronze" | "prata" | "ouro"
+      plan_tier: "starter" | "pro" | "premium"
+      subscription_status:
+        | "pending_payment"
+        | "active"
+        | "suspended"
+        | "cancelled"
       transaction_status: "pendente" | "entregue"
       transaction_tipo: "venda" | "resgate_produto" | "resgate_cashback"
     }
@@ -448,9 +475,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["lojista", "cliente"],
+      app_role: ["lojista", "cliente", "admin"],
       modalidade: ["pontos", "cashback", "ambos"],
       nivel_cliente: ["bronze", "prata", "ouro"],
+      plan_tier: ["starter", "pro", "premium"],
+      subscription_status: [
+        "pending_payment",
+        "active",
+        "suspended",
+        "cancelled",
+      ],
       transaction_status: ["pendente", "entregue"],
       transaction_tipo: ["venda", "resgate_produto", "resgate_cashback"],
     },
