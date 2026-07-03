@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,19 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/login")({
   ssr: false,
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    const uid = data.session?.user.id;
+    if (!uid) return;
+    // Já logado: se tem loja, manda pro painel; senão, pro onboarding.
+    const { data: store } = await supabase
+      .from("stores")
+      .select("id")
+      .eq("owner_id", uid)
+      .maybeSingle();
+    if (store) throw redirect({ to: "/lojista" });
+    throw redirect({ to: "/lojista/onboarding" });
+  },
   component: Login,
 });
 
