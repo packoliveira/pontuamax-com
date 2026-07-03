@@ -842,6 +842,7 @@ export type Database = {
         | "indicacao"
         | "vale_presente"
         | "nota_fiscal"
+        | "ajuste"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -987,6 +988,7 @@ export const Constants = {
         "indicacao",
         "vale_presente",
         "nota_fiscal",
+        "ajuste",
       ],
     },
   },
