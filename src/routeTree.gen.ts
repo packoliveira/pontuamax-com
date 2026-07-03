@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LojistaRouteImport } from './routes/lojista'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const LojistaIndexRoute = LojistaIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
   getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaProdutosRoute = LojistaProdutosRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
   '/lojista/': typeof LojistaIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
   '/lojista': typeof LojistaIndexRoute
 }
 export interface FileRoutesById {
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
   '/lojista/': typeof LojistaIndexRoute
 }
 export interface FileRouteTypes {
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/lojista/lancar-venda'
     | '/lojista/login'
     | '/lojista/produtos'
+    | '/lojista/resgates'
     | '/lojista/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/lojista/lancar-venda'
     | '/lojista/login'
     | '/lojista/produtos'
+    | '/lojista/resgates'
     | '/lojista'
   id:
     | '__root__'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/lojista/lancar-venda'
     | '/lojista/login'
     | '/lojista/produtos'
+    | '/lojista/resgates'
     | '/lojista/'
   fileRoutesById: FileRoutesById
 }
@@ -135,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/lojista/'
       preLoaderRoute: typeof LojistaIndexRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/resgates': {
+      id: '/lojista/resgates'
+      path: '/resgates'
+      fullPath: '/lojista/resgates'
+      preLoaderRoute: typeof LojistaResgatesRouteImport
       parentRoute: typeof LojistaRoute
     }
     '/lojista/produtos': {
@@ -173,6 +192,7 @@ interface LojistaRouteChildren {
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
   LojistaLoginRoute: typeof LojistaLoginRoute
   LojistaProdutosRoute: typeof LojistaProdutosRoute
+  LojistaResgatesRoute: typeof LojistaResgatesRoute
   LojistaIndexRoute: typeof LojistaIndexRoute
 }
 
@@ -181,6 +201,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
   LojistaLoginRoute: LojistaLoginRoute,
   LojistaProdutosRoute: LojistaProdutosRoute,
+  LojistaResgatesRoute: LojistaResgatesRoute,
   LojistaIndexRoute: LojistaIndexRoute,
 }
 
