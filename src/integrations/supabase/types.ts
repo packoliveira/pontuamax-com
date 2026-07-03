@@ -586,6 +586,13 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "store_clients_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       stores: {
@@ -776,6 +783,13 @@ export type Database = {
           voucher_code?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_client_user_id_profiles_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_product_id_fkey"
             columns: ["product_id"]
