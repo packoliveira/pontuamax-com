@@ -2,7 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, integrationLogsQuery } from "@/lib/queries";
-import { atualizarLoja, rotacionarWebhookSecret, testarWebhook, salvarWhatsapp, enviarWhatsappTeste } from "@/lib/qsf.functions";
+import {
+  atualizarLoja,
+  rotacionarWebhookSecret,
+  testarWebhook,
+  salvarWhatsapp,
+  enviarWhatsappTeste,
+  conectarWhatsappQR,
+  statusWhatsapp,
+  desconectarWhatsapp,
+} from "@/lib/qsf.functions";
 import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +22,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle } from "lucide-react";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
@@ -27,6 +37,7 @@ function ConfigPage() {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [logo, setLogo] = useState("");
+  const [banner, setBanner] = useState("");
   const [cor1, setCor1] = useState("#7c3aed");
   const [cor2, setCor2] = useState("#f97316");
   const [modalidade, setModalidade] = useState<Modalidade>("ambos");
@@ -38,6 +49,7 @@ function ConfigPage() {
       setNome(loja.nome_fantasia);
       setTelefone(loja.telefone ?? "");
       setLogo(loja.logo_url ?? "");
+      setBanner(loja.banner_url ?? "");
       setCor1(loja.brand_primary);
       setCor2(loja.brand_secondary);
       setModalidade(loja.modalidade as Modalidade);
@@ -53,6 +65,7 @@ function ConfigPage() {
           nome_fantasia: nome,
           telefone: telefone || null,
           logo_url: logo || null,
+        banner_url: banner || null,
           brand_primary: cor1,
           brand_secondary: cor2,
           modalidade,
@@ -85,8 +98,24 @@ function ConfigPage() {
             <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} /></div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-3">
-            <div><Label>URL do logo</Label><Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." /></div>
+          <Card><CardHeader><CardTitle className="text-base">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
+            <AssetUploader
+              storeId={loja.id}
+              kind="logo"
+              label="Logo da loja"
+              hint="Recomendado: 512 × 512 px (quadrado), PNG com fundo transparente. Até 2 MB."
+              value={logo}
+              onChange={setLogo}
+            />
+            <AssetUploader
+              storeId={loja.id}
+              kind="banner"
+              label="Banner da página do cliente"
+              hint="Desktop: 1920 × 480 px · Mobile: 1080 × 720 px. JPG ou PNG até 3 MB."
+              value={banner}
+              onChange={setBanner}
+              aspect="banner"
+            />
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Cor primária</Label><div className="flex gap-2"><Input type="color" value={cor1} onChange={(e) => setCor1(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor1} onChange={(e) => setCor1(e.target.value)} /></div></div>
               <div><Label>Cor secundária</Label><div className="flex gap-2"><Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor2} onChange={(e) => setCor2(e.target.value)} /></div></div>
