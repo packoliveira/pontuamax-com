@@ -20,6 +20,7 @@ import { Route as ValeCodigoRouteImport } from './routes/vale.$codigo'
 import { Route as NpsIdRouteImport } from './routes/nps.$id'
 import { Route as NotaSlugRouteImport } from './routes/nota.$slug'
 import { Route as LojistaValePresenteRouteImport } from './routes/lojista.vale-presente'
+import { Route as LojistaSorteiosRouteImport } from './routes/lojista.sorteios'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
@@ -88,6 +89,11 @@ const NotaSlugRoute = NotaSlugRouteImport.update({
 const LojistaValePresenteRoute = LojistaValePresenteRouteImport.update({
   id: '/vale-presente',
   path: '/vale-presente',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaSorteiosRoute = LojistaSorteiosRouteImport.update({
+  id: '/sorteios',
+  path: '/sorteios',
   getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
   '/lojista/vale-presente': typeof LojistaValePresenteRoute
   '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
   '/lojista/vale-presente': typeof LojistaValePresenteRoute
   '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
   '/lojista/vale-presente': typeof LojistaValePresenteRoute
   '/nota/$slug': typeof NotaSlugRoute
   '/nps/$id': typeof NpsIdRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/sorteios'
     | '/lojista/vale-presente'
     | '/nota/$slug'
     | '/nps/$id'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/sorteios'
     | '/lojista/vale-presente'
     | '/nota/$slug'
     | '/nps/$id'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/lojista/sorteios'
     | '/lojista/vale-presente'
     | '/nota/$slug'
     | '/nps/$id'
@@ -415,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/vale-presente'
       fullPath: '/lojista/vale-presente'
       preLoaderRoute: typeof LojistaValePresenteRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/sorteios': {
+      id: '/lojista/sorteios'
+      path: '/sorteios'
+      fullPath: '/lojista/sorteios'
+      preLoaderRoute: typeof LojistaSorteiosRouteImport
       parentRoute: typeof LojistaRoute
     }
     '/lojista/resgates': {
@@ -540,6 +559,7 @@ interface LojistaRouteChildren {
   LojistaProdutosRoute: typeof LojistaProdutosRoute
   LojistaPromocoesRoute: typeof LojistaPromocoesRoute
   LojistaResgatesRoute: typeof LojistaResgatesRoute
+  LojistaSorteiosRoute: typeof LojistaSorteiosRoute
   LojistaValePresenteRoute: typeof LojistaValePresenteRoute
   LojistaIndexRoute: typeof LojistaIndexRoute
 }
@@ -556,6 +576,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaProdutosRoute: LojistaProdutosRoute,
   LojistaPromocoesRoute: LojistaPromocoesRoute,
   LojistaResgatesRoute: LojistaResgatesRoute,
+  LojistaSorteiosRoute: LojistaSorteiosRoute,
   LojistaValePresenteRoute: LojistaValePresenteRoute,
   LojistaIndexRoute: LojistaIndexRoute,
 }
