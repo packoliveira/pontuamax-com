@@ -21,8 +21,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText } from "lucide-react";
+import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles } from "lucide-react";
 
 const REF_KEY = "qsf_referrer_phone";
 function getStoredReferrer(): string | null {
@@ -378,35 +379,7 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
         <IndicacaoCard loja={loja} telefone={meuTelefone} bonusIndicado={loja.bonus_indicado} bonusIndicador={loja.bonus_indicador} />
       )}
 
-      <section>
-        <h2 className="font-semibold mb-3">Histórico</h2>
-        <Card><CardContent className="p-0"><div className="divide-y">
-          {txs.length === 0 && <div className="p-6 text-center text-sm text-muted-foreground">Sem movimentações ainda</div>}
-          {txs.map((t) => {
-            const prd = (t.products as unknown as { nome: string | null } | null)?.nome;
-            const descr =
-              t.tipo === "venda" ? "Compra na loja" :
-              t.tipo === "resgate_produto" ? `Resgate: ${prd ?? "produto"}` :
-              t.tipo === "vale_presente" ? "Vale-presente" :
-              t.tipo === "nota_fiscal" ? "Nota fiscal aprovada" :
-              t.tipo === "indicacao" ? "Bônus de indicação" :
-              "Voucher de cashback";
-            return (
-              <div key={t.id} className="flex items-center justify-between p-3 text-sm">
-                <div>
-                  <div className="font-medium">{descr}</div>
-                  <div className="text-xs text-muted-foreground">{formatDate(t.created_at)}</div>
-                </div>
-                <div className="text-right text-xs">
-                  {t.tipo === "venda" && <div className="text-muted-foreground">{formatBRL(Number(t.valor))}</div>}
-                  {t.pontos_delta ? <div className={t.pontos_delta > 0 ? "text-green-700" : "text-destructive"}>{t.pontos_delta > 0 ? "+" : ""}{t.pontos_delta} pts</div> : null}
-                  {Number(t.cashback_delta) ? <div className={Number(t.cashback_delta) > 0 ? "text-green-700" : "text-destructive"}>{Number(t.cashback_delta) > 0 ? "+" : ""}{formatBRL(Number(t.cashback_delta))}</div> : null}
-                </div>
-              </div>
-            );
-          })}
-        </div></CardContent></Card>
-      </section>
+      <HistoricoSection txs={txs} inclP={inclP} inclC={inclC} />
 
       <section>
         <Link to="/nota/$slug" params={{ slug: loja.slug }}
