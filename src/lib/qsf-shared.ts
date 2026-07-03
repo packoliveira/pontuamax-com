@@ -46,3 +46,31 @@ export function phoneToEmail(phone: string) {
 export function onlyDigits(s: string) {
   return s.replace(/\D/g, "");
 }
+
+export function cpfToEmail(cpf: string) {
+  const digits = cpf.replace(/\D/g, "");
+  return `${digits}@cpf.qsfclub.local`;
+}
+
+export function formatCPF(v: string) {
+  const d = (v ?? "").replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+export function isValidCPF(cpf: string): boolean {
+  const d = (cpf ?? "").replace(/\D/g, "");
+  if (d.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(d)) return false;
+  const calc = (base: string, factor: number) => {
+    let sum = 0;
+    for (const c of base) sum += Number(c) * factor--;
+    const r = (sum * 10) % 11;
+    return r === 10 ? 0 : r;
+  };
+  const d1 = calc(d.slice(0, 9), 10);
+  const d2 = calc(d.slice(0, 10), 11);
+  return d1 === Number(d[9]) && d2 === Number(d[10]);
+}
