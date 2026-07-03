@@ -16,14 +16,15 @@ export const Route = createFileRoute("/lojista/login")({
     const { data } = await supabase.auth.getSession();
     const uid = data.session?.user.id;
     if (!uid) return;
-    // Já logado: se tem loja, manda pro painel; senão, pro onboarding.
+    // Já logado: só redireciona pro painel se realmente tem loja.
+    // Se não tem loja, mostra o form de login (com opção de sair) —
+    // não força onboarding, senão quem só queria trocar de conta fica preso.
     const { data: store } = await supabase
       .from("stores")
       .select("id")
       .eq("owner_id", uid)
       .maybeSingle();
     if (store) throw redirect({ to: "/lojista" });
-    throw redirect({ to: "/lojista/onboarding" });
   },
   component: Login,
 });
@@ -33,6 +34,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   useEffect(() => {
     try {
       const msg = sessionStorage.getItem("auth_flash");
@@ -41,6 +43,9 @@ function Login() {
         sessionStorage.removeItem("auth_flash");
       }
     } catch { /* ignore */ }
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionEmail(data.session?.user.email ?? null);
+    });
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -63,6 +68,21 @@ function Login() {
           <CardDescription>Entre com o email cadastrado</CardDescription>
         </CardHeader>
         <CardContent>
+          {sessionEmail && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              Você está conectado como <strong>{sessionEmail}</strong>, mas essa conta ainda não tem loja.
+              <button
+                type="button"
+                className="ml-2 underline"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setSessionEmail(null);
+                }}
+              >
+                Sair
+              </button>
+            </div>
+          )}
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
