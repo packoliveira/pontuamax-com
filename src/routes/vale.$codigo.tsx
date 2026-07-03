@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { giftCardByCodeQuery, storeBySlugQuery } from "@/lib/queries";
+import { giftCardByCodeQuery } from "@/lib/queries";
 import { resgatarGiftCard } from "@/lib/qsf.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ function Page() {
   useEffect(() => { supabase.auth.getSession().then(({ data }) => setUid(data.session?.user.id ?? null)); }, []);
 
   const { data: loja } = useQuery({
-    ...storeBySlugQuery(""),
     queryKey: ["store-by-id", card?.store_id],
     enabled: !!card?.store_id,
     queryFn: async () => {
