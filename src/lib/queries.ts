@@ -125,7 +125,7 @@ export const myTransactionsAtStoreQuery = (storeId: string | undefined) =>
         .eq("store_id", storeId)
         .eq("client_user_id", session.session.user.id)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(200);
       if (error) throw error;
       return data ?? [];
     },
