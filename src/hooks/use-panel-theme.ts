@@ -9,7 +9,10 @@ import { useEffect } from "react";
 export function usePanelTheme() {
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.add("dark");
+    // Painel interno agora usa tema claro por padrão.
+    // Garantimos que a classe `dark` não fique ativa caso tenha sido
+    // adicionada em uma versão anterior.
+    root.classList.remove("dark");
     return () => {
       root.classList.remove("dark");
     };
