@@ -23,6 +23,7 @@ import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
+import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 
@@ -96,6 +97,11 @@ const LojistaClientesRoute = LojistaClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => LojistaRoute,
 } as any)
+const LojistaCampanhasRoute = LojistaCampanhasRouteImport.update({
+  id: '/campanhas',
+  path: '/campanhas',
+  getParentRoute: () => LojistaRoute,
+} as any)
 const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
   id: '/aguardando',
   path: '/aguardando',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/aguardando': typeof LojistaAguardandoRoute
+  '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/$slug': typeof SlugRoute
   '/cadastro': typeof CadastroRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
+  '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/aguardando': typeof LojistaAguardandoRoute
+  '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/lojista'
     | '/lojista/aguardando'
+    | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/cadastro'
     | '/lojista/aguardando'
+    | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/lojista'
     | '/lojista/aguardando'
+    | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -324,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaClientesRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/lojista/campanhas': {
+      id: '/lojista/campanhas'
+      path: '/campanhas'
+      fullPath: '/lojista/campanhas'
+      preLoaderRoute: typeof LojistaCampanhasRouteImport
+      parentRoute: typeof LojistaRoute
+    }
     '/lojista/aguardando': {
       id: '/lojista/aguardando'
       path: '/aguardando'
@@ -353,6 +372,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface LojistaRouteChildren {
   LojistaAguardandoRoute: typeof LojistaAguardandoRoute
+  LojistaCampanhasRoute: typeof LojistaCampanhasRoute
   LojistaClientesRoute: typeof LojistaClientesRoute
   LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
@@ -365,6 +385,7 @@ interface LojistaRouteChildren {
 
 const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaAguardandoRoute: LojistaAguardandoRoute,
+  LojistaCampanhasRoute: LojistaCampanhasRoute,
   LojistaClientesRoute: LojistaClientesRoute,
   LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
