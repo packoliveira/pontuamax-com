@@ -348,7 +348,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { user_id: userId, link, senha_temporaria: cpfDigits };
+    return { user_id: userId, link, senha_temporaria: digits };
   });
 
 // -------- Lançar venda (lojista) --------
