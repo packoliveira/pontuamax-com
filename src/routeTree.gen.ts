@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
@@ -23,6 +24,11 @@ import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
   path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -73,6 +79,7 @@ const LojistaClientesRoute = LojistaClientesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
@@ -97,6 +105,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$slug'
     | '/lojista'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$slug'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$slug'
     | '/lojista'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
@@ -147,6 +159,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRoute: typeof SlugRoute
   LojistaRoute: typeof LojistaRouteWithChildren
 }
 
@@ -157,6 +170,13 @@ declare module '@tanstack/react-router' {
       path: '/lojista'
       fullPath: '/lojista'
       preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -252,6 +272,7 @@ const LojistaRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRoute: SlugRoute,
   LojistaRoute: LojistaRouteWithChildren,
 }
 export const routeTree = rootRouteImport
