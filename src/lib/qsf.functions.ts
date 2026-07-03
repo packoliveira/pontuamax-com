@@ -170,6 +170,35 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     if (!owner.data) throw new Error("Você não é dono desta loja.");
     const digits = data.phone.replace(/\D/g, "");
     const cpfDigits = (data.cpf ?? "").replace(/\D/g, "") || null;
+    if (digits.length < 8) throw new Error("Telefone inválido.");
+    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF inválido. Informe os 11 dígitos.");
+
+    // Bloquear duplicidade nesta loja: procurar profiles com mesmo telefone OU CPF
+    const orClauses = [`phone.eq.${digits}`];
+    if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
+    const dup = await supabaseAdmin
+      .from("profiles")
+      .select("id, phone, cpf")
+      .or(orClauses.join(","));
+    const dupIds = (dup.data ?? []).map((p) => p.id);
+    if (dupIds.length > 0) {
+      const links = await supabaseAdmin
+        .from("store_clients")
+        .select("user_id")
+        .eq("store_id", data.store_id)
+        .in("user_id", dupIds);
+      if ((links.data ?? []).length > 0) {
+        const conflict = dup.data!.find((p) => links.data!.some((l) => l.user_id === p.id));
+        if (conflict?.phone === digits) {
+          throw new Error("Já existe um cliente cadastrado nesta loja com este telefone.");
+        }
+        if (cpfDigits && conflict?.cpf === cpfDigits) {
+          throw new Error("Já existe um cliente cadastrado nesta loja com este CPF.");
+        }
+        throw new Error("Já existe um cliente cadastrado nesta loja com este telefone ou CPF.");
+      }
+    }
+
     const email = `${digits}@cliente.qsfclub.local`;
     // Try to find existing user
     let userId: string | undefined;
