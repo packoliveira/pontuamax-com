@@ -827,6 +827,12 @@ export const resgatarProduto = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id, voucher_validade_dias")
+      .eq("id", data.store_id)
+      .maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
     const link = await supabaseAdmin
       .from("store_clients")
       .select("*")
@@ -842,6 +848,8 @@ export const resgatarProduto = createServerFn({ method: "POST" })
     if (!prd.data || prd.data.store_id !== data.store_id || !prd.data.ativo) throw new Error("Produto indisponível.");
     if (link.data.pontos < prd.data.custo_pontos) throw new Error("Pontos insuficientes.");
     const voucher = gerarVoucher();
+    const validade = Math.max(1, Number(loja.data.voucher_validade_dias) || 7);
+    const expiresAt = new Date(Date.now() + validade * 24 * 60 * 60 * 1000).toISOString();
     const novoPontos = link.data.pontos - prd.data.custo_pontos;
     const { error: txErr } = await supabaseAdmin.from("transactions").insert({
       store_id: data.store_id,
@@ -851,13 +859,14 @@ export const resgatarProduto = createServerFn({ method: "POST" })
       product_id: prd.data.id,
       voucher_code: voucher,
       status: "pendente",
+      voucher_expires_at: expiresAt,
     });
     if (txErr) throw new Error(txErr.message);
     await supabaseAdmin
       .from("store_clients")
       .update({ pontos: novoPontos, nivel: calcularNivel(novoPontos) })
       .eq("id", link.data.id);
-    return { voucher };
+    return { voucher, expires_at: expiresAt };
   });
 
 // -------- Cliente: resgatar cashback --------
@@ -868,6 +877,12 @@ export const resgatarCashback = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id, voucher_validade_dias")
+      .eq("id", data.store_id)
+      .maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
     const link = await supabaseAdmin
       .from("store_clients")
       .select("*")
@@ -877,6 +892,8 @@ export const resgatarCashback = createServerFn({ method: "POST" })
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
     if (data.valor > Number(link.data.cashback_saldo)) throw new Error("Cashback insuficiente.");
     const voucher = gerarVoucher();
+    const validade = Math.max(1, Number(loja.data.voucher_validade_dias) || 7);
+    const expiresAt = new Date(Date.now() + validade * 24 * 60 * 60 * 1000).toISOString();
     const novoSaldo = +(Number(link.data.cashback_saldo) - data.valor).toFixed(2);
     const { error: txErr } = await supabaseAdmin.from("transactions").insert({
       store_id: data.store_id,
@@ -885,10 +902,11 @@ export const resgatarCashback = createServerFn({ method: "POST" })
       cashback_delta: -data.valor,
       voucher_code: voucher,
       status: "pendente",
+      voucher_expires_at: expiresAt,
     });
     if (txErr) throw new Error(txErr.message);
     await supabaseAdmin.from("store_clients").update({ cashback_saldo: novoSaldo }).eq("id", link.data.id);
-    return { voucher };
+    return { voucher, expires_at: expiresAt };
   });
 
 // -------- Lojista: confirmar entrega de resgate --------
@@ -897,12 +915,95 @@ export const confirmarResgate = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ transaction_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const tx = await supabaseAdmin.from("transactions").select("id, store_id, stores:store_id(owner_id)").eq("id", data.transaction_id).maybeSingle();
+    const tx = await supabaseAdmin
+      .from("transactions")
+      .select("id, store_id, status, voucher_expires_at, stores:store_id(owner_id)")
+      .eq("id", data.transaction_id)
+      .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
     if (!tx.data || ownerId !== context.userId) throw new Error("Não autorizado.");
+    if (tx.data.status === "entregue") throw new Error("Voucher já foi entregue.");
+    if (tx.data.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
+    if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
+      throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
+    }
     const { error } = await supabaseAdmin.from("transactions").update({ status: "entregue" }).eq("id", data.transaction_id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// -------- Lojista: validar voucher pelo código --------
+export const validarVoucher = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ voucher_code: z.string().min(4).max(40) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const store = await supabaseAdmin
+      .from("stores").select("id, nome_fantasia").eq("owner_id", context.userId).maybeSingle();
+    if (!store.data) throw new Error("Loja não encontrada.");
+    const code = data.voucher_code.trim().toUpperCase();
+    const tx = await supabaseAdmin
+      .from("transactions")
+      .select("id, tipo, status, valor, pontos_delta, cashback_delta, voucher_code, voucher_expires_at, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone)")
+      .eq("store_id", store.data.id)
+      .eq("voucher_code", code)
+      .maybeSingle();
+    if (!tx.data) throw new Error("Voucher não encontrado nesta loja.");
+    if (tx.data.status === "entregue") throw new Error("Voucher já foi entregue.");
+    if (tx.data.status === "expirado") throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
+    if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
+      throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
+    }
+    const { error } = await supabaseAdmin
+      .from("transactions").update({ status: "entregue" }).eq("id", tx.data.id);
+    if (error) throw new Error(error.message);
+    return {
+      ok: true,
+      voucher: tx.data.voucher_code,
+      tipo: tx.data.tipo,
+      cliente: (tx.data.profiles as { full_name: string | null } | null)?.full_name ?? "Cliente",
+      produto: (tx.data.products as { nome: string | null } | null)?.nome ?? null,
+      pontos: Math.abs(Number(tx.data.pontos_delta || 0)),
+      cashback: Math.abs(Number(tx.data.cashback_delta || 0)),
+    };
+  });
+
+// -------- Job: expirar vouchers vencidos e devolver saldo ao cliente --------
+// Chamado pelo cron pg_cron via /api/public/hooks/expirar-vouchers
+export const expirarVouchersVencidos = createServerFn({ method: "POST" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const nowIso = new Date().toISOString();
+    const pend = await supabaseAdmin
+      .from("transactions")
+      .select("id, store_id, client_user_id, tipo, pontos_delta, cashback_delta, voucher_code")
+      .eq("status", "pendente")
+      .not("voucher_expires_at", "is", null)
+      .lt("voucher_expires_at", nowIso)
+      .limit(500);
+    if (pend.error) throw new Error(pend.error.message);
+    let expired = 0;
+    let refunded = 0;
+    for (const t of pend.data ?? []) {
+      if (!t.client_user_id) continue;
+      const link = await supabaseAdmin
+        .from("store_clients").select("id, pontos, cashback_saldo")
+        .eq("store_id", t.store_id).eq("user_id", t.client_user_id).maybeSingle();
+      const pontosDevolver = -Number(t.pontos_delta || 0); // pontos_delta é negativo em resgate
+      const cashbackDevolver = -Number(t.cashback_delta || 0);
+      if (link.data) {
+        const novoPontos = Math.max(0, link.data.pontos + pontosDevolver);
+        const novoCashback = Math.max(0, +(Number(link.data.cashback_saldo) + cashbackDevolver).toFixed(2));
+        await supabaseAdmin
+          .from("store_clients")
+          .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+          .eq("id", link.data.id);
+        refunded++;
+      }
+      await supabaseAdmin.from("transactions").update({ status: "expirado" }).eq("id", t.id);
+      expired++;
+    }
+    return { expired, refunded };
   });
 
 // -------- Produtos CRUD (lojista) --------
