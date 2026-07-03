@@ -728,6 +728,76 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
     return { ok: true, novo_saldo: novoPontos };
   });
 
+// -------- LOJISTA: estornar uma venda lançada --------
+export const estornarVenda = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      transaction_id: z.string().uuid(),
+      motivo: z.string().max(200).optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const tx = await supabaseAdmin
+      .from("transactions")
+      .select("id, store_id, client_user_id, tipo, valor, pontos_delta, cashback_delta, origem, stores:store_id(owner_id)")
+      .eq("id", data.transaction_id)
+      .maybeSingle();
+    if (!tx.data) throw new Error("Venda não encontrada.");
+    const owner = (tx.data.stores as unknown as { owner_id: string } | null)?.owner_id;
+    if (owner !== context.userId) throw new Error("Sem permissão para estornar esta venda.");
+    if (tx.data.tipo !== "venda") throw new Error("Só é possível estornar transações do tipo venda.");
+    if (typeof tx.data.origem === "string" && tx.data.origem.startsWith("estornada:")) {
+      throw new Error("Esta venda já foi estornada.");
+    }
+    // Verifica se já existe um estorno para essa transação
+    const jaEstornada = await supabaseAdmin
+      .from("transactions")
+      .select("id")
+      .eq("store_id", tx.data.store_id)
+      .eq("client_user_id", tx.data.client_user_id)
+      .eq("origem", `estorno:${tx.data.id}`)
+      .maybeSingle();
+    if (jaEstornada.data) throw new Error("Esta venda já foi estornada.");
+
+    const link = await supabaseAdmin
+      .from("store_clients").select("id, pontos, cashback_saldo")
+      .eq("store_id", tx.data.store_id).eq("user_id", tx.data.client_user_id).maybeSingle();
+    if (!link.data) throw new Error("Cliente não vinculado à loja.");
+
+    const deltaPontos = -Number(tx.data.pontos_delta || 0);
+    const deltaCashback = -Number(tx.data.cashback_delta || 0);
+    const novoPontos = Math.max(0, link.data.pontos + deltaPontos);
+    const novoCashback = Math.max(0, +(Number(link.data.cashback_saldo) + deltaCashback).toFixed(2));
+
+    const ins = await supabaseAdmin.from("transactions").insert({
+      store_id: tx.data.store_id,
+      client_user_id: tx.data.client_user_id,
+      tipo: "ajuste",
+      valor: 0,
+      pontos_delta: deltaPontos,
+      cashback_delta: deltaCashback,
+      status: "entregue",
+      origem: `estorno:${tx.data.id}${data.motivo ? `:${data.motivo.slice(0, 120)}` : ""}`,
+    });
+    if (ins.error) throw new Error(ins.error.message);
+
+    const upd = await supabaseAdmin
+      .from("store_clients")
+      .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+      .eq("id", link.data.id);
+    if (upd.error) throw new Error(upd.error.message);
+
+    // Marca a venda original como estornada (origem prefixada)
+    await supabaseAdmin
+      .from("transactions")
+      .update({ origem: `estornada:${tx.data.origem ?? "manual"}` })
+      .eq("id", tx.data.id);
+
+    return { ok: true, pontos_revertidos: -deltaPontos, cashback_revertido: -deltaCashback };
+  });
+
 // -------- Disparar notificações agora (teste manual) --------
 export const dispararNotificacoesAgora = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
