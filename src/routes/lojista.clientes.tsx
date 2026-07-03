@@ -3,13 +3,15 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
 import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente } from "@/lib/qsf.functions";
-import { formatBRL, formatDate } from "@/lib/qsf-shared";
+import { formatBRL, formatDate, calcularNivel, progressoNivel } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trophy } from "lucide-react";
 import { Search, Cake, X, Plus, UserPlus, Pencil, Coins, Minus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +25,36 @@ const NIVEL_COR: Record<string, string> = {
   prata: "bg-slate-200 text-slate-800",
   ouro: "bg-yellow-100 text-yellow-800",
 };
+
+type FiltroCampo = "todos" | "nome" | "telefone" | "cpf";
+type FiltroNivel = "todos" | "bronze" | "prata" | "ouro";
+
+function NivelBadge({ pontos, nivel }: { pontos: number; nivel: string }) {
+  const prog = progressoNivel(pontos);
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <Badge className={NIVEL_COR[nivel] ?? ""} variant="secondary">
+        <Trophy className="mr-1 h-3 w-3" /> {nivel}
+      </Badge>
+      {prog.proximo ? (
+        <div className="w-32">
+          <div className="mb-0.5 flex items-center justify-between text-[10px] text-muted-foreground">
+            <span>→ {prog.proximo}</span>
+            <span>{Math.max(0, Math.min(prog.alvo, prog.alvo - prog.atual))} pts</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${Math.min(100, Math.max(0, prog.pct))}%` }}
+            />
+          </div>
+        </div>
+      ) : (
+        <span className="text-[10px] text-muted-foreground">nível máximo</span>
+      )}
+    </div>
+  );
+}
 
 // --- helpers de formatação/validação
 function onlyDigits(v: string) {
@@ -65,6 +97,8 @@ function ClientesPage() {
   const { data: clientes = [] } = useQuery(storeClientsQuery(loja?.id));
   const { data: tags = [] } = useQuery(clientTagsQuery(loja?.id));
   const [q, setQ] = useState("");
+  const [filtroCampo, setFiltroCampo] = useState<FiltroCampo>("todos");
+  const [filtroNivel, setFiltroNivel] = useState<FiltroNivel>("todos");
   const [editing, setEditing] = useState<{ userId: string; value: string } | null>(null);
   const [tagInput, setTagInput] = useState<Record<string, string>>({});
   const [openNew, setOpenNew] = useState(false);
@@ -168,10 +202,21 @@ function ClientesPage() {
   if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
 
   const filtered = clientes.filter((c) => {
+    if (filtroNivel !== "todos" && c.nivel !== filtroNivel) return false;
     if (!q) return true;
-    const s = q.toLowerCase();
+    const s = q.toLowerCase().trim();
+    const digits = q.replace(/\D/g, "");
     const p = c.profiles as unknown as ClienteProfile | null;
-    return (p?.full_name ?? "").toLowerCase().includes(s) || (p?.phone ?? "").includes(s) || (p?.cpf ?? "").includes(s);
+    const nome = (p?.full_name ?? "").toLowerCase();
+    const tel = p?.phone ?? "";
+    const cpf = p?.cpf ?? "";
+    if (filtroCampo === "nome") return nome.includes(s);
+    if (filtroCampo === "telefone") return digits.length > 0 && tel.includes(digits);
+    if (filtroCampo === "cpf") return digits.length > 0 && cpf.includes(digits);
+    return (
+      nome.includes(s) ||
+      (digits.length > 0 && (tel.includes(digits) || cpf.includes(digits)))
+    );
   });
   const inclP = loja.modalidade !== "cashback";
   const inclC = loja.modalidade !== "pontos";
@@ -181,15 +226,58 @@ function ClientesPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Clientes</h1>
-          <p className="text-sm text-muted-foreground">{clientes.length} cliente(s) cadastrado(s)</p>
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} de {clientes.length} cliente(s)
+          </p>
         </div>
         <Button onClick={() => setOpenNew(true)}>
           <UserPlus className="h-4 w-4" /> Cadastrar cliente
         </Button>
       </div>
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Buscar por nome, telefone ou CPF" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[240px] flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={
+              filtroCampo === "nome" ? "Buscar por nome" :
+              filtroCampo === "telefone" ? "Buscar por telefone (só dígitos)" :
+              filtroCampo === "cpf" ? "Buscar por CPF (só dígitos)" :
+              "Buscar por nome, telefone ou CPF"
+            }
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={filtroCampo} onValueChange={(v) => setFiltroCampo(v as FiltroCampo)}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Campo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os campos</SelectItem>
+            <SelectItem value="nome">Nome</SelectItem>
+            <SelectItem value="telefone">Telefone</SelectItem>
+            <SelectItem value="cpf">CPF</SelectItem>
+          </SelectContent>
+        </Select>
+        {inclP && (
+          <Select value={filtroNivel} onValueChange={(v) => setFiltroNivel(v as FiltroNivel)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Nível" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os níveis</SelectItem>
+              <SelectItem value="bronze">Bronze</SelectItem>
+              <SelectItem value="prata">Prata</SelectItem>
+              <SelectItem value="ouro">Ouro</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        {(q || filtroCampo !== "todos" || filtroNivel !== "todos") && (
+          <Button variant="ghost" size="sm" onClick={() => { setQ(""); setFiltroCampo("todos"); setFiltroNivel("todos"); }}>
+            Limpar
+          </Button>
+        )}
       </div>
       <Card>
         <CardContent className="p-0">
@@ -202,9 +290,6 @@ function ClientesPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{p?.full_name ?? "—"}</span>
-                      {inclP && (
-                        <Badge className={NIVEL_COR[c.nivel]} variant="secondary">{c.nivel}</Badge>
-                      )}
                       <Button
                         size="sm"
                         variant="ghost"
@@ -261,9 +346,12 @@ function ClientesPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2 text-sm">
                     {inclP && (
-                      <div className="text-right">
-                        <div className="text-xs text-muted-foreground">Saldo de pontos</div>
-                        <div className="text-lg font-bold">{c.pontos} <span className="text-xs font-normal text-muted-foreground">pts</span></div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">Saldo</div>
+                          <div className="text-lg font-bold">{c.pontos} <span className="text-xs font-normal text-muted-foreground">pts</span></div>
+                        </div>
+                        <NivelBadge pontos={c.pontos} nivel={c.nivel} />
                       </div>
                     )}
                     {inclC && <div className="text-green-700 font-semibold">{formatBRL(Number(c.cashback_saldo))}</div>}
