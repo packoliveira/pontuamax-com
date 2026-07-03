@@ -193,7 +193,14 @@ export const lancarVenda = createServerFn({ method: "POST" })
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
     const inclP = loja.data.modalidade !== "cashback";
     const inclC = loja.data.modalidade !== "pontos";
-    const pontos = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos)) : 0;
+    // Buscar promoções ativas da loja e aplicar multiplicador
+    const promosRes = await supabaseAdmin
+      .from("promotions")
+      .select("multiplicador, dias_semana, hora_inicio, hora_fim, data_inicio, data_fim")
+      .eq("store_id", data.store_id)
+      .eq("ativo", true);
+    const multiplicador = getActiveMultiplier(promosRes.data ?? []);
+    const pontos = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos) * multiplicador) : 0;
     const cashback = inclC ? +(data.valor * (Number(loja.data.percentual_cashback) / 100)).toFixed(2) : 0;
     const novoPontos = link.data.pontos + pontos;
     const novoCashback = +(Number(link.data.cashback_saldo) + cashback).toFixed(2);
@@ -221,7 +228,56 @@ export const lancarVenda = createServerFn({ method: "POST" })
         pontosGanhos: pontos,
       });
     }
-    return { pontos, cashback };
+    return { pontos, cashback, multiplicador };
+  });
+
+// -------- Promoções: CRUD --------
+const promoSchema = z.object({
+  id: z.string().uuid().optional(),
+  nome: z.string().min(1).max(100),
+  multiplicador: z.number().min(1).max(10),
+  dias_semana: z.array(z.number().int().min(0).max(6)).min(1),
+  hora_inicio: z.string().regex(/^\d{2}:\d{2}$/),
+  hora_fim: z.string().regex(/^\d{2}:\d{2}$/),
+  data_inicio: z.string().nullable().optional(),
+  data_fim: z.string().nullable().optional(),
+  ativo: z.boolean().default(true),
+});
+
+export const salvarPromocao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => promoSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const loja = await context.supabase.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    const payload = {
+      store_id: loja.data.id,
+      nome: data.nome,
+      multiplicador: data.multiplicador,
+      dias_semana: data.dias_semana,
+      hora_inicio: data.hora_inicio,
+      hora_fim: data.hora_fim,
+      data_inicio: data.data_inicio || null,
+      data_fim: data.data_fim || null,
+      ativo: data.ativo,
+    };
+    if (data.id) {
+      const { error } = await context.supabase.from("promotions").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase.from("promotions").insert(payload);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const removerPromocao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("promotions").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 // -------- Cliente: resgatar produto --------
