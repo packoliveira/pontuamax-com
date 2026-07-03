@@ -172,7 +172,12 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
   );
 }
 
-function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Promise<void> }) {
+function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
+  loja: Loja;
+  onAuthenticated: () => Promise<void>;
+  onAuthStart?: () => void;
+  onAuthError?: () => void;
+}) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
@@ -197,6 +202,7 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
     if (senha.length < 6) return toast.error("A senha precisa ter no mínimo 6 caracteres.");
     if (mode === "signup" && senha !== senha2) return toast.error("As senhas não coincidem");
     setLoading(true);
+    onAuthStart?.();
     try {
       const email = cpfToEmail(cpfDigits);
       if (mode === "signup") {
@@ -234,6 +240,7 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
       }
       await onAuthenticated();
     } catch (err) {
+      onAuthError?.();
       // Auto-switch: cadastro com CPF já existente → login
       if (mode === "signup" && isUsuarioJaCadastrado(err)) {
         switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
