@@ -29,7 +29,7 @@ async function writeAudit(params: {
     target_type: params.targetType ?? null,
     target_id: params.targetId ?? null,
     target_label: params.targetLabel ?? null,
-    details: params.details ?? {},
+    details: (params.details ?? {}) as never,
   });
 }
 
