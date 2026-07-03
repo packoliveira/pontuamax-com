@@ -10,8 +10,8 @@ import { createFileRoute } from "@tanstack/react-router";
 // {
 //   "id_venda_externa": "12345",     // required, used for idempotency
 //   "valor": 199.90,                  // required, valor total da venda em BRL
-//   "telefone_cliente": "11999999999",// required (ou cpf_cliente)
-//   "cpf_cliente": "12345678900",     // opcional
+//   "cpf_cliente": "12345678900",     // required (11 dígitos) — login do cliente é sempre por CPF
+//   "telefone_cliente": "11999999999",// opcional
 //   "nome_cliente": "Fulano"          // opcional (usado ao criar cliente novo)
 // }
 
