@@ -244,6 +244,9 @@ function Auth({ loja }: { loja: Loja }) {
 
 function VincularStore({ loja }: { loja: Loja }) {
   const qc = useQueryClient();
+  // Sessão criada agora (fluxo de cadastro na página pública): vincula automaticamente uma vez.
+  // Sessão pré-existente sem vínculo (ex.: cliente excluído pelo lojista): desloga e volta ao login.
+  const [ready, setReady] = useState(false);
   const vincular = useMutation({
     mutationFn: () => vincularClienteALoja({ data: { store_id: loja.id, referrer_phone: getStoredReferrer() } }),
     onSuccess: (link) => {
@@ -257,7 +260,22 @@ function VincularStore({ loja }: { loja: Loja }) {
     },
     onError: (e) => toast.error((e as Error).message),
   });
-  useEffect(() => { vincular.mutate(); }, []); // eslint-disable-line
+  useEffect(() => {
+    const flag = `justSignedUp:${loja.id}`;
+    const justSignedUp = typeof window !== "undefined" && sessionStorage.getItem(flag) === "1";
+    if (justSignedUp) {
+      try { sessionStorage.removeItem(flag); } catch { /* ignore */ }
+      vincular.mutate();
+      setReady(true);
+    } else {
+      // Sessão antiga sem vínculo → forçar login novamente
+      (async () => {
+        await supabase.auth.signOut();
+        qc.clear();
+      })();
+    }
+  }, []); // eslint-disable-line
+  if (!ready) return <div className="p-8 text-center text-sm text-muted-foreground">Redirecionando para o login...</div>;
   return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
 }
 
