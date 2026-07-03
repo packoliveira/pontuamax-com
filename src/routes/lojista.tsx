@@ -1,5 +1,4 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { LojistaShell } from "@/components/lojista-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { usePanelTheme } from "@/hooks/use-panel-theme";
@@ -28,15 +27,10 @@ export const Route = createFileRoute("/lojista")({
 
 function LojistaLayout() {
   usePanelTheme();
-  const { data: session } = useQuery({
-    queryKey: ["auth-session"],
-    queryFn: async () => (await supabase.auth.getSession()).data.session,
-  });
-  if (!session) return <Outlet />;
-  // Tela aguardando é standalone (sem shell)
-  if (typeof window !== "undefined" && window.location.pathname === "/lojista/aguardando") {
-    return <Outlet />;
-  }
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Rotas públicas / standalone: sem shell
+  const standalone = ["/lojista/login", "/lojista/onboarding", "/lojista/aguardando"];
+  if (standalone.includes(pathname)) return <Outlet />;
   return (
     <LojistaShell>
       <Outlet />
