@@ -179,6 +179,16 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           .eq("id", link.id);
         if (upd.error) return logAndRespond("erro", upd.error.message, 500);
 
+        if (pontos > 0) {
+          const { notifyClient } = await import("@/lib/notify.server");
+          await notifyClient({
+            event: "pontos_ganhos",
+            storeId: loja.id,
+            clientUserId: clientProfile.id,
+            pontosGanhos: pontos,
+          });
+        }
+
         return logAndRespond("sucesso", "venda processada", 200, {
           pontos_creditados: pontos,
           cashback_creditado: cashback,

@@ -2,16 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, integrationLogsQuery } from "@/lib/queries";
-import { atualizarLoja, rotacionarWebhookSecret, testarWebhook } from "@/lib/qsf.functions";
+import { atualizarLoja, rotacionarWebhookSecret, testarWebhook, salvarWhatsapp, enviarWhatsappTeste } from "@/lib/qsf.functions";
 import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle } from "lucide-react";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
@@ -116,6 +118,7 @@ function ConfigPage() {
           </Button>
 
           <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
+          <WhatsappCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
@@ -291,6 +294,163 @@ function IntegracoesCard({
               ))}
             </div>
           )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+type LojaRow = {
+  id: string;
+  evolution_url: string | null;
+  evolution_apikey: string | null;
+  evolution_instance: string | null;
+  whatsapp_enabled: boolean;
+  whatsapp_template_pontos: string;
+};
+
+const DEFAULT_TEMPLATE = `Oi {nome_cliente}! 🎉
+Você acabou de ganhar {pontos_ganhos} pontos na {nome_loja}!
+Seu saldo atual: {pontos_saldo} pontos.
+Faltam {pontos_faltantes} pontos para você trocar por: {proximo_premio}.
+Confira tudo aqui: {link_portal_cliente}`;
+
+function WhatsappCard({ loja }: { loja: LojaRow }) {
+  const qc = useQueryClient();
+  const [url, setUrl] = useState(loja.evolution_url ?? "");
+  const [apikey, setApikey] = useState(loja.evolution_apikey ?? "");
+  const [instance, setInstance] = useState(loja.evolution_instance ?? "");
+  const [enabled, setEnabled] = useState(loja.whatsapp_enabled);
+  const [template, setTemplate] = useState(loja.whatsapp_template_pontos || DEFAULT_TEMPLATE);
+  const [testPhone, setTestPhone] = useState("");
+
+  useEffect(() => {
+    setUrl(loja.evolution_url ?? "");
+    setApikey(loja.evolution_apikey ?? "");
+    setInstance(loja.evolution_instance ?? "");
+    setEnabled(loja.whatsapp_enabled);
+    setTemplate(loja.whatsapp_template_pontos || DEFAULT_TEMPLATE);
+  }, [loja]);
+
+  const salvar = useMutation({
+    mutationFn: () =>
+      salvarWhatsapp({
+        data: {
+          evolution_url: url || null,
+          evolution_apikey: apikey || null,
+          evolution_instance: instance || null,
+          whatsapp_enabled: enabled,
+          whatsapp_template_pontos: template,
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Configurações de WhatsApp salvas");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const testar = useMutation({
+    mutationFn: () => enviarWhatsappTeste({ data: { telefone: testPhone } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["integration-logs", loja.id] });
+      toast.success(`Mensagem enviada para ${r.numero}`);
+    },
+    onError: (e) => {
+      qc.invalidateQueries({ queryKey: ["integration-logs", loja.id] });
+      toast.error((e as Error).message);
+    },
+  });
+
+  const vars = [
+    "{nome_cliente}",
+    "{pontos_ganhos}",
+    "{nome_loja}",
+    "{pontos_saldo}",
+    "{pontos_faltantes}",
+    "{proximo_premio}",
+    "{link_portal_cliente}",
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <MessageCircle className="h-4 w-4" />
+          WhatsApp (Evolution API)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between rounded-md border p-3">
+          <div>
+            <div className="text-sm font-medium">Envio automático de "pontos ganhos"</div>
+            <div className="text-xs text-muted-foreground">
+              Dispara toda vez que o cliente ganha pontos (manual ou via Bling/Olist).
+            </div>
+          </div>
+          <Switch checked={enabled} onCheckedChange={setEnabled} />
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div>
+            <Label>URL da instância Evolution</Label>
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://evolution.seu-dominio.com" />
+          </div>
+          <div>
+            <Label>Nome da instância</Label>
+            <Input value={instance} onChange={(e) => setInstance(e.target.value)} placeholder="minha-loja" />
+          </div>
+        </div>
+        <div>
+          <Label>API Key (header apikey)</Label>
+          <Input type="password" value={apikey} onChange={(e) => setApikey(e.target.value)} placeholder="••••••••" />
+          <p className="text-xs text-muted-foreground mt-1">
+            A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente final.
+          </p>
+        </div>
+
+        <div>
+          <Label>Template da mensagem "pontos ganhos"</Label>
+          <Textarea rows={7} value={template} onChange={(e) => setTemplate(e.target.value)} className="font-mono text-xs" />
+          <div className="mt-2 flex flex-wrap gap-1">
+            {vars.map((v) => (
+              <button
+                key={v}
+                type="button"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-muted hover:bg-muted-foreground/20 font-mono"
+                onClick={() => setTemplate((t) => `${t}${v}`)}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          {salvar.isPending ? "Salvando..." : "Salvar WhatsApp"}
+        </Button>
+
+        <div className="rounded-md border p-3 space-y-2">
+          <Label>Enviar mensagem de teste</Label>
+          <div className="flex gap-2">
+            <Input
+              value={testPhone}
+              onChange={(e) => setTestPhone(e.target.value)}
+              placeholder="11 91234-5678"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => testar.mutate()}
+              disabled={testar.isPending || !testPhone}
+            >
+              <Send className="h-4 w-4 mr-1" />
+              {testar.isPending ? "Enviando..." : "Testar"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Prefixo 55 é adicionado automaticamente. Sucessos e erros aparecem em "Últimos 20 eventos" acima.
+          </p>
         </div>
       </CardContent>
     </Card>

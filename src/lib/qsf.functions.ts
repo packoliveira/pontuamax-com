@@ -175,6 +175,15 @@ export const lancarVenda = createServerFn({ method: "POST" })
       .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
       .eq("id", link.data.id);
     if (updErr) throw new Error(updErr.message);
+    if (pontos > 0) {
+      const { notifyClient } = await import("./notify.server");
+      await notifyClient({
+        event: "pontos_ganhos",
+        storeId: data.store_id,
+        clientUserId: data.client_user_id,
+        pontosGanhos: pontos,
+      });
+    }
     return { pontos, cashback };
   });
 
@@ -358,4 +367,57 @@ export const testarWebhook = createServerFn({ method: "POST" })
       .update({ webhook_last_at: new Date().toISOString() })
       .eq("id", loja.data.id);
     return { ok: true };
+  });
+
+// -------- WhatsApp: salvar config da Evolution API + template + toggle --------
+export const salvarWhatsapp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        evolution_url: z.string().max(300).optional().nullable(),
+        evolution_apikey: z.string().max(300).optional().nullable(),
+        evolution_instance: z.string().max(100).optional().nullable(),
+        whatsapp_enabled: z.boolean(),
+        whatsapp_template_pontos: z.string().min(1).max(2000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("stores").update(data).eq("owner_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -------- WhatsApp: enviar mensagem de teste --------
+export const enviarWhatsappTeste = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ telefone: z.string().min(8).max(20), texto: z.string().min(1).max(1000).optional() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id, nome_fantasia, evolution_url, evolution_apikey, evolution_instance")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    if (!loja.data.evolution_url || !loja.data.evolution_apikey || !loja.data.evolution_instance) {
+      throw new Error("Configure URL, API key e instância da Evolution API antes de testar.");
+    }
+    const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
+    const numero = formatBrazilPhone(data.telefone);
+    if (!numero) throw new Error("Telefone inválido.");
+    const texto = data.texto ?? `✅ Teste QSF Club — ${loja.data.nome_fantasia}. Integração WhatsApp funcionando!`;
+    const res = await sendWhatsappRaw({
+      storeId: loja.data.id,
+      url: loja.data.evolution_url,
+      apikey: loja.data.evolution_apikey,
+      instance: loja.data.evolution_instance,
+      number: numero,
+      text: texto,
+    });
+    if (!res.ok) throw new Error(res.error ?? "Falha ao enviar");
+    return { ok: true, numero };
   });

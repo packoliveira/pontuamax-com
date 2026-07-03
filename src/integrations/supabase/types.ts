@@ -158,6 +158,9 @@ export type Database = {
           brand_secondary: string
           cnpj: string | null
           created_at: string
+          evolution_apikey: string | null
+          evolution_instance: string | null
+          evolution_url: string | null
           id: string
           logo_url: string | null
           modalidade: Database["public"]["Enums"]["modalidade"]
@@ -169,12 +172,17 @@ export type Database = {
           telefone: string | null
           webhook_last_at: string | null
           webhook_secret: string
+          whatsapp_enabled: boolean
+          whatsapp_template_pontos: string
         }
         Insert: {
           brand_primary?: string
           brand_secondary?: string
           cnpj?: string | null
           created_at?: string
+          evolution_apikey?: string | null
+          evolution_instance?: string | null
+          evolution_url?: string | null
           id?: string
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
@@ -186,12 +194,17 @@ export type Database = {
           telefone?: string | null
           webhook_last_at?: string | null
           webhook_secret?: string
+          whatsapp_enabled?: boolean
+          whatsapp_template_pontos?: string
         }
         Update: {
           brand_primary?: string
           brand_secondary?: string
           cnpj?: string | null
           created_at?: string
+          evolution_apikey?: string | null
+          evolution_instance?: string | null
+          evolution_url?: string | null
           id?: string
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
@@ -203,6 +216,8 @@ export type Database = {
           telefone?: string | null
           webhook_last_at?: string | null
           webhook_secret?: string
+          whatsapp_enabled?: boolean
+          whatsapp_template_pontos?: string
         }
         Relationships: []
       }
