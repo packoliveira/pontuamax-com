@@ -679,3 +679,153 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
     </Card>
   );
 }
+
+type LojaLite = {
+  notif_birthday_enabled: boolean;
+  notif_birthday_bonus_points: number;
+  notif_birthday_template: string;
+  notif_inactivity_enabled: boolean;
+  notif_inactivity_days: number;
+  notif_inactivity_template: string;
+  notif_expiry_enabled: boolean;
+  notif_expiry_days: number;
+  notif_expiry_warn_days: number;
+  notif_expiry_template: string;
+};
+
+function NotificacoesCard({ loja }: { loja: LojaLite }) {
+  const [bDayOn, setBDayOn] = useState(loja.notif_birthday_enabled);
+  const [bDayBonus, setBDayBonus] = useState(String(loja.notif_birthday_bonus_points));
+  const [bDayTpl, setBDayTpl] = useState(loja.notif_birthday_template);
+  const [inatOn, setInatOn] = useState(loja.notif_inactivity_enabled);
+  const [inatDias, setInatDias] = useState(String(loja.notif_inactivity_days));
+  const [inatTpl, setInatTpl] = useState(loja.notif_inactivity_template);
+  const [expOn, setExpOn] = useState(loja.notif_expiry_enabled);
+  const [expDias, setExpDias] = useState(String(loja.notif_expiry_days));
+  const [expWarn, setExpWarn] = useState(String(loja.notif_expiry_warn_days));
+  const [expTpl, setExpTpl] = useState(loja.notif_expiry_template);
+
+  useEffect(() => {
+    setBDayOn(loja.notif_birthday_enabled);
+    setBDayBonus(String(loja.notif_birthday_bonus_points));
+    setBDayTpl(loja.notif_birthday_template);
+    setInatOn(loja.notif_inactivity_enabled);
+    setInatDias(String(loja.notif_inactivity_days));
+    setInatTpl(loja.notif_inactivity_template);
+    setExpOn(loja.notif_expiry_enabled);
+    setExpDias(String(loja.notif_expiry_days));
+    setExpWarn(String(loja.notif_expiry_warn_days));
+    setExpTpl(loja.notif_expiry_template);
+  }, [loja]);
+
+  const salvar = useMutation({
+    mutationFn: () =>
+      salvarNotificacoes({
+        data: {
+          notif_birthday_enabled: bDayOn,
+          notif_birthday_bonus_points: parseInt(bDayBonus) || 0,
+          notif_birthday_template: bDayTpl,
+          notif_inactivity_enabled: inatOn,
+          notif_inactivity_days: parseInt(inatDias) || 60,
+          notif_inactivity_template: inatTpl,
+          notif_expiry_enabled: expOn,
+          notif_expiry_days: parseInt(expDias) || 180,
+          notif_expiry_warn_days: parseInt(expWarn) || 7,
+          notif_expiry_template: expTpl,
+        },
+      }),
+    onSuccess: () => toast.success("Notificações salvas"),
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const disparar = useMutation({
+    mutationFn: () => dispararNotificacoesAgora({}),
+    onSuccess: (r: unknown) => {
+      const s = r as { aniversario: number; inatividade: number; expiracao: number; erros: number };
+      toast.success(`Enviadas: 🎂${s.aniversario} · 💤${s.inatividade} · ⏳${s.expiracao} · ⚠️${s.erros} erros`);
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><Bell className="h-4 w-4" /> Notificações automáticas</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <p className="text-xs text-muted-foreground">
+          Cron diário (09:00 Brasília) envia estas mensagens via WhatsApp. Requer WhatsApp ativado e Evolution API conectada acima.
+        </p>
+
+        {/* Aniversário */}
+        <div className="rounded-md border p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-semibold text-sm"><Cake className="h-4 w-4 text-pink-500" /> Aniversário</div>
+            <Switch checked={bDayOn} onCheckedChange={setBDayOn} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Bônus em pontos</Label>
+              <Input type="number" min={0} value={bDayBonus} onChange={(e) => setBDayBonus(e.target.value)} disabled={!bDayOn} />
+            </div>
+          </div>
+          <div>
+            <Label>Mensagem</Label>
+            <Textarea rows={3} value={bDayTpl} onChange={(e) => setBDayTpl(e.target.value)} disabled={!bDayOn} />
+            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}</p>
+          </div>
+        </div>
+
+        {/* Inatividade */}
+        <div className="rounded-md border p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-semibold text-sm"><Clock className="h-4 w-4 text-amber-500" /> Cliente sumido</div>
+            <Switch checked={inatOn} onCheckedChange={setInatOn} />
+          </div>
+          <div>
+            <Label>Enviar após quantos dias sem comprar</Label>
+            <Input type="number" min={1} value={inatDias} onChange={(e) => setInatDias(e.target.value)} disabled={!inatOn} />
+          </div>
+          <div>
+            <Label>Mensagem</Label>
+            <Textarea rows={3} value={inatTpl} onChange={(e) => setInatTpl(e.target.value)} disabled={!inatOn} />
+            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}</p>
+          </div>
+        </div>
+
+        {/* Expiração */}
+        <div className="rounded-md border p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-semibold text-sm"><TimerReset className="h-4 w-4 text-red-500" /> Pontos a expirar</div>
+            <Switch checked={expOn} onCheckedChange={setExpOn} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Pontos expiram em (dias)</Label>
+              <Input type="number" min={1} value={expDias} onChange={(e) => setExpDias(e.target.value)} disabled={!expOn} />
+            </div>
+            <div>
+              <Label>Avisar quantos dias antes</Label>
+              <Input type="number" min={1} value={expWarn} onChange={(e) => setExpWarn(e.target.value)} disabled={!expOn} />
+            </div>
+          </div>
+          <div>
+            <Label>Mensagem</Label>
+            <Textarea rows={3} value={expTpl} onChange={(e) => setExpTpl(e.target.value)} disabled={!expOn} />
+            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+            {salvar.isPending ? "Salvando..." : "Salvar notificações"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => disparar.mutate()} disabled={disparar.isPending}>
+            <Send className="h-4 w-4 mr-1" />
+            {disparar.isPending ? "Disparando..." : "Disparar agora (teste)"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
