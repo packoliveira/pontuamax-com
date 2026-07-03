@@ -329,6 +329,195 @@ function IntegracoesCard({
   );
 }
 
+function AssetUploader({
+  storeId,
+  kind,
+  label,
+  hint,
+  value,
+  onChange,
+  aspect,
+}: {
+  storeId: string;
+  kind: "logo" | "banner";
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (url: string) => void;
+  aspect?: "banner";
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Arquivo acima de 5 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${storeId}/${kind}-${Date.now()}.${ext}`;
+      const up = await supabase.storage.from("store-assets").upload(path, file, {
+        upsert: true,
+        contentType: file.type || undefined,
+      });
+      if (up.error) throw up.error;
+      const signed = await supabase.storage.from("store-assets").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signed.error || !signed.data?.signedUrl) throw signed.error ?? new Error("Falha ao gerar URL");
+      onChange(signed.data.signedUrl);
+      toast.success("Imagem enviada — não esqueça de salvar as alterações.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const previewClass = aspect === "banner" ? "w-full h-24 object-cover" : "h-20 w-20 object-contain bg-muted";
+
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-3">
+        {value ? (
+          <img src={value} alt={label} className={`${previewClass} rounded-md border`} />
+        ) : (
+          <div className={`${previewClass} rounded-md border border-dashed flex items-center justify-center text-xs text-muted-foreground`}>
+            sem imagem
+          </div>
+        )}
+        <div className="flex flex-col gap-1">
+          <label className="inline-flex">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFile(f);
+                e.currentTarget.value = "";
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" asChild>
+              <span>
+                {uploading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
+                {uploading ? "Enviando..." : value ? "Trocar imagem" : "Enviar imagem"}
+              </span>
+            </Button>
+          </label>
+          {value && (
+            <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")}>
+              Remover
+            </Button>
+          )}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+function WhatsappQRConnect({ storeId }: { storeId: string }) {
+  const qc = useQueryClient();
+  const [qr, setQr] = useState<string | null>(null);
+  const [state, setState] = useState<string>("unknown");
+  const [loading, setLoading] = useState(false);
+
+  async function checkStatus() {
+    try {
+      const r = await statusWhatsapp({});
+      setState(r.state);
+      if (r.state === "open") setQr(null);
+    } catch {
+      setState("error");
+    }
+  }
+
+  useEffect(() => {
+    checkStatus();
+    const id = setInterval(checkStatus, 5000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
+
+  async function conectar() {
+    setLoading(true);
+    try {
+      const r = await conectarWhatsappQR({});
+      setQr(r.qr);
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Escaneie o QR Code no WhatsApp do celular");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function desconectar() {
+    setLoading(true);
+    try {
+      await desconectarWhatsapp({});
+      setQr(null);
+      await checkStatus();
+      toast.success("WhatsApp desconectado");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const badge =
+    state === "open"
+      ? { text: "Conectado", cls: "bg-emerald-100 text-emerald-700" }
+      : state === "connecting"
+        ? { text: "Aguardando leitura do QR", cls: "bg-amber-100 text-amber-700" }
+        : state === "unconfigured"
+          ? { text: "Não configurado", cls: "bg-muted text-muted-foreground" }
+          : { text: "Desconectado", cls: "bg-red-100 text-red-700" };
+
+  return (
+    <div className="rounded-md border p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <QrCode className="h-4 w-4" />
+          <span className="text-sm font-medium">Conexão WhatsApp</span>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+            {badge.text}
+          </span>
+        </div>
+        {state === "open" ? (
+          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading}>
+            <Power className="h-3 w-3 mr-1" />
+            Desconectar
+          </Button>
+        ) : (
+          <Button type="button" size="sm" onClick={conectar} disabled={loading}>
+            {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <QrCode className="h-3 w-3 mr-1" />}
+            Gerar QR Code
+          </Button>
+        )}
+      </div>
+      {qr && state !== "open" && (
+        <div className="flex flex-col items-center gap-2 pt-2">
+          <img
+            src={qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`}
+            alt="QR Code do WhatsApp"
+            className="w-56 h-56 border rounded-md"
+          />
+          <p className="text-xs text-muted-foreground text-center max-w-xs">
+            Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> → <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
+          </p>
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">
+        Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até você desconectar ou o WhatsApp derrubar a sessão.
+      </p>
+    </div>
+  );
+}
+
 type LojaRow = {
   id: string;
   evolution_url: string | null;
