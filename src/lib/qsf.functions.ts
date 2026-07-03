@@ -92,6 +92,9 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         indicacao_ativa: z.boolean().optional(),
         bonus_indicador: z.number().int().min(0).max(10000).optional(),
         bonus_indicado: z.number().int().min(0).max(10000).optional(),
+        nps_enabled: z.boolean().optional(),
+        nps_ask_comment: z.boolean().optional(),
+        nps_template: z.string().min(1).max(2000).optional(),
       })
       .parse(input),
   )

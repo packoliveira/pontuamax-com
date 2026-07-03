@@ -16,6 +16,7 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as NpsIdRouteImport } from './routes/nps.$id'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
@@ -64,6 +65,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const NpsIdRoute = NpsIdRouteImport.update({
+  id: '/nps/$id',
+  path: '/nps/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
   id: '/resgates',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/nps/$id': typeof NpsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/nps/$id': typeof NpsIdRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
+  '/nps/$id': typeof NpsIdRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/nps/$id'
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/notifications-daily'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/nps/$id'
     | '/admin'
     | '/lojista'
     | '/api/public/hooks/notifications-daily'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
+    | '/nps/$id'
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/notifications-daily'
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
+  NpsIdRoute: typeof NpsIdRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
@@ -325,6 +338,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/nps/$id': {
+      id: '/nps/$id'
+      path: '/nps/$id'
+      fullPath: '/nps/$id'
+      preLoaderRoute: typeof NpsIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lojista/resgates': {
       id: '/lojista/resgates'
@@ -467,6 +487,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
+  NpsIdRoute: NpsIdRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
