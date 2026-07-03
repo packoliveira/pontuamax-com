@@ -27,7 +27,9 @@ export function traduzirErroAuth(err: unknown): string {
     const m = msg.match(re);
     if (m) return pt.replace("$1", m[1] ?? "");
   }
-  return "Ocorreu um erro. Tente novamente.";
+  // Fallback: mostra a mensagem original para facilitar diagnóstico ao invés
+  // de esconder o problema atrás de um texto genérico.
+  return msg;
 }
 
 export function isCredenciaisInvalidas(err: unknown): boolean {

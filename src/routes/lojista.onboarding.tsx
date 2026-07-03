@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { criarLoja } from "@/lib/qsf.functions";
+import { criarLoja, atualizarLoja } from "@/lib/qsf.functions";
 import { slugify, type Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { traduzirErroAuth } from "@/lib/auth-errors";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BrandPreview } from "@/components/brand-preview";
-import { Check, ArrowRight, Copy } from "lucide-react";
+import { Check, ArrowRight, Copy, Upload, Loader2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/onboarding")({
@@ -33,6 +33,13 @@ function Onboarding() {
   const [cnpj, setCnpj] = useState("");
   const [telefone, setTelefone] = useState("");
   const [logo, setLogo] = useState("");
+  const [banner, setBanner] = useState("");
+  const [bannerMobile, setBannerMobile] = useState("");
+  // Arquivos escolhidos no passo 3 são enviados só depois que a loja for criada
+  // (o upload precisa do storeId como pasta no bucket).
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
   const [cor1, setCor1] = useState("#7c3aed");
   const [cor2, setCor2] = useState("#f97316");
   const [modalidade, setModalidade] = useState<Modalidade>("ambos");
@@ -62,7 +69,7 @@ function Onboarding() {
         if (liErr) throw liErr;
       }
       const s = slugify(nome);
-      await criarLoja({
+      const loja = await criarLoja({
         data: {
           slug: s,
           nome_fantasia: nome,
@@ -76,6 +83,34 @@ function Onboarding() {
           percentual_cashback: parseFloat(pctC) || 0,
         },
       });
+      // 2. Upload das imagens escolhidas (agora que temos storeId)
+      const uploadedUrls: { logo_url?: string | null; banner_url?: string | null; banner_url_mobile?: string | null } = {};
+      const doUpload = async (file: File, kind: "logo" | "banner" | "banner-mobile") => {
+        const ext = (file.name.split(".").pop() || "png").toLowerCase();
+        const path = `${loja.id}/${kind}-${Date.now()}.${ext}`;
+        const up = await supabase.storage.from("store-assets").upload(path, file, {
+          upsert: true,
+          contentType: file.type || undefined,
+        });
+        if (up.error) throw up.error;
+        const signed = await supabase.storage
+          .from("store-assets")
+          .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        if (signed.error || !signed.data?.signedUrl) throw signed.error ?? new Error("Falha ao gerar URL");
+        return signed.data.signedUrl;
+      };
+      try {
+        if (logoFile) uploadedUrls.logo_url = await doUpload(logoFile, "logo");
+        if (bannerFile) uploadedUrls.banner_url = await doUpload(bannerFile, "banner");
+        if (bannerMobileFile) uploadedUrls.banner_url_mobile = await doUpload(bannerMobileFile, "banner-mobile");
+        if (Object.keys(uploadedUrls).length > 0) {
+          await atualizarLoja({ data: uploadedUrls });
+        }
+      } catch (upErr) {
+        // Loja criada; só falhou o upload de imagem — segue o fluxo e avisa.
+        toast.warning("Loja criada, mas houve um problema no upload das imagens. Você pode enviá-las depois em Configurações.");
+        console.error(upErr);
+      }
       setSlug(s);
       setStep(5);
     } catch (e) {
@@ -132,7 +167,28 @@ function Onboarding() {
         {step === 3 && (
           <div className="grid gap-6 md:grid-cols-[1fr_320px]">
             <Card><CardHeader><CardTitle>Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
-              <div><Label>URL do logo</Label><Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." /></div>
+              <OnboardingImagePicker
+                label="Logo"
+                hint="Recomendado: 512 × 512 px. PNG com fundo transparente até 5 MB."
+                file={logoFile}
+                previewUrl={logo}
+                onChange={(f, url) => { setLogoFile(f); setLogo(url); }}
+                square
+              />
+              <OnboardingImagePicker
+                label="Banner (desktop)"
+                hint="Recomendado: 1920 × 480 px. JPG ou PNG até 5 MB."
+                file={bannerFile}
+                previewUrl={banner}
+                onChange={(f, url) => { setBannerFile(f); setBanner(url); }}
+              />
+              <OnboardingImagePicker
+                label="Banner (celular)"
+                hint="Recomendado: 1080 × 720 px (vertical). JPG ou PNG até 5 MB."
+                file={bannerMobileFile}
+                previewUrl={bannerMobile}
+                onChange={(f, url) => { setBannerMobileFile(f); setBannerMobile(url); }}
+              />
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Cor primária</Label><div className="flex gap-2"><Input type="color" value={cor1} onChange={(e) => setCor1(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor1} onChange={(e) => setCor1(e.target.value)} /></div></div>
                 <div><Label>Cor secundária</Label><div className="flex gap-2"><Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor2} onChange={(e) => setCor2(e.target.value)} /></div></div>
@@ -199,3 +255,71 @@ function Onboarding() {
     </div>
   );
 }
+
+function OnboardingImagePicker({
+  label,
+  hint,
+  file,
+  previewUrl,
+  onChange,
+  square,
+}: {
+  label: string;
+  hint: string;
+  file: File | null;
+  previewUrl: string;
+  onChange: (file: File | null, previewUrl: string) => void;
+  square?: boolean;
+}) {
+  // Preview local (blob URL) enquanto o upload real acontece só depois de criar a loja.
+  const localUrl = file ? URL.createObjectURL(file) : previewUrl;
+  const cls = square ? "h-20 w-20 object-contain bg-muted" : "w-full h-24 object-cover";
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-3">
+        {localUrl ? (
+          <img src={localUrl} alt={label} className={`${cls} rounded-md border`} />
+        ) : (
+          <div className={`${cls} rounded-md border border-dashed flex items-center justify-center text-xs text-muted-foreground`}>
+            <ImageIcon className="h-4 w-4 mr-1" /> sem imagem
+          </div>
+        )}
+        <div className="flex flex-col gap-1">
+          <label className="inline-flex">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0] ?? null;
+                if (f && f.size > 5 * 1024 * 1024) {
+                  toast.error("Arquivo acima de 5 MB");
+                  e.currentTarget.value = "";
+                  return;
+                }
+                onChange(f, "");
+                e.currentTarget.value = "";
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" asChild>
+              <span>
+                <Upload className="h-3 w-3 mr-1" />
+                {file || previewUrl ? "Trocar imagem" : "Enviar imagem"}
+              </span>
+            </Button>
+          </label>
+          {(file || previewUrl) && (
+            <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null, "")}>
+              Remover
+            </Button>
+          )}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+// Silencia warning caso Loader2 fique sem uso em alguma branch.
+void Loader2;

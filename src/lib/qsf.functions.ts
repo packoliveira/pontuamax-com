@@ -128,6 +128,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         brand_secondary: z.string().max(20).optional(),
         logo_url: z.string().max(500).optional().nullable(),
         banner_url: z.string().max(500).optional().nullable(),
+        banner_url_mobile: z.string().max(500).optional().nullable(),
         indicacao_ativa: z.boolean().optional(),
         bonus_indicador: z.number().int().min(0).max(10000).optional(),
         bonus_indicado: z.number().int().min(0).max(10000).optional(),
@@ -1660,7 +1661,7 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
 
 // -------- Public lookups (no auth) with safe fields only --------
 const PUBLIC_STORE_SELECT =
-  "id, slug, nome_fantasia, logo_url, banner_url, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at";
+  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at";
 
 export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))

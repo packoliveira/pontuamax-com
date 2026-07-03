@@ -600,6 +600,7 @@ export type Database = {
           activated_at: string | null
           admin_notes: string | null
           banner_url: string | null
+          banner_url_mobile: string | null
           bonus_indicado: number
           bonus_indicador: number
           brand_primary: string
@@ -646,6 +647,7 @@ export type Database = {
           activated_at?: string | null
           admin_notes?: string | null
           banner_url?: string | null
+          banner_url_mobile?: string | null
           bonus_indicado?: number
           bonus_indicador?: number
           brand_primary?: string
@@ -692,6 +694,7 @@ export type Database = {
           activated_at?: string | null
           admin_notes?: string | null
           banner_url?: string | null
+          banner_url_mobile?: string | null
           bonus_indicado?: number
           bonus_indicador?: number
           brand_primary?: string
