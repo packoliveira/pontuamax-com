@@ -105,3 +105,82 @@ export const getMyStoreSubscription = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data;
   });
+
+export const listAdmins = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: roles, error } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+    if (error) throw new Error(error.message);
+    const ids = Array.from(new Set((roles ?? []).map((r) => r.user_id)));
+    const { data: profs } = ids.length
+      ? await supabaseAdmin.from("profiles").select("id, full_name").in("id", ids)
+      : { data: [] as { id: string; full_name: string | null }[] };
+    const profMap = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
+    const rows: { user_id: string; email: string | null; full_name: string | null; is_me: boolean }[] = [];
+    for (const uid of ids) {
+      const { data: u } = await supabaseAdmin.auth.admin.getUserById(uid);
+      rows.push({
+        user_id: uid,
+        email: u?.user?.email ?? null,
+        full_name: profMap.get(uid) ?? null,
+        is_me: uid === context.userId,
+      });
+    }
+    return rows;
+  });
+
+export const addAdminByEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ email: z.string().email() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Busca usuário por email (paginando pela lista do auth)
+    const emailLower = data.email.trim().toLowerCase();
+    let targetId: string | null = null;
+    let page = 1;
+    // até 10 páginas de 200 usuários (2000). suficiente pra este projeto.
+    while (page <= 10 && !targetId) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) throw new Error(error.message);
+      const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLower);
+      if (found) targetId = found.id;
+      if (!list?.users || list.users.length < 200) break;
+      page++;
+    }
+    if (!targetId) throw new Error("Nenhuma conta encontrada com este e-mail.");
+    const { error: insErr } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: targetId, role: "admin" });
+    if (insErr && !/duplicate|unique/i.test(insErr.message)) throw new Error(insErr.message);
+    return { ok: true, user_id: targetId };
+  });
+
+export const removeAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ user_id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    if (data.user_id === context.userId) {
+      throw new Error("Você não pode remover o próprio acesso de admin.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count, error: cErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("*", { count: "exact", head: true })
+      .eq("role", "admin");
+    if (cErr) throw new Error(cErr.message);
+    if ((count ?? 0) <= 1) throw new Error("Não é possível remover o único admin do sistema.");
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.user_id)
+      .eq("role", "admin");
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
