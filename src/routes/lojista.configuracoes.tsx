@@ -24,7 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset } from "lucide-react";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
@@ -151,6 +151,7 @@ function ConfigPage() {
           <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
           <WhatsappCard loja={loja} />
           <NotificacoesCard loja={loja} />
+          <IndicacaoCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
@@ -327,6 +328,66 @@ function IntegracoesCard({
             </div>
           )}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number } }) {
+  const qc = useQueryClient();
+  const [ativa, setAtiva] = useState(loja.indicacao_ativa);
+  const [bIndicador, setBIndicador] = useState(String(loja.bonus_indicador));
+  const [bIndicado, setBIndicado] = useState(String(loja.bonus_indicado));
+  useEffect(() => {
+    setAtiva(loja.indicacao_ativa);
+    setBIndicador(String(loja.bonus_indicador));
+    setBIndicado(String(loja.bonus_indicado));
+  }, [loja]);
+  const salvar = useMutation({
+    mutationFn: () =>
+      atualizarLoja({
+        data: {
+          indicacao_ativa: ativa,
+          bonus_indicador: parseInt(bIndicador) || 0,
+          bonus_indicado: parseInt(bIndicado) || 0,
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Indicação salva");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const link = typeof window !== "undefined" ? `${window.location.origin}/${loja.slug}?indicou=TELEFONE` : "";
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><Gift className="h-4 w-4" /> Indicação amigo → amigo</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Cada cliente ganha um link único (com o telefone dele) para compartilhar. Quando o amigo se cadastrar por esse link e fizer a 1ª compra, os dois recebem pontos.
+        </p>
+        <div className="flex items-center gap-2">
+          <Switch checked={ativa} onCheckedChange={setAtiva} />
+          <span className="text-sm">Ativar programa de indicação</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Bônus para o indicador (pts)</Label>
+            <Input type="number" min={0} value={bIndicador} onChange={(e) => setBIndicador(e.target.value)} disabled={!ativa} />
+          </div>
+          <div>
+            <Label>Bônus para o indicado (pts)</Label>
+            <Input type="number" min={0} value={bIndicado} onChange={(e) => setBIndicado(e.target.value)} disabled={!ativa} />
+          </div>
+        </div>
+        <div className="rounded-md border p-3 text-xs text-muted-foreground break-all">
+          Formato do link: <code>{link}</code>
+        </div>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          {salvar.isPending ? "Salvando..." : "Salvar indicação"}
+        </Button>
       </CardContent>
     </Card>
   );

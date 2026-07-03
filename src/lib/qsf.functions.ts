@@ -89,6 +89,9 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         brand_secondary: z.string().max(20).optional(),
         logo_url: z.string().max(500).optional().nullable(),
         banner_url: z.string().max(500).optional().nullable(),
+        indicacao_ativa: z.boolean().optional(),
+        bonus_indicador: z.number().int().min(0).max(10000).optional(),
+        bonus_indicado: z.number().int().min(0).max(10000).optional(),
       })
       .parse(input),
   )
@@ -101,16 +104,42 @@ export const atualizarLoja = createServerFn({ method: "POST" })
 // -------- CLIENTE: link authenticated user to a store --------
 export const vincularClienteALoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ store_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) =>
+    z.object({
+      store_id: z.string().uuid(),
+      referrer_phone: z.string().max(20).optional().nullable(),
+    }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("user_roles").upsert({ user_id: context.userId, role: "cliente" }, { onConflict: "user_id,role" });
+    // Verifica se já existe link (para não sobrescrever referrer)
+    const existing = await supabaseAdmin
+      .from("store_clients")
+      .select("*")
+      .eq("store_id", data.store_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (existing.data) return existing.data;
+
+    // Resolve referrer pelo telefone
+    let referrer_user_id: string | null = null;
+    if (data.referrer_phone) {
+      const digits = data.referrer_phone.replace(/\D/g, "");
+      if (digits.length >= 8) {
+        const prof = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
+        if (prof.data && prof.data.id !== context.userId) {
+          // indicador precisa ser cliente da mesma loja
+          const refLink = await supabaseAdmin
+            .from("store_clients").select("id")
+            .eq("store_id", data.store_id).eq("user_id", prof.data.id).maybeSingle();
+          if (refLink.data) referrer_user_id = prof.data.id;
+        }
+      }
+    }
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
-      .upsert(
-        { store_id: data.store_id, user_id: context.userId },
-        { onConflict: "store_id,user_id", ignoreDuplicates: false },
-      )
+      .insert({ store_id: data.store_id, user_id: context.userId, referrer_user_id })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
@@ -180,7 +209,7 @@ export const lancarVenda = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("id, owner_id, modalidade, regra_pontos, percentual_cashback")
+      .select("id, owner_id, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, nome_fantasia")
       .eq("id", data.store_id)
       .maybeSingle();
     if (!loja.data || loja.data.owner_id !== context.userId) throw new Error("Loja inválida.");
@@ -200,8 +229,22 @@ export const lancarVenda = createServerFn({ method: "POST" })
       .eq("store_id", data.store_id)
       .eq("ativo", true);
     const multiplicador = getActiveMultiplier(promosRes.data ?? []);
-    const pontos = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos) * multiplicador) : 0;
+    const pontosBase = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos) * multiplicador) : 0;
     const cashback = inclC ? +(data.valor * (Number(loja.data.percentual_cashback) / 100)).toFixed(2) : 0;
+
+    // -------- Bônus de indicação (só na 1ª compra) --------
+    let bonusIndicado = 0;
+    let bonusIndicador = 0;
+    const pagarIndicacao =
+      loja.data.indicacao_ativa &&
+      !link.data.referral_bonus_paid &&
+      link.data.referrer_user_id;
+    if (pagarIndicacao) {
+      bonusIndicado = Number(loja.data.bonus_indicado) || 0;
+      bonusIndicador = Number(loja.data.bonus_indicador) || 0;
+    }
+
+    const pontos = pontosBase + bonusIndicado;
     const novoPontos = link.data.pontos + pontos;
     const novoCashback = +(Number(link.data.cashback_saldo) + cashback).toFixed(2);
     const { error: txErr } = await supabaseAdmin.from("transactions").insert({
@@ -216,9 +259,42 @@ export const lancarVenda = createServerFn({ method: "POST" })
     if (txErr) throw new Error(txErr.message);
     const { error: updErr } = await supabaseAdmin
       .from("store_clients")
-      .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+      .update({
+        pontos: novoPontos,
+        cashback_saldo: novoCashback,
+        nivel: calcularNivel(novoPontos),
+        ...(pagarIndicacao ? { referral_bonus_paid: true } : {}),
+      })
       .eq("id", link.data.id);
     if (updErr) throw new Error(updErr.message);
+
+    // Creditar indicador
+    if (pagarIndicacao && bonusIndicador > 0 && link.data.referrer_user_id) {
+      const refLink = await supabaseAdmin
+        .from("store_clients").select("id, pontos")
+        .eq("store_id", data.store_id).eq("user_id", link.data.referrer_user_id).maybeSingle();
+      if (refLink.data) {
+        const novoRef = refLink.data.pontos + bonusIndicador;
+        await supabaseAdmin.from("store_clients")
+          .update({ pontos: novoRef, nivel: calcularNivel(novoRef) })
+          .eq("id", refLink.data.id);
+        await supabaseAdmin.from("transactions").insert({
+          store_id: data.store_id,
+          client_user_id: link.data.referrer_user_id,
+          tipo: "indicacao",
+          pontos_delta: bonusIndicador,
+          status: "entregue",
+        });
+        const { notifyClient } = await import("./notify.server");
+        await notifyClient({
+          event: "pontos_ganhos",
+          storeId: data.store_id,
+          clientUserId: link.data.referrer_user_id,
+          pontosGanhos: bonusIndicador,
+        });
+      }
+    }
+
     if (pontos > 0) {
       const { notifyClient } = await import("./notify.server");
       await notifyClient({
@@ -228,7 +304,7 @@ export const lancarVenda = createServerFn({ method: "POST" })
         pontosGanhos: pontos,
       });
     }
-    return { pontos, cashback, multiplicador };
+    return { pontos, cashback, multiplicador, bonusIndicado, bonusIndicador };
   });
 
 // -------- Promoções: CRUD --------
