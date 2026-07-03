@@ -90,8 +90,14 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   // Se o usuário logado é o próprio dono da loja (lojista visitando "minha
   // página pública"), NUNCA vincula ele como cliente — apenas mostra o modo
   // prévia com atalho pro painel.
-  const { data: minhaLoja } = useQuery({ ...myStoreQuery(), enabled: !!sessionUserId });
+  const { data: minhaLoja, isLoading: isOwnerCheckLoading } = useQuery({
+    ...myStoreQuery(),
+    enabled: !!sessionUserId,
+  });
   const isOwnerPreview = !!minhaLoja && minhaLoja.id === loja.id;
+  // Enquanto não sabemos se o usuário logado é o dono da loja, NÃO podemos
+  // renderizar VincularStore — senão criamos vínculo do próprio lojista.
+  const ownerCheckPending = !!sessionUserId && isOwnerCheckLoading;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
@@ -130,7 +136,7 @@ function ClienteFlow({ loja }: { loja: Loja }) {
       <Header loja={loja} showLogout={!!sessionUserId} />
       {isOwnerPreview ? (
         <OwnerPreviewBanner />
-      ) : isLoading || hydrating || authenticating ? (
+      ) : isLoading || hydrating || authenticating || ownerCheckPending ? (
         <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
       ) : sessionUserId && link ? (
         <ClienteLogado loja={loja} link={link} />
