@@ -51,7 +51,7 @@ export const storeClientsQuery = (storeId: string | undefined) =>
       if (!storeId) return [];
       const { data, error } = await supabase
         .from("store_clients")
-        .select("*, profiles:user_id(full_name, phone, cpf)")
+        .select("*, profiles:user_id(full_name, phone, cpf, birthdate)")
         .eq("store_id", storeId)
         .order("created_at", { ascending: false });
       if (error) throw error;

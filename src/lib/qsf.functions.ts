@@ -280,6 +280,72 @@ export const removerPromocao = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// -------- Notificações automáticas: salvar config --------
+export const salvarNotificacoes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        notif_birthday_enabled: z.boolean(),
+        notif_birthday_bonus_points: z.number().int().min(0).max(10000),
+        notif_birthday_template: z.string().min(1).max(2000),
+        notif_inactivity_enabled: z.boolean(),
+        notif_inactivity_days: z.number().int().min(1).max(365),
+        notif_inactivity_template: z.string().min(1).max(2000),
+        notif_expiry_enabled: z.boolean(),
+        notif_expiry_days: z.number().int().min(1).max(3650),
+        notif_expiry_warn_days: z.number().int().min(1).max(90),
+        notif_expiry_template: z.string().min(1).max(2000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("stores").update(data).eq("owner_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -------- Aniversário do cliente (lojista edita) --------
+export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      client_user_id: z.string().uuid(),
+      store_id: z.string().uuid(),
+      birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
+    if (!owner.data) throw new Error("Loja inválida.");
+    const link = await supabaseAdmin.from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
+    if (!link.data) throw new Error("Cliente não vinculado à loja.");
+    const { error } = await supabaseAdmin.from("profiles").update({ birthdate: data.birthdate }).eq("id", data.client_user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -------- Disparar notificações agora (teste manual) --------
+export const dispararNotificacoesAgora = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Só permite se for dono de alguma loja (evita endpoint público via serverFn)
+    const store = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    if (!store.data) throw new Error("Sem loja.");
+    const url = process.env.VITE_APP_URL || "https://project--62bd2a63-6908-43c2-9917-f4ddac34c65f.lovable.app";
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    const res = await fetch(`${url}/api/public/hooks/notifications-daily`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: key ?? "" },
+      body: "{}",
+    });
+    const body = await res.text();
+    if (!res.ok) throw new Error(`Falha: ${res.status} ${body.slice(0, 200)}`);
+    return JSON.parse(body);
+  });
+
 // -------- Cliente: resgatar produto --------
 export const resgatarProduto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

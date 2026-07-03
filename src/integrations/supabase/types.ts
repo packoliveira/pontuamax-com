@@ -152,6 +152,44 @@ export type Database = {
           },
         ]
       }
+      notification_logs: {
+        Row: {
+          client_user_id: string
+          created_at: string
+          id: string
+          mensagem_erro: string | null
+          status: string
+          store_id: string
+          tipo: string
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          status: string
+          store_id: string
+          tipo: string
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          status?: string
+          store_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           ativo: boolean
@@ -192,6 +230,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          birthdate: string | null
           cpf: string | null
           created_at: string
           full_name: string | null
@@ -199,6 +238,7 @@ export type Database = {
           phone: string | null
         }
         Insert: {
+          birthdate?: string | null
           cpf?: string | null
           created_at?: string
           full_name?: string | null
@@ -206,6 +246,7 @@ export type Database = {
           phone?: string | null
         }
         Update: {
+          birthdate?: string | null
           cpf?: string | null
           created_at?: string
           full_name?: string | null
@@ -272,6 +313,10 @@ export type Database = {
           cashback_saldo: number
           created_at: string
           id: string
+          last_notified_birthday: string | null
+          last_notified_expiry: string | null
+          last_notified_inactivity: string | null
+          last_purchase_at: string | null
           nivel: Database["public"]["Enums"]["nivel_cliente"]
           pontos: number
           store_id: string
@@ -281,6 +326,10 @@ export type Database = {
           cashback_saldo?: number
           created_at?: string
           id?: string
+          last_notified_birthday?: string | null
+          last_notified_expiry?: string | null
+          last_notified_inactivity?: string | null
+          last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
           pontos?: number
           store_id: string
@@ -290,6 +339,10 @@ export type Database = {
           cashback_saldo?: number
           created_at?: string
           id?: string
+          last_notified_birthday?: string | null
+          last_notified_expiry?: string | null
+          last_notified_inactivity?: string | null
+          last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
           pontos?: number
           store_id?: string
@@ -323,6 +376,16 @@ export type Database = {
           modalidade: Database["public"]["Enums"]["modalidade"]
           mrr_amount: number
           nome_fantasia: string
+          notif_birthday_bonus_points: number
+          notif_birthday_enabled: boolean
+          notif_birthday_template: string
+          notif_expiry_days: number
+          notif_expiry_enabled: boolean
+          notif_expiry_template: string
+          notif_expiry_warn_days: number
+          notif_inactivity_days: number
+          notif_inactivity_enabled: boolean
+          notif_inactivity_template: string
           owner_id: string
           percentual_cashback: number
           plan: Database["public"]["Enums"]["plan_tier"]
@@ -353,6 +416,16 @@ export type Database = {
           modalidade?: Database["public"]["Enums"]["modalidade"]
           mrr_amount?: number
           nome_fantasia: string
+          notif_birthday_bonus_points?: number
+          notif_birthday_enabled?: boolean
+          notif_birthday_template?: string
+          notif_expiry_days?: number
+          notif_expiry_enabled?: boolean
+          notif_expiry_template?: string
+          notif_expiry_warn_days?: number
+          notif_inactivity_days?: number
+          notif_inactivity_enabled?: boolean
+          notif_inactivity_template?: string
           owner_id: string
           percentual_cashback?: number
           plan?: Database["public"]["Enums"]["plan_tier"]
@@ -383,6 +456,16 @@ export type Database = {
           modalidade?: Database["public"]["Enums"]["modalidade"]
           mrr_amount?: number
           nome_fantasia?: string
+          notif_birthday_bonus_points?: number
+          notif_birthday_enabled?: boolean
+          notif_birthday_template?: string
+          notif_expiry_days?: number
+          notif_expiry_enabled?: boolean
+          notif_expiry_template?: string
+          notif_expiry_warn_days?: number
+          notif_inactivity_days?: number
+          notif_inactivity_enabled?: boolean
+          notif_inactivity_template?: string
           owner_id?: string
           percentual_cashback?: number
           plan?: Database["public"]["Enums"]["plan_tier"]
