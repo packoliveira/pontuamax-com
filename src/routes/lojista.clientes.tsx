@@ -2,13 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
-import { atualizarAniversarioCliente, addClientTag, removeClientTag } from "@/lib/qsf.functions";
+import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone } from "@/lib/qsf.functions";
 import { formatBRL, formatDate } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Cake, X, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Search, Cake, X, Plus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/clientes")({
@@ -30,6 +32,22 @@ function ClientesPage() {
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<{ userId: string; value: string } | null>(null);
   const [tagInput, setTagInput] = useState<Record<string, string>>({});
+  const [openNew, setOpenNew] = useState(false);
+  const [novo, setNovo] = useState({ nome: "", phone: "" });
+
+  const criar = useMutation({
+    mutationFn: () =>
+      cadastrarClientePorTelefone({
+        data: { store_id: loja!.id, nome: novo.nome.trim(), phone: novo.phone.trim() },
+      }),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
+      toast.success(`Cliente cadastrado. Senha temporária: ${res.senha_temporaria}`);
+      setNovo({ nome: "", phone: "" });
+      setOpenNew(false);
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
 
   const addTag = useMutation({
     mutationFn: (v: { user_id: string; tag: string }) => addClientTag({ data: { store_id: loja!.id, client_user_id: v.user_id, tag: v.tag } }),
@@ -67,9 +85,14 @@ function ClientesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Clientes</h1>
-        <p className="text-sm text-muted-foreground">{clientes.length} cliente(s) cadastrado(s)</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Clientes</h1>
+          <p className="text-sm text-muted-foreground">{clientes.length} cliente(s) cadastrado(s)</p>
+        </div>
+        <Button onClick={() => setOpenNew(true)}>
+          <UserPlus className="h-4 w-4" /> Cadastrar cliente
+        </Button>
       </div>
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -135,6 +158,36 @@ function ClientesPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={openNew} onOpenChange={setOpenNew}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cadastrar cliente</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="novo-nome">Nome</Label>
+              <Input id="novo-nome" value={novo.nome} onChange={(e) => setNovo((s) => ({ ...s, nome: e.target.value }))} placeholder="Nome do cliente" />
+            </div>
+            <div>
+              <Label htmlFor="novo-tel">Telefone (com DDD)</Label>
+              <Input id="novo-tel" value={novo.phone} onChange={(e) => setNovo((s) => ({ ...s, phone: e.target.value }))} placeholder="(11) 99999-9999" inputMode="tel" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              A senha inicial do cliente será o próprio telefone (só números). Ele pode entrar depois na página pública da sua loja.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpenNew(false)}>Cancelar</Button>
+            <Button
+              onClick={() => criar.mutate()}
+              disabled={criar.isPending || !novo.nome.trim() || novo.phone.replace(/\D/g, "").length < 8}
+            >
+              {criar.isPending ? "Cadastrando..." : "Cadastrar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
