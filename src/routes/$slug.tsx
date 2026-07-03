@@ -447,3 +447,117 @@ function IndicacaoCard({
     </Card>
   );
 }
+
+type TxRow = {
+  id: string;
+  tipo: string;
+  valor: number | string;
+  pontos_delta: number;
+  cashback_delta: number | string;
+  created_at: string;
+  origem: string | null;
+  products?: { nome: string | null } | null;
+};
+
+function describeTx(t: TxRow) {
+  const prd = t.products?.nome;
+  const ajusteMotivo = t.tipo === "ajuste" && t.origem?.startsWith("ajuste_manual:")
+    ? t.origem.slice("ajuste_manual:".length)
+    : null;
+  switch (t.tipo) {
+    case "venda": return "Compra na loja";
+    case "resgate_produto": return `Resgate: ${prd ?? "produto"}`;
+    case "resgate_cashback": return "Voucher de cashback";
+    case "vale_presente": return "Vale-presente";
+    case "nota_fiscal": return "Nota fiscal aprovada";
+    case "indicacao": return "Bônus de indicação";
+    case "ajuste": return ajusteMotivo
+      ? `Ajuste da loja: ${ajusteMotivo}`
+      : (t.pontos_delta >= 0 ? "Ajuste da loja (crédito)" : "Ajuste da loja (estorno)");
+    default: return "Movimentação";
+  }
+}
+
+function formatDateTime(iso: string) {
+  try {
+    return new Date(iso).toLocaleString("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch { return formatDate(iso); }
+}
+
+function TxRowItem({ t }: { t: TxRow }) {
+  const isCredit = t.pontos_delta > 0 || Number(t.cashback_delta) > 0;
+  return (
+    <div className="flex items-start justify-between gap-3 p-3 text-sm">
+      <div className="flex items-start gap-2 min-w-0">
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
+          {isCredit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+        </div>
+        <div className="min-w-0">
+          <div className="font-medium truncate">{describeTx(t)}</div>
+          <div className="text-xs text-muted-foreground">{formatDateTime(t.created_at)}</div>
+          {t.tipo === "venda" && Number(t.valor) > 0 && (
+            <div className="text-xs text-muted-foreground">Compra de {formatBRL(Number(t.valor))}</div>
+          )}
+        </div>
+      </div>
+      <div className="text-right text-xs shrink-0">
+        {t.pontos_delta ? (
+          <div className={t.pontos_delta > 0 ? "text-green-700 font-semibold" : "text-destructive font-semibold"}>
+            {t.pontos_delta > 0 ? "+" : ""}{t.pontos_delta} pts
+          </div>
+        ) : null}
+        {Number(t.cashback_delta) ? (
+          <div className={Number(t.cashback_delta) > 0 ? "text-green-700 font-semibold" : "text-destructive font-semibold"}>
+            {Number(t.cashback_delta) > 0 ? "+" : ""}{formatBRL(Number(t.cashback_delta))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolean; inclC: boolean }) {
+  const list = txs as TxRow[];
+  const ganhos = list.filter((t) => t.pontos_delta > 0 || Number(t.cashback_delta) > 0);
+  const resgates = list.filter((t) =>
+    t.tipo === "resgate_produto" || t.tipo === "resgate_cashback" || t.tipo === "vale_presente"
+  );
+  const ajustes = list.filter((t) => t.tipo === "ajuste");
+
+  const renderList = (arr: TxRow[]) => (
+    <Card>
+      <CardContent className="p-0">
+        <div className="divide-y">
+          {arr.length === 0
+            ? <div className="p-6 text-center text-sm text-muted-foreground">Sem movimentações</div>
+            : arr.map((t) => <TxRowItem key={t.id} t={t} />)}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
+        <h2 className="font-semibold">Histórico</h2>
+        <span className="text-xs text-muted-foreground">acompanhe seu saldo</span>
+      </div>
+      <Tabs defaultValue="todos">
+        <TabsList className="w-full">
+          <TabsTrigger value="todos" className="flex-1">Tudo</TabsTrigger>
+          {(inclP || inclC) && <TabsTrigger value="ganhos" className="flex-1">Ganhos</TabsTrigger>}
+          <TabsTrigger value="resgates" className="flex-1">Resgates</TabsTrigger>
+          <TabsTrigger value="ajustes" className="flex-1">Ajustes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="todos" className="mt-3">{renderList(list)}</TabsContent>
+        <TabsContent value="ganhos" className="mt-3">{renderList(ganhos)}</TabsContent>
+        <TabsContent value="resgates" className="mt-3">{renderList(resgates)}</TabsContent>
+        <TabsContent value="ajustes" className="mt-3">{renderList(ajustes)}</TabsContent>
+      </Tabs>
+    </section>
+  );
+}
