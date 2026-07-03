@@ -1458,12 +1458,36 @@ export const excluirClienteDaLoja = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
     if (!owner.data) throw new Error("Você não é dono desta loja.");
-    await supabaseAdmin.from("client_tags").delete().eq("store_id", data.store_id).eq("client_user_id", data.client_user_id);
+
+    // Apaga TUDO deste cliente nesta loja (fidelidade zerada nesta loja)
+    const sid = data.store_id;
+    const uid = data.client_user_id;
+
+    // 1) Tags
+    await supabaseAdmin.from("client_tags").delete().eq("store_id", sid).eq("client_user_id", uid);
+    // 2) Transações (pontos, cashback, estornos, resgates)
+    await supabaseAdmin.from("transactions").delete().eq("store_id", sid).eq("client_user_id", uid);
+    // 3) Notas fiscais enviadas
+    await supabaseAdmin.from("fiscal_notes").delete().eq("store_id", sid).eq("client_user_id", uid);
+    // 4) Respostas de NPS
+    await supabaseAdmin.from("nps_responses").delete().eq("store_id", sid).eq("client_user_id", uid);
+    // 5) Logs de notificação
+    await supabaseAdmin.from("notification_logs").delete().eq("store_id", sid).eq("client_user_id", uid);
+    // 6) Destinatários de campanhas (apaga por campanhas desta loja)
+    const camps = await supabaseAdmin.from("campaigns").select("id").eq("store_id", sid);
+    const campIds = (camps.data ?? []).map((c) => c.id);
+    if (campIds.length) {
+      await supabaseAdmin.from("campaign_recipients").delete().eq("client_user_id", uid).in("campaign_id", campIds);
+    }
+    // 7) Vales-presente resgatados por este cliente nesta loja: soltar o resgate
+    await supabaseAdmin.from("gift_cards").update({ redeemed_by: null, redeemed_at: null }).eq("store_id", sid).eq("redeemed_by", uid);
+
+    // 8) Vínculo com a loja (por último)
     const del = await supabaseAdmin
       .from("store_clients")
       .delete()
-      .eq("store_id", data.store_id)
-      .eq("user_id", data.client_user_id)
+      .eq("store_id", sid)
+      .eq("user_id", uid)
       .select("id");
     if (del.error) throw new Error(del.error.message);
     if (!del.data || del.data.length === 0) throw new Error("Cliente não estava vinculado a esta loja.");
