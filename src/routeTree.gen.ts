@@ -33,6 +33,7 @@ import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.confi
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
+import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
@@ -157,6 +158,11 @@ const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
   path: '/aguardando',
   getParentRoute: () => LojistaRoute,
 } as any)
+const ApiPublicWidgetSlugRoute = ApiPublicWidgetSlugRouteImport.update({
+  id: '/api/public/widget/$slug',
+  path: '/api/public/widget/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
   id: '/api/public/webhook/$origem',
   path: '/api/public/webhook/$origem',
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -229,6 +236,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   id:
     | '__root__'
     | '/'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -360,6 +372,7 @@ export interface RootRouteChildren {
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
+  ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -532,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaAguardandoRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/api/public/widget/$slug': {
+      id: '/api/public/widget/$slug'
+      path: '/api/public/widget/$slug'
+      fullPath: '/api/public/widget/$slug'
+      preLoaderRoute: typeof ApiPublicWidgetSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhook/$origem': {
       id: '/api/public/webhook/$origem'
       path: '/api/public/webhook/$origem'
@@ -617,6 +637,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
+  ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
