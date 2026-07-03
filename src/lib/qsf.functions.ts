@@ -52,6 +52,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         brand_primary: z.string().max(20).optional(),
         brand_secondary: z.string().max(20).optional(),
         logo_url: z.string().max(500).optional().nullable(),
+        banner_url: z.string().max(500).optional().nullable(),
       })
       .parse(input),
   )
@@ -420,4 +421,103 @@ export const enviarWhatsappTeste = createServerFn({ method: "POST" })
     });
     if (!res.ok) throw new Error(res.error ?? "Falha ao enviar");
     return { ok: true, numero };
+  });
+
+// -------- WhatsApp: conectar via QR Code (Evolution API) --------
+export const conectarWhatsappQR = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id, slug, evolution_url, evolution_apikey, evolution_instance")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    if (!loja.data.evolution_url || !loja.data.evolution_apikey) {
+      throw new Error("Configure URL e API Key da Evolution API antes de conectar.");
+    }
+    const base = loja.data.evolution_url.replace(/\/$/, "");
+    const instance = loja.data.evolution_instance || `qsf-${loja.data.slug}`;
+    const headers = { "Content-Type": "application/json", apikey: loja.data.evolution_apikey };
+    let qr: string | null = null;
+    // Tenta criar (idempotente na maioria das versões — se já existe, cai no connect)
+    try {
+      const createRes = await fetch(`${base}/instance/create`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          instanceName: instance,
+          qrcode: true,
+          integration: "WHATSAPP-BAILEYS",
+        }),
+      });
+      if (createRes.ok) {
+        const j = (await createRes.json()) as { qrcode?: { base64?: string }; base64?: string };
+        qr = j?.qrcode?.base64 ?? j?.base64 ?? null;
+      }
+    } catch {
+      /* segue pro connect */
+    }
+    if (!qr) {
+      const connRes = await fetch(`${base}/instance/connect/${encodeURIComponent(instance)}`, { headers });
+      if (!connRes.ok) {
+        const body = await connRes.text();
+        throw new Error(`Evolution API [${connRes.status}]: ${body.slice(0, 200)}`);
+      }
+      const j = (await connRes.json()) as { base64?: string; qrcode?: { base64?: string } };
+      qr = j?.base64 ?? j?.qrcode?.base64 ?? null;
+    }
+    if (loja.data.evolution_instance !== instance) {
+      await supabaseAdmin.from("stores").update({ evolution_instance: instance }).eq("id", loja.data.id);
+    }
+    if (!qr) throw new Error("Instância já conectada ou QR indisponível.");
+    return { instance, qr };
+  });
+
+// -------- WhatsApp: status da conexão --------
+export const statusWhatsapp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("evolution_url, evolution_apikey, evolution_instance")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    const d = loja.data;
+    if (!d?.evolution_url || !d?.evolution_apikey || !d?.evolution_instance) {
+      return { state: "unconfigured" as string };
+    }
+    const base = d.evolution_url.replace(/\/$/, "");
+    try {
+      const res = await fetch(`${base}/instance/connectionState/${encodeURIComponent(d.evolution_instance)}`, {
+        headers: { apikey: d.evolution_apikey },
+      });
+      if (!res.ok) return { state: "error" };
+      const j = (await res.json()) as { instance?: { state?: string }; state?: string };
+      return { state: j?.instance?.state ?? j?.state ?? "unknown" };
+    } catch {
+      return { state: "error" };
+    }
+  });
+
+// -------- WhatsApp: desconectar (logout) --------
+export const desconectarWhatsapp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("evolution_url, evolution_apikey, evolution_instance")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    const d = loja.data;
+    if (!d?.evolution_url || !d?.evolution_apikey || !d?.evolution_instance) return { ok: true };
+    const base = d.evolution_url.replace(/\/$/, "");
+    await fetch(`${base}/instance/logout/${encodeURIComponent(d.evolution_instance)}`, {
+      method: "DELETE",
+      headers: { apikey: d.evolution_apikey },
+    }).catch(() => null);
+    return { ok: true };
   });

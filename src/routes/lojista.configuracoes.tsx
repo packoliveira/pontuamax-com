@@ -2,7 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, integrationLogsQuery } from "@/lib/queries";
-import { atualizarLoja, rotacionarWebhookSecret, testarWebhook, salvarWhatsapp, enviarWhatsappTeste } from "@/lib/qsf.functions";
+import {
+  atualizarLoja,
+  rotacionarWebhookSecret,
+  testarWebhook,
+  salvarWhatsapp,
+  enviarWhatsappTeste,
+  conectarWhatsappQR,
+  statusWhatsapp,
+  desconectarWhatsapp,
+} from "@/lib/qsf.functions";
 import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +22,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle } from "lucide-react";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
@@ -27,6 +37,7 @@ function ConfigPage() {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [logo, setLogo] = useState("");
+  const [banner, setBanner] = useState("");
   const [cor1, setCor1] = useState("#7c3aed");
   const [cor2, setCor2] = useState("#f97316");
   const [modalidade, setModalidade] = useState<Modalidade>("ambos");
@@ -38,6 +49,7 @@ function ConfigPage() {
       setNome(loja.nome_fantasia);
       setTelefone(loja.telefone ?? "");
       setLogo(loja.logo_url ?? "");
+      setBanner(loja.banner_url ?? "");
       setCor1(loja.brand_primary);
       setCor2(loja.brand_secondary);
       setModalidade(loja.modalidade as Modalidade);
@@ -53,6 +65,7 @@ function ConfigPage() {
           nome_fantasia: nome,
           telefone: telefone || null,
           logo_url: logo || null,
+        banner_url: banner || null,
           brand_primary: cor1,
           brand_secondary: cor2,
           modalidade,
@@ -85,8 +98,24 @@ function ConfigPage() {
             <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} /></div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-3">
-            <div><Label>URL do logo</Label><Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." /></div>
+          <Card><CardHeader><CardTitle className="text-base">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
+            <AssetUploader
+              storeId={loja.id}
+              kind="logo"
+              label="Logo da loja"
+              hint="Recomendado: 512 × 512 px (quadrado), PNG com fundo transparente. Até 2 MB."
+              value={logo}
+              onChange={setLogo}
+            />
+            <AssetUploader
+              storeId={loja.id}
+              kind="banner"
+              label="Banner da página do cliente"
+              hint="Desktop: 1920 × 480 px · Mobile: 1080 × 720 px. JPG ou PNG até 3 MB."
+              value={banner}
+              onChange={setBanner}
+              aspect="banner"
+            />
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Cor primária</Label><div className="flex gap-2"><Input type="color" value={cor1} onChange={(e) => setCor1(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor1} onChange={(e) => setCor1(e.target.value)} /></div></div>
               <div><Label>Cor secundária</Label><div className="flex gap-2"><Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor2} onChange={(e) => setCor2(e.target.value)} /></div></div>
@@ -300,6 +329,195 @@ function IntegracoesCard({
   );
 }
 
+function AssetUploader({
+  storeId,
+  kind,
+  label,
+  hint,
+  value,
+  onChange,
+  aspect,
+}: {
+  storeId: string;
+  kind: "logo" | "banner";
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (url: string) => void;
+  aspect?: "banner";
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Arquivo acima de 5 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${storeId}/${kind}-${Date.now()}.${ext}`;
+      const up = await supabase.storage.from("store-assets").upload(path, file, {
+        upsert: true,
+        contentType: file.type || undefined,
+      });
+      if (up.error) throw up.error;
+      const signed = await supabase.storage.from("store-assets").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signed.error || !signed.data?.signedUrl) throw signed.error ?? new Error("Falha ao gerar URL");
+      onChange(signed.data.signedUrl);
+      toast.success("Imagem enviada — não esqueça de salvar as alterações.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const previewClass = aspect === "banner" ? "w-full h-24 object-cover" : "h-20 w-20 object-contain bg-muted";
+
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-3">
+        {value ? (
+          <img src={value} alt={label} className={`${previewClass} rounded-md border`} />
+        ) : (
+          <div className={`${previewClass} rounded-md border border-dashed flex items-center justify-center text-xs text-muted-foreground`}>
+            sem imagem
+          </div>
+        )}
+        <div className="flex flex-col gap-1">
+          <label className="inline-flex">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFile(f);
+                e.currentTarget.value = "";
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" asChild>
+              <span>
+                {uploading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
+                {uploading ? "Enviando..." : value ? "Trocar imagem" : "Enviar imagem"}
+              </span>
+            </Button>
+          </label>
+          {value && (
+            <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")}>
+              Remover
+            </Button>
+          )}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+function WhatsappQRConnect({ storeId }: { storeId: string }) {
+  const qc = useQueryClient();
+  const [qr, setQr] = useState<string | null>(null);
+  const [state, setState] = useState<string>("unknown");
+  const [loading, setLoading] = useState(false);
+
+  async function checkStatus() {
+    try {
+      const r = await statusWhatsapp({});
+      setState(r.state);
+      if (r.state === "open") setQr(null);
+    } catch {
+      setState("error");
+    }
+  }
+
+  useEffect(() => {
+    checkStatus();
+    const id = setInterval(checkStatus, 5000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
+
+  async function conectar() {
+    setLoading(true);
+    try {
+      const r = await conectarWhatsappQR({});
+      setQr(r.qr);
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Escaneie o QR Code no WhatsApp do celular");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function desconectar() {
+    setLoading(true);
+    try {
+      await desconectarWhatsapp({});
+      setQr(null);
+      await checkStatus();
+      toast.success("WhatsApp desconectado");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const badge =
+    state === "open"
+      ? { text: "Conectado", cls: "bg-emerald-100 text-emerald-700" }
+      : state === "connecting"
+        ? { text: "Aguardando leitura do QR", cls: "bg-amber-100 text-amber-700" }
+        : state === "unconfigured"
+          ? { text: "Não configurado", cls: "bg-muted text-muted-foreground" }
+          : { text: "Desconectado", cls: "bg-red-100 text-red-700" };
+
+  return (
+    <div className="rounded-md border p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <QrCode className="h-4 w-4" />
+          <span className="text-sm font-medium">Conexão WhatsApp</span>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+            {badge.text}
+          </span>
+        </div>
+        {state === "open" ? (
+          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading}>
+            <Power className="h-3 w-3 mr-1" />
+            Desconectar
+          </Button>
+        ) : (
+          <Button type="button" size="sm" onClick={conectar} disabled={loading}>
+            {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <QrCode className="h-3 w-3 mr-1" />}
+            Gerar QR Code
+          </Button>
+        )}
+      </div>
+      {qr && state !== "open" && (
+        <div className="flex flex-col items-center gap-2 pt-2">
+          <img
+            src={qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`}
+            alt="QR Code do WhatsApp"
+            className="w-56 h-56 border rounded-md"
+          />
+          <p className="text-xs text-muted-foreground text-center max-w-xs">
+            Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> → <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
+          </p>
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">
+        Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até você desconectar ou o WhatsApp derrubar a sessão.
+      </p>
+    </div>
+  );
+}
+
 type LojaRow = {
   id: string;
   evolution_url: string | null;
@@ -408,6 +626,8 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
             A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente final.
           </p>
         </div>
+
+        <WhatsappQRConnect storeId={loja.id} />
 
         <div>
           <Label>Template da mensagem "pontos ganhos"</Label>

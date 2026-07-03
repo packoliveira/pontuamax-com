@@ -156,6 +156,7 @@ export type Database = {
         Row: {
           activated_at: string | null
           admin_notes: string | null
+          banner_url: string | null
           brand_primary: string
           brand_secondary: string
           cancelled_at: string | null
@@ -185,6 +186,7 @@ export type Database = {
         Insert: {
           activated_at?: string | null
           admin_notes?: string | null
+          banner_url?: string | null
           brand_primary?: string
           brand_secondary?: string
           cancelled_at?: string | null
@@ -214,6 +216,7 @@ export type Database = {
         Update: {
           activated_at?: string | null
           admin_notes?: string | null
+          banner_url?: string | null
           brand_primary?: string
           brand_secondary?: string
           cancelled_at?: string | null
