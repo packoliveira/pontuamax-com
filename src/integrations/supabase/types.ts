@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      integration_logs: {
+        Row: {
+          created_at: string
+          id: string
+          mensagem_erro: string | null
+          origem: string
+          payload_recebido: Json | null
+          status: string
+          store_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          origem: string
+          payload_recebido?: Json | null
+          status: string
+          store_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          origem?: string
+          payload_recebido?: Json | null
+          status?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           ativo: boolean
@@ -129,6 +167,8 @@ export type Database = {
           regra_pontos: number
           slug: string
           telefone: string | null
+          webhook_last_at: string | null
+          webhook_secret: string
         }
         Insert: {
           brand_primary?: string
@@ -144,6 +184,8 @@ export type Database = {
           regra_pontos?: number
           slug: string
           telefone?: string | null
+          webhook_last_at?: string | null
+          webhook_secret?: string
         }
         Update: {
           brand_primary?: string
@@ -159,6 +201,8 @@ export type Database = {
           regra_pontos?: number
           slug?: string
           telefone?: string | null
+          webhook_last_at?: string | null
+          webhook_secret?: string
         }
         Relationships: []
       }
@@ -168,6 +212,8 @@ export type Database = {
           client_user_id: string
           created_at: string
           id: string
+          id_venda_externa: string | null
+          origem: string | null
           pontos_delta: number
           product_id: string | null
           status: Database["public"]["Enums"]["transaction_status"]
@@ -181,6 +227,8 @@ export type Database = {
           client_user_id: string
           created_at?: string
           id?: string
+          id_venda_externa?: string | null
+          origem?: string | null
           pontos_delta?: number
           product_id?: string | null
           status?: Database["public"]["Enums"]["transaction_status"]
@@ -194,6 +242,8 @@ export type Database = {
           client_user_id?: string
           created_at?: string
           id?: string
+          id_venda_externa?: string | null
+          origem?: string | null
           pontos_delta?: number
           product_id?: string | null
           status?: Database["public"]["Enums"]["transaction_status"]
