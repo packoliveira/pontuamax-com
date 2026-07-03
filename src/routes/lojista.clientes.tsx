@@ -435,6 +435,21 @@ function ClientesPage() {
           </DialogHeader>
           {editInfo && (
             <div className="space-y-3">
+              {inclP && (() => {
+                const c = clientes.find((x) => x.user_id === editInfo.user_id);
+                if (!c) return null;
+                return (
+                  <div className="flex items-center justify-between rounded-md border bg-muted/40 p-3">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Saldo</div>
+                      <div className="text-lg font-bold">
+                        {c.pontos} <span className="text-xs font-normal text-muted-foreground">pts</span>
+                      </div>
+                    </div>
+                    <NivelBadge pontos={c.pontos} nivel={c.nivel} />
+                  </div>
+                );
+              })()}
               <div>
                 <Label htmlFor="edit-nome">Nome</Label>
                 <Input id="edit-nome" value={editInfo.full_name} onChange={(e) => setEditInfo({ ...editInfo, full_name: e.target.value })} />
