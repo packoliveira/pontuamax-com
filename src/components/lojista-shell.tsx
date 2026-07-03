@@ -1,12 +1,13 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles, Megaphone, Zap, Ticket, FileText, Trophy, Code } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { myStoreQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const nav: NavItem[] = [
@@ -30,6 +31,49 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: loja } = useQuery(myStoreQuery());
+  const [copied, setCopied] = useState(false);
+
+  const publicUrl = loja?.slug
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/${loja.slug}`
+    : null;
+
+  const copyLink = async () => {
+    if (!publicUrl) return;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setCopied(true);
+      toast.success("Link copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar");
+    }
+  };
+
+  const PublicLinkCard = () =>
+    loja?.slug ? (
+      <div className="mx-3 my-2 rounded-md border bg-muted/40 p-2 text-xs">
+        <div className="mb-1 text-muted-foreground">Sua página pública</div>
+        <div className="flex items-center gap-1">
+          <a
+            href={`/${loja.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 truncate font-mono text-foreground hover:underline"
+            title={publicUrl ?? ""}
+          >
+            /{loja.slug}
+          </a>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={copyLink} title="Copiar link">
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" asChild title="Abrir">
+            <a href={`/${loja.slug}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </Button>
+        </div>
+      </div>
+    ) : null;
 
   const doLogout = async () => {
     await qc.cancelQueries();
@@ -77,6 +121,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-muted/30">
       <aside className="hidden md:flex md:w-64 md:flex-col border-r bg-background">
         <Brand />
+        <PublicLinkCard />
         <div className="flex-1"><NavList /></div>
         <div className="p-3 border-t">
           <Button variant="ghost" size="sm" className="w-full justify-start" onClick={doLogout}>
@@ -99,6 +144,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="p-0 w-72">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <Brand />
+              <PublicLinkCard />
               <NavList onClick={() => setOpen(false)} />
               <div className="p-3 border-t">
                 <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setOpen(false); doLogout(); }}>
