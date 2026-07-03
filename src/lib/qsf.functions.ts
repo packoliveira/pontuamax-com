@@ -89,6 +89,9 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         brand_secondary: z.string().max(20).optional(),
         logo_url: z.string().max(500).optional().nullable(),
         banner_url: z.string().max(500).optional().nullable(),
+        indicacao_ativa: z.boolean().optional(),
+        bonus_indicador: z.number().int().min(0).max(10000).optional(),
+        bonus_indicado: z.number().int().min(0).max(10000).optional(),
       })
       .parse(input),
   )
@@ -101,16 +104,42 @@ export const atualizarLoja = createServerFn({ method: "POST" })
 // -------- CLIENTE: link authenticated user to a store --------
 export const vincularClienteALoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ store_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) =>
+    z.object({
+      store_id: z.string().uuid(),
+      referrer_phone: z.string().max(20).optional().nullable(),
+    }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("user_roles").upsert({ user_id: context.userId, role: "cliente" }, { onConflict: "user_id,role" });
+    // Verifica se já existe link (para não sobrescrever referrer)
+    const existing = await supabaseAdmin
+      .from("store_clients")
+      .select("*")
+      .eq("store_id", data.store_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (existing.data) return existing.data;
+
+    // Resolve referrer pelo telefone
+    let referrer_user_id: string | null = null;
+    if (data.referrer_phone) {
+      const digits = data.referrer_phone.replace(/\D/g, "");
+      if (digits.length >= 8) {
+        const prof = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
+        if (prof.data && prof.data.id !== context.userId) {
+          // indicador precisa ser cliente da mesma loja
+          const refLink = await supabaseAdmin
+            .from("store_clients").select("id")
+            .eq("store_id", data.store_id).eq("user_id", prof.data.id).maybeSingle();
+          if (refLink.data) referrer_user_id = prof.data.id;
+        }
+      }
+    }
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
-      .upsert(
-        { store_id: data.store_id, user_id: context.userId },
-        { onConflict: "store_id,user_id", ignoreDuplicates: false },
-      )
+      .insert({ store_id: data.store_id, user_id: context.userId, referrer_user_id })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
