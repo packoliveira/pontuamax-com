@@ -394,6 +394,56 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
   );
 }
 
+function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_comment: boolean; nps_template: string } }) {
+  const qc = useQueryClient();
+  const [on, setOn] = useState(loja.nps_enabled);
+  const [askC, setAskC] = useState(loja.nps_ask_comment);
+  const [tpl, setTpl] = useState(loja.nps_template);
+  useEffect(() => {
+    setOn(loja.nps_enabled);
+    setAskC(loja.nps_ask_comment);
+    setTpl(loja.nps_template);
+  }, [loja]);
+  const salvar = useMutation({
+    mutationFn: () => atualizarLoja({ data: { nps_enabled: on, nps_ask_comment: askC, nps_template: tpl } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("NPS salvo");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><Star className="h-4 w-4" /> Pesquisa de satisfação (NPS)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Após cada venda lançada, o cliente recebe um link no WhatsApp para dar uma nota de 0 a 10. Requer WhatsApp ativo.
+        </p>
+        <div className="flex items-center gap-2">
+          <Switch checked={on} onCheckedChange={setOn} />
+          <span className="text-sm">Ativar pesquisa NPS pós-venda</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch checked={askC} onCheckedChange={setAskC} disabled={!on} />
+          <span className="text-sm">Pedir comentário opcional</span>
+        </div>
+        <div>
+          <Label>Mensagem enviada</Label>
+          <Textarea rows={4} value={tpl} onChange={(e) => setTpl(e.target.value)} disabled={!on} />
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Variáveis: <code>{"{nome_cliente}"}</code>, <code>{"{nome_loja}"}</code>, <code>{"{link_nps}"}</code>
+          </p>
+        </div>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          {salvar.isPending ? "Salvando..." : "Salvar NPS"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 function AssetUploader({
   storeId,
   kind,
