@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
+import { traduzirErroAuth } from "@/lib/auth-errors";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BrandPreview } from "@/components/brand-preview";
 import { Check, ArrowRight, Copy } from "lucide-react";
@@ -71,7 +73,7 @@ function Onboarding() {
       setSlug(s);
       setStep(5);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(traduzirErroAuth(e));
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,7 @@ function Onboarding() {
           <Card><CardHeader><CardTitle>Sua conta de lojista</CardTitle></CardHeader><CardContent className="space-y-4">
             <div><Label>Seu nome</Label><Input value={respName} onChange={(e) => setRespName(e.target.value)} placeholder="Como quer ser chamado" /></div>
             <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" /></div>
-            <div><Label>Senha</Label><Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} /></div>
+            <div><Label>Senha</Label><PasswordInput value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} /></div>
             <Button onClick={() => setStep(2)} disabled={!respName || !email || senha.length < 6} className="w-full">Próximo <ArrowRight className="h-4 w-4" /></Button>
           </CardContent></Card>
         )}

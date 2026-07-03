@@ -1491,7 +1491,23 @@ export const excluirClienteDaLoja = createServerFn({ method: "POST" })
       .select("id");
     if (del.error) throw new Error(del.error.message);
     if (!del.data || del.data.length === 0) throw new Error("Cliente não estava vinculado a esta loja.");
-    return { ok: true };
+
+    // 9) Se o cliente não pertence a nenhuma outra loja, remover profile e conta de auth
+    // (libera CPF/telefone para novo cadastro do zero).
+    const outros = await supabaseAdmin
+      .from("store_clients")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", uid);
+    const restantes = outros.count ?? 0;
+    let auth_removido = false;
+    if (restantes === 0) {
+      // profile
+      await supabaseAdmin.from("profiles").delete().eq("id", uid);
+      // auth user
+      const authDel = await supabaseAdmin.auth.admin.deleteUser(uid);
+      if (!authDel.error) auth_removido = true;
+    }
+    return { ok: true, auth_removido };
   });
 
 // ============================================================
