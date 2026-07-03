@@ -9,6 +9,7 @@ import { traduzirErroAuth, isCredenciaisInvalidas } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Sparkles, Loader2, Store, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
 export const Route = createFileRoute("/lojista/login")({
   ssr: false,
@@ -37,6 +38,7 @@ function Login() {
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [errorKind, setErrorKind] = useState<"cred" | "store" | "other" | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
   useEffect(() => {
     try {
       const msg = sessionStorage.getItem("auth_flash");
@@ -159,6 +161,13 @@ function Login() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verificando credenciais e loja...</>) : "Entrar"}
             </Button>
+            <button
+              type="button"
+              onClick={() => setForgotOpen(true)}
+              className="block mx-auto text-xs text-muted-foreground hover:text-foreground underline"
+            >
+              Esqueci minha senha
+            </button>
             <p className="text-xs text-center text-muted-foreground">
               Ainda não tem loja?{" "}
               <Link to="/lojista/onboarding" className="underline text-violet-700">Criar minha loja</Link>
@@ -166,6 +175,7 @@ function Login() {
           </form>
         </CardContent>
       </Card>
+      <EsqueciSenhaDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} />
     </div>
   );
 }
