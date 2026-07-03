@@ -262,7 +262,9 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
   });
 
 // -------- LOJISTA: cadastrar novo cliente pelo telefone (durante lançar venda) --------
-// Cria auth user com email sintético baseado no CPF e senha temporária = CPF (só dígitos)
+// Identidade única do cliente = TELEFONE. Cria auth user com email sintético
+// baseado no telefone (fonte da verdade) e senha temporária = telefone (só dígitos).
+// CPF fica salvo apenas como dado complementar do perfil.
 export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -271,7 +273,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         phone: z.string().min(8).max(20),
         nome: z.string().min(1).max(100),
         store_id: z.string().uuid(),
-        cpf: z.string().min(11).max(20),
+        cpf: z.string().max(20).optional().nullable(),
       })
       .parse(input),
   )
@@ -283,10 +285,12 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     const digits = data.phone.replace(/\D/g, "");
     const cpfDigits = (data.cpf ?? "").replace(/\D/g, "");
     if (digits.length < 8) throw new Error("Telefone inválido.");
-    if (cpfDigits.length !== 11) throw new Error("CPF é obrigatório e deve conter 11 dígitos.");
+    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
 
-    // Bloquear duplicidade nesta loja: procurar profiles com mesmo telefone OU CPF
-    const orClauses = [`phone.eq.${digits}`, `cpf.eq.${cpfDigits}`];
+    // Bloquear duplicidade nesta loja: procurar profiles com mesmo telefone
+    // (ou CPF quando informado). Telefone é a chave única.
+    const orClauses = [`phone.eq.${digits}`];
+    if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
     const dup = await supabaseAdmin
       .from("profiles")
       .select("id, phone, cpf")
@@ -303,35 +307,39 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         if (conflict?.phone === digits) {
           throw new Error("Já existe um cliente cadastrado nesta loja com este telefone.");
         }
-        if (conflict?.cpf === cpfDigits) {
+        if (cpfDigits && conflict?.cpf === cpfDigits) {
           throw new Error("Já existe um cliente cadastrado nesta loja com este CPF.");
         }
         throw new Error("Já existe um cliente cadastrado nesta loja com este telefone ou CPF.");
       }
     }
 
-    // Login do cliente é SEMPRE pelo CPF
-    const email = `${cpfDigits}@cpf.qsfclub.local`;
-    // Try to find existing user por CPF (fonte da verdade) ou telefone (legado)
+    // Login do cliente é SEMPRE pelo TELEFONE.
+    const email = `${digits}@cliente.qsfclub.local`;
+    // Reaproveita cliente existente: procura primeiro por telefone; depois por CPF (legado) quando informado.
     let userId: string | undefined;
-    const byCpf = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpfDigits).maybeSingle();
-    const existing = byCpf.data
-      ? byCpf
-      : await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
+    const byPhone = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
+    const existing = byPhone.data
+      ? byPhone
+      : cpfDigits
+        ? await supabaseAdmin.from("profiles").select("id").eq("cpf", cpfDigits).maybeSingle()
+        : { data: null as { id: string } | null };
     if (existing.data) {
       userId = existing.data.id;
-      await supabaseAdmin.from("profiles").update({ cpf: cpfDigits, phone: digits }).eq("id", userId);
+      const patch: { phone: string; cpf?: string } = { phone: digits };
+      if (cpfDigits) patch.cpf = cpfDigits;
+      await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
     } else {
       const created = await supabaseAdmin.auth.admin.createUser({
         email,
-        password: cpfDigits,
+        password: digits,
         email_confirm: true,
-        user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits },
+        user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits || null },
       });
       if (created.error || !created.data.user) throw new Error(created.error?.message ?? "Falha ao criar cliente");
       userId = created.data.user.id;
       // Ensure profile exists (trigger handles it, but idempotent)
-      await supabaseAdmin.from("profiles").upsert({ id: userId, full_name: data.nome, phone: digits, cpf: cpfDigits });
+      await supabaseAdmin.from("profiles").upsert({ id: userId, full_name: data.nome, phone: digits, cpf: cpfDigits || null });
     }
     await supabaseAdmin.from("user_roles").upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id,role" });
     const { data: link, error } = await supabaseAdmin
