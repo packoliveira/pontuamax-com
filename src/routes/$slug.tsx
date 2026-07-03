@@ -21,7 +21,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Coins, Wallet, LogOut, Trophy, Ticket } from "lucide-react";
+import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift } from "lucide-react";
+
+const REF_KEY = "qsf_referrer_phone";
+function getStoredReferrer(): string | null {
+  try {
+    const p = new URLSearchParams(window.location.search).get("indicou");
+    if (p) {
+      const d = p.replace(/\D/g, "");
+      if (d.length >= 8) localStorage.setItem(REF_KEY, d);
+    }
+    return localStorage.getItem(REF_KEY);
+  } catch { return null; }
+}
 
 type Loja = Tables<"stores">;
 type Link = Tables<"store_clients">;
@@ -222,8 +234,11 @@ function Auth({ loja }: { loja: Loja }) {
 function VincularStore({ loja }: { loja: Loja }) {
   const qc = useQueryClient();
   const vincular = useMutation({
-    mutationFn: () => vincularClienteALoja({ data: { store_id: loja.id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-link", loja.id] }),
+    mutationFn: () => vincularClienteALoja({ data: { store_id: loja.id, referrer_phone: getStoredReferrer() } }),
+    onSuccess: () => {
+      try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+      qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
+    },
   });
   useEffect(() => { vincular.mutate(); }, []); // eslint-disable-line
   return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
@@ -244,10 +259,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
   const prog = progressoNivel(link.pontos);
 
   const [nome, setNome] = useState("Cliente");
+  const [meuTelefone, setMeuTelefone] = useState<string | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata as { full_name?: string } | undefined;
       setNome(meta?.full_name ?? "Cliente");
+      const phone = (data.user?.user_metadata as { phone?: string } | undefined)?.phone;
+      setMeuTelefone(phone ?? null);
     });
   }, []);
 
@@ -355,6 +373,10 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
         </section>
       )}
 
+      {loja.indicacao_ativa && meuTelefone && (
+        <IndicacaoCard loja={loja} telefone={meuTelefone} bonusIndicado={loja.bonus_indicado} bonusIndicador={loja.bonus_indicador} />
+      )}
+
       <section>
         <h2 className="font-semibold mb-3">Histórico</h2>
         <Card><CardContent className="p-0"><div className="divide-y">
@@ -399,5 +421,42 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function IndicacaoCard({
+  loja, telefone, bonusIndicado, bonusIndicador,
+}: { loja: Loja; telefone: string; bonusIndicado: number; bonusIndicador: number }) {
+  const link = `${window.location.origin}/${loja.slug}?indicou=${telefone}`;
+  const msg = `Oi! 👋 Sou cliente da ${loja.nome_fantasia} e quero te indicar. Cadastre-se pelo meu link e ganhe ${bonusIndicado} pontos na sua 1ª compra: ${link}`;
+  const share = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: loja.nome_fantasia, text: msg, url: link }); return; } catch { /* fallback */ }
+    }
+    await navigator.clipboard.writeText(link);
+    toast.success("Link copiado!");
+  };
+  const whats = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base"><Gift className="h-4 w-4" /> Indique amigos e ganhe pontos</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Seu amigo ganha <strong>{bonusIndicado} pts</strong> na 1ª compra.
+          Você ganha <strong>{bonusIndicador} pts</strong> quando ele comprar.
+        </p>
+        <div className="flex gap-2">
+          <Input readOnly value={link} className="text-xs" onFocus={(e) => e.currentTarget.select()} />
+          <Button size="sm" onClick={share} style={{ backgroundColor: "var(--brand-primary)" }} className="text-white">
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </div>
+        <Button variant="outline" size="sm" onClick={whats} className="w-full">Enviar por WhatsApp</Button>
+      </CardContent>
+    </Card>
   );
 }
