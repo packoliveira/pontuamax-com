@@ -1241,21 +1241,23 @@ export const sortearGanhador = createServerFn({ method: "POST" })
     if (!r || r.stores.owner_id !== context.userId) throw new Error("Sorteio não encontrado.");
     if (r.status !== "aberto") throw new Error("Sorteio já finalizado.");
 
-    // elegíveis: clientes vinculados; filtra por nível e (se tag) por tag
-    let q = supabaseAdmin.from("store_clients").select("user_id, nivel").eq("store_id", r.store_id);
-    if (r.filtro_nivel_min === "prata") q = q.in("nivel", ["prata","ouro"]);
-    else if (r.filtro_nivel_min === "ouro") q = q.eq("nivel", "ouro");
-    const linkRes = await q;
+    // elegíveis: busca clientes vinculados e (se houver) tags, e delega a
+    // filtragem/seleção à lógica pura em raffle-logic.ts (testada em unit).
+    const { elegiveisSorteio, escolherVencedor } = await import("./raffle-logic");
+    const linkRes = await supabaseAdmin
+      .from("store_clients").select("user_id, nivel").eq("store_id", r.store_id);
     if (linkRes.error) throw new Error(linkRes.error.message);
-    let userIds = (linkRes.data ?? []).map((l) => l.user_id);
-    if (r.filtro_tag) {
-      const tagRes = await supabaseAdmin.from("client_tags")
-        .select("client_user_id").eq("store_id", r.store_id).eq("tag", r.filtro_tag);
-      const tagged = new Set((tagRes.data ?? []).map((t) => t.client_user_id));
-      userIds = userIds.filter((u) => tagged.has(u));
-    }
-    if (userIds.length === 0) throw new Error("Nenhum cliente elegível.");
-    const winner = userIds[Math.floor(Math.random() * userIds.length)];
+    const tagRes = r.filtro_tag
+      ? await supabaseAdmin.from("client_tags")
+          .select("client_user_id, tag").eq("store_id", r.store_id).eq("tag", r.filtro_tag)
+      : { data: [] as { client_user_id: string; tag: string }[], error: null };
+    // biome-ignore lint/suspicious/noExplicitAny: linhas do Supabase
+    const userIds = elegiveisSorteio(
+      (linkRes.data ?? []) as any,
+      (tagRes.data ?? []) as any,
+      { filtro_tag: r.filtro_tag, filtro_nivel_min: r.filtro_nivel_min },
+    );
+    const winner = escolherVencedor(userIds);
     const prof = await supabaseAdmin.from("profiles").select("full_name").eq("id", winner).maybeSingle();
     await supabaseAdmin.from("raffles").update({
       ganhador_user_id: winner,
