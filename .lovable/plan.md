@@ -1,63 +1,103 @@
-## Objetivo
-Substituir o mock store por Supabase Auth + Postgres, mantendo o comportamento atual do MVP (fluxos de lançar venda, resgate, catálogo, saldo).
+# Roadmap "Fidelimax-like" — implementação em 4 fases
 
-## Autenticação
+Você listou 10 features grandes. Fazer tudo de uma vez seria caro (muitos créditos) e arriscado (bugs interligados). Vou entregar em **4 fases**, cada uma testável sozinha. Você aprova cada fase antes de começar a próxima.
 
-**Lojista** — Supabase email/senha
-- Cadastro em `/lojista/onboarding` cria o user, o `profile` (nome, telefone), e a `store` (nome fantasia, CNPJ, slug, modalidade, branding)
-- Login em `/lojista/login` com email/senha
-- Rota `/lojista/*` protegida via `_authenticated` layout gerenciado + checagem de role `lojista`
+---
 
-**Cliente final** — telefone/CPF + senha (Supabase custom flow)
-- Cliente é `auth.users` com email sintético `<phone>@qsf.local` internamente; formulário mostra só telefone e senha
-- Cadastro na primeira visita a `/:slug` (pede telefone, CPF, nome, senha)
-- Login subsequente: telefone + senha
-- Um mesmo cliente pode ter contas em várias lojas — vínculo via tabela `store_clients (store_id, user_id)`
+## FASE 1 — Comercial + Admin (essencial pra vender)
+**Objetivo: você conseguir cadastrar clientes na sua plataforma essa semana.**
 
-## Schema
+1. **`/cadastro`** — lojista cria conta (email + senha + nome + telefone + nome da loja)
+2. Novo campo `stores.subscription_status` (`pending_payment`, `active`, `suspended`, `cancelled`) + `plan` (`starter`, `pro`, `premium`) + `setup_paid_at`
+3. Após cadastro → redireciona pra **`/lojista/aguardando`** — tela bloqueada: "Aguardando liberação. Fale com nosso time no WhatsApp: [link]"
+4. **Middleware**: se `subscription_status != 'active'`, TODO acesso ao `/lojista/*` cai em `/lojista/aguardando` (exceto o próprio aguardando)
+5. **Painel admin** em `/admin` (role `admin` na `user_roles`):
+   - Lista todas as lojas + status + plano + MRR calculado
+   - Ações: liberar (`active`), suspender, cancelar, mudar plano
+   - Dashboard: total de lojas, MRR total, lojas por status, novas lojas no mês
+6. Rota `/admin` protegida por `has_role(admin)`
 
-```text
-profiles          (id=auth.users.id, full_name, phone, cpf?, created_at)
-user_roles        (user_id, role: 'lojista'|'cliente')  -- padrão de segurança
-stores            (id, owner_id, slug UNIQUE, nome_fantasia, cnpj, modalidade,
-                   regra_pontos, percentual_cashback, brand_primary, brand_secondary,
-                   logo_url, telefone, created_at)
-store_clients     (id, store_id, user_id, pontos, cashback_saldo, nivel, created_at,
-                   UNIQUE(store_id, user_id))
-products          (id, store_id, nome, custo_pontos, descricao, ativo, created_at)
-transactions      (id, store_id, client_id, tipo: 'venda'|'resgate_produto'|'resgate_cashback',
-                   valor, pontos_delta, cashback_delta, product_id?, voucher_code?,
-                   status: 'pendente'|'entregue', created_at)
-```
+**Entregável testável:** você cria conta em `/cadastro`, entra como admin, libera, o lojista consegue usar.
 
-RLS resumida:
-- `stores`: SELECT público (para página `/:slug` carregar branding); INSERT/UPDATE só owner
-- `products`: SELECT público por store; write só owner
-- `store_clients`: SELECT/UPDATE o próprio user OU owner da store
-- `transactions`: SELECT o próprio client OU owner da store; INSERT via server function (regras de negócio)
+---
 
-Funções server (`createServerFn` com `requireSupabaseAuth`):
-- `registerClient(slug, phone, cpf, nome, senha)` — cria auth user + profile + role + store_clients
-- `lancarVenda(client_id, valor)` — calcula pontos/cashback, aplica nível, insere transaction, atualiza store_clients
-- `resgatarProduto(product_id)` / `resgatarCashback(valor)` — valida saldo, gera voucher `QSF-XXXX-XXXX`
-- `entregarResgate(transaction_id)` — muda status
+## FASE 2 — Engajamento (o que vende contra Fidelimax)
+**Objetivo: dar ao lojista as ferramentas de marketing que geram retorno.**
 
-Trigger `handle_new_user` cria profile automaticamente.
+1. **Campanhas WhatsApp em massa** (`/lojista/campanhas`)
+   - Criar campanha: nome, mensagem (com variáveis `{{nome}}`, `{{pontos}}`, `{{loja}}`)
+   - Segmentar: nível (Bronze/Prata/Ouro), inativos (30/60/90d), aniversariantes do mês, todos
+   - Preview + envio (via Evolution API já integrada)
+   - Log de disparos + status por cliente
+2. **Cupons/promoções** (`/lojista/promocoes`)
+   - Multiplicador de pontos por período (ex: "2x pontos de sex a dom")
+   - Aplicado automaticamente no `/lojista/lancar-venda` dentro do período
+3. **Notificações automáticas** (cron pg_cron chamando route TanStack):
+   - Aniversário: WhatsApp automático no dia com bônus configurável
+   - Inatividade 30/60/90d: mensagem "sentimos sua falta"
+   - Pontos expirando em 7d (se lojista habilitar expiração)
+4. **Indicação amigo→amigo**
+   - Cliente compartilha link `/{slug}?indicou={phone}`
+   - Novo cliente ganha X pontos, quem indicou ganha Y na primeira compra do indicado
 
-## Migração de código
-- Deletar `src/lib/mock-store.ts`
-- Reescrever telas de `/lojista/*` e `/:slug` para usar TanStack Query + server functions
-- `/lojista/onboarding` vira signup completo (email/senha + dados da loja)
-- Página `/:slug` carrega store via server fn pública (SELECT anon) e injeta branding antes do login
-- Manter formatação BRL, cálculo de nível (Bronze/Prata/Ouro), validações
+---
 
-## Ordem de execução
-1. Habilitar Lovable Cloud
-2. Migração SQL (tabelas + RLS + grants + trigger + função `has_role`)
-3. Server functions (`.functions.ts`) + middleware bearer
-4. Reescrever telas lojista e página cliente
-5. Deletar mock, atualizar `__root.tsx` (auth listener)
-6. Verificar build
+## FASE 3 — Profissionalização (retenção de lojistas)
+**Objetivo: lojista sentir que vale o valor da mensalidade.**
 
-## Nota de segurança
-Cliente com telefone/senha simples é ok pra MVP. Vale documentar que reset de senha por WhatsApp/SMS entra junto com a integração Evolution API mais adiante.
+1. **Relatórios/Dashboard do lojista** (`/lojista/relatorios`)
+   - Faturamento por período, ticket médio, nº vendas, nº novos clientes
+   - Taxa de retorno (clientes que voltaram)
+   - Top 10 clientes por gasto e por pontos
+   - Gráficos (recharts): vendas por dia/semana/mês
+2. **Exportação CSV**
+   - Clientes: nome, telefone, pontos, cashback, nível, última compra
+   - Transações: data, cliente, valor, pontos gerados/resgatados
+3. **Multi-usuário por loja** (`/lojista/equipe`)
+   - Nova tabela `store_users` (store_id, user_id, role: `owner` | `manager` | `cashier`)
+   - `owner`: tudo. `manager`: sem financeiro/equipe. `cashier`: só lançar venda + consultar cliente
+   - Convite por email
+4. **PWA instalável** pro cliente final em `/{slug}`
+   - Manifest + ícones + service worker (via vite-plugin-pwa, guardado contra preview)
+   - Cliente adiciona à tela inicial, abre como app
+
+---
+
+## FASE 4 — Legal + polimento (destravar cobrança)
+**Objetivo: poder cobrar sem risco jurídico.**
+
+1. **Termos de Uso** (`/termos`) — texto template LGPD/CDC adaptado
+2. **Política de Privacidade** (`/privacidade`) — LGPD compliant (dados coletados, finalidade, retenção, direitos do titular, DPO)
+3. **Checkbox obrigatório** no cadastro (lojista) e no cadastro do cliente final aceitando termos
+4. **Export/delete de dados** do cliente (direito LGPD) na tela do cliente
+
+---
+
+## Detalhes técnicos (só pra referência)
+
+**Novas tabelas:**
+- `store_users` (multi-usuário)
+- `campaigns` + `campaign_recipients` (WhatsApp em massa)
+- `promotions` (multiplicadores por período)
+- `referrals` (indicações)
+- `notification_logs` (auditoria de envios automáticos)
+- Colunas em `stores`: `subscription_status`, `plan`, `setup_paid_at`, `mrr_amount`, `birthday_bonus_points`
+
+**Novas rotas:**
+- Público: `/cadastro`, `/termos`, `/privacidade`
+- Lojista: `/lojista/aguardando`, `/lojista/campanhas`, `/lojista/promocoes`, `/lojista/relatorios`, `/lojista/equipe`
+- Admin: `/admin`, `/admin/lojas`, `/admin/financeiro`
+- API pública: `/api/public/hooks/notifications-cron`
+
+**Segurança:**
+- `admin` role via `user_roles` (já existe) + `has_role` (já existe)
+- RLS: `store_users` gate em cima de todas as tabelas de loja
+- Middleware TanStack: bloqueio por `subscription_status`
+
+---
+
+## Recomendação
+
+Começar por **Fase 1 agora** (é a que destrava você começar a vender). São ~5-8 arquivos + 1 migration. Depois de aprovada e testada por você, seguimos pra Fase 2.
+
+**Confirma que posso começar a Fase 1?** Se quiser reordenar (ex: PWA antes de campanhas), me fala antes.
