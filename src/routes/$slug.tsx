@@ -146,16 +146,27 @@ function Auth({ loja }: { loja: Loja }) {
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
   const [senha, setSenha] = useState("");
+  const [senha2, setSenha2] = useState("");
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
 
   const qc = useQueryClient();
 
+  const switchTo = (novo: "login" | "signup", msg: string) => {
+    setMode(novo);
+    setSenha("");
+    setSenha2("");
+    setAviso(msg);
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAviso(null);
     const cpfDigits = onlyDigits(cpf);
     if (!isValidCPF(cpfDigits)) return toast.error("CPF inválido");
-    if (senha.length < 6) return toast.error("Senha deve ter 6+ caracteres");
+    if (senha.length < 6) return toast.error("A senha precisa ter no mínimo 6 caracteres.");
+    if (mode === "signup" && senha !== senha2) return toast.error("As senhas não coincidem");
     setLoading(true);
     try {
       const email = cpfToEmail(cpfDigits);
@@ -186,7 +197,16 @@ function Auth({ loja }: { loja: Loja }) {
       }
       qc.invalidateQueries();
     } catch (err) {
-      toast.error((err as Error).message);
+      // Auto-switch: cadastro com CPF já existente → login
+      if (mode === "signup" && isUsuarioJaCadastrado(err)) {
+        switchTo("login", "Você já tem uma conta com esse CPF. Entre com sua senha abaixo.");
+      } else if (mode === "login" && isCredenciaisInvalidas(err)) {
+        // Login que falhou pode ser: CPF não cadastrado OU senha errada.
+        // Sugere cadastro mas mantém CPF preenchido.
+        switchTo("signup", "Não encontramos uma conta com esse CPF. Cadastre-se abaixo — se você já tem conta, tente a senha novamente.");
+      } else {
+        toast.error(traduzirErroAuth(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -200,6 +220,11 @@ function Auth({ loja }: { loja: Loja }) {
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-3">
+            {aviso && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+                {aviso}
+              </div>
+            )}
             <div>
               <Label>CPF</Label>
               <Input
@@ -224,12 +249,31 @@ function Auth({ loja }: { loja: Loja }) {
             )}
             <div>
               <Label>Senha</Label>
-              <Input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"} />
+              <PasswordInput
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              />
             </div>
+            {mode === "signup" && (
+              <div>
+                <Label>Confirmar senha</Label>
+                <PasswordInput
+                  value={senha2}
+                  onChange={(e) => setSenha2(e.target.value)}
+                  placeholder="Repita a senha"
+                  autoComplete="new-password"
+                />
+                {senha2.length > 0 && senha !== senha2 && (
+                  <p className="mt-1 text-[11px] text-destructive">As senhas não coincidem</p>
+                )}
+              </div>
+            )}
             <Button type="submit" disabled={loading} className="w-full text-white" style={{ backgroundColor: "var(--brand-primary)" }}>
               {loading ? "Aguarde..." : mode === "signup" ? "Criar conta" : "Entrar"}
             </Button>
-            <button type="button" onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-xs text-center w-full underline text-muted-foreground">
+            <button type="button" onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }} className="text-xs text-center w-full underline text-muted-foreground">
               {mode === "login" ? "Ainda não tenho conta" : "Já tenho conta, entrar"}
             </button>
             {mode === "login" && (
