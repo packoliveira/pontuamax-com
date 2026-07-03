@@ -16,8 +16,33 @@ export function formatBrazilPhone(raw: string | null | undefined): string | null
   return `55${digits}`;
 }
 
-function renderTemplate(tpl: string, vars: Record<string, string | number>): string {
-  return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? String(vars[k]) : `{${k}}`));
+// Fallbacks por variável — garantem que a mensagem nunca saia com "{algo}" cru
+// nem com string vazia. Aplicam-se quando a variável está ausente OU vazia.
+const VAR_FALLBACKS: Record<string, string> = {
+  nome_cliente: "cliente",
+  pontos_ganhos: "0",
+  nome_loja: "nossa loja",
+  pontos_saldo: "0",
+  pontos_faltantes: "alguns",
+  proximo_premio: "novos prêmios em breve",
+  link_portal_cliente: "",
+};
+
+function renderTemplate(tpl: string, vars: Record<string, string | number | null | undefined>): string {
+  const rendered = tpl.replace(/\{(\w+)\}/g, (_, k: string) => {
+    const raw = vars[k];
+    const value = raw === undefined || raw === null ? "" : String(raw).trim();
+    if (value !== "") return value;
+    return VAR_FALLBACKS[k] ?? "";
+  });
+  // Higienização final: colapsa espaços duplicados e linhas vazias que sobraram
+  // por conta de fallbacks vazios (ex.: link_portal_cliente sem slug).
+  return rendered
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+/g, " ").trimEnd())
+    .filter((line, idx, arr) => !(line === "" && arr[idx - 1] === ""))
+    .join("\n")
+    .trim();
 }
 
 async function logIntegration(
@@ -120,16 +145,16 @@ export async function notifyClient(params: {
       .limit(1)
       .maybeSingle();
 
-    const proximoPremio = prox?.nome ?? "nenhum prêmio disponível no momento";
+    const proximoPremio = prox?.nome?.trim() || VAR_FALLBACKS.proximo_premio;
     const pontosFaltantes = prox ? Math.max(0, prox.custo_pontos - saldo) : 0;
-    const linkPortal = `https://qsfclub.com/${loja.slug}`;
+    const linkPortal = loja.slug ? `https://qsfclub.com/${loja.slug}` : "";
 
     let text: string;
     if (params.event === "pontos_ganhos") {
       text = renderTemplate(loja.whatsapp_template_pontos, {
-        nome_cliente: profile?.full_name ?? "cliente",
-        pontos_ganhos: params.pontosGanhos ?? 0,
-        nome_loja: loja.nome_fantasia,
+        nome_cliente: profile?.full_name?.trim(),
+        pontos_ganhos: params.pontosGanhos,
+        nome_loja: loja.nome_fantasia?.trim(),
         pontos_saldo: saldo,
         pontos_faltantes: pontosFaltantes,
         proximo_premio: proximoPremio,
