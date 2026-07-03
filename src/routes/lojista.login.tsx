@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,15 @@ function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    try {
+      const msg = sessionStorage.getItem("auth_flash");
+      if (msg) {
+        toast.info(msg);
+        sessionStorage.removeItem("auth_flash");
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
