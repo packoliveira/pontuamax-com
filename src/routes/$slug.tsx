@@ -8,6 +8,7 @@ import {
   activeStoreProductsQuery,
   myLinkAtStoreQuery,
   myTransactionsAtStoreQuery,
+  myStoreQuery,
   type StorePublic,
 } from "@/lib/queries";
 import {
@@ -86,6 +87,11 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [hydrating, setHydrating] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
+  // Se o usuário logado é o próprio dono da loja (lojista visitando "minha
+  // página pública"), NUNCA vincula ele como cliente — apenas mostra o modo
+  // prévia com atalho pro painel.
+  const { data: minhaLoja } = useQuery({ ...myStoreQuery(), enabled: !!sessionUserId });
+  const isOwnerPreview = !!minhaLoja && minhaLoja.id === loja.id;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
@@ -122,7 +128,9 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   return (
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
-      {isLoading || hydrating || authenticating ? (
+      {isOwnerPreview ? (
+        <OwnerPreviewBanner />
+      ) : isLoading || hydrating || authenticating ? (
         <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
       ) : sessionUserId && link ? (
         <ClienteLogado loja={loja} link={link} />
@@ -137,6 +145,31 @@ function ClienteFlow({ loja }: { loja: Loja }) {
         />
       )}
     </>
+  );
+}
+
+function OwnerPreviewBanner() {
+  return (
+    <div className="max-w-2xl mx-auto p-4 -mt-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Você está vendo sua loja como visitante</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Esta é a página pública que seus clientes acessam. Como você está logado
+            como dono da loja, nada é criado nem vinculado ao clicar aqui.
+          </p>
+          <p>
+            Para testar como cliente, saia da sua conta de lojista (canto superior direito)
+            ou abra este link em uma janela anônima.
+          </p>
+          <Link to="/lojista">
+            <Button variant="outline" size="sm">Voltar ao painel</Button>
+          </Link>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
