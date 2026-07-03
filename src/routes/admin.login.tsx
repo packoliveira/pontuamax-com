@@ -30,12 +30,7 @@ export const Route = createFileRoute("/admin/login")({
         "Esta área é exclusiva do admin master. Use o login do lojista.",
       );
     } catch { /* ignore */ }
-    const { data: store } = await supabase
-      .from("stores")
-      .select("id")
-      .eq("owner_id", uid)
-      .maybeSingle();
-    throw redirect({ to: store ? "/lojista" : "/lojista/login" });
+    throw redirect({ to: "/lojista/login" });
   },
   component: AdminLogin,
 });
