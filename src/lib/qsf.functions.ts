@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, gerarVoucher } from "./qsf-shared";
+import { calcularNivel, cpfToEmail, gerarVoucher } from "./qsf-shared";
 
 // -------- LOJISTA: sincronizar clientes órfãos --------
 // Reprocessa cadastros da página pública: para toda transação/nota fiscal desta
@@ -261,10 +261,9 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     return link;
   });
 
-// -------- LOJISTA: cadastrar novo cliente pelo telefone (durante lançar venda) --------
-// Identidade única do cliente = TELEFONE. Cria auth user com email sintético
-// baseado no telefone (fonte da verdade) e senha temporária = telefone (só dígitos).
-// CPF fica salvo apenas como dado complementar do perfil.
+// -------- LOJISTA: cadastrar novo cliente pelo CPF (durante lançar venda) --------
+// Identidade única do cliente = CPF. Cria/normaliza auth user com email sintético
+// baseado no CPF (fonte da verdade) e senha temporária = CPF (só dígitos).
 export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -287,8 +286,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     if (digits.length < 8) throw new Error("Telefone inválido.");
     if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
 
-    // Bloquear duplicidade nesta loja: procurar profiles com mesmo telefone
-    // (ou CPF quando informado). Telefone é a chave única.
+    // Bloquear duplicidade nesta loja: CPF é a chave única; telefone é complementar.
     const orClauses = [`phone.eq.${digits}`];
     if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
     const dup = await supabaseAdmin
@@ -314,25 +312,32 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       }
     }
 
-    // Login do cliente é SEMPRE pelo TELEFONE.
-    const email = `${digits}@cliente.qsfclub.local`;
-    // Reaproveita cliente existente: procura primeiro por telefone; depois por CPF (legado) quando informado.
+    // Login do cliente é SEMPRE pelo CPF.
+    const email = cpfToEmail(cpfDigits);
+    // Reaproveita cliente existente: procura primeiro por CPF; depois por telefone (legado) quando informado.
     let userId: string | undefined;
-    const byPhone = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
-    const existing = byPhone.data
-      ? byPhone
-      : cpfDigits
-        ? await supabaseAdmin.from("profiles").select("id").eq("cpf", cpfDigits).maybeSingle()
-        : { data: null as { id: string } | null };
+    const byCpf = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpfDigits).maybeSingle();
+    const existing = byCpf.data
+      ? byCpf
+      : await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
     if (existing.data) {
       userId = existing.data.id;
       const patch: { phone: string; cpf?: string } = { phone: digits };
       if (cpfDigits) patch.cpf = cpfDigits;
       await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
+      const normalized = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        email,
+        password: cpfDigits,
+        email_confirm: true,
+        user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits },
+      });
+      if (normalized.error && !/already|exists|registered/i.test(normalized.error.message)) {
+        throw new Error(normalized.error.message);
+      }
     } else {
       const created = await supabaseAdmin.auth.admin.createUser({
         email,
-        password: digits,
+        password: cpfDigits,
         email_confirm: true,
         user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits || null },
       });
@@ -348,7 +353,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { user_id: userId, link, senha_temporaria: digits };
+    return { user_id: userId, link, senha_temporaria: cpfDigits };
   });
 
 // -------- Lançar venda (lojista) --------
