@@ -52,6 +52,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         brand_primary: z.string().max(20).optional(),
         brand_secondary: z.string().max(20).optional(),
         logo_url: z.string().max(500).optional().nullable(),
+        banner_url: z.string().max(500).optional().nullable(),
       })
       .parse(input),
   )
