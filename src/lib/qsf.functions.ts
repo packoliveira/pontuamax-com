@@ -449,6 +449,100 @@ export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// -------- LOJISTA: atualizar dados básicos do cliente (nome / telefone / CPF) --------
+export const atualizarClienteInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      store_id: z.string().uuid(),
+      client_user_id: z.string().uuid(),
+      full_name: z.string().min(1).max(120),
+      phone: z.string().min(8).max(20),
+      cpf: z.string().max(20).optional().nullable(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const owner = await supabaseAdmin
+      .from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
+    if (!owner.data) throw new Error("Loja inválida.");
+    const link = await supabaseAdmin
+      .from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
+    if (!link.data) throw new Error("Cliente não vinculado à loja.");
+
+    const phoneDigits = data.phone.replace(/\D/g, "");
+    if (phoneDigits.length < 8) throw new Error("Telefone inválido.");
+    const cpfDigits = (data.cpf ?? "").replace(/\D/g, "");
+    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF inválido. Informe os 11 dígitos.");
+
+    // Duplicidade dentro da mesma loja (outros clientes com mesmo telefone/CPF)
+    const orClauses = [`phone.eq.${phoneDigits}`];
+    if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
+    const dup = await supabaseAdmin
+      .from("profiles").select("id, phone, cpf").or(orClauses.join(","))
+      .neq("id", data.client_user_id);
+    const dupIds = (dup.data ?? []).map((p) => p.id);
+    if (dupIds.length > 0) {
+      const links = await supabaseAdmin
+        .from("store_clients").select("user_id").eq("store_id", data.store_id).in("user_id", dupIds);
+      if ((links.data ?? []).length > 0) {
+        const conflict = dup.data!.find((p) => links.data!.some((l) => l.user_id === p.id));
+        if (conflict?.phone === phoneDigits) throw new Error("Já existe outro cliente nesta loja com este telefone.");
+        if (cpfDigits && conflict?.cpf === cpfDigits) throw new Error("Já existe outro cliente nesta loja com este CPF.");
+        throw new Error("Já existe outro cliente nesta loja com este telefone ou CPF.");
+      }
+    }
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ full_name: data.full_name.trim(), phone: phoneDigits, cpf: cpfDigits || null })
+      .eq("id", data.client_user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -------- LOJISTA: ajustar pontos do cliente (adicionar ou estornar) --------
+export const ajustarPontosCliente = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      store_id: z.string().uuid(),
+      client_user_id: z.string().uuid(),
+      // positivo = adicionar; negativo = estornar
+      delta: z.number().int().min(-1_000_000).max(1_000_000).refine((n) => n !== 0, "Informe uma quantidade diferente de zero."),
+      motivo: z.string().max(200).optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const owner = await supabaseAdmin
+      .from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
+    if (!owner.data) throw new Error("Loja inválida.");
+    const link = await supabaseAdmin
+      .from("store_clients").select("id, pontos")
+      .eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
+    if (!link.data) throw new Error("Cliente não vinculado à loja.");
+    const novoPontos = link.data.pontos + data.delta;
+    if (novoPontos < 0) throw new Error(`Estorno maior que o saldo atual (${link.data.pontos} pts).`);
+    const { error: eIns } = await supabaseAdmin.from("transactions").insert({
+      store_id: data.store_id,
+      client_user_id: data.client_user_id,
+      tipo: "ajuste",
+      valor: 0,
+      pontos_delta: data.delta,
+      cashback_delta: 0,
+      status: "entregue",
+      origem: data.motivo ? `ajuste_manual:${data.motivo.slice(0, 180)}` : "ajuste_manual",
+    });
+    if (eIns) throw new Error(eIns.message);
+    const { error: eUp } = await supabaseAdmin
+      .from("store_clients")
+      .update({ pontos: novoPontos, nivel: calcularNivel(novoPontos) })
+      .eq("id", link.data.id);
+    if (eUp) throw new Error(eUp.message);
+    return { ok: true, novo_saldo: novoPontos };
+  });
+
 // -------- Disparar notificações agora (teste manual) --------
 export const dispararNotificacoesAgora = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
