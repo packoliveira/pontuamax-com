@@ -27,6 +27,7 @@ import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
+import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
@@ -118,6 +119,12 @@ const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
   path: '/api/public/webhook/$origem',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksNotificationsDailyRoute =
+  ApiPublicHooksNotificationsDailyRouteImport.update({
+    id: '/api/public/hooks/notifications-daily',
+    path: '/api/public/hooks/notifications-daily',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRoutesByTo {
@@ -155,6 +163,7 @@ export interface FileRoutesByTo {
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
+  '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRoutesById {
@@ -176,6 +185,7 @@ export interface FileRoutesById {
   '/lojista/resgates': typeof LojistaResgatesRoute
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
 }
 export interface FileRouteTypes {
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/lojista/resgates'
     | '/admin/'
     | '/lojista/'
+    | '/api/public/hooks/notifications-daily'
     | '/api/public/webhook/$origem'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/lojista/resgates'
     | '/admin'
     | '/lojista'
+    | '/api/public/hooks/notifications-daily'
     | '/api/public/webhook/$origem'
   id:
     | '__root__'
@@ -236,6 +248,7 @@ export interface FileRouteTypes {
     | '/lojista/resgates'
     | '/admin/'
     | '/lojista/'
+    | '/api/public/hooks/notifications-daily'
     | '/api/public/webhook/$origem'
   fileRoutesById: FileRoutesById
 }
@@ -245,6 +258,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   LojistaRoute: typeof LojistaRouteWithChildren
+  ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
 }
 
@@ -376,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhookOrigemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/notifications-daily': {
+      id: '/api/public/hooks/notifications-daily'
+      path: '/api/public/hooks/notifications-daily'
+      fullPath: '/api/public/hooks/notifications-daily'
+      preLoaderRoute: typeof ApiPublicHooksNotificationsDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -426,6 +447,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
   LojistaRoute: LojistaRouteWithChildren,
+  ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
 }
 export const routeTree = rootRouteImport
