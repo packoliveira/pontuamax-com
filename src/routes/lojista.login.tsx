@@ -34,6 +34,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   useEffect(() => {
     try {
       const msg = sessionStorage.getItem("auth_flash");
@@ -42,6 +43,9 @@ function Login() {
         sessionStorage.removeItem("auth_flash");
       }
     } catch { /* ignore */ }
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionEmail(data.session?.user.email ?? null);
+    });
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -64,6 +68,21 @@ function Login() {
           <CardDescription>Entre com o email cadastrado</CardDescription>
         </CardHeader>
         <CardContent>
+          {sessionEmail && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              Você está conectado como <strong>{sessionEmail}</strong>, mas essa conta ainda não tem loja.
+              <button
+                type="button"
+                className="ml-2 underline"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setSessionEmail(null);
+                }}
+              >
+                Sair
+              </button>
+            </div>
+          )}
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
