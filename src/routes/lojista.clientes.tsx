@@ -108,7 +108,7 @@ function ClientesPage() {
 
   const criar = useMutation({
     mutationFn: () => {
-      if (novo.cpf.trim() && !isValidCPF(novo.cpf)) {
+      if (!novo.cpf.trim() || !isValidCPF(novo.cpf)) {
         throw new Error("CPF inválido. Verifique os dígitos informados.");
       }
       return cadastrarClientePorTelefone({
@@ -116,13 +116,13 @@ function ClientesPage() {
           store_id: loja!.id,
           nome: novo.nome.trim(),
           phone: novo.phone.trim(),
-          cpf: novo.cpf.trim() || undefined,
+          cpf: novo.cpf.trim(),
         },
       });
     },
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
-      toast.success(`Cliente cadastrado. Senha temporária: ${res.senha_temporaria}`);
+      toast.success(`Cliente cadastrado. Senha inicial (CPF): ${res.senha_temporaria}`);
       setNovo({ nome: "", phone: "", cpf: "" });
       setOpenNew(false);
     },
@@ -132,7 +132,7 @@ function ClientesPage() {
   const salvarInfo = useMutation({
     mutationFn: () => {
       if (!editInfo) throw new Error("Sem cliente selecionado.");
-      if (editInfo.cpf.trim() && !isValidCPF(editInfo.cpf)) {
+      if (!editInfo.cpf.trim() || !isValidCPF(editInfo.cpf)) {
         throw new Error("CPF inválido. Verifique os dígitos informados.");
       }
       return atualizarClienteInfo({
@@ -141,7 +141,7 @@ function ClientesPage() {
           client_user_id: editInfo.user_id,
           full_name: editInfo.full_name.trim(),
           phone: editInfo.phone.trim(),
-          cpf: editInfo.cpf.trim() || null,
+          cpf: editInfo.cpf.trim(),
         },
       });
     },
