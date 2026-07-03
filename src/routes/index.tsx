@@ -147,48 +147,62 @@ function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: stri
 
 function PhoneMockup() {
   return (
-    <div className="relative w-[300px] rounded-[2.5rem] border-[10px] border-[#0A2540] bg-[#0A2540] shadow-2xl">
+    <div className="relative w-[310px] rounded-[2.5rem] border-[10px] border-[#0A2540] bg-[#0A2540] shadow-2xl">
       <div className="absolute left-1/2 top-2 z-10 h-4 w-24 -translate-x-1/2 rounded-full bg-[#0A2540]" />
-      <div className="overflow-hidden rounded-[1.9rem] bg-white">
+      <div className="max-h-[600px] overflow-hidden rounded-[1.9rem] bg-slate-50">
         {/* header loja */}
-        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+        <div className="flex items-center gap-2 border-b border-slate-100 bg-white px-4 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0A2540] text-xs font-bold text-white">
             LE
           </div>
-          <div>
+          <div className="flex-1">
             <div className="text-xs font-semibold text-[#0A2540]">Loja Exemplo</div>
             <div className="text-[10px] text-[#0A2540]/60">Olá, Maria</div>
           </div>
+          <Trophy className="h-3.5 w-3.5 text-[#0A2540]/40" />
         </div>
 
-        {/* saldo */}
-        <div className="space-y-3 px-4 pt-4">
+        {/* saldo pontos */}
+        <div className="space-y-2.5 px-4 pt-3">
           <div className="rounded-2xl bg-[#0A2540] p-4 text-white">
             <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-white/70">
               <Coins className="h-3 w-3" /> Seu saldo
             </div>
-            <div className="mt-2 text-2xl font-bold">1.240 <span className="text-xs font-normal text-white/70">pts</span></div>
+            <div className="mt-1.5 text-2xl font-bold">180 <span className="text-xs font-normal text-white/70">pts</span></div>
             <div className="mt-3 flex items-center justify-between text-[10px] text-white/80">
               <span className="inline-flex items-center gap-1"><Trophy className="h-3 w-3 text-[#C4E135]" /> Nível Prata</span>
-              <span>760 pts p/ Ouro</span>
+              <span>120 pts p/ Ouro</span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
               <div className="h-full w-3/5 rounded-full bg-[#C4E135]" />
             </div>
           </div>
+          {/* cashback */}
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C4E135]/30 text-[#0A2540]">
+                <Wallet className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-[#0A2540]/60">Cashback</div>
+                <div className="text-sm font-bold text-[#0A2540]">R$ 24,50</div>
+              </div>
+            </div>
+            <button className="rounded-md bg-[#0A2540] px-2.5 py-1 text-[10px] font-semibold text-white">
+              Usar
+            </button>
+          </div>
         </div>
 
         {/* catálogo */}
-        <div className="px-4 pt-4 pb-5">
+        <div className="px-4 pt-3 pb-5">
           <div className="mb-2 flex items-center justify-between">
-            <div className="text-xs font-semibold text-[#0A2540]">Prêmios</div>
+            <div className="text-xs font-semibold text-[#0A2540]">Catálogo de resgate</div>
             <div className="text-[10px] text-[#0A2540]/50">Ver todos</div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <MiniPrize label="Café grátis" pts="200" />
-            <MiniPrize label="Desc. 20%" pts="500" />
-            <MiniPrize label="Brinde loja" pts="800" />
-            <MiniPrize label="Vale R$50" pts="1.200" />
+          <div className="space-y-2">
+            <MiniPrize label="Desconto de R$20" pts="150" available />
+            <MiniPrize label="Camiseta Fitness" pts="800" />
           </div>
         </div>
       </div>
@@ -196,14 +210,26 @@ function PhoneMockup() {
   );
 }
 
-function MiniPrize({ label, pts }: { label: string; pts: string }) {
+function MiniPrize({ label, pts, available }: { label: string; pts: string; available?: boolean }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-white p-2">
-      <div className="flex h-10 items-center justify-center rounded-md bg-slate-50">
+    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white p-2.5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-slate-100">
         <Gift className="h-4 w-4 text-[#0A2540]/60" />
       </div>
-      <div className="mt-1.5 text-[10px] font-semibold text-[#0A2540]">{label}</div>
-      <div className="text-[9px] text-[#0A2540]/60">{pts} pts</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[11px] font-semibold text-[#0A2540]">{label}</div>
+        <div className="text-[10px] text-[#0A2540]/60">{pts} pts</div>
+      </div>
+      <button
+        className={
+          "rounded-md px-2 py-1 text-[10px] font-semibold " +
+          (available
+            ? "bg-[#C4E135] text-[#0A2540]"
+            : "bg-slate-100 text-[#0A2540]/50")
+        }
+      >
+        Resgatar
+      </button>
     </div>
   );
 }
