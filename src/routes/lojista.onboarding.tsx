@@ -170,10 +170,13 @@ function Onboarding() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 to-orange-50 p-4 py-8">
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <span>Passo {step} de 4</span>
+          <span>Passo {alreadyAuthed ? step - 1 : step} de {alreadyAuthed ? 3 : 4}</span>
+          {alreadyAuthed && email && (
+            <span className="text-xs">• conectado como <strong>{email}</strong></span>
+          )}
         </div>
 
-        {step === 1 && (
+        {step === 1 && !alreadyAuthed && (
           <Card><CardHeader><CardTitle>Sua conta de lojista</CardTitle></CardHeader><CardContent className="space-y-4">
             <div><Label>Seu nome</Label><Input value={respName} onChange={(e) => setRespName(e.target.value)} placeholder="Como quer ser chamado" /></div>
             <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" /></div>
