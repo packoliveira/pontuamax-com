@@ -10,6 +10,8 @@ import {
   listAdmins,
   addAdminByEmail,
   removeAdmin,
+  listAuditLogs,
+  changeMyPassword,
 } from "@/lib/admin.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2 } from "lucide-react";
+import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
@@ -249,6 +251,8 @@ function AdminDashboard() {
       <EditDialog store={editing} onClose={() => setEditing(null)} onSaved={() => qc.invalidateQueries({ queryKey: ["admin-stores"] })} />
 
       <AdminsSection />
+      <ChangePasswordSection />
+      <AuditLogSection />
     </div>
   );
 }
@@ -484,5 +488,122 @@ function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClo
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ChangePasswordSection() {
+  const change = useServerFn(changeMyPassword);
+  const [cur, setCur] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  const mut = useMutation({
+    mutationFn: async () => change({ data: { current_password: cur, new_password: next } }),
+    onSuccess: () => {
+      toast.success("Senha alterada com sucesso.");
+      setCur(""); setNext(""); setConfirm("");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <KeyRound className="h-4 w-4 text-red-600" /> Alterar minha senha
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          className="grid gap-3 sm:grid-cols-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (next.length < 8) return toast.error("A nova senha precisa ter no mínimo 8 caracteres.");
+            if (next !== confirm) return toast.error("A confirmação não confere.");
+            mut.mutate();
+          }}
+        >
+          <div className="space-y-1">
+            <Label>Senha atual</Label>
+            <Input type="password" value={cur} onChange={(e) => setCur(e.target.value)} required autoComplete="current-password" />
+          </div>
+          <div className="space-y-1">
+            <Label>Nova senha</Label>
+            <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} required autoComplete="new-password" />
+          </div>
+          <div className="space-y-1">
+            <Label>Confirmar nova</Label>
+            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required autoComplete="new-password" />
+          </div>
+          <div className="sm:col-span-3">
+            <Button type="submit" disabled={mut.isPending}>
+              {mut.isPending ? "Alterando..." : "Alterar senha"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+const ACTION_LABEL: Record<string, string> = {
+  "admin.added": "Adicionou admin",
+  "admin.removed": "Removeu admin",
+  "admin.password_changed": "Alterou própria senha",
+  "store.subscription_updated": "Atualizou assinatura de loja",
+};
+
+function AuditLogSection() {
+  const fetchLogs = useServerFn(listAuditLogs);
+  const { data, isLoading } = useQuery({
+    queryKey: ["audit-logs"],
+    queryFn: () => fetchLogs() as Promise<Array<{
+      id: string; actor_id: string; actor_email: string | null; action: string;
+      target_type: string | null; target_id: string | null; target_label: string | null;
+      details: Record<string, unknown>; created_at: string;
+    }>>,
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ScrollText className="h-4 w-4 text-red-600" /> Log de auditoria
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        {isLoading && <div className="p-6 text-center text-sm text-muted-foreground">Carregando...</div>}
+        {!isLoading && (data ?? []).length === 0 && (
+          <div className="p-6 text-center text-sm text-muted-foreground">Nenhum evento registrado ainda.</div>
+        )}
+        <div className="divide-y max-h-[500px] overflow-y-auto">
+          {(data ?? []).map((log) => (
+            <div key={log.id} className="p-3 text-sm">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="text-[10px]">{ACTION_LABEL[log.action] ?? log.action}</Badge>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(log.created_at).toLocaleString("pt-BR")}
+                </span>
+              </div>
+              <div className="mt-1 text-xs">
+                <span className="text-muted-foreground">Por:</span>{" "}
+                <span className="font-medium">{log.actor_email ?? log.actor_id}</span>
+                {log.target_label && (
+                  <>
+                    <span className="text-muted-foreground"> · Alvo:</span>{" "}
+                    <span className="font-medium">{log.target_label}</span>
+                  </>
+                )}
+              </div>
+              {log.details && Object.keys(log.details).length > 0 && (
+                <pre className="mt-1 text-[10px] bg-muted rounded p-2 overflow-x-auto">
+                  {JSON.stringify(log.details, null, 2)}
+                </pre>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
