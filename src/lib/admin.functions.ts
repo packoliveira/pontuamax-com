@@ -116,6 +116,16 @@ export const updateStoreSubscription = createServerFn({ method: "POST" })
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
     const { error } = await supabaseAdmin.from("stores").update(patch).eq("id", data.store_id);
     if (error) throw new Error(error.message);
+    const { data: storeInfo } = await supabaseAdmin
+      .from("stores").select("nome_fantasia").eq("id", data.store_id).maybeSingle();
+    await writeAudit({
+      actorId: context.userId,
+      action: "store.subscription_updated",
+      targetType: "store",
+      targetId: data.store_id,
+      targetLabel: storeInfo?.nome_fantasia ?? null,
+      details: patch as Record<string, unknown>,
+    });
     return { ok: true };
   });
 
@@ -183,6 +193,14 @@ export const addAdminByEmail = createServerFn({ method: "POST" })
       .from("user_roles")
       .insert({ user_id: targetId, role: "admin" });
     if (insErr && !/duplicate|unique/i.test(insErr.message)) throw new Error(insErr.message);
+    await writeAudit({
+      actorId: context.userId,
+      action: "admin.added",
+      targetType: "user",
+      targetId: targetId,
+      targetLabel: emailLower,
+      details: { email: emailLower },
+    });
     return { ok: true, user_id: targetId };
   });
 
@@ -207,5 +225,75 @@ export const removeAdmin = createServerFn({ method: "POST" })
       .eq("user_id", data.user_id)
       .eq("role", "admin");
     if (error) throw new Error(error.message);
+    let targetEmail: string | null = null;
+    try {
+      const { data: u } = await supabaseAdmin.auth.admin.getUserById(data.user_id);
+      targetEmail = u?.user?.email ?? null;
+    } catch { /* ignore */ }
+    await writeAudit({
+      actorId: context.userId,
+      action: "admin.removed",
+      targetType: "user",
+      targetId: data.user_id,
+      targetLabel: targetEmail,
+      details: { email: targetEmail },
+    });
+    return { ok: true };
+  });
+
+export const listAuditLogs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensureAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("admin_audit_logs")
+      .select("id, actor_id, actor_email, action, target_type, target_id, target_label, details, created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const changeMyPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        current_password: z.string().min(1),
+        new_password: z.string().min(8, "Mínimo 8 caracteres"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await ensureAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: userInfo, error: uErr } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    if (uErr || !userInfo?.user?.email) throw new Error("Não foi possível localizar sua conta.");
+    const email = userInfo.user.email;
+    // Verifica senha atual usando client publishable, sem persistir sessão
+    const { createClient } = await import("@supabase/supabase-js");
+    const checker = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false, storage: undefined } },
+    );
+    const { error: signErr } = await checker.auth.signInWithPassword({
+      email,
+      password: data.current_password,
+    });
+    if (signErr) throw new Error("Senha atual incorreta.");
+    const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(context.userId, {
+      password: data.new_password,
+    });
+    if (updErr) throw new Error(updErr.message);
+    await writeAudit({
+      actorId: context.userId,
+      action: "admin.password_changed",
+      targetType: "user",
+      targetId: context.userId,
+      targetLabel: email,
+      details: {},
+    });
     return { ok: true };
   });
