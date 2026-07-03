@@ -175,6 +175,15 @@ export const lancarVenda = createServerFn({ method: "POST" })
       .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
       .eq("id", link.data.id);
     if (updErr) throw new Error(updErr.message);
+    if (pontos > 0) {
+      const { notifyClient } = await import("./notify.server");
+      await notifyClient({
+        event: "pontos_ganhos",
+        storeId: data.store_id,
+        clientUserId: data.client_user_id,
+        pontosGanhos: pontos,
+      });
+    }
     return { pontos, cashback };
   });
 
