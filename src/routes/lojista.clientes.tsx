@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { myStoreQuery, storeClientsQuery } from "@/lib/queries";
-import { atualizarAniversarioCliente } from "@/lib/qsf.functions";
+import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
+import { atualizarAniversarioCliente, addClientTag, removeClientTag } from "@/lib/qsf.functions";
 import { formatBRL, formatDate } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Cake } from "lucide-react";
+import { Search, Cake, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/clientes")({
@@ -26,8 +26,20 @@ function ClientesPage() {
   const qc = useQueryClient();
   const { data: loja } = useQuery(myStoreQuery());
   const { data: clientes = [] } = useQuery(storeClientsQuery(loja?.id));
+  const { data: tags = [] } = useQuery(clientTagsQuery(loja?.id));
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<{ userId: string; value: string } | null>(null);
+  const [tagInput, setTagInput] = useState<Record<string, string>>({});
+
+  const addTag = useMutation({
+    mutationFn: (v: { user_id: string; tag: string }) => addClientTag({ data: { store_id: loja!.id, client_user_id: v.user_id, tag: v.tag } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["client-tags"] }),
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const rmTag = useMutation({
+    mutationFn: (id: string) => removeClientTag({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["client-tags"] }),
+  });
 
   const salvarBirth = useMutation({
     mutationFn: (input: { user_id: string; birthdate: string | null }) =>
@@ -94,6 +106,22 @@ function ClientesPage() {
                           <button className="underline" onClick={() => setEditing({ userId: c.user_id, value: p?.birthdate ?? "" })}>editar</button>
                         </>
                       )}
+                    </div>
+                    <div className="flex items-center gap-1 flex-wrap mt-2">
+                      {tags.filter((t) => t.client_user_id === c.user_id).map((t) => (
+                        <Badge key={t.id} variant="outline" className="gap-1">
+                          #{t.tag}
+                          <button onClick={() => rmTag.mutate(t.id)} className="hover:text-red-600"><X className="h-3 w-3" /></button>
+                        </Badge>
+                      ))}
+                      <div className="flex items-center gap-1">
+                        <Input value={tagInput[c.user_id] ?? ""} onChange={(e) => setTagInput((s) => ({ ...s, [c.user_id]: e.target.value }))}
+                          placeholder="nova tag" className="h-6 w-24 text-xs" />
+                        <Button size="sm" variant="ghost" className="h-6 px-1" disabled={!(tagInput[c.user_id] ?? "").trim()}
+                          onClick={() => { addTag.mutate({ user_id: c.user_id, tag: tagInput[c.user_id] }); setTagInput((s) => ({ ...s, [c.user_id]: "" })); }}>
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right text-sm">
