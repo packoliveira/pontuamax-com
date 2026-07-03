@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { myStoreQuery } from "@/lib/queries";
-import { atualizarLoja } from "@/lib/qsf.functions";
+import { myStoreQuery, integrationLogsQuery } from "@/lib/queries";
+import { atualizarLoja, rotacionarWebhookSecret, testarWebhook } from "@/lib/qsf.functions";
 import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
