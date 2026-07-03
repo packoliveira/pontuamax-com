@@ -5,7 +5,7 @@
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export type NotifyEvent = "pontos_ganhos";
+export type NotifyEvent = "pontos_ganhos" | "nps_request";
 
 export function formatBrazilPhone(raw: string | null | undefined): string | null {
   if (!raw) return null;
@@ -26,6 +26,7 @@ const VAR_FALLBACKS: Record<string, string> = {
   pontos_faltantes: "alguns",
   proximo_premio: "novos prêmios em breve",
   link_portal_cliente: "",
+  link_nps: "",
 };
 
 function renderTemplate(tpl: string, vars: Record<string, string | number | null | undefined>): string {
@@ -99,17 +100,19 @@ export async function notifyClient(params: {
   clientUserId: string;
   // contexto específico do evento
   pontosGanhos?: number;
+  transactionId?: string;
 }): Promise<void> {
   try {
     const { data: loja } = await supabaseAdmin
       .from("stores")
       .select(
-        "id, slug, nome_fantasia, whatsapp_enabled, whatsapp_template_pontos, evolution_url, evolution_apikey, evolution_instance",
+        "id, slug, nome_fantasia, whatsapp_enabled, whatsapp_template_pontos, evolution_url, evolution_apikey, evolution_instance, nps_enabled, nps_template",
       )
       .eq("id", params.storeId)
       .maybeSingle();
     if (!loja) return;
     if (!loja.whatsapp_enabled) return;
+    if (params.event === "nps_request" && !loja.nps_enabled) return;
     if (!loja.evolution_url || !loja.evolution_apikey || !loja.evolution_instance) {
       await logIntegration(loja.id, "erro", "WhatsApp ativado mas Evolution API não configurada", { event: params.event });
       return;
@@ -148,6 +151,7 @@ export async function notifyClient(params: {
     const proximoPremio = prox?.nome?.trim() || VAR_FALLBACKS.proximo_premio;
     const pontosFaltantes = prox ? Math.max(0, prox.custo_pontos - saldo) : 0;
     const linkPortal = loja.slug ? `https://qsfclub.com/${loja.slug}` : "";
+    const linkNps = params.transactionId ? `https://qsfclub.com/nps/${params.transactionId}` : "";
 
     let text: string;
     if (params.event === "pontos_ganhos") {
@@ -159,6 +163,13 @@ export async function notifyClient(params: {
         pontos_faltantes: pontosFaltantes,
         proximo_premio: proximoPremio,
         link_portal_cliente: linkPortal,
+      });
+    } else if (params.event === "nps_request") {
+      if (!linkNps) return;
+      text = renderTemplate(loja.nps_template, {
+        nome_cliente: profile?.full_name?.trim(),
+        nome_loja: loja.nome_fantasia?.trim(),
+        link_nps: linkNps,
       });
     } else {
       return;
