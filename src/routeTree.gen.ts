@@ -9,38 +9,92 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LojistaRouteImport } from './routes/lojista'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
+import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 
+const LojistaRoute = LojistaRouteImport.update({
+  id: '/lojista',
+  path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LojistaIndexRoute = LojistaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaLoginRoute = LojistaLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaLancarVendaRoute = LojistaLancarVendaRouteImport.update({
+  id: '/lancar-venda',
+  path: '/lancar-venda',
+  getParentRoute: () => LojistaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/lojista': typeof LojistaRouteWithChildren
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/': typeof LojistaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista': typeof LojistaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/lojista': typeof LojistaRouteWithChildren
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/': typeof LojistaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/lojista'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/lojista/lancar-venda' | '/lojista/login' | '/lojista'
+  id:
+    | '__root__'
+    | '/'
+    | '/lojista'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LojistaRoute: typeof LojistaRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/lojista': {
+      id: '/lojista'
+      path: '/lojista'
+      fullPath: '/lojista'
+      preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +102,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lojista/': {
+      id: '/lojista/'
+      path: '/'
+      fullPath: '/lojista/'
+      preLoaderRoute: typeof LojistaIndexRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/login': {
+      id: '/lojista/login'
+      path: '/login'
+      fullPath: '/lojista/login'
+      preLoaderRoute: typeof LojistaLoginRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/lancar-venda': {
+      id: '/lojista/lancar-venda'
+      path: '/lancar-venda'
+      fullPath: '/lojista/lancar-venda'
+      preLoaderRoute: typeof LojistaLancarVendaRouteImport
+      parentRoute: typeof LojistaRoute
+    }
   }
 }
 
+interface LojistaRouteChildren {
+  LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
+  LojistaLoginRoute: typeof LojistaLoginRoute
+  LojistaIndexRoute: typeof LojistaIndexRoute
+}
+
+const LojistaRouteChildren: LojistaRouteChildren = {
+  LojistaLancarVendaRoute: LojistaLancarVendaRoute,
+  LojistaLoginRoute: LojistaLoginRoute,
+  LojistaIndexRoute: LojistaIndexRoute,
+}
+
+const LojistaRouteWithChildren =
+  LojistaRoute._addFileChildren(LojistaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LojistaRoute: LojistaRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
