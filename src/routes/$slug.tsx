@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -85,6 +85,7 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   const { data: link, isLoading } = useQuery(myLinkAtStoreQuery(loja.id));
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [hydrating, setHydrating] = useState(false);
+  const [authenticating, setAuthenticating] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
@@ -114,20 +115,26 @@ function ClienteFlow({ loja }: { loja: Loja }) {
       ]);
     } finally {
       setHydrating(false);
+      setAuthenticating(false);
     }
   };
 
   return (
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
-      {isLoading || hydrating ? (
+      {isLoading || hydrating || authenticating ? (
         <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
       ) : sessionUserId && link ? (
         <ClienteLogado loja={loja} link={link} />
       ) : sessionUserId && !link ? (
         <VincularStore loja={loja} />
       ) : (
-        <Auth loja={loja} onAuthenticated={handleAuthSuccess} />
+        <Auth
+          loja={loja}
+          onAuthStart={() => setAuthenticating(true)}
+          onAuthError={() => setAuthenticating(false)}
+          onAuthenticated={handleAuthSuccess}
+        />
       )}
     </>
   );
