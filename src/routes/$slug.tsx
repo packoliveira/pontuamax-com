@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -85,6 +85,7 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   const { data: link, isLoading } = useQuery(myLinkAtStoreQuery(loja.id));
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [hydrating, setHydrating] = useState(false);
+  const [authenticating, setAuthenticating] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
@@ -114,20 +115,26 @@ function ClienteFlow({ loja }: { loja: Loja }) {
       ]);
     } finally {
       setHydrating(false);
+      setAuthenticating(false);
     }
   };
 
   return (
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
-      {isLoading || hydrating ? (
+      {isLoading || hydrating || authenticating ? (
         <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
       ) : sessionUserId && link ? (
         <ClienteLogado loja={loja} link={link} />
       ) : sessionUserId && !link ? (
         <VincularStore loja={loja} />
       ) : (
-        <Auth loja={loja} onAuthenticated={handleAuthSuccess} />
+        <Auth
+          loja={loja}
+          onAuthStart={() => setAuthenticating(true)}
+          onAuthError={() => setAuthenticating(false)}
+          onAuthenticated={handleAuthSuccess}
+        />
       )}
     </>
   );
@@ -165,7 +172,12 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
   );
 }
 
-function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Promise<void> }) {
+function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
+  loja: Loja;
+  onAuthenticated: () => Promise<void>;
+  onAuthStart?: () => void;
+  onAuthError?: () => void;
+}) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
@@ -190,6 +202,7 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
     if (senha.length < 6) return toast.error("A senha precisa ter no mínimo 6 caracteres.");
     if (mode === "signup" && senha !== senha2) return toast.error("As senhas não coincidem");
     setLoading(true);
+    onAuthStart?.();
     try {
       const email = cpfToEmail(cpfDigits);
       if (mode === "signup") {
@@ -227,6 +240,7 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
       }
       await onAuthenticated();
     } catch (err) {
+      onAuthError?.();
       // Auto-switch: cadastro com CPF já existente → login
       if (mode === "signup" && isUsuarioJaCadastrado(err)) {
         switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
@@ -323,38 +337,47 @@ function Auth({ loja, onAuthenticated }: { loja: Loja; onAuthenticated: () => Pr
 
 function VincularStore({ loja }: { loja: Loja }) {
   const qc = useQueryClient();
-  // Sessão criada agora (fluxo de cadastro na página pública): vincula automaticamente uma vez.
-  // Sessão pré-existente sem vínculo (ex.: cliente excluído pelo lojista): desloga e volta ao login.
-  const [ready, setReady] = useState(false);
-  const vincular = useMutation({
-    mutationFn: () => vincularClienteALoja({ data: { store_id: loja.id, referrer_phone: getStoredReferrer() } }),
-    onSuccess: (link) => {
-      try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
-      if (link?.store_id === loja.id) {
-        toast.success(`Cadastro confirmado em ${loja.nome_fantasia}`);
-      } else {
-        toast.error("Cadastro criado mas não foi possível confirmar. Tente novamente.");
-      }
-      qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
+  // A operação de vínculo é idempotente no backend (retorna o link se já existir).
+  // Sempre tenta vincular; só sinaliza erro se falhar de verdade — nunca faz signOut
+  // implícito, que causava loop de "voltar ao login" logo após "Bem-vindo(a)".
+  const started = useRef(false);
+  const [erro, setErro] = useState<string | null>(null);
   useEffect(() => {
-    const flag = `justSignedUp:${loja.id}`;
-    const justSignedUp = typeof window !== "undefined" && sessionStorage.getItem(flag) === "1";
-    if (justSignedUp) {
-      try { sessionStorage.removeItem(flag); } catch { /* ignore */ }
-      vincular.mutate();
-      setReady(true);
-    } else {
-      // Sessão antiga sem vínculo → forçar login novamente
-      (async () => {
-        await supabase.auth.signOut();
-        qc.clear();
-      })();
-    }
-  }, []); // eslint-disable-line
-  if (!ready) return <div className="p-8 text-center text-sm text-muted-foreground">Redirecionando para o login...</div>;
+    if (started.current) return;
+    started.current = true;
+    (async () => {
+      try {
+        const link = await vincularClienteALoja({
+          data: { store_id: loja.id, referrer_phone: getStoredReferrer() },
+        });
+        try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+        try { sessionStorage.removeItem(`justSignedUp:${loja.id}`); } catch { /* ignore */ }
+        if (!link || link.store_id !== loja.id) {
+          throw new Error("Não foi possível confirmar seu cadastro nesta loja.");
+        }
+        await qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
+      } catch (e) {
+        setErro((e as Error).message);
+      }
+    })();
+  }, [loja.id, qc]);
+
+  if (erro) {
+    return (
+      <div className="p-8 text-center space-y-3 max-w-md mx-auto">
+        <p className="text-sm text-destructive">{erro}</p>
+        <Button
+          onClick={async () => {
+            await qc.cancelQueries();
+            qc.clear();
+            await supabase.auth.signOut();
+          }}
+        >
+          Voltar ao login
+        </Button>
+      </div>
+    );
+  }
   return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
 }
 
