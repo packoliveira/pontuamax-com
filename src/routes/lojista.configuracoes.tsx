@@ -118,6 +118,7 @@ function ConfigPage() {
           </Button>
 
           <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
+          <WhatsappCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
