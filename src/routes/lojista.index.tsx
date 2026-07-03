@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { formatBRL } from "@/lib/qsf-shared";
 import { myStoreQuery, storeClientsQuery, storeTransactionsQuery } from "@/lib/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,11 +13,17 @@ export const Route = createFileRoute("/lojista/")({
 });
 
 function Dashboard() {
-  const { data: loja } = useQuery(myStoreQuery());
+  const navigate = useNavigate();
+  const { data: loja, isLoading } = useQuery(myStoreQuery());
   const { data: clientes = [] } = useQuery(storeClientsQuery(loja?.id));
   const { data: txs = [] } = useQuery(storeTransactionsQuery(loja?.id));
 
-  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+  useEffect(() => {
+    if (!isLoading && !loja) navigate({ to: "/lojista/onboarding" });
+  }, [isLoading, loja, navigate]);
+
+  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Redirecionando para o onboarding...</div>;
 
   const inicioMes = new Date();
   inicioMes.setDate(1); inicioMes.setHours(0, 0, 0, 0);
