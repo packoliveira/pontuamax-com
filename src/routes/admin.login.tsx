@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isCurrentUserAdmin, bootstrapFirstAdmin } from "@/lib/admin.functions";
@@ -13,6 +13,25 @@ import { traduzirErroAuth } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/admin/login")({
   ssr: false,
+  beforeLoad: async () => {
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) return; // não logado: mostra a tela de login normalmente
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", uid);
+    const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+    if (isAdmin) throw redirect({ to: "/admin" });
+    // Logado mas não é admin → bloqueia ANTES de qualquer signOut e redireciona.
+    try {
+      sessionStorage.setItem(
+        "auth_flash",
+        "Esta área é exclusiva do admin master. Use o login do lojista.",
+      );
+    } catch { /* ignore */ }
+    throw redirect({ to: "/lojista/login" });
+  },
   component: AdminLogin,
 });
 
