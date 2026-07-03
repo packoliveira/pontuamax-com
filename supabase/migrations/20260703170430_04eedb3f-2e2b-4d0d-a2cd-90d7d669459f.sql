@@ -1,0 +1,2 @@
+GRANT USAGE ON TYPE public.app_role TO authenticated, anon, service_role;
+NOTIFY pgrst, 'reload schema';
