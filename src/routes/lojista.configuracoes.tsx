@@ -24,7 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset } from "lucide-react";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
@@ -151,6 +151,7 @@ function ConfigPage() {
           <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
           <WhatsappCard loja={loja} />
           <NotificacoesCard loja={loja} />
+          <IndicacaoCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
