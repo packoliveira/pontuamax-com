@@ -114,6 +114,132 @@ export type Database = {
           },
         ]
       }
+      client_tags: {
+        Row: {
+          client_user_id: string
+          created_at: string
+          id: string
+          store_id: string
+          tag: string
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string
+          id?: string
+          store_id: string
+          tag: string
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          store_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tags_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fiscal_notes: {
+        Row: {
+          client_user_id: string
+          cnpj_extraido: string | null
+          created_at: string
+          id: string
+          image_hash: string
+          image_path: string
+          motivo_rejeicao: string | null
+          ocr_raw: Json | null
+          pontos_creditados: number | null
+          status: string
+          store_id: string
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          client_user_id: string
+          cnpj_extraido?: string | null
+          created_at?: string
+          id?: string
+          image_hash: string
+          image_path: string
+          motivo_rejeicao?: string | null
+          ocr_raw?: Json | null
+          pontos_creditados?: number | null
+          status?: string
+          store_id: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          client_user_id?: string
+          cnpj_extraido?: string | null
+          created_at?: string
+          id?: string
+          image_hash?: string
+          image_path?: string
+          motivo_rejeicao?: string | null
+          ocr_raw?: Json | null
+          pontos_creditados?: number | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_notes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_cards: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          pontos: number
+          redeemed_at: string | null
+          redeemed_by: string | null
+          store_id: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          pontos: number
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          store_id: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          pontos?: number
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_cards_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_logs: {
         Row: {
           created_at: string
@@ -346,6 +472,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "promotions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raffles: {
+        Row: {
+          created_at: string
+          filtro_nivel_min: string | null
+          filtro_tag: string | null
+          ganhador_nome: string | null
+          ganhador_user_id: string | null
+          id: string
+          premio: string
+          sorted_at: string | null
+          status: string
+          store_id: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          filtro_nivel_min?: string | null
+          filtro_tag?: string | null
+          ganhador_nome?: string | null
+          ganhador_user_id?: string | null
+          id?: string
+          premio: string
+          sorted_at?: string | null
+          status?: string
+          store_id: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          filtro_nivel_min?: string | null
+          filtro_tag?: string | null
+          ganhador_nome?: string | null
+          ganhador_user_id?: string | null
+          id?: string
+          premio?: string
+          sorted_at?: string | null
+          status?: string
+          store_id?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raffles_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
@@ -661,6 +840,8 @@ export type Database = {
         | "resgate_produto"
         | "resgate_cashback"
         | "indicacao"
+        | "vale_presente"
+        | "nota_fiscal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -804,6 +985,8 @@ export const Constants = {
         "resgate_produto",
         "resgate_cashback",
         "indicacao",
+        "vale_presente",
+        "nota_fiscal",
       ],
     },
   },
