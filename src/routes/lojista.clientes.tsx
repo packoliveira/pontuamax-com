@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
 import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente } from "@/lib/qsf.functions";
-import { formatBRL, formatDate, calcularNivel, progressoNivel } from "@/lib/qsf-shared";
+import { formatBRL, formatDate, progressoNivel } from "@/lib/qsf-shared";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
