@@ -16,6 +16,7 @@ import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
+import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 
 const LojistaRoute = LojistaRouteImport.update({
@@ -53,6 +54,11 @@ const LojistaLancarVendaRoute = LojistaLancarVendaRouteImport.update({
   path: '/lancar-venda',
   getParentRoute: () => LojistaRoute,
 } as any)
+const LojistaConfiguracoesRoute = LojistaConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => LojistaRoute,
+} as any)
 const LojistaClientesRoute = LojistaClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/lojista'
     | '/lojista/clientes'
+    | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
     | '/lojista/produtos'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/lojista/clientes'
+    | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
     | '/lojista/produtos'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/lojista'
     | '/lojista/clientes'
+    | '/lojista/configuracoes'
     | '/lojista/lancar-venda'
     | '/lojista/login'
     | '/lojista/produtos'
@@ -177,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaLancarVendaRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/lojista/configuracoes': {
+      id: '/lojista/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/lojista/configuracoes'
+      preLoaderRoute: typeof LojistaConfiguracoesRouteImport
+      parentRoute: typeof LojistaRoute
+    }
     '/lojista/clientes': {
       id: '/lojista/clientes'
       path: '/clientes'
@@ -189,6 +208,7 @@ declare module '@tanstack/react-router' {
 
 interface LojistaRouteChildren {
   LojistaClientesRoute: typeof LojistaClientesRoute
+  LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
   LojistaLoginRoute: typeof LojistaLoginRoute
   LojistaProdutosRoute: typeof LojistaProdutosRoute
@@ -198,6 +218,7 @@ interface LojistaRouteChildren {
 
 const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaClientesRoute: LojistaClientesRoute,
+  LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
   LojistaLoginRoute: LojistaLoginRoute,
   LojistaProdutosRoute: LojistaProdutosRoute,
