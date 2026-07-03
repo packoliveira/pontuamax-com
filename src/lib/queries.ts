@@ -131,3 +131,20 @@ export const activeStoreProductsQuery = (storeId: string | undefined) =>
       return data ?? [];
     },
   });
+
+export const integrationLogsQuery = (storeId: string | undefined) =>
+  queryOptions({
+    queryKey: ["integration-logs", storeId],
+    enabled: !!storeId,
+    queryFn: async () => {
+      if (!storeId) return [];
+      const { data, error } = await supabase
+        .from("integration_logs")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });

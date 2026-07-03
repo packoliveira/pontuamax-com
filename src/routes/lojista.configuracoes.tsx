@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { myStoreQuery } from "@/lib/queries";
-import { atualizarLoja } from "@/lib/qsf.functions";
+import { myStoreQuery, integrationLogsQuery } from "@/lib/queries";
+import { atualizarLoja, rotacionarWebhookSecret, testarWebhook } from "@/lib/qsf.functions";
 import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
@@ -113,6 +114,8 @@ function ConfigPage() {
           <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg">
             {salvar.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
+
+          <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
@@ -120,5 +123,176 @@ function ConfigPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function IntegracoesCard({
+  storeId,
+  slug,
+  secret,
+  lastAt,
+}: {
+  storeId: string;
+  slug: string;
+  secret: string;
+  lastAt: string | null;
+}) {
+  const qc = useQueryClient();
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const urlBling = `${origin}/api/public/webhook/bling`;
+  const urlOlist = `${origin}/api/public/webhook/olist`;
+
+  const conectada =
+    !!lastAt && Date.now() - new Date(lastAt).getTime() < 30 * 24 * 60 * 60 * 1000;
+
+  const { data: logs } = useQuery(integrationLogsQuery(storeId));
+
+  const rotate = useMutation({
+    mutationFn: () => rotacionarWebhookSecret({}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Novo segredo gerado. Atualize no Bling/Olist.");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const test = useMutation({
+    mutationFn: () => testarWebhook({ data: { origem: "teste" } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      qc.invalidateQueries({ queryKey: ["integration-logs", storeId] });
+      toast.success("Webhook de teste registrado.");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const copy = (v: string, label: string) => {
+    navigator.clipboard.writeText(v).then(() => toast.success(`${label} copiado`));
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center justify-between">
+          <span>Integrações (Bling / Olist)</span>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+              conectada ? "bg-emerald-100 text-emerald-700" : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {conectada ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+            {conectada ? "Conectada" : "Nunca conectada"}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Configure a URL abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
+          no QSF Club, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
+        </p>
+
+        <div>
+          <Label>URL do webhook (Bling)</Label>
+          <div className="flex gap-2">
+            <Input readOnly value={urlBling} className="font-mono text-xs" />
+            <Button type="button" variant="outline" size="icon" onClick={() => copy(urlBling, "URL")}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div>
+          <Label>URL do webhook (Olist)</Label>
+          <div className="flex gap-2">
+            <Input readOnly value={urlOlist} className="font-mono text-xs" />
+            <Button type="button" variant="outline" size="icon" onClick={() => copy(urlOlist, "URL")}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <Label>Identificador da loja (header x-qsf-store)</Label>
+          <div className="flex gap-2">
+            <Input readOnly value={slug} className="font-mono text-xs" />
+            <Button type="button" variant="outline" size="icon" onClick={() => copy(slug, "Slug")}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <Label>Chave secreta (header x-qsf-secret)</Label>
+          <div className="flex gap-2">
+            <Input readOnly value={secret} className="font-mono text-xs" />
+            <Button type="button" variant="outline" size="icon" onClick={() => copy(secret, "Segredo")}>
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (confirm("Gerar novo segredo? A chave atual deixará de funcionar imediatamente.")) rotate.mutate();
+              }}
+              disabled={rotate.isPending}
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Gerar novo
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Envie sempre nos headers <code>x-qsf-store</code> e <code>x-qsf-secret</code>. Payload esperado:
+            <code className="ml-1">{`{ id_venda_externa, valor, telefone_cliente, nome_cliente? }`}</code>.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="secondary" onClick={() => test.mutate()} disabled={test.isPending}>
+            <Send className="h-4 w-4 mr-1" />
+            {test.isPending ? "Enviando..." : "Testar integração"}
+          </Button>
+          {lastAt && (
+            <span className="text-xs text-muted-foreground">
+              Último evento: {new Date(lastAt).toLocaleString("pt-BR")}
+            </span>
+          )}
+        </div>
+
+        <div>
+          <div className="text-sm font-semibold mb-2">Últimos 20 eventos</div>
+          {!logs || logs.length === 0 ? (
+            <div className="text-xs text-muted-foreground rounded-md border border-dashed p-4">
+              Nenhum evento recebido ainda.
+            </div>
+          ) : (
+            <div className="rounded-md border divide-y">
+              {logs.map((log) => (
+                <div key={log.id} className="p-2 text-xs flex items-start gap-2">
+                  <span
+                    className={`mt-0.5 inline-block h-2 w-2 rounded-full ${
+                      log.status === "sucesso" ? "bg-emerald-500" : "bg-red-500"
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium uppercase">{log.origem}</span>
+                      <span className="text-muted-foreground">
+                        {new Date(log.created_at).toLocaleString("pt-BR")}
+                      </span>
+                    </div>
+                    {log.mensagem_erro && <div className="text-red-600">{log.mensagem_erro}</div>}
+                    <details className="mt-1">
+                      <summary className="cursor-pointer text-muted-foreground">Payload</summary>
+                      <pre className="mt-1 whitespace-pre-wrap break-all bg-muted/50 p-2 rounded">
+                        {JSON.stringify(log.payload_recebido, null, 2)}
+                      </pre>
+                    </details>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

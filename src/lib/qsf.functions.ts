@@ -309,3 +309,53 @@ export const removerProduto = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// -------- Integrações: rotacionar segredo do webhook --------
+export const rotacionarWebhookSecret = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const bytes = new Uint8Array(24);
+    crypto.getRandomValues(bytes);
+    const secret = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    const { error } = await supabaseAdmin
+      .from("stores")
+      .update({ webhook_secret: secret })
+      .eq("owner_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { webhook_secret: secret };
+  });
+
+// -------- Integrações: enviar webhook de teste (simula Bling/Olist) --------
+export const testarWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ origem: z.enum(["bling", "olist", "teste"]).default("teste") }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id, slug, webhook_secret")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!loja.data) throw new Error("Loja não encontrada.");
+    await supabaseAdmin.from("integration_logs").insert({
+      store_id: loja.data.id,
+      origem: data.origem,
+      payload_recebido: {
+        id_venda_externa: `TESTE-${Date.now()}`,
+        valor: 100,
+        telefone_cliente: "(teste)",
+        nome_cliente: "Cliente de Teste",
+        _meta: "evento simulado a partir do painel",
+      } as never,
+      status: "sucesso",
+      mensagem_erro: null,
+    });
+    await supabaseAdmin
+      .from("stores")
+      .update({ webhook_last_at: new Date().toISOString() })
+      .eq("id", loja.data.id);
+    return { ok: true };
+  });
