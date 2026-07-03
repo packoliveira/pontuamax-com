@@ -91,7 +91,8 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         if (!idVenda) return logAndRespond("erro", "id_venda_externa é obrigatório", 400);
         if (!Number.isFinite(valor) || valor <= 0) return logAndRespond("erro", "valor inválido", 400);
-        if (!cpf || cpf.length !== 11) return logAndRespond("erro", "cpf_cliente é obrigatório (11 dígitos)", 400);
+        if (!telefone || telefone.length < 8) return logAndRespond("erro", "telefone_cliente é obrigatório", 400);
+        if (cpf && cpf.length !== 11) return logAndRespond("erro", "cpf_cliente deve ter 11 dígitos quando informado", 400);
 
         // Idempotência: mesma venda já processada?
         const dup = await supabaseAdmin
@@ -102,23 +103,23 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           .maybeSingle();
         if (dup.data) return logAndRespond("sucesso", "venda já processada (idempotente)", 200, { duplicated: true });
 
-        // Busca ou cria cliente por telefone/CPF
+        // Busca ou cria cliente. Identidade única = TELEFONE.
         let clientProfile: { id: string } | null = null;
         {
-          const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
-          if (p.data) clientProfile = p.data;
-        }
-        if (!clientProfile && telefone) {
           const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
           if (p.data) clientProfile = p.data;
         }
+        if (!clientProfile && cpf) {
+          const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
+          if (p.data) clientProfile = p.data;
+        }
         if (!clientProfile) {
-          const email = `${cpf}@cpf.qsfclub.local`;
+          const email = `${telefone}@cliente.qsfclub.local`;
           const created = await supabaseAdmin.auth.admin.createUser({
             email,
-            password: cpf,
+            password: telefone,
             email_confirm: true,
-            user_metadata: { full_name: nome, phone: telefone || null, cpf },
+            user_metadata: { full_name: nome, phone: telefone, cpf: cpf || null },
           });
           if (created.error || !created.data.user) {
             return logAndRespond("erro", `falha criando cliente: ${created.error?.message ?? "?"}`, 500);
@@ -127,8 +128,8 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           await supabaseAdmin.from("profiles").upsert({
             id: clientProfile.id,
             full_name: nome,
-            phone: telefone || null,
-            cpf,
+            phone: telefone,
+            cpf: cpf || null,
           });
           await supabaseAdmin.from("user_roles").upsert(
             { user_id: clientProfile.id, role: "cliente" as const },
