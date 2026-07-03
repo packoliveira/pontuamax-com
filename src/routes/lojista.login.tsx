@@ -16,14 +16,15 @@ export const Route = createFileRoute("/lojista/login")({
     const { data } = await supabase.auth.getSession();
     const uid = data.session?.user.id;
     if (!uid) return;
-    // Já logado: se tem loja, manda pro painel; senão, pro onboarding.
+    // Já logado: só redireciona pro painel se realmente tem loja.
+    // Se não tem loja, mostra o form de login (com opção de sair) —
+    // não força onboarding, senão quem só queria trocar de conta fica preso.
     const { data: store } = await supabase
       .from("stores")
       .select("id")
       .eq("owner_id", uid)
       .maybeSingle();
     if (store) throw redirect({ to: "/lojista" });
-    throw redirect({ to: "/lojista/onboarding" });
   },
   component: Login,
 });
