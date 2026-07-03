@@ -17,15 +17,24 @@ export const Route = createFileRoute("/admin")({
       .eq("user_id", data.session.user.id);
     const isAdmin = (roles ?? []).some((r) => r.role === "admin");
     if (!isAdmin) {
-      // Deixa entrar — a página oferece bootstrap se ainda não houver admin.
-      // Se já existir admin, admin.index bloqueia normalmente.
+      // Se ainda não existe NENHUM admin no sistema, deixa entrar
+      // para permitir bootstrap do primeiro admin.
+      const { count } = await supabase
+        .from("user_roles")
+        .select("*", { count: "exact", head: true })
+        .eq("role", "admin");
+      if ((count ?? 0) > 0) {
+        return { accessDenied: true as const };
+      }
     }
+    return { accessDenied: false as const };
   },
   component: AdminLayout,
 });
 
 function AdminLayout() {
   usePanelTheme();
+  const ctx = Route.useRouteContext();
   // A rota /admin/login usa layout próprio (dark) — não renderiza este shell.
   if (typeof window !== "undefined" && window.location.pathname === "/admin/login") {
     return <Outlet />;
@@ -59,8 +68,43 @@ function AdminLayout() {
         </div>
       </header>
       <main className="max-w-7xl mx-auto p-4 md:p-6">
-        <Outlet />
+        {ctx?.accessDenied ? <AccessDenied /> : <Outlet />}
       </main>
+    </div>
+  );
+}
+
+function AccessDenied() {
+  return (
+    <div className="max-w-lg mx-auto mt-12">
+      <div className="rounded-lg border border-red-500/40 bg-red-500/5 p-8 text-center space-y-4">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white">
+          <ShieldAlert className="h-7 w-7" />
+        </div>
+        <h1 className="text-2xl font-bold">Acesso negado</h1>
+        <p className="text-sm text-muted-foreground">
+          Esta área é exclusiva do <strong>Administrador Master</strong> do QSF Club.
+          Sua conta não tem essa permissão.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Se você é lojista, use o painel do lojista. Se acredita que deveria ter
+          acesso, peça a um admin master que te adicione.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
+          <Button asChild variant="outline">
+            <a href="/lojista">Ir para o painel do lojista</a>
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/admin/login";
+            }}
+          >
+            Sair e entrar com outra conta
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
