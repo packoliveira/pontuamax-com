@@ -960,7 +960,7 @@ export const validarVoucher = createServerFn({ method: "POST" })
     }
     const { error } = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: (function(){return new Date().toISOString();})() })
+      .update({ status: "entregue", delivered_at: new Date().toISOString() })
       .eq("id", tx.data.id);
     if (error) throw new Error(error.message);
     return {
