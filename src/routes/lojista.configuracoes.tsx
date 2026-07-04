@@ -443,10 +443,6 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
   );
 }
 
-function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number } }) {
-  return _IndicacaoCardImpl(loja);
-}
-
 type ValidadeLoja = {
   id: string;
   pontos_expiracao_modo: string;
@@ -555,7 +551,7 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   );
 }
 
-function _IndicacaoCardImpl(loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number }) {
+function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number } }) {
   const qc = useQueryClient();
   const [ativa, setAtiva] = useState(loja.indicacao_ativa);
   const [bIndicador, setBIndicador] = useState(String(loja.bonus_indicador));
