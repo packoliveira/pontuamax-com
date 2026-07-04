@@ -648,6 +648,7 @@ export type Database = {
           last_purchase_at: string | null
           nivel: Database["public"]["Enums"]["nivel_cliente"]
           pontos: number
+          pontos_decaimento_last_at: string | null
           referral_bonus_paid: boolean
           referrer_user_id: string | null
           store_id: string
@@ -663,6 +664,7 @@ export type Database = {
           last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
           pontos?: number
+          pontos_decaimento_last_at?: string | null
           referral_bonus_paid?: boolean
           referrer_user_id?: string | null
           store_id: string
@@ -678,6 +680,7 @@ export type Database = {
           last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
           pontos?: number
+          pontos_decaimento_last_at?: string | null
           referral_bonus_paid?: boolean
           referrer_user_id?: string | null
           store_id?: string
@@ -743,6 +746,11 @@ export type Database = {
           owner_id: string
           percentual_cashback: number
           plan: Database["public"]["Enums"]["plan_tier"]
+          pontos_decaimento_dias: number
+          pontos_decaimento_valor: number
+          pontos_expiracao_last_run_at: string | null
+          pontos_expiracao_modo: string
+          pontos_validade_dias: number
           regra_pontos: number
           setup_paid_at: string | null
           slug: string
@@ -796,6 +804,11 @@ export type Database = {
           owner_id: string
           percentual_cashback?: number
           plan?: Database["public"]["Enums"]["plan_tier"]
+          pontos_decaimento_dias?: number
+          pontos_decaimento_valor?: number
+          pontos_expiracao_last_run_at?: string | null
+          pontos_expiracao_modo?: string
+          pontos_validade_dias?: number
           regra_pontos?: number
           setup_paid_at?: string | null
           slug: string
@@ -849,6 +862,11 @@ export type Database = {
           owner_id?: string
           percentual_cashback?: number
           plan?: Database["public"]["Enums"]["plan_tier"]
+          pontos_decaimento_dias?: number
+          pontos_decaimento_valor?: number
+          pontos_expiracao_last_run_at?: string | null
+          pontos_expiracao_modo?: string
+          pontos_validade_dias?: number
           regra_pontos?: number
           setup_paid_at?: string | null
           slug?: string
@@ -992,6 +1010,7 @@ export type Database = {
         | "nota_fiscal"
         | "ajuste"
         | "instagram_bonus"
+        | "expiracao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1145,6 +1164,7 @@ export const Constants = {
         "nota_fiscal",
         "ajuste",
         "instagram_bonus",
+        "expiracao",
       ],
     },
   },
