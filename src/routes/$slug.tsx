@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { traduzirErroAuth, isCredenciaisInvalidas, isUsuarioJaCadastrado } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles, Instagram, Check, X, Clock, Package } from "lucide-react";
