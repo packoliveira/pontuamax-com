@@ -466,6 +466,8 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
   const usarCashback = () => {
     const v = parseFloat(cashbackValor.replace(",", "."));
     if (!v || v <= 0) return toast.error("Valor inválido");
+    const saldo = Number(link.cashback_saldo);
+    if (v > saldo) return toast.error(`Cashback insuficiente. Saldo disponível: ${formatBRL(saldo)}.`);
     resgatarC.mutate(+v.toFixed(2));
   };
 

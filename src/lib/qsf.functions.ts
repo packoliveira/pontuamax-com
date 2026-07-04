@@ -855,7 +855,11 @@ export const resgatarProduto = createServerFn({ method: "POST" })
       .eq("id", data.product_id)
       .maybeSingle();
     if (!prd.data || prd.data.store_id !== data.store_id || !prd.data.ativo) throw new Error("Produto indisponível.");
-    if (link.data.pontos < prd.data.custo_pontos) throw new Error("Pontos insuficientes.");
+    if (link.data.pontos < prd.data.custo_pontos) {
+      throw new Error(
+        `Pontos insuficientes para trocar por "${prd.data.nome}". Necessário: ${prd.data.custo_pontos} pts. Saldo atual: ${link.data.pontos} pts. Faltam ${prd.data.custo_pontos - link.data.pontos} pts.`,
+      );
+    }
     const voucher = gerarVoucher();
     const validade = Math.max(1, Number(loja.data.voucher_validade_dias) || 7);
     const expiresAt = new Date(Date.now() + validade * 24 * 60 * 60 * 1000).toISOString();
@@ -899,7 +903,13 @@ export const resgatarCashback = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
-    if (data.valor > Number(link.data.cashback_saldo)) throw new Error("Cashback insuficiente.");
+    if (data.valor <= 0) throw new Error("Valor de cashback inválido.");
+    const saldoCb = Number(link.data.cashback_saldo);
+    if (data.valor > saldoCb) {
+      throw new Error(
+        `Cashback insuficiente. Solicitado: R$ ${data.valor.toFixed(2)}. Saldo disponível: R$ ${saldoCb.toFixed(2)}.`,
+      );
+    }
     const voucher = gerarVoucher();
     const validade = Math.max(1, Number(loja.data.voucher_validade_dias) || 7);
     const expiresAt = new Date(Date.now() + validade * 24 * 60 * 60 * 1000).toISOString();
