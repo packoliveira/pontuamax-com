@@ -740,3 +740,92 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
     </section>
   );
 }
+
+function InstagramCard({ loja }: { loja: Loja }) {
+  const qc = useQueryClient();
+  const [url, setUrl] = useState("");
+  const [nota, setNota] = useState("");
+  const { data: subs = [] } = useQuery({
+    queryKey: ["my-ig-subs", loja.id],
+    queryFn: () => listMyInstagramSubmissions({ data: { store_id: loja.id } }),
+  });
+
+  const enviar = useMutation({
+    mutationFn: () => submitInstagramPost({ data: { store_id: loja.id, post_url: url.trim(), client_note: nota.trim() || null } }),
+    onSuccess: () => {
+      toast.success("Post enviado! A loja vai revisar em breve.");
+      setUrl(""); setNota("");
+      qc.invalidateQueries({ queryKey: ["my-ig-subs", loja.id] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const pts = loja.instagram_points_per_post ?? 50;
+  const handle = loja.instagram_handle;
+  const instrucoesDefault = `1. Poste uma foto ou reel usando a loja\n2. Marque @${handle} no post\n3. Mantenha o post no ar pelo menos ${loja.instagram_min_days_live ?? 7} dias\n4. Seu perfil precisa estar público`;
+
+  return (
+    <section>
+      <Card className="overflow-hidden">
+        <div className="p-5 text-white" style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%)" }}>
+          <div className="flex items-center gap-2 text-sm opacity-95"><Instagram className="h-4 w-4" /> Poste no Instagram e ganhe pontos</div>
+          <div className="text-3xl font-bold mt-2">+{pts} pts por post</div>
+          <div className="text-sm opacity-95 mt-1">Marque <strong>@{handle}</strong> no post e envie o link aqui.</div>
+        </div>
+        <CardContent className="pt-4 space-y-3">
+          <details className="text-sm">
+            <summary className="cursor-pointer font-medium">Como funciona</summary>
+            <pre className="whitespace-pre-wrap text-xs text-muted-foreground mt-2 font-sans">
+              {loja.instagram_instructions || instrucoesDefault}
+            </pre>
+          </details>
+          <div>
+            <Label className="text-xs">Link do seu post no Instagram</Label>
+            <Input
+              value={url} onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://www.instagram.com/p/XXXXXXX/"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Observação (opcional)</Label>
+            <Input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Alguma info extra pra loja" />
+          </div>
+          <Button
+            onClick={() => enviar.mutate()}
+            disabled={!url.trim() || enviar.isPending}
+            className="text-white w-full"
+            style={{ backgroundColor: "var(--brand-primary)" }}
+          >
+            {enviar.isPending ? "Enviando..." : "Enviar para aprovação"}
+          </Button>
+
+          {subs.length > 0 && (
+            <div className="pt-3 border-t space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground">Minhas submissões</div>
+              {subs.map((s) => (
+                <div key={s.id} className="flex items-start justify-between gap-2 text-xs">
+                  <div className="min-w-0 flex-1">
+                    <a href={s.post_url} target="_blank" rel="noopener noreferrer" className="truncate block text-primary hover:underline">
+                      {s.post_url}
+                    </a>
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(s.created_at).toLocaleDateString("pt-BR")}
+                      {s.status === "rejeitado" && s.rejection_reason ? ` · ${s.rejection_reason}` : ""}
+                      {s.status === "estornado" && s.rejection_reason ? ` · ${s.rejection_reason}` : ""}
+                    </div>
+                  </div>
+                  <div>
+                    {s.status === "pendente" && <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5"><Clock className="h-3 w-3" /> Pendente</span>}
+                    {s.status === "aprovado" && <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5"><Check className="h-3 w-3" /> +{s.points_awarded} pts</span>}
+                    {s.status === "rejeitado" && <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5"><X className="h-3 w-3" /> Rejeitado</span>}
+                    {s.status === "estornado" && <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5"><X className="h-3 w-3" /> Estornado</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
