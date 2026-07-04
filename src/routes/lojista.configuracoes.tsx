@@ -444,6 +444,118 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
 }
 
 function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number } }) {
+  return _IndicacaoCardImpl(loja);
+}
+
+type ValidadeLoja = {
+  id: string;
+  pontos_expiracao_modo: string;
+  pontos_validade_dias: number;
+  pontos_decaimento_dias: number;
+  pontos_decaimento_valor: number;
+  pontos_expiracao_last_run_at: string | null;
+};
+
+function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
+  const qc = useQueryClient();
+  const [modo, setModo] = useState<"nenhum" | "validade" | "decaimento">((loja.pontos_expiracao_modo as never) ?? "nenhum");
+  const [validadeDias, setValidadeDias] = useState(String(loja.pontos_validade_dias ?? 365));
+  const [decaiDias, setDecaiDias] = useState(String(loja.pontos_decaimento_dias ?? 30));
+  const [decaiValor, setDecaiValor] = useState(String(loja.pontos_decaimento_valor ?? 10));
+
+  useEffect(() => {
+    setModo((loja.pontos_expiracao_modo as never) ?? "nenhum");
+    setValidadeDias(String(loja.pontos_validade_dias ?? 365));
+    setDecaiDias(String(loja.pontos_decaimento_dias ?? 30));
+    setDecaiValor(String(loja.pontos_decaimento_valor ?? 10));
+  }, [loja]);
+
+  const salvar = useMutation({
+    mutationFn: () =>
+      atualizarLoja({
+        data: {
+          pontos_expiracao_modo: modo,
+          pontos_validade_dias: Math.max(1, parseInt(validadeDias, 10) || 365),
+          pontos_decaimento_dias: Math.max(1, parseInt(decaiDias, 10) || 30),
+          pontos_decaimento_valor: Math.max(1, parseInt(decaiValor, 10) || 10),
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Regras de validade salvas");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Hourglass className="h-4 w-4" /> Validade dos pontos
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Defina se e como os pontos dos clientes expiram. A execução é automática (todo dia) e cria uma movimentação de "expiração" no histórico.
+        </p>
+
+        <RadioGroup value={modo} onValueChange={(v) => setModo(v as never)} className="space-y-2">
+          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+            <RadioGroupItem value="nenhum" id="mp-nenhum" className="mt-0.5" />
+            <div>
+              <div className="text-sm font-medium">Sem expiração</div>
+              <div className="text-xs text-muted-foreground">Os pontos nunca expiram.</div>
+            </div>
+          </label>
+          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+            <RadioGroupItem value="validade" id="mp-validade" className="mt-0.5" />
+            <div className="flex-1">
+              <div className="text-sm font-medium">Validade por data</div>
+              <div className="text-xs text-muted-foreground">Cada ponto ganho expira depois de N dias.</div>
+              {modo === "validade" && (
+                <div className="mt-2 flex items-center gap-2">
+                  <Input type="number" min={1} className="w-28" value={validadeDias} onChange={(e) => setValidadeDias(e.target.value)} />
+                  <span className="text-xs text-muted-foreground">dias de validade</span>
+                </div>
+              )}
+            </div>
+          </label>
+          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+            <RadioGroupItem value="decaimento" id="mp-decai" className="mt-0.5" />
+            <div className="flex-1">
+              <div className="text-sm font-medium">Decaimento periódico</div>
+              <div className="text-xs text-muted-foreground">Cliente perde X pontos a cada N dias.</div>
+              {modo === "decaimento" && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Pontos a remover</Label>
+                    <Input type="number" min={1} value={decaiValor} onChange={(e) => setDecaiValor(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">A cada (dias)</Label>
+                    <Input type="number" min={1} value={decaiDias} onChange={(e) => setDecaiDias(e.target.value)} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </label>
+        </RadioGroup>
+
+        {loja.pontos_expiracao_last_run_at && (
+          <p className="text-[11px] text-muted-foreground">
+            Última execução: {new Date(loja.pontos_expiracao_last_run_at).toLocaleString("pt-BR")}
+          </p>
+        )}
+
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          {salvar.isPending ? "Salvando..." : "Salvar validade"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function _IndicacaoCardImpl(loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number }) {
   const qc = useQueryClient();
   const [ativa, setAtiva] = useState(loja.indicacao_ativa);
   const [bIndicador, setBIndicador] = useState(String(loja.bonus_indicador));
