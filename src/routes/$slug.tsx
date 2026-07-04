@@ -577,6 +577,8 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
 
       <HistoricoSection txs={txs} inclP={inclP} inclC={inclC} />
 
+      <VouchersSection loja={loja} txs={txs} nome={nome} telefone={meuTelefone} />
+
       {loja.instagram_program_active && loja.instagram_handle && (
         <InstagramCard loja={loja} />
       )}
