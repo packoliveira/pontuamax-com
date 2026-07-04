@@ -888,6 +888,7 @@ export type Database = {
           cashback_delta: number
           client_user_id: string
           created_at: string
+          delivered_at: string | null
           id: string
           id_venda_externa: string | null
           origem: string | null
@@ -904,6 +905,7 @@ export type Database = {
           cashback_delta?: number
           client_user_id: string
           created_at?: string
+          delivered_at?: string | null
           id?: string
           id_venda_externa?: string | null
           origem?: string | null
@@ -920,6 +922,7 @@ export type Database = {
           cashback_delta?: number
           client_user_id?: string
           created_at?: string
+          delivered_at?: string | null
           id?: string
           id_venda_externa?: string | null
           origem?: string | null
