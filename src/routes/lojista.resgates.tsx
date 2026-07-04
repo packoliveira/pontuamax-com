@@ -82,7 +82,9 @@ function ResgatesPage() {
                 ? `${r.products?.nome ?? "Produto"} • ${Math.abs(r.pontos_delta)} pts`
                 : `Voucher de cashback • ${formatBRL(Math.abs(Number(r.cashback_delta)))}`}
             </div>
-            <div className="text-xs font-mono mt-1">{r.voucher_code}</div>
+            <div className="mt-1 inline-block rounded-md bg-primary/10 border border-primary/30 px-2 py-1 text-base sm:text-lg font-mono font-bold tracking-widest text-primary">
+              {r.voucher_code}
+            </div>
             <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2">
               <span>{formatDate(r.created_at)}</span>
               {tr && r.status === "pendente" && (
