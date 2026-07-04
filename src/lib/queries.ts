@@ -11,6 +11,9 @@ export type StorePublic = Pick<
   | "indicacao_ativa" | "bonus_indicador" | "bonus_indicado"
   | "whatsapp_enabled" | "nps_enabled"
   | "created_at"
+  | "instagram_program_active" | "instagram_handle"
+  | "instagram_points_per_post" | "instagram_min_days_live"
+  | "instagram_instructions"
 >;
 
 export const myStoreQuery = () =>
