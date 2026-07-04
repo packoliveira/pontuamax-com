@@ -136,6 +136,11 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         nps_ask_comment: z.boolean().optional(),
         nps_template: z.string().min(1).max(2000).optional(),
         voucher_validade_dias: z.number().int().min(1).max(365).optional(),
+        instagram_program_active: z.boolean().optional(),
+        instagram_handle: z.string().max(60).optional().nullable(),
+        instagram_points_per_post: z.number().int().min(1).max(100_000).optional(),
+        instagram_min_days_live: z.number().int().min(0).max(365).optional(),
+        instagram_instructions: z.string().max(2000).optional().nullable(),
       })
       .parse(input),
   )
@@ -1835,7 +1840,7 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
 
 // -------- Public lookups (no auth) with safe fields only --------
 const PUBLIC_STORE_SELECT =
-  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at";
+  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions";
 
 export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))

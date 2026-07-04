@@ -24,7 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star } from "lucide-react";
+import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
@@ -173,6 +173,7 @@ function ConfigPage() {
           <NotificacoesCard loja={loja} />
           <IndicacaoCard loja={loja} />
           <NpsCard loja={loja} />
+          <InstagramCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
@@ -349,6 +350,92 @@ function IntegracoesCard({
             </div>
           )}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+type IgLoja = {
+  id: string;
+  instagram_program_active: boolean;
+  instagram_handle: string | null;
+  instagram_points_per_post: number;
+  instagram_min_days_live: number;
+  instagram_instructions: string | null;
+};
+
+function InstagramCard({ loja }: { loja: IgLoja }) {
+  const qc = useQueryClient();
+  const [on, setOn] = useState(loja.instagram_program_active);
+  const [handle, setHandle] = useState(loja.instagram_handle ?? "");
+  const [pontos, setPontos] = useState(String(loja.instagram_points_per_post ?? 50));
+  const [dias, setDias] = useState(String(loja.instagram_min_days_live ?? 7));
+  const [instrucoes, setInstrucoes] = useState(loja.instagram_instructions ?? "");
+
+  useEffect(() => {
+    setOn(loja.instagram_program_active);
+    setHandle(loja.instagram_handle ?? "");
+    setPontos(String(loja.instagram_points_per_post ?? 50));
+    setDias(String(loja.instagram_min_days_live ?? 7));
+    setInstrucoes(loja.instagram_instructions ?? "");
+  }, [loja]);
+
+  const salvar = useMutation({
+    mutationFn: () =>
+      atualizarLoja({
+        data: {
+          instagram_program_active: on,
+          instagram_handle: handle.trim().replace(/^@/, "") || null,
+          instagram_points_per_post: Math.max(1, parseInt(pontos, 10) || 50),
+          instagram_min_days_live: Math.max(0, parseInt(dias, 10) || 0),
+          instagram_instructions: instrucoes.trim() || null,
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Configurações do Instagram salvas");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Instagram className="h-4 w-4" /> Poste no Instagram e ganhe pontos
+          <span className="ml-auto"><Switch checked={on} onCheckedChange={setOn} /></span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">
+          Quando ativo, os clientes enviam o link do post do Instagram pela página de vocês e você aprova em
+          {" "}<a href="/lojista/instagram" className="underline">Posts do Instagram</a> para creditar os pontos.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <Label>@ do Instagram da loja</Label>
+            <Input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="sua_loja" disabled={!on} />
+          </div>
+          <div>
+            <Label>Pontos por post aprovado</Label>
+            <Input type="number" min={1} value={pontos} onChange={(e) => setPontos(e.target.value)} disabled={!on} />
+          </div>
+          <div>
+            <Label>Post deve ficar no ar (dias)</Label>
+            <Input type="number" min={0} value={dias} onChange={(e) => setDias(e.target.value)} disabled={!on} />
+            <p className="text-[10px] text-muted-foreground mt-1">Se o cliente apagar antes disso, você pode estornar os pontos.</p>
+          </div>
+        </div>
+        <div>
+          <Label>Instruções para o cliente</Label>
+          <Textarea
+            rows={4} value={instrucoes} onChange={(e) => setInstrucoes(e.target.value)} disabled={!on}
+            placeholder={`Ex:\n1. Poste uma foto ou reel usando nossos produtos\n2. Marque @${handle || "sua_loja"} na foto\n3. Use a #suahashtag\n4. Perfil precisa estar público`}
+          />
+        </div>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          {salvar.isPending ? "Salvando..." : "Salvar configurações"}
+        </Button>
       </CardContent>
     </Card>
   );
