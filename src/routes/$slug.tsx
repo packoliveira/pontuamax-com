@@ -27,7 +27,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles } from "lucide-react";
+import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles, Instagram, Check, X, Clock } from "lucide-react";
+import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
 
 const REF_KEY = "qsf_referrer_phone";
 function getStoredReferrer(): string | null {
@@ -554,6 +555,10 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
       )}
 
       <HistoricoSection txs={txs} inclP={inclP} inclC={inclC} />
+
+      {loja.instagram_program_active && loja.instagram_handle && (
+        <InstagramCard loja={loja} />
+      )}
 
       <section>
         <Link to="/nota/$slug" params={{ slug: loja.slug }}
