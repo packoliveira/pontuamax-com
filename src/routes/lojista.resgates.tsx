@@ -9,12 +9,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Gift, Wallet, ScanLine, Clock, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Gift, Wallet, ScanLine, Clock, AlertTriangle, Printer } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 type TxRow = Tables<"transactions"> & {
   profiles: { full_name: string | null } | null;
   products: { nome: string | null } | null;
+};
+
+type Comprovante = {
+  transaction_id: string;
+  voucher_code: string | null;
+  tipo: string;
+  delivered_at: string;
+  loja: string | null;
+  cliente: string;
+  cliente_telefone: string | null;
+  produto: string | null;
+  pontos_usados: number;
+  cashback_aplicado: number;
 };
 
 export const Route = createFileRoute("/lojista/resgates")({
@@ -27,12 +41,14 @@ function ResgatesPage() {
   const { data: loja } = useQuery(myStoreQuery());
   const { data: txs = [] } = useQuery(storeTransactionsQuery(loja?.id));
   const [codigo, setCodigo] = useState("");
+  const [comprovante, setComprovante] = useState<Comprovante | null>(null);
 
   const confirmar = useMutation({
     mutationFn: (id: string) => confirmarResgate({ data: { transaction_id: id } }),
-    onSuccess: () => {
+    onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ["transactions", loja?.id] });
       qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
+      if (r?.comprovante) setComprovante(r.comprovante as Comprovante);
     },
   });
 
@@ -96,7 +112,7 @@ function ResgatesPage() {
           </div>
         </div>
         {r.status === "pendente" && (
-          <Button size="sm" disabled={confirmar.isPending} onClick={() => confirmar.mutate(r.id, { onSuccess: () => toast.success("Voucher entregue") })}>
+          <Button size="sm" disabled={confirmar.isPending} onClick={() => confirmar.mutate(r.id, { onSuccess: () => toast.success("Voucher entregue — comprovante gerado") })}>
             <CheckCircle2 className="h-4 w-4 mr-1" /> Entregar
           </Button>
         )}
@@ -168,6 +184,62 @@ function ResgatesPage() {
           </div></CardContent></Card>
         </section>
       )}
+
+      <Dialog open={!!comprovante} onOpenChange={(o) => { if (!o) setComprovante(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" /> Comprovante de resgate
+            </DialogTitle>
+          </DialogHeader>
+          {comprovante && (
+            <div id="comprovante-print" className="space-y-3 text-sm border rounded-md p-4 bg-background">
+              <div className="text-center">
+                <div className="font-bold text-base">{comprovante.loja ?? "Loja"}</div>
+                <div className="text-xs text-muted-foreground">Comprovante de entrega</div>
+              </div>
+              <div className="border-t pt-2 grid grid-cols-[110px_1fr] gap-y-1">
+                <span className="text-muted-foreground">Cliente</span>
+                <span className="font-medium">{comprovante.cliente}</span>
+                {comprovante.cliente_telefone && (<>
+                  <span className="text-muted-foreground">Telefone</span>
+                  <span>{comprovante.cliente_telefone}</span>
+                </>)}
+                <span className="text-muted-foreground">Voucher</span>
+                <span className="font-mono font-bold">{comprovante.voucher_code ?? "—"}</span>
+                <span className="text-muted-foreground">Entregue em</span>
+                <span>{new Date(comprovante.delivered_at).toLocaleString("pt-BR")}</span>
+              </div>
+              <div className="border-t pt-2">
+                {comprovante.produto && (
+                  <div className="flex justify-between">
+                    <span>Produto resgatado</span>
+                    <span className="font-medium">{comprovante.produto}</span>
+                  </div>
+                )}
+                {comprovante.pontos_usados > 0 && (
+                  <div className="flex justify-between">
+                    <span>Pontos usados</span>
+                    <span className="font-medium">{comprovante.pontos_usados} pts</span>
+                  </div>
+                )}
+                {comprovante.cashback_aplicado > 0 && (
+                  <div className="flex justify-between">
+                    <span>Cashback aplicado</span>
+                    <span className="font-medium">{formatBRL(comprovante.cashback_aplicado)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-1" /> Imprimir
+            </Button>
+            <Button onClick={() => setComprovante(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
