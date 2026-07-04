@@ -560,6 +560,10 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
         <InstagramCard loja={loja} />
       )}
 
+      {loja.instagram_program_active && (
+        <MeusPostsInstagram loja={loja} />
+      )}
+
       <section>
         <Link to="/nota/$slug" params={{ slug: loja.slug }}
           className="flex items-center justify-center gap-2 rounded-md border border-dashed p-4 text-sm hover:bg-accent">
