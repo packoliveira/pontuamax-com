@@ -1,20 +1,35 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const KEY = "qsf-panel-theme";
+type Theme = "light" | "dark";
+
+function readInitial(): Theme {
+  if (typeof window === "undefined") return "light";
+  const saved = window.localStorage.getItem(KEY);
+  if (saved === "dark" || saved === "light") return saved;
+  return "light";
+}
 
 /**
- * Applies the dark internal panel theme (Lojista + Admin) by toggling the
- * `dark` class on <html> while the hosting component is mounted. Portals
- * (dialogs, popovers, sheets, toasts) inherit the theme because they attach
- * to document.body.
+ * Aplica o tema (claro/escuro) do painel interno enquanto o componente estiver
+ * montado. A preferência é salva no localStorage e usada em todos os painéis.
  */
 export function usePanelTheme() {
+  const [theme, setThemeState] = useState<Theme>(readInitial);
+
   useEffect(() => {
     const root = document.documentElement;
-    // Painel interno agora usa tema claro por padrão.
-    // Garantimos que a classe `dark` não fique ativa caso tenha sido
-    // adicionada em uma versão anterior.
-    root.classList.remove("dark");
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    window.localStorage.setItem(KEY, theme);
     return () => {
       root.classList.remove("dark");
     };
+  }, [theme]);
+
+  const toggle = useCallback(() => {
+    setThemeState((t) => (t === "dark" ? "light" : "dark"));
   }, []);
+
+  return { theme, toggle, setTheme: setThemeState };
 }
