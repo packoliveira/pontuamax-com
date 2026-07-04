@@ -76,13 +76,26 @@ export const listMyInstagramSubmissions = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const r = await supabaseAdmin
       .from("instagram_submissions")
-      .select("id, post_url, status, points_awarded, rejection_reason, created_at, reviewed_at")
+      .select("id, post_url, status, points_awarded, rejection_reason, created_at, reviewed_at, verify_after, client_note, transaction_id")
       .eq("store_id", data.store_id)
       .eq("client_user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(30);
     if (r.error) throw new Error(r.error.message);
-    return r.data ?? [];
+    const rows = r.data ?? [];
+    const txIds = rows.map((r) => r.transaction_id).filter((x): x is string => !!x);
+    let cashbackMap = new Map<string, number>();
+    if (txIds.length > 0) {
+      const txs = await supabaseAdmin
+        .from("transactions")
+        .select("id, cashback_delta")
+        .in("id", txIds);
+      for (const t of txs.data ?? []) cashbackMap.set(t.id, Number(t.cashback_delta ?? 0));
+    }
+    return rows.map((r) => ({
+      ...r,
+      cashback_awarded: r.transaction_id ? cashbackMap.get(r.transaction_id) ?? 0 : 0,
+    }));
   });
 
 // -------- LOJISTA: fila de submissões --------
