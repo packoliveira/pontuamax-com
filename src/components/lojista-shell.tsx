@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { myStoreQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const nav: NavItem[] = [
@@ -139,6 +140,11 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
             </div>
             <span className="font-semibold">QSF Club</span>
           </div>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" onClick={doLogout} title="Sair" aria-label="Sair">
+              <LogOut className="h-5 w-5" />
+            </Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
@@ -155,6 +161,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
         </header>
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
