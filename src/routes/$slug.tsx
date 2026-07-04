@@ -489,6 +489,16 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                 </div>
               </div>
               <div className="text-4xl font-bold mt-2">{link.pontos}</div>
+              {loja.pontos_expiracao_modo === "validade" && (
+                <div className="text-[11px] mt-1 opacity-80">
+                  Pontos expiram após {loja.pontos_validade_dias} dias
+                </div>
+              )}
+              {loja.pontos_expiracao_modo === "decaimento" && (
+                <div className="text-[11px] mt-1 opacity-80">
+                  Você perde {loja.pontos_decaimento_valor} pts a cada {loja.pontos_decaimento_dias} dias
+                </div>
+              )}
               {prog.proximo && (
                 <div className="mt-4">
                   <div className="flex justify-between text-xs opacity-90 mb-1">
@@ -654,6 +664,9 @@ function describeTx(t: TxRow) {
     case "vale_presente": return "Vale-presente";
     case "nota_fiscal": return "Nota fiscal aprovada";
     case "indicacao": return "Bônus de indicação";
+    case "expiracao": return t.origem?.startsWith("expiracao_decaimento")
+      ? "Decaimento periódico de pontos"
+      : "Pontos expirados";
     case "ajuste": return ajusteMotivo
       ? `Ajuste da loja: ${ajusteMotivo}`
       : (t.pontos_delta >= 0 ? "Ajuste da loja (crédito)" : "Ajuste da loja (estorno)");

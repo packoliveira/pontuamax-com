@@ -42,6 +42,7 @@ import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
+import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
 import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
 
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
@@ -211,6 +212,12 @@ const ApiPublicHooksExpirarVouchersRoute =
     path: '/api/public/hooks/expirar-vouchers',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksExpirarPontosRoute =
+  ApiPublicHooksExpirarPontosRouteImport.update({
+    id: '/api/public/hooks/expirar-pontos',
+    path: '/api/public/hooks/expirar-pontos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCampanhasAgendadasRoute =
   ApiPublicHooksCampanhasAgendadasRouteImport.update({
     id: '/api/public/hooks/campanhas-agendadas',
@@ -248,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
+  '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
@@ -282,6 +290,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
+  '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
@@ -319,6 +328,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
+  '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/campanhas-agendadas'
+    | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/lojista'
     | '/api/public/hooks/campanhas-agendadas'
+    | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
@@ -427,6 +439,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/lojista/'
     | '/api/public/hooks/campanhas-agendadas'
+    | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
@@ -445,6 +458,7 @@ export interface RootRouteChildren {
   NpsIdRoute: typeof NpsIdRoute
   ValeCodigoRoute: typeof ValeCodigoRoute
   ApiPublicHooksCampanhasAgendadasRoute: typeof ApiPublicHooksCampanhasAgendadasRoute
+  ApiPublicHooksExpirarPontosRoute: typeof ApiPublicHooksExpirarPontosRoute
   ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
@@ -685,6 +699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksExpirarVouchersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/expirar-pontos': {
+      id: '/api/public/hooks/expirar-pontos'
+      path: '/api/public/hooks/expirar-pontos'
+      fullPath: '/api/public/hooks/expirar-pontos'
+      preLoaderRoute: typeof ApiPublicHooksExpirarPontosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/campanhas-agendadas': {
       id: '/api/public/hooks/campanhas-agendadas'
       path: '/api/public/hooks/campanhas-agendadas'
@@ -761,6 +782,7 @@ const rootRouteChildren: RootRouteChildren = {
   NpsIdRoute: NpsIdRoute,
   ValeCodigoRoute: ValeCodigoRoute,
   ApiPublicHooksCampanhasAgendadasRoute: ApiPublicHooksCampanhasAgendadasRoute,
+  ApiPublicHooksExpirarPontosRoute: ApiPublicHooksExpirarPontosRoute,
   ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,

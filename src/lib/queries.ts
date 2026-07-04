@@ -14,6 +14,8 @@ export type StorePublic = Pick<
   | "instagram_program_active" | "instagram_handle"
   | "instagram_points_per_post" | "instagram_min_days_live"
   | "instagram_instructions"
+  | "pontos_expiracao_modo" | "pontos_validade_dias"
+  | "pontos_decaimento_dias" | "pontos_decaimento_valor"
 >;
 
 export const myStoreQuery = () =>
