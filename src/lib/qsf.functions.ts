@@ -990,6 +990,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
         descricao: z.string().max(500).optional().nullable(),
         custo_pontos: z.number().int().min(0),
         ativo: z.boolean().default(true),
+        foto_url: z.string().max(1000).optional().nullable(),
       })
       .parse(input),
   )
@@ -999,7 +1000,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
     if (data.id) {
       const { error } = await context.supabase
         .from("products")
-        .update({ nome: data.nome, descricao: data.descricao, custo_pontos: data.custo_pontos, ativo: data.ativo })
+        .update({ nome: data.nome, descricao: data.descricao, custo_pontos: data.custo_pontos, ativo: data.ativo, foto_url: data.foto_url ?? null })
         .eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
@@ -1009,6 +1010,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
         descricao: data.descricao,
         custo_pontos: data.custo_pontos,
         ativo: data.ativo,
+        foto_url: data.foto_url ?? null,
       });
       if (error) throw new Error(error.message);
     }
