@@ -130,13 +130,13 @@ function ProdutoDialog({ open, onOpenChange, editing, storeId, onSave }: {
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${storeId}/produtos/${Date.now()}.${ext}`;
-      const up = await supabase.storage.from("store-assets").upload(path, file, {
+      const path = `${storeId}/${Date.now()}.${ext}`;
+      const up = await supabase.storage.from("product-images").upload(path, file, {
         upsert: true, contentType: file.type || undefined,
       });
       if (up.error) throw up.error;
       const signed = await supabase.storage
-        .from("store-assets")
+        .from("product-images")
         .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (signed.error || !signed.data?.signedUrl) throw signed.error ?? new Error("Falha ao gerar URL");
       setFotoUrl(signed.data.signedUrl);
