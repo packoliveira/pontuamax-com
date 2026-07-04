@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Shield, LogOut, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePanelTheme } from "@/hooks/use-panel-theme";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -35,6 +38,43 @@ export const Route = createFileRoute("/admin")({
 function AdminLayout() {
   usePanelTheme();
   const ctx = Route.useRouteContext();
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (ctx?.accessDenied) return;
+    const channel = supabase
+      .channel("admin-audit-alerts")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "admin_audit_logs" },
+        (payload) => {
+          const row = payload.new as {
+            action: string;
+            actor_email: string | null;
+            target_label: string | null;
+          };
+          if (row.action === "admin.password_changed") {
+            toast.warning("🔐 Senha de admin alterada", {
+              description: `${row.actor_email ?? "Admin"} trocou a própria senha.`,
+              duration: 10000,
+            });
+          } else if (row.action === "admin.removed") {
+            toast.error("⚠️ Admin removido", {
+              description: `${row.actor_email ?? "Admin"} removeu ${row.target_label ?? "um admin"} do painel master.`,
+              duration: 12000,
+            });
+          }
+          // Atualiza a lista de auditoria/admins na tela
+          qc.invalidateQueries({ queryKey: ["audit-logs"] });
+          qc.invalidateQueries({ queryKey: ["admins-list"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [ctx?.accessDenied, qc]);
+
   // A rota /admin/login usa layout próprio (dark) — não renderiza este shell.
   if (typeof window !== "undefined" && window.location.pathname === "/admin/login") {
     return <Outlet />;

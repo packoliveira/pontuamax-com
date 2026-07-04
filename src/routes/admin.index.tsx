@@ -95,6 +95,22 @@ function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | StoreRow["subscription_status"]>("all");
 
+  const list = stores ?? [];
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return list.filter((s) => {
+      if (filter !== "all" && s.subscription_status !== filter) return false;
+      if (!q) return true;
+      return (
+        s.nome_fantasia.toLowerCase().includes(q) ||
+        s.slug.toLowerCase().includes(q) ||
+        (s.owner_name ?? "").toLowerCase().includes(q) ||
+        (s.owner_email ?? "").toLowerCase().includes(q) ||
+        (s.owner_phone ?? s.telefone ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [list, search, filter]);
+
   if (loadingAdmin) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
   if (!adminCheck?.isAdmin) {
@@ -132,7 +148,6 @@ function AdminDashboard() {
     );
   }
 
-  const list = stores ?? [];
   const mrrTotal = list.filter((s) => s.subscription_status === "active").reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
   const mrrPotencial = list.filter((s) => s.subscription_status === "pending_payment").reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
   const ativas = list.filter((s) => s.subscription_status === "active").length;
@@ -146,21 +161,6 @@ function AdminDashboard() {
   const churnMes = list.filter((s) => s.cancelled_at && new Date(s.cancelled_at).getTime() >= inicioMes).length;
   const arr = mrrTotal * 12;
   const ticketMedio = ativas > 0 ? mrrTotal / ativas : 0;
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return list.filter((s) => {
-      if (filter !== "all" && s.subscription_status !== filter) return false;
-      if (!q) return true;
-      return (
-        s.nome_fantasia.toLowerCase().includes(q) ||
-        s.slug.toLowerCase().includes(q) ||
-        (s.owner_name ?? "").toLowerCase().includes(q) ||
-        (s.owner_email ?? "").toLowerCase().includes(q) ||
-        (s.owner_phone ?? s.telefone ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [list, search, filter]);
 
   return (
     <div className="space-y-6">
