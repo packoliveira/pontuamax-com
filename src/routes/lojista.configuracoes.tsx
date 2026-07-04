@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
 import { toast } from "sonner";
 import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
+import { Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
