@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ const nav: NavItem[] = [
   { to: "/lojista/vale-presente", label: "Vale-presente", icon: Ticket },
   { to: "/lojista/notas", label: "Notas fiscais", icon: FileText },
   { to: "/lojista/sorteios", label: "Sorteios", icon: Trophy },
+  { to: "/lojista/instagram", label: "Posts do Instagram", icon: Instagram },
   { to: "/lojista/nps", label: "NPS", icon: Star },
   { to: "/lojista/widget", label: "Widget", icon: Code },
   { to: "/lojista/configuracoes", label: "Configurações", icon: Settings },
