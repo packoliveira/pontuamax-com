@@ -105,14 +105,20 @@ export const listStoreInstagramSubmissions = createServerFn({ method: "GET" })
     if (!store.data) throw new Error("Loja não encontrada.");
     let q = supabaseAdmin
       .from("instagram_submissions")
-      .select("id, post_url, status, points_awarded, rejection_reason, verify_after, reviewed_at, created_at, client_user_id, profiles:client_user_id (full_name, phone)")
+      .select("id, post_url, status, points_awarded, rejection_reason, verify_after, reviewed_at, created_at, client_user_id")
       .eq("store_id", store.data.id)
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.status !== "todos") q = q.eq("status", data.status);
     const r = await q;
     if (r.error) throw new Error(r.error.message);
-    return r.data ?? [];
+    const rows = r.data ?? [];
+    if (rows.length === 0) return [];
+    const ids = Array.from(new Set(rows.map((x) => x.client_user_id)));
+    const profs = await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", ids);
+    const map = new Map<string, { full_name: string | null; phone: string | null }>();
+    for (const p of profs.data ?? []) map.set(p.id, { full_name: p.full_name, phone: p.phone });
+    return rows.map((r) => ({ ...r, profiles: map.get(r.client_user_id) ?? null }));
   });
 
 async function requireOwnerOfSubmission(userId: string, submissionId: string) {
