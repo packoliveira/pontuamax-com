@@ -175,6 +175,7 @@ function ConfigPage() {
           <IndicacaoCard loja={loja} />
           <NpsCard loja={loja} />
           <InstagramCard loja={loja} />
+          <ValidadePontosCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
