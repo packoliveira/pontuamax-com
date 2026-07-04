@@ -749,11 +749,6 @@ function InstagramCard({ loja }: { loja: Loja }) {
   const qc = useQueryClient();
   const [url, setUrl] = useState("");
   const [nota, setNota] = useState("");
-  const { data: subs = [] } = useQuery({
-    queryKey: ["my-ig-subs", loja.id],
-    queryFn: () => listMyInstagramSubmissions({ data: { store_id: loja.id } }),
-  });
-
   const enviar = useMutation({
     mutationFn: () => submitInstagramPost({ data: { store_id: loja.id, post_url: url.trim(), client_note: nota.trim() || null } }),
     onSuccess: () => {
@@ -802,34 +797,152 @@ function InstagramCard({ loja }: { loja: Loja }) {
           >
             {enviar.isPending ? "Enviando..." : "Enviar para aprovação"}
           </Button>
-
-          {subs.length > 0 && (
-            <div className="pt-3 border-t space-y-2">
-              <div className="text-xs font-semibold text-muted-foreground">Minhas submissões</div>
-              {subs.map((s) => (
-                <div key={s.id} className="flex items-start justify-between gap-2 text-xs">
-                  <div className="min-w-0 flex-1">
-                    <a href={s.post_url} target="_blank" rel="noopener noreferrer" className="truncate block text-primary hover:underline">
-                      {s.post_url}
-                    </a>
-                    <div className="text-[10px] text-muted-foreground">
-                      {new Date(s.created_at).toLocaleDateString("pt-BR")}
-                      {s.status === "rejeitado" && s.rejection_reason ? ` · ${s.rejection_reason}` : ""}
-                      {s.status === "estornado" && s.rejection_reason ? ` · ${s.rejection_reason}` : ""}
-                    </div>
-                  </div>
-                  <div>
-                    {s.status === "pendente" && <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5"><Clock className="h-3 w-3" /> Pendente</span>}
-                    {s.status === "aprovado" && <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5"><Check className="h-3 w-3" /> +{s.points_awarded} pts</span>}
-                    {s.status === "rejeitado" && <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5"><X className="h-3 w-3" /> Rejeitado</span>}
-                    {s.status === "estornado" && <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5"><X className="h-3 w-3" /> Estornado</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </CardContent>
       </Card>
     </section>
   );
+}
+
+function MeusPostsInstagram({ loja }: { loja: Loja }) {
+  const { data: subs = [], isLoading } = useQuery({
+    queryKey: ["my-ig-subs", loja.id],
+    queryFn: () => listMyInstagramSubmissions({ data: { store_id: loja.id } }),
+  });
+
+  const pendentes = subs.filter((s) => s.status === "pendente");
+  const aprovados = subs.filter((s) => s.status === "aprovado");
+  const rejeitados = subs.filter((s) => s.status === "rejeitado" || s.status === "estornado");
+
+  const totalPts = aprovados.reduce((acc, s) => acc + (s.points_awarded ?? 0), 0);
+  const totalCb = aprovados.reduce((acc, s) => acc + Number(s.cashback_awarded ?? 0), 0);
+
+  const renderList = (arr: typeof subs) => {
+    if (arr.length === 0) {
+      return (
+        <Card>
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+            Nenhum post por aqui ainda.
+          </CardContent>
+        </Card>
+      );
+    }
+    return (
+      <div className="space-y-2">
+        {arr.map((s) => <PostSubmissionRow key={s.id} s={s} />)}
+      </div>
+    );
+  };
+
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Instagram className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
+        <h2 className="font-semibold">Meus posts no Instagram</h2>
+        <span className="text-xs text-muted-foreground">acompanhe o status</span>
+      </div>
+
+      {(aprovados.length > 0) && (
+        <Card className="mb-3">
+          <CardContent className="p-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs text-muted-foreground">Já creditado no Instagram</div>
+              <div className="text-lg font-bold">
+                {totalPts > 0 && <span className="text-green-700">+{totalPts} pts</span>}
+                {totalPts > 0 && totalCb > 0 && <span className="text-muted-foreground"> · </span>}
+                {totalCb > 0 && <span className="text-green-700">+{formatBRL(totalCb)} cashback</span>}
+              </div>
+            </div>
+            <div className="text-xs text-right text-muted-foreground">
+              <div>{aprovados.length} post(s)</div>
+              <div>aprovado(s)</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs defaultValue="todos">
+        <TabsList className="w-full">
+          <TabsTrigger value="todos" className="flex-1">Todos ({subs.length})</TabsTrigger>
+          <TabsTrigger value="pendentes" className="flex-1">Em análise ({pendentes.length})</TabsTrigger>
+          <TabsTrigger value="aprovados" className="flex-1">Aprovados ({aprovados.length})</TabsTrigger>
+          <TabsTrigger value="rejeitados" className="flex-1">Rejeitados ({rejeitados.length})</TabsTrigger>
+        </TabsList>
+        <TabsContent value="todos" className="mt-3">
+          {isLoading ? <div className="text-center text-sm text-muted-foreground p-4">Carregando...</div> : renderList(subs)}
+        </TabsContent>
+        <TabsContent value="pendentes" className="mt-3">{renderList(pendentes)}</TabsContent>
+        <TabsContent value="aprovados" className="mt-3">{renderList(aprovados)}</TabsContent>
+        <TabsContent value="rejeitados" className="mt-3">{renderList(rejeitados)}</TabsContent>
+      </Tabs>
+    </section>
+  );
+}
+
+type IgSub = {
+  id: string;
+  post_url: string;
+  status: string;
+  points_awarded: number;
+  cashback_awarded?: number;
+  rejection_reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  verify_after: string | null;
+  client_note: string | null;
+};
+
+function PostSubmissionRow({ s }: { s: IgSub }) {
+  const cb = Number(s.cashback_awarded ?? 0);
+  return (
+    <Card>
+      <CardContent className="p-3 space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <a
+            href={s.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline truncate flex-1 min-w-0"
+          >
+            {s.post_url}
+          </a>
+          <StatusBadge status={s.status} />
+        </div>
+        <div className="text-[11px] text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
+          <span>Enviado em {formatDateTime(s.created_at)}</span>
+          {s.reviewed_at && <span>Revisado em {formatDateTime(s.reviewed_at)}</span>}
+          {s.status === "pendente" && s.verify_after && (
+            <span>Verificação a partir de {new Date(s.verify_after).toLocaleDateString("pt-BR")}</span>
+          )}
+        </div>
+        {s.status === "aprovado" && (s.points_awarded > 0 || cb > 0) && (
+          <div className="flex items-center gap-2 text-xs font-semibold text-green-700">
+            <ArrowUpRight className="h-3 w-3" />
+            Creditado:
+            {s.points_awarded > 0 && <span>+{s.points_awarded} pts</span>}
+            {cb > 0 && <span>+{formatBRL(cb)} cashback</span>}
+          </div>
+        )}
+        {(s.status === "rejeitado" || s.status === "estornado") && s.rejection_reason && (
+          <div className="text-xs text-destructive">
+            <strong>Motivo:</strong> {s.rejection_reason}
+          </div>
+        )}
+        {s.client_note && (
+          <div className="text-[11px] text-muted-foreground italic">"{s.client_note}"</div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === "pendente")
+    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-[11px]"><Clock className="h-3 w-3" /> Em análise</span>;
+  if (status === "aprovado")
+    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-[11px]"><Check className="h-3 w-3" /> Aprovado</span>;
+  if (status === "rejeitado")
+    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px]"><X className="h-3 w-3" /> Rejeitado</span>;
+  if (status === "estornado")
+    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px]"><X className="h-3 w-3" /> Estornado</span>;
+  return null;
 }
