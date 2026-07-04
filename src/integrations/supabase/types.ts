@@ -279,6 +279,72 @@ export type Database = {
           },
         ]
       }
+      instagram_submissions: {
+        Row: {
+          client_note: string | null
+          client_user_id: string
+          created_at: string
+          id: string
+          points_awarded: number
+          post_url: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["instagram_submission_status"]
+          store_id: string
+          transaction_id: string | null
+          updated_at: string
+          verify_after: string | null
+        }
+        Insert: {
+          client_note?: string | null
+          client_user_id: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          post_url: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["instagram_submission_status"]
+          store_id: string
+          transaction_id?: string | null
+          updated_at?: string
+          verify_after?: string | null
+        }
+        Update: {
+          client_note?: string | null
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          post_url?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["instagram_submission_status"]
+          store_id?: string
+          transaction_id?: string | null
+          updated_at?: string
+          verify_after?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_submissions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_submissions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_logs: {
         Row: {
           created_at: string
@@ -652,6 +718,11 @@ export type Database = {
           evolution_url: string | null
           id: string
           indicacao_ativa: boolean
+          instagram_handle: string | null
+          instagram_instructions: string | null
+          instagram_min_days_live: number
+          instagram_points_per_post: number
+          instagram_program_active: boolean
           logo_url: string | null
           modalidade: Database["public"]["Enums"]["modalidade"]
           mrr_amount: number
@@ -700,6 +771,11 @@ export type Database = {
           evolution_url?: string | null
           id?: string
           indicacao_ativa?: boolean
+          instagram_handle?: string | null
+          instagram_instructions?: string | null
+          instagram_min_days_live?: number
+          instagram_points_per_post?: number
+          instagram_program_active?: boolean
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
           mrr_amount?: number
@@ -748,6 +824,11 @@ export type Database = {
           evolution_url?: string | null
           id?: string
           indicacao_ativa?: boolean
+          instagram_handle?: string | null
+          instagram_instructions?: string | null
+          instagram_min_days_live?: number
+          instagram_points_per_post?: number
+          instagram_program_active?: boolean
           logo_url?: string | null
           modalidade?: Database["public"]["Enums"]["modalidade"]
           mrr_amount?: number
@@ -888,6 +969,11 @@ export type Database = {
     }
     Enums: {
       app_role: "lojista" | "cliente" | "admin"
+      instagram_submission_status:
+        | "pendente"
+        | "aprovado"
+        | "rejeitado"
+        | "estornado"
       modalidade: "pontos" | "cashback" | "ambos"
       nivel_cliente: "bronze" | "prata" | "ouro"
       plan_tier: "starter" | "pro" | "premium"
@@ -905,6 +991,7 @@ export type Database = {
         | "vale_presente"
         | "nota_fiscal"
         | "ajuste"
+        | "instagram_bonus"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1033,6 +1120,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["lojista", "cliente", "admin"],
+      instagram_submission_status: [
+        "pendente",
+        "aprovado",
+        "rejeitado",
+        "estornado",
+      ],
       modalidade: ["pontos", "cashback", "ambos"],
       nivel_cliente: ["bronze", "prata", "ouro"],
       plan_tier: ["starter", "pro", "premium"],
@@ -1051,6 +1144,7 @@ export const Constants = {
         "vale_presente",
         "nota_fiscal",
         "ajuste",
+        "instagram_bonus",
       ],
     },
   },
