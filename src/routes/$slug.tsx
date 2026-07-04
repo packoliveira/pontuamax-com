@@ -27,7 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles, Instagram, Check, X, Clock } from "lucide-react";
+import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles, Instagram, Check, X, Clock, Package } from "lucide-react";
 import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
 
 const REF_KEY = "qsf_referrer_phone";
@@ -539,6 +539,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
               return (
                 <Card key={p.id}>
                   <CardContent className="p-3 space-y-2">
+                    <div className="aspect-video w-full overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                      {p.foto_url ? (
+                        <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" />
+                      ) : (
+                        <Package className="h-8 w-8 text-muted-foreground/40" />
+                      )}
+                    </div>
                     <div className="font-medium text-sm">{p.nome}</div>
                     <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
@@ -585,7 +592,14 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
         <DialogContent className="text-center">
           <DialogHeader><DialogTitle className="flex items-center justify-center gap-2"><Ticket className="h-5 w-5" /> Seu voucher</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">Apresente este código no caixa:</p>
-          <div className="text-2xl font-mono font-bold tracking-widest py-4 rounded-lg" style={{ backgroundColor: "var(--brand-primary)", color: "white" }}>{voucher}</div>
+          <div
+            key={voucher ?? "empty"}
+            className="text-3xl sm:text-4xl font-mono font-black tracking-widest py-6 rounded-lg break-all"
+            style={{ backgroundColor: "var(--brand-primary)", color: "white" }}
+          >
+            {voucher}
+          </div>
+          <p className="text-xs text-muted-foreground">Válido por alguns dias — confira em "Meus resgates".</p>
         </DialogContent>
       </Dialog>
 

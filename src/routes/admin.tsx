@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Shield, LogOut, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePanelTheme } from "@/hooks/use-panel-theme";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -94,7 +95,9 @@ function AdminLayout() {
               ADMIN
             </span>
           </Link>
-          <Button
+          <div className="flex items-center gap-1">
+            <ThemeToggle className="text-slate-100 hover:bg-slate-800" />
+            <Button
             size="sm"
             variant="ghost"
             className="text-slate-100 hover:bg-slate-800"
@@ -105,6 +108,7 @@ function AdminLayout() {
           >
             <LogOut className="h-4 w-4" /> Sair
           </Button>
+          </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto p-4 md:p-6">

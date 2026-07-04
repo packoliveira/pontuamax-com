@@ -931,7 +931,7 @@ export const confirmarResgate = createServerFn({ method: "POST" })
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
     if (!tx.data || ownerId !== context.userId) throw new Error("Não autorizado.");
-    if (tx.data.status === "entregue") throw new Error("Voucher já foi entregue.");
+    if (tx.data.status === "entregue") throw new Error("Este voucher já foi utilizado anteriormente e não pode ser entregue novamente.");
     if (tx.data.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
@@ -958,7 +958,7 @@ export const validarVoucher = createServerFn({ method: "POST" })
       .eq("voucher_code", code)
       .maybeSingle();
     if (!tx.data) throw new Error("Voucher não encontrado nesta loja.");
-    if (tx.data.status === "entregue") throw new Error("Voucher já foi entregue.");
+    if (tx.data.status === "entregue") throw new Error("Este voucher já foi utilizado anteriormente. Cada voucher só pode ser entregue uma vez.");
     if (tx.data.status === "expirado") throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
@@ -990,6 +990,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
         descricao: z.string().max(500).optional().nullable(),
         custo_pontos: z.number().int().min(0),
         ativo: z.boolean().default(true),
+        foto_url: z.string().max(1000).optional().nullable(),
       })
       .parse(input),
   )
@@ -999,7 +1000,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
     if (data.id) {
       const { error } = await context.supabase
         .from("products")
-        .update({ nome: data.nome, descricao: data.descricao, custo_pontos: data.custo_pontos, ativo: data.ativo })
+        .update({ nome: data.nome, descricao: data.descricao, custo_pontos: data.custo_pontos, ativo: data.ativo, foto_url: data.foto_url ?? null })
         .eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
@@ -1009,6 +1010,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
         descricao: data.descricao,
         custo_pontos: data.custo_pontos,
         ativo: data.ativo,
+        foto_url: data.foto_url ?? null,
       });
       if (error) throw new Error(error.message);
     }

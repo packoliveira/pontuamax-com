@@ -472,6 +472,7 @@ export type Database = {
           created_at: string
           custo_pontos: number
           descricao: string | null
+          foto_url: string | null
           id: string
           nome: string
           store_id: string
@@ -481,6 +482,7 @@ export type Database = {
           created_at?: string
           custo_pontos: number
           descricao?: string | null
+          foto_url?: string | null
           id?: string
           nome: string
           store_id: string
@@ -490,6 +492,7 @@ export type Database = {
           created_at?: string
           custo_pontos?: number
           descricao?: string | null
+          foto_url?: string | null
           id?: string
           nome?: string
           store_id?: string
