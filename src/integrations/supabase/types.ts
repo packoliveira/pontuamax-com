@@ -990,6 +990,70 @@ export type Database = {
         }
         Returns: boolean
       }
+      resgatar_cashback_atomico: {
+        Args: {
+          p_expires_at: string
+          p_store_id: string
+          p_user_id: string
+          p_valor: number
+          p_voucher_code: string
+        }
+        Returns: {
+          cashback_delta: number
+          client_user_id: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          id_venda_externa: string | null
+          origem: string | null
+          pontos_delta: number
+          product_id: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          store_id: string
+          tipo: Database["public"]["Enums"]["transaction_tipo"]
+          valor: number
+          voucher_code: string | null
+          voucher_expires_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      resgatar_produto_atomico: {
+        Args: {
+          p_expires_at: string
+          p_product_id: string
+          p_store_id: string
+          p_user_id: string
+          p_voucher_code: string
+        }
+        Returns: {
+          cashback_delta: number
+          client_user_id: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          id_venda_externa: string | null
+          origem: string | null
+          pontos_delta: number
+          product_id: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          store_id: string
+          tipo: Database["public"]["Enums"]["transaction_tipo"]
+          valor: number
+          voucher_code: string | null
+          voucher_expires_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "lojista" | "cliente" | "admin"

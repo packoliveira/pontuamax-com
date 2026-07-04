@@ -842,43 +842,19 @@ export const resgatarProduto = createServerFn({ method: "POST" })
       .eq("id", data.store_id)
       .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
-    const link = await supabaseAdmin
-      .from("store_clients")
-      .select("*")
-      .eq("store_id", data.store_id)
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!link.data) throw new Error("Cliente não vinculado à loja.");
-    const prd = await supabaseAdmin
-      .from("products")
-      .select("id, store_id, nome, custo_pontos, ativo")
-      .eq("id", data.product_id)
-      .maybeSingle();
-    if (!prd.data || prd.data.store_id !== data.store_id || !prd.data.ativo) throw new Error("Produto indisponível.");
-    if (link.data.pontos < prd.data.custo_pontos) {
-      throw new Error(
-        `Pontos insuficientes para trocar por "${prd.data.nome}". Necessário: ${prd.data.custo_pontos} pts. Saldo atual: ${link.data.pontos} pts. Faltam ${prd.data.custo_pontos - link.data.pontos} pts.`,
-      );
-    }
     const voucher = gerarVoucher();
     const validade = Math.max(1, Number(loja.data.voucher_validade_dias) || 7);
     const expiresAt = new Date(Date.now() + validade * 24 * 60 * 60 * 1000).toISOString();
-    const novoPontos = link.data.pontos - prd.data.custo_pontos;
-    const { error: txErr } = await supabaseAdmin.from("transactions").insert({
-      store_id: data.store_id,
-      client_user_id: context.userId,
-      tipo: "resgate_produto",
-      pontos_delta: -prd.data.custo_pontos,
-      product_id: prd.data.id,
-      voucher_code: voucher,
-      status: "pendente",
-      voucher_expires_at: expiresAt,
+    // Trava transacional: SELECT ... FOR UPDATE dentro da RPC serializa
+    // resgates concorrentes e impede uso duplo do mesmo saldo de pontos.
+    const { error: rpcErr } = await supabaseAdmin.rpc("resgatar_produto_atomico", {
+      p_store_id: data.store_id,
+      p_user_id: context.userId,
+      p_product_id: data.product_id,
+      p_voucher_code: voucher,
+      p_expires_at: expiresAt,
     });
-    if (txErr) throw new Error(txErr.message);
-    await supabaseAdmin
-      .from("store_clients")
-      .update({ pontos: novoPontos, nivel: calcularNivel(novoPontos) })
-      .eq("id", link.data.id);
+    if (rpcErr) throw new Error(rpcErr.message);
     return { voucher, expires_at: expiresAt };
   });
 
@@ -896,35 +872,19 @@ export const resgatarCashback = createServerFn({ method: "POST" })
       .eq("id", data.store_id)
       .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
-    const link = await supabaseAdmin
-      .from("store_clients")
-      .select("*")
-      .eq("store_id", data.store_id)
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!link.data) throw new Error("Cliente não vinculado à loja.");
-    if (data.valor <= 0) throw new Error("Valor de cashback inválido.");
-    const saldoCb = Number(link.data.cashback_saldo);
-    if (data.valor > saldoCb) {
-      throw new Error(
-        `Cashback insuficiente. Solicitado: R$ ${data.valor.toFixed(2)}. Saldo disponível: R$ ${saldoCb.toFixed(2)}.`,
-      );
-    }
     const voucher = gerarVoucher();
     const validade = Math.max(1, Number(loja.data.voucher_validade_dias) || 7);
     const expiresAt = new Date(Date.now() + validade * 24 * 60 * 60 * 1000).toISOString();
-    const novoSaldo = +(Number(link.data.cashback_saldo) - data.valor).toFixed(2);
-    const { error: txErr } = await supabaseAdmin.from("transactions").insert({
-      store_id: data.store_id,
-      client_user_id: context.userId,
-      tipo: "resgate_cashback",
-      cashback_delta: -data.valor,
-      voucher_code: voucher,
-      status: "pendente",
-      voucher_expires_at: expiresAt,
+    // Trava transacional: SELECT ... FOR UPDATE dentro da RPC serializa
+    // resgates concorrentes e impede uso duplo do mesmo saldo de cashback.
+    const { error: rpcErr } = await supabaseAdmin.rpc("resgatar_cashback_atomico", {
+      p_store_id: data.store_id,
+      p_user_id: context.userId,
+      p_valor: data.valor,
+      p_voucher_code: voucher,
+      p_expires_at: expiresAt,
     });
-    if (txErr) throw new Error(txErr.message);
-    await supabaseAdmin.from("store_clients").update({ cashback_saldo: novoSaldo }).eq("id", link.data.id);
+    if (rpcErr) throw new Error(rpcErr.message);
     return { voucher, expires_at: expiresAt };
   });
 
@@ -936,7 +896,7 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, store_id, status, voucher_expires_at, delivered_at, stores:store_id(owner_id)")
+      .select("id, store_id, status, tipo, voucher_code, voucher_expires_at, delivered_at, pontos_delta, cashback_delta, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone), stores:store_id(owner_id, nome_fantasia)")
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
@@ -948,12 +908,30 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     }
+    const deliveredAt = new Date().toISOString();
     const { error } = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: new Date().toISOString() })
+      .update({ status: "entregue", delivered_at: deliveredAt })
       .eq("id", data.transaction_id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    const store = tx.data.stores as unknown as { nome_fantasia: string | null } | null;
+    const profile = tx.data.profiles as { full_name: string | null; phone: string | null } | null;
+    const product = tx.data.products as { nome: string | null } | null;
+    return {
+      ok: true,
+      comprovante: {
+        transaction_id: tx.data.id,
+        voucher_code: tx.data.voucher_code,
+        tipo: tx.data.tipo,
+        delivered_at: deliveredAt,
+        loja: store?.nome_fantasia ?? null,
+        cliente: profile?.full_name ?? "Cliente",
+        cliente_telefone: profile?.phone ?? null,
+        produto: product?.nome ?? null,
+        pontos_usados: Math.abs(Number(tx.data.pontos_delta ?? 0)),
+        cashback_aplicado: Math.abs(Number(tx.data.cashback_delta ?? 0)),
+      },
+    };
   });
 
 // -------- Lojista: validar voucher pelo código --------
