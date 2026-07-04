@@ -664,6 +664,9 @@ function describeTx(t: TxRow) {
     case "vale_presente": return "Vale-presente";
     case "nota_fiscal": return "Nota fiscal aprovada";
     case "indicacao": return "Bônus de indicação";
+    case "expiracao": return t.origem?.startsWith("expiracao_decaimento")
+      ? "Decaimento periódico de pontos"
+      : "Pontos expirados";
     case "ajuste": return ajusteMotivo
       ? `Ajuste da loja: ${ajusteMotivo}`
       : (t.pontos_delta >= 0 ? "Ajuste da loja (crédito)" : "Ajuste da loja (estorno)");
