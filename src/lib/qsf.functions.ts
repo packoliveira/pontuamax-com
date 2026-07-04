@@ -926,17 +926,22 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, store_id, status, voucher_expires_at, stores:store_id(owner_id)")
+      .select("id, store_id, status, voucher_expires_at, delivered_at, stores:store_id(owner_id)")
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
     if (!tx.data || ownerId !== context.userId) throw new Error("Não autorizado.");
-    if (tx.data.status === "entregue") throw new Error("Este voucher já foi utilizado anteriormente e não pode ser entregue novamente.");
+    if (tx.data.status === "entregue") {
+      throw new Error(formatVoucherJaUsado(tx.data.delivered_at));
+    }
     if (tx.data.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     }
-    const { error } = await supabaseAdmin.from("transactions").update({ status: "entregue" }).eq("id", data.transaction_id);
+    const { error } = await supabaseAdmin
+      .from("transactions")
+      .update({ status: "entregue", delivered_at: new Date().toISOString() })
+      .eq("id", data.transaction_id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -953,18 +958,22 @@ export const validarVoucher = createServerFn({ method: "POST" })
     const code = data.voucher_code.trim().toUpperCase();
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, tipo, status, valor, pontos_delta, cashback_delta, voucher_code, voucher_expires_at, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone)")
+      .select("id, tipo, status, valor, pontos_delta, cashback_delta, voucher_code, voucher_expires_at, delivered_at, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone)")
       .eq("store_id", store.data.id)
       .eq("voucher_code", code)
       .maybeSingle();
     if (!tx.data) throw new Error("Voucher não encontrado nesta loja.");
-    if (tx.data.status === "entregue") throw new Error("Este voucher já foi utilizado anteriormente. Cada voucher só pode ser entregue uma vez.");
+    if (tx.data.status === "entregue") {
+      throw new Error(formatVoucherJaUsado(tx.data.delivered_at));
+    }
     if (tx.data.status === "expirado") throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
     }
     const { error } = await supabaseAdmin
-      .from("transactions").update({ status: "entregue" }).eq("id", tx.data.id);
+      .from("transactions")
+      .update({ status: "entregue", delivered_at: new Date().toISOString() })
+      .eq("id", tx.data.id);
     if (error) throw new Error(error.message);
     return {
       ok: true,
@@ -976,6 +985,18 @@ export const validarVoucher = createServerFn({ method: "POST" })
       cashback: Math.abs(Number(tx.data.cashback_delta || 0)),
     };
   });
+
+function formatVoucherJaUsado(delivered_at: string | null | undefined): string {
+  if (!delivered_at) {
+    return "Este voucher já foi utilizado anteriormente. Cada voucher só pode ser entregue uma vez.";
+  }
+  const d = new Date(delivered_at);
+  const fmt = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  }).format(d);
+  return `Este voucher já foi utilizado em ${fmt}. Cada voucher só pode ser entregue uma vez.`;
+}
 
 
 // -------- Produtos CRUD (lojista) --------
