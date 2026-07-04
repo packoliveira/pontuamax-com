@@ -539,6 +539,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
               return (
                 <Card key={p.id}>
                   <CardContent className="p-3 space-y-2">
+                    <div className="aspect-video w-full overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                      {p.foto_url ? (
+                        <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" />
+                      ) : (
+                        <Package className="h-8 w-8 text-muted-foreground/40" />
+                      )}
+                    </div>
                     <div className="font-medium text-sm">{p.nome}</div>
                     <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
