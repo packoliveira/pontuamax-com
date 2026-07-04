@@ -896,7 +896,7 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, store_id, status, voucher_expires_at, delivered_at, stores:store_id(owner_id)")
+      .select("id, store_id, status, tipo, voucher_code, voucher_expires_at, delivered_at, pontos_delta, cashback_delta, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone), stores:store_id(owner_id, nome_fantasia)")
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
@@ -908,12 +908,30 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     }
+    const deliveredAt = new Date().toISOString();
     const { error } = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: new Date().toISOString() })
+      .update({ status: "entregue", delivered_at: deliveredAt })
       .eq("id", data.transaction_id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+    const store = tx.data.stores as unknown as { nome_fantasia: string | null } | null;
+    const profile = tx.data.profiles as { full_name: string | null; phone: string | null } | null;
+    const product = tx.data.products as { nome: string | null } | null;
+    return {
+      ok: true,
+      comprovante: {
+        transaction_id: tx.data.id,
+        voucher_code: tx.data.voucher_code,
+        tipo: tx.data.tipo,
+        delivered_at: deliveredAt,
+        loja: store?.nome_fantasia ?? null,
+        cliente: profile?.full_name ?? "Cliente",
+        cliente_telefone: profile?.phone ?? null,
+        produto: product?.nome ?? null,
+        pontos_usados: Math.abs(Number(tx.data.pontos_delta ?? 0)),
+        cashback_aplicado: Math.abs(Number(tx.data.cashback_delta ?? 0)),
+      },
+    };
   });
 
 // -------- Lojista: validar voucher pelo código --------
@@ -942,7 +960,7 @@ export const validarVoucher = createServerFn({ method: "POST" })
     }
     const { error } = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: new Date().toISOString() })
+      .update({ status: "entregue", delivered_at: (function(){return new Date().toISOString();})() })
       .eq("id", tx.data.id);
     if (error) throw new Error(error.message);
     return {
