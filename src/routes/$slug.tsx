@@ -28,6 +28,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles, Instagram, Check, X, Clock, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Receipt, CheckCircle2, AlertTriangle, Printer } from "lucide-react";
 import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
 
 const REF_KEY = "qsf_referrer_phone";
