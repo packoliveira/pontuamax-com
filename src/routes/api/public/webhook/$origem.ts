@@ -17,7 +17,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, x-qsf-secret, x-qsf-store",
 };
 const json = (body: unknown, status = 200) =>
@@ -92,6 +92,12 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         if (!secret || secret !== loja.webhook_secret) {
           return logAndRespond("erro", "segredo inválido", 401);
+        }
+
+        // Some ERP panels validate the webhook by sending a POST without a sale body.
+        // Treat an authenticated empty POST as a successful connectivity test.
+        if (!raw || Object.keys(payload).length === 0) {
+          return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
         const idVenda = String(payload.id_venda_externa ?? "").trim();
