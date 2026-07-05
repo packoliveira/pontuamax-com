@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, PackageX, ImageIcon, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, PackageX, ImageIcon, Upload, X, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,10 +43,14 @@ function ProdutosPage() {
 
   if (loja.modalidade === "cashback") {
     return (
-      <div className="max-w-lg mx-auto text-center py-16 space-y-3">
-        <PackageX className="h-10 w-10 text-muted-foreground mx-auto" />
-        <h2 className="text-lg font-semibold">Produtos indisponíveis</h2>
-        <p className="text-sm text-muted-foreground">Sua loja está no modo cashback. Ative pontos em Configurações para cadastrar produtos.</p>
+      <div className="mx-auto max-w-lg rounded-2xl border border-[#E5E7EB] bg-white p-10 text-center shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#F1F5F9] text-[#64748B]">
+          <PackageX className="h-5 w-5" />
+        </div>
+        <h2 className="mt-4 text-lg font-semibold text-[#0F172A]">Produtos indisponíveis</h2>
+        <p className="mt-2 text-sm text-[#64748B]">
+          Sua loja está no modo cashback. Ative pontos em Configurações para cadastrar produtos.
+        </p>
       </div>
     );
   }
@@ -55,42 +59,99 @@ function ProdutosPage() {
   const openEdit = (p: Produto) => { setEditing(p); setOpen(true); };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Produtos para resgate</h1>
-          <p className="text-sm text-muted-foreground">Produtos que seus clientes trocam por pontos</p>
+    <div className="space-y-8">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Catálogo</div>
+          <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Produtos para resgate</h1>
+          <p className="mt-1 text-sm text-[#64748B]">Produtos que seus clientes trocam por pontos.</p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4" /> Novo produto</Button>
+        <Button onClick={openNew} size="lg" className="shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]">
+          <Plus className="h-4 w-4" /> Novo produto
+        </Button>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {produtos.map((p) => (
-          <Card key={p.id}>
-            <CardContent className="p-4 space-y-2">
-              <div className="aspect-video w-full overflow-hidden rounded-md bg-muted flex items-center justify-center">
+
+      {produtos.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
+            <Package className="h-5 w-5" />
+          </div>
+          <h3 className="mt-4 text-base font-semibold text-[#0F172A]">Nenhum produto cadastrado</h3>
+          <p className="mt-1 text-sm text-[#64748B]">
+            Adicione seu primeiro produto para que os clientes possam resgatar com pontos.
+          </p>
+          <Button onClick={openNew} className="mt-5 rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8]">
+            <Plus className="h-4 w-4" /> Criar produto
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {produtos.map((p) => (
+            <Card
+              key={p.id}
+              className="group overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="relative aspect-video w-full overflow-hidden bg-[#F1F5F9]">
                 {p.foto_url ? (
-                  <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" />
+                  <img
+                    src={p.foto_url}
+                    alt={p.nome}
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                  />
                 ) : (
-                  <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                  <div className="flex h-full w-full items-center justify-center text-[#94A3B8]">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
                 )}
+                <span
+                  className={
+                    "absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm " +
+                    (p.ativo
+                      ? "bg-[#22C55E]/15 text-[#15803D] ring-1 ring-inset ring-[#22C55E]/30"
+                      : "bg-[#F1F5F9] text-[#64748B] ring-1 ring-inset ring-[#E5E7EB]")
+                  }
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${p.ativo ? "bg-[#22C55E]" : "bg-[#94A3B8]"}`} />
+                  {p.ativo ? "Ativo" : "Inativo"}
+                </span>
               </div>
-              <div>
-                <div className="font-semibold">{p.nome}</div>
-                <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-bold text-violet-600">{p.custo_pontos} pts</span>
-                <span className={`text-xs ${p.ativo ? "text-green-700" : "text-muted-foreground"}`}>{p.ativo ? "Ativo" : "Inativo"}</span>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}><Pencil className="h-3 w-3" /> Editar</Button>
-                <Button size="sm" variant="outline" onClick={() => remover.mutate(p.id, { onSuccess: () => toast.success("Removido") })}><Trash2 className="h-3 w-3" /></Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        {produtos.length === 0 && <p className="text-sm text-muted-foreground col-span-full">Nenhum produto cadastrado.</p>}
-      </div>
+              <CardContent className="space-y-3 p-5">
+                <div>
+                  <div className="truncate text-base font-semibold text-[#0F172A]">{p.nome}</div>
+                  <div className="mt-1 line-clamp-2 min-h-[2rem] text-xs text-[#64748B]">
+                    {p.descricao || "Sem descrição"}
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] bg-clip-text text-lg font-bold text-transparent">
+                    {p.custo_pontos.toLocaleString("pt-BR")}
+                  </span>
+                  <span className="text-xs font-medium text-[#64748B]">pts</span>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9]"
+                    onClick={() => openEdit(p)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl border-[#E5E7EB] text-[#EF4444] hover:border-[#EF4444]/40 hover:bg-[#EF4444]/5"
+                    onClick={() => remover.mutate(p.id, { onSuccess: () => toast.success("Removido") })}
+                    aria-label="Remover produto"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <ProdutoDialog
         open={open}
