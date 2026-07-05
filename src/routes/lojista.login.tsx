@@ -8,7 +8,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { traduzirErroAuth, isCredenciaisInvalidas } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Store, AlertCircle } from "lucide-react";
-import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
+import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 import { toast } from "sonner";
 import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
@@ -145,8 +145,8 @@ function Login() {
         </svg>
 
         <div className="relative z-10 flex items-center gap-3">
-          <PontoaMaxMark size={36} />
-          <PontoaMaxWordmark variant="dark" size={22} />
+          <PontuaMaxMark size={36} />
+          <PontuaMaxWordmark variant="dark" size={22} />
         </div>
 
         <div className="relative z-10 max-w-md space-y-4">
@@ -178,11 +178,11 @@ function Login() {
         <Card className="w-full max-w-md rounded-2xl border-[#E5E7EB] shadow-sm">
           <CardHeader className="text-center">
             <div className="mx-auto lg:hidden flex flex-col items-center gap-2">
-              <PontoaMaxMark size={44} />
-              <PontoaMaxWordmark variant="light" size={18} />
+              <PontuaMaxMark size={44} />
+              <PontuaMaxWordmark variant="light" size={18} />
             </div>
             <CardTitle className="mt-2 text-2xl">Bem-vindo de volta</CardTitle>
-            <CardDescription>Entre no painel do lojista PontoaMax</CardDescription>
+            <CardDescription>Entre no painel do lojista PontuaMax</CardDescription>
           </CardHeader>
         <CardContent>
           {sessionEmail && (

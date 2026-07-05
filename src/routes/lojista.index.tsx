@@ -67,7 +67,7 @@ function Dashboard() {
           <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Dashboard</div>
           <h1 className="mt-1 truncate text-2xl font-bold text-[#0F172A] md:text-3xl">Olá, {loja.nome_fantasia}</h1>
           <p className="mt-1 truncate text-sm text-[#64748B]">
-            Sua página: <span className="font-mono text-[#0F172A]">pontoamax.app/{loja.slug}</span>
+            Sua página: <span className="font-mono text-[#0F172A]">pontuamax.com.br/{loja.slug}</span>
           </p>
         </div>
         <Link to="/lojista/lancar-venda">

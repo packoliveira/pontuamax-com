@@ -14,7 +14,7 @@ export const Route = createFileRoute("/redefinir-senha")({
   component: Page,
   head: () => ({
     meta: [
-      { title: "Redefinir senha · PontoaMax" },
+      { title: "Redefinir senha · PontuaMax" },
       { name: "description", content: "Defina uma nova senha para sua conta." },
     ],
   }),

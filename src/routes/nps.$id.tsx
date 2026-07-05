@@ -11,7 +11,7 @@ export const Route = createFileRoute("/nps/$id")({
   component: NpsPage,
   head: () => ({
     meta: [
-      { title: "Sua opinião · PontoaMax" },
+      { title: "Sua opinião · PontuaMax" },
       { name: "description", content: "Avalie sua experiência de compra." },
     ],
   }),

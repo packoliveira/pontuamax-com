@@ -28,14 +28,14 @@ import {
   Flame,
   ArrowUpRight,
 } from "lucide-react";
-import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
+import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PontoaMax — Fidelize seus clientes com pontos, cashback e CRM" },
+      { title: "PontuaMax — Fidelize seus clientes com pontos, cashback e CRM" },
       { name: "description", content: "Plataforma SaaS premium de fidelização, cashback, CRM e relacionamento com clientes, com página personalizada por loja." },
-      { property: "og:title", content: "PontoaMax" },
+      { property: "og:title", content: "PontuaMax" },
       { property: "og:description", content: "Fidelização, cashback e CRM em uma plataforma moderna." },
     ],
   }),
@@ -47,8 +47,8 @@ function Index() {
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <PontoaMaxMark size={36} />
-          <PontoaMaxWordmark variant="light" size={18} />
+          <PontuaMaxMark size={36} />
+          <PontuaMaxWordmark variant="light" size={18} />
         </div>
         <Link to="/lojista/login">
           <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">Entrar como lojista</Button>
@@ -156,7 +156,7 @@ function Index() {
       </section>
 
       <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-xs text-[#64748B]">
-        © {new Date().getFullYear()} PontoaMax. Fidelização, cashback e CRM em uma plataforma só.
+        © {new Date().getFullYear()} PontuaMax. Fidelização, cashback e CRM em uma plataforma só.
       </footer>
     </div>
   );
@@ -671,7 +671,7 @@ function DashboardMockup() {
           <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
         </div>
         <div className="mx-auto rounded-md bg-white px-3 py-1 text-[10px] text-[#0F172A]/60">
-          pontoamax.app/lojista
+          pontuamax.com.br/lojista
         </div>
       </div>
 
@@ -679,8 +679,8 @@ function DashboardMockup() {
         {/* sidebar */}
         <aside className="hidden w-52 shrink-0 border-r border-slate-100 bg-white p-3 md:block">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <PontoaMaxMark size={22} />
-            <PontoaMaxWordmark variant="light" size={14} />
+            <PontuaMaxMark size={22} />
+            <PontuaMaxWordmark variant="light" size={14} />
           </div>
           <nav className="mt-3 space-y-1 text-xs">
             <div className="flex items-center gap-2 rounded-md bg-[#0F172A] px-2.5 py-2 font-medium text-white">
@@ -699,7 +699,7 @@ function DashboardMockup() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-bold text-[#0F172A]">Olá, Loja Exemplo</h3>
-              <div className="text-xs text-[#64748B]">Sua página: <span className="font-mono">pontoamax.app/loja-exemplo</span></div>
+              <div className="text-xs text-[#64748B]">Sua página: <span className="font-mono">pontuamax.com.br/loja-exemplo</span></div>
             </div>
             <div className="rounded-md bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-white">
               Lançar venda →
