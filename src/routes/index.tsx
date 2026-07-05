@@ -10,6 +10,7 @@ import {
   Users,
   ArrowRight,
   Trophy,
+  Check,
 } from "lucide-react";
 import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
 
@@ -39,24 +40,27 @@ function Index() {
       </header>
 
       {/* HERO */}
-      <section className="mx-auto max-w-6xl px-6 py-12 md:py-20">
-        <div className="grid items-center gap-12 md:grid-cols-2">
+      <section className="mx-auto flex min-h-[calc(100vh-96px)] max-w-6xl items-center px-6 py-16 md:py-28">
+        <div className="grid w-full items-center gap-16 md:grid-cols-2">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-xs font-medium text-[#0F172A] shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
-              Fidelização • Cashback • CRM
+              Fidelização • Cashback • Campanhas
             </div>
             <h1 className="mt-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Fidelize e faça<br />
-              <span style={{ color: "#2563EB" }}>seu negócio crescer</span>
+              Fidelize clientes e faça{" "}
+              <span className="bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] bg-clip-text text-transparent">
+                seu negócio crescer
+              </span>
+              .
             </h1>
             <p className="mt-6 text-lg text-[#64748B] md:text-xl">
-              Plataforma SaaS premium de pontos, cashback, CRM e campanhas — com uma página personalizada por loja.
+              Programa de fidelidade com pontos, cashback e campanhas para aumentar a recorrência dos seus clientes e vender mais todos os meses.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
               <Link to="/lojista/onboarding">
                 <Button size="lg" className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto">
-                  <Store className="h-4 w-4" /> Criar minha loja
+                  <Store className="h-4 w-4" /> Criar minha loja gratuitamente
                 </Button>
               </Link>
               <Link to="/lojista/login">
@@ -65,17 +69,30 @@ function Index() {
                   variant="outline"
                   className="w-full border-[#2563EB]/30 text-[#2563EB] hover:bg-[#2563EB]/5 rounded-xl sm:w-auto"
                 >
-                  Já sou lojista, entrar
+                  Entrar como lojista
                 </Button>
               </Link>
             </div>
-            <p className="mt-4 text-xs text-[#64748B]">
-              Cada loja terá seu próprio link: pontoamax.app/<span className="font-mono">nomedaloja</span>
-            </p>
+            <ul className="mt-6 flex flex-col items-center gap-2 text-sm text-[#475569] sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 md:justify-start">
+              {[
+                "Implantação em poucos minutos",
+                "Link personalizado para sua empresa",
+                "Sem limite de clientes cadastrados",
+              ].map((item) => (
+                <li key={item} className="inline-flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#22C55E]/15 text-[#16A34A]">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="flex justify-center md:justify-end">
-            <PhoneMockup />
+            <div className="animate-[float_6s_ease-in-out_infinite]">
+              <PhoneMockup />
+            </div>
           </div>
         </div>
       </section>
