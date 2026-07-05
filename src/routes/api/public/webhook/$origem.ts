@@ -6,14 +6,68 @@ import { createFileRoute } from "@tanstack/react-router";
 //       The store is identified by header `x-qsf-store` (loja slug OR uuid)
 //       or by field `store_slug` / `store_id` in the JSON body.
 //
-// Expected JSON body (kept intentionally simple):
+// Aceita 2 formatos de payload:
+//
+// 1) Formato simples (nosso, para testes/integrações custom):
 // {
-//   "id_venda_externa": "12345",     // required, used for idempotency
-//   "valor": 199.90,                  // required, valor total da venda em BRL
-//   "cpf_cliente": "12345678900",     // required (11 dígitos) — login do cliente é sempre por CPF
-//   "telefone_cliente": "11999999999",// opcional
-//   "nome_cliente": "Fulano"          // opcional (usado ao criar cliente novo)
+//   "id_venda_externa": "12345",
+//   "valor": 199.90,
+//   "cpf_cliente": "12345678900",     // CPF OU telefone (pelo menos um)
+//   "telefone_cliente": "11999999999",
+//   "nome_cliente": "Fulano"
 // }
+//
+// 2) Formato nativo Olist ERP (pedido de venda):
+//    { "pedido": { "numero", "total", "cliente": { "nome", "documento", "fones":[{"fone"}] } } }
+//    ou com envelope { "data": { ... } } / { "resource": "...", "data": {...} }
+
+function extractOlistPayload(p: Record<string, unknown>): {
+  idVenda: string;
+  valor: number;
+  cpf: string;
+  telefone: string;
+  nome: string;
+} {
+  // Desembrulha envelopes comuns
+  const root =
+    (p.pedido as Record<string, unknown>) ??
+    (p.data as Record<string, unknown>) ??
+    (p.venda as Record<string, unknown>) ??
+    p;
+  const cliente = (root.cliente as Record<string, unknown>) ?? {};
+  const fones = (cliente.fones as Array<Record<string, unknown>>) ?? [];
+  const fonePrincipal =
+    (cliente.fone as string | undefined) ??
+    (cliente.celular as string | undefined) ??
+    (fones[0]?.fone as string | undefined) ??
+    (fones[0]?.numero as string | undefined) ??
+    "";
+
+  const idVenda = String(
+    p.id_venda_externa ??
+      root.numero ??
+      root.id ??
+      root.numero_pedido ??
+      root.codigo ??
+      "",
+  ).trim();
+
+  const valorRaw =
+    p.valor ?? root.total ?? root.valor_total ?? root.total_pedido ?? root.valor ?? 0;
+  const valor = typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
+
+  const cpfRaw = String(
+    p.cpf_cliente ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
+  );
+  const cpf = cpfRaw.replace(/\D/g, "");
+
+  const telRaw = String(p.telefone_cliente ?? fonePrincipal ?? "");
+  const telefone = telRaw.replace(/\D/g, "");
+
+  const nome = String(p.nome_cliente ?? cliente.nome ?? cliente.razao_social ?? "").trim() || "Cliente";
+
+  return { idVenda, valor, cpf, telefone, nome };
+}
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -100,16 +154,15 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        const idVenda = String(payload.id_venda_externa ?? "").trim();
-        const valor = Number(payload.valor);
-        const telefone = String(payload.telefone_cliente ?? "").replace(/\D/g, "");
-        const cpf = String(payload.cpf_cliente ?? "").replace(/\D/g, "");
-        const nome = String(payload.nome_cliente ?? "").trim() || "Cliente";
+        const { idVenda, valor, cpf, telefone, nome } = extractOlistPayload(payload);
 
-        if (!idVenda) return logAndRespond("erro", "id_venda_externa é obrigatório", 400);
+        if (!idVenda) return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
         if (!Number.isFinite(valor) || valor <= 0) return logAndRespond("erro", "valor inválido", 400);
-        if (!telefone || telefone.length < 8) return logAndRespond("erro", "telefone_cliente é obrigatório", 400);
-        if (cpf && cpf.length !== 11) return logAndRespond("erro", "cpf_cliente deve ter 11 dígitos quando informado", 400);
+        if (!cpf && !telefone) {
+          return logAndRespond("erro", "informe CPF ou telefone do cliente", 400);
+        }
+        if (cpf && cpf.length !== 11) return logAndRespond("erro", "CPF deve ter 11 dígitos", 400);
+        if (telefone && telefone.length < 8) return logAndRespond("erro", "telefone inválido", 400);
 
         // Idempotência: mesma venda já processada?
         const dup = await supabaseAdmin
@@ -120,23 +173,26 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           .maybeSingle();
         if (dup.data) return logAndRespond("sucesso", "venda já processada (idempotente)", 200, { duplicated: true });
 
-        // Busca ou cria cliente. Identidade única = TELEFONE.
+        // Busca cliente: 1º por CPF (mais confiável), depois por telefone.
         let clientProfile: { id: string } | null = null;
-        {
-          const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
-          if (p.data) clientProfile = p.data;
-        }
-        if (!clientProfile && cpf) {
+        if (cpf) {
           const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
           if (p.data) clientProfile = p.data;
         }
+        if (!clientProfile && telefone) {
+          const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
+          if (p.data) clientProfile = p.data;
+        }
         if (!clientProfile) {
-          const email = `${telefone}@cliente.qsfclub.local`;
+          // Email sintético: usa CPF se tiver, senão telefone
+          const localPart = cpf || telefone;
+          const email = `${localPart}@cliente.qsfclub.local`;
+          const password = telefone || cpf;
           const created = await supabaseAdmin.auth.admin.createUser({
             email,
-            password: telefone,
+              password,
             email_confirm: true,
-            user_metadata: { full_name: nome, phone: telefone, cpf: cpf || null },
+              user_metadata: { full_name: nome, phone: telefone || null, cpf: cpf || null },
           });
           if (created.error || !created.data.user) {
             return logAndRespond("erro", `falha criando cliente: ${created.error?.message ?? "?"}`, 500);
@@ -145,7 +201,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           await supabaseAdmin.from("profiles").upsert({
             id: clientProfile.id,
             full_name: nome,
-            phone: telefone,
+              phone: telefone || null,
             cpf: cpf || null,
           });
           await supabaseAdmin.from("user_roles").upsert(
