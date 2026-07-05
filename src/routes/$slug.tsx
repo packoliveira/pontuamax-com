@@ -1145,7 +1145,7 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
           <div className="text-sm font-medium truncate">{detalhe}</div>
         </div>
         {t.voucher_code && (
-          <div className="mt-1 inline-block rounded-md bg-primary/10 border border-primary/30 px-2 py-0.5 text-sm font-mono font-bold tracking-widest text-primary">
+          <div className="mt-1 inline-block select-all rounded-md bg-slate-900 text-white border border-slate-700 px-2 py-0.5 text-sm font-mono font-bold tracking-widest">
             {t.voucher_code}
           </div>
         )}
