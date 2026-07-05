@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { BrandPreview } from "@/components/brand-preview";
+import { Coins, Wallet, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
 import { Hourglass } from "lucide-react";
@@ -209,10 +209,18 @@ function ConfigPage() {
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">Prévia ao vivo</div>
-          <div className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden bg-white">
-            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
-            <BrandPreview nome={nome} logo={logo} cor1={cor1} cor2={cor2} modalidade={modalidade} />
-          </div>
+          <LivePreview
+            nome={nome}
+            logo={logo}
+            banner={banner}
+            bannerMobile={bannerMobile}
+            cor1={cor1}
+            cor2={cor2}
+            modalidade={modalidade}
+          />
+          <p className="mt-2 text-[11px] text-[#64748B]">
+            Atualiza em tempo real conforme você ajusta cores, banner e logo.
+          </p>
         </div>
       </div>
     </div>
@@ -388,6 +396,109 @@ function IntegracoesCard({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function LivePreview({
+  nome,
+  logo,
+  banner,
+  bannerMobile,
+  cor1,
+  cor2,
+  modalidade,
+}: {
+  nome: string;
+  logo: string;
+  banner: string;
+  bannerMobile: string;
+  cor1: string;
+  cor2: string;
+  modalidade: Modalidade;
+}) {
+  const inclP = modalidade !== "cashback";
+  const inclC = modalidade !== "pontos";
+  const bannerSrc = banner || bannerMobile;
+  const gradient = `linear-gradient(135deg, ${cor1}, ${cor2})`;
+  const glow = `0 12px 40px -12px ${cor1}80`;
+  return (
+    <div
+      className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
+      style={{
+        background: `radial-gradient(120% 80% at 0% 0%, ${cor1}22, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${cor2}22, transparent 60%), #0B1020`,
+      }}
+    >
+      <div className="h-1" style={{ background: gradient }} />
+      {bannerSrc ? (
+        <div className="w-full h-24 overflow-hidden">
+          <img src={bannerSrc} alt="" className="w-full h-full object-cover" />
+        </div>
+      ) : (
+        <div className="w-full h-24" style={{ background: gradient, opacity: 0.85 }} />
+      )}
+      <div className="p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          {logo ? (
+            <img
+              src={logo}
+              alt=""
+              className="h-10 w-10 rounded-xl object-contain bg-white/10 p-1 ring-1"
+              style={{ boxShadow: glow, borderColor: cor1 }}
+            />
+          ) : (
+            <div
+              className="h-10 w-10 rounded-xl flex items-center justify-center text-white font-bold"
+              style={{ background: gradient, boxShadow: glow }}
+            >
+              {(nome || "L").charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <div className="text-sm font-semibold text-white truncate">{nome || "Sua loja"}</div>
+            <div className="text-[10px] uppercase tracking-wider text-white/60">Programa fidelidade</div>
+          </div>
+        </div>
+
+        <div className="rounded-xl p-3 bg-white/5 border border-white/10 space-y-2">
+          <div className="flex items-center justify-between text-[11px] text-white/70">
+            <span>Nível Prata</span>
+            <span>240 / 300 pts</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: "80%",
+                background: gradient,
+                boxShadow: `0 0 12px ${cor1}99`,
+              }}
+            />
+          </div>
+        </div>
+
+        {inclP && (
+          <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: `${cor1}22` }}>
+            <Coins className="h-4 w-4" style={{ color: cor1 }} />
+            <div className="text-xs text-white"><strong>240</strong> pontos</div>
+          </div>
+        )}
+        {inclC && (
+          <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: `${cor2}22` }}>
+            <Wallet className="h-4 w-4" style={{ color: cor2 }} />
+            <div className="text-xs text-white"><strong>R$ 32,50</strong> de cashback</div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="w-full py-2 rounded-xl text-sm font-semibold text-white inline-flex items-center justify-center gap-1"
+          style={{ background: gradient, boxShadow: glow }}
+        >
+          <Sparkles className="h-4 w-4" />
+          Resgatar recompensa
+        </button>
+      </div>
+    </div>
   );
 }
 
