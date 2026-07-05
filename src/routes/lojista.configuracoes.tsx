@@ -23,6 +23,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandPreview } from "@/components/brand-preview";
+import { Coins, Wallet, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
 import { Hourglass } from "lucide-react";
@@ -209,10 +210,18 @@ function ConfigPage() {
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">Prévia ao vivo</div>
-          <div className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden bg-white">
-            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
-            <BrandPreview nome={nome} logo={logo} cor1={cor1} cor2={cor2} modalidade={modalidade} />
-          </div>
+          <LivePreview
+            nome={nome}
+            logo={logo}
+            banner={banner}
+            bannerMobile={bannerMobile}
+            cor1={cor1}
+            cor2={cor2}
+            modalidade={modalidade}
+          />
+          <p className="mt-2 text-[11px] text-[#64748B]">
+            Atualiza em tempo real conforme você ajusta cores, banner e logo.
+          </p>
         </div>
       </div>
     </div>
