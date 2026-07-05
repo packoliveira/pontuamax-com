@@ -276,7 +276,7 @@ function IntegracoesCard({
       <CardContent className="space-y-4">
         <p className="text-xs text-[#64748B]">
           Configure a URL abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
-          no PontoaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
+          no PontuaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
         </p>
 
         <div>

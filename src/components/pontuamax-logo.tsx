@@ -2,9 +2,9 @@ import { useId } from "react";
 
 type Props = { className?: string; size?: number };
 
-/** Ícone oficial PontoaMax: "P" moderno com degradê roxo → azul → verde-água.
+/** Ícone oficial PontuaMax: "P" moderno com degradê roxo → azul → verde-água.
  *  Minimalista, sem elementos figurativos. Funciona sozinho como favicon. */
-export function PontoaMaxMark({ className, size = 32 }: Props) {
+export function PontuaMaxMark({ className, size = 32 }: Props) {
   const id = useId().replace(/:/g, "");
   const gradId = `pm-grad-${id}`;
   return (
@@ -45,8 +45,8 @@ export function PontoaMaxMark({ className, size = 32 }: Props) {
   );
 }
 
-/** Wordmark: "Pontoa" adapta ao fundo (dark/light) e "Max" usa o degradê. */
-export function PontoaMaxWordmark({
+/** Wordmark: "Pontua" adapta ao fundo (dark/light) e "Max" usa o degradê. */
+export function PontuaMaxWordmark({
   className,
   variant = "light",
   size = 18,
@@ -57,13 +57,13 @@ export function PontoaMaxWordmark({
 }) {
   const id = useId().replace(/:/g, "");
   const gradId = `pm-word-${id}`;
-  const pontoaColor = variant === "dark" ? "#FFFFFF" : "#0F172A";
+  const pontuaColor = variant === "dark" ? "#FFFFFF" : "#0F172A";
   return (
     <span
       className={"inline-flex items-baseline font-semibold tracking-tight " + (className ?? "")}
       style={{ fontSize: size, lineHeight: 1 }}
     >
-      <span style={{ color: pontoaColor }}>Pontoa</span>
+      <span style={{ color: pontuaColor }}>Pontua</span>
       <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
@@ -89,7 +89,7 @@ export function PontoaMaxWordmark({
 }
 
 /** Logo completa (ícone + wordmark). */
-export function PontoaMaxLogo({
+export function PontuaMaxLogo({
   className,
   variant = "light",
   size = 20,
@@ -100,8 +100,8 @@ export function PontoaMaxLogo({
 }) {
   return (
     <span className={"inline-flex items-center gap-2 " + (className ?? "")}>
-      <PontoaMaxMark size={size + 8} />
-      <PontoaMaxWordmark variant={variant} size={size} />
+      <PontuaMaxMark size={size + 8} />
+      <PontuaMaxWordmark variant={variant} size={size} />
     </span>
   );
 }

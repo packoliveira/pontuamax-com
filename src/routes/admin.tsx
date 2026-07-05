@@ -127,7 +127,7 @@ function AccessDenied() {
         </div>
         <h1 className="text-2xl font-bold">Acesso negado</h1>
         <p className="text-sm text-muted-foreground">
-          Esta área é exclusiva do <strong>Administrador Master</strong> do PontoaMax.
+          Esta área é exclusiva do <strong>Administrador Master</strong> do PontuaMax.
           Sua conta não tem essa permissão.
         </p>
         <p className="text-xs text-muted-foreground">

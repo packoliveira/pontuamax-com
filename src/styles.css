@@ -64,7 +64,7 @@
 :root {
   --radius: 0.625rem;
   /* Tema claro do painel interno (Lojista + Admin).
-     Identidade visual PontoaMax: azul profundo (#2563EB) como primária,
+     Identidade visual PontuaMax: azul profundo (#2563EB) como primária,
      verde crescimento (#22C55E) como accent/sucesso e laranja (#F59E0B)
      reservado para avisos/promoções. Fonte: Inter. */
   --background: #F8FAFC;
@@ -103,7 +103,7 @@
 }
 
 .dark {
-  /* Tema escuro do painel PontoaMax. Páginas públicas da loja continuam claras
+  /* Tema escuro do painel PontuaMax. Páginas públicas da loja continuam claras
      e sobrescrevem as cores da marca dinamicamente por loja. */
   --background: #0B1220;
   --foreground: #F5F5F5;

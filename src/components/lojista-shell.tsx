@@ -1,7 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram } from "lucide-react";
-import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
+import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -113,9 +113,9 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
 
   const Brand = () => (
     <div className="flex items-center gap-2 px-4 py-4 border-b border-white/10">
-      <PontoaMaxMark size={32} />
+      <PontuaMaxMark size={32} />
       <div className="min-w-0">
-        <PontoaMaxWordmark variant="dark" size={15} />
+        <PontuaMaxWordmark variant="dark" size={15} />
         <div className="text-xs text-white/50 truncate max-w-[140px]">{loja?.nome_fantasia ?? "—"}</div>
       </div>
     </div>
@@ -137,8 +137,8 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 backdrop-blur px-3 py-2">
           <div className="flex items-center gap-2">
-            <PontoaMaxMark size={28} />
-            <PontoaMaxWordmark variant="light" size={16} />
+            <PontuaMaxMark size={28} />
+            <PontuaMaxWordmark variant="light" size={16} />
           </div>
           <div className="flex items-center gap-0.5">
             <ThemeToggle />

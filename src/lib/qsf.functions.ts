@@ -1363,7 +1363,7 @@ export const enviarWhatsappTeste = createServerFn({ method: "POST" })
     const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
     const numero = formatBrazilPhone(data.telefone);
     if (!numero) throw new Error("Telefone inválido.");
-    const texto = data.texto ?? `✅ Teste PontoaMax — ${loja.data.nome_fantasia}. Integração WhatsApp funcionando!`;
+    const texto = data.texto ?? `✅ Teste PontuaMax — ${loja.data.nome_fantasia}. Integração WhatsApp funcionando!`;
     const res = await sendWhatsappRaw({
       storeId: loja.data.id,
       url: loja.data.evolution_url,

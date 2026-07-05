@@ -285,8 +285,8 @@ function Onboarding() {
             <h2 className="text-xl font-bold">Sua loja está pronta!</h2>
             <p className="text-sm text-muted-foreground">Divulgue este link para seus clientes:</p>
             <div className="flex items-center gap-2 max-w-md mx-auto rounded-md border bg-muted p-2">
-              <code className="flex-1 text-sm text-left truncate">pontoamax.app/{slug}</code>
-              <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(`pontoamax.app/${slug}`); toast.success("Copiado!"); }}>
+              <code className="flex-1 text-sm text-left truncate">pontuamax.com.br/{slug}</code>
+              <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(`pontuamax.com.br/${slug}`); toast.success("Copiado!"); }}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
