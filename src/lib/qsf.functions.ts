@@ -268,6 +268,16 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (existing.data) {
+      // Se o cliente estava marcado como "cadastro pendente" (criado por
+      // venda antes do auto-cadastro), agora que ele autenticou o cadastro
+      // está completo — zera a flag para o badge sumir no painel do lojista.
+      if (existing.data.pending_registration) {
+        await supabaseAdmin
+          .from("store_clients")
+          .update({ pending_registration: false })
+          .eq("id", existing.data.id);
+        existing.data.pending_registration = false;
+      }
       await logVinculo("sucesso", null, {
         user_id: context.userId,
         store_slug: lojaCheck.data.slug,
@@ -295,7 +305,7 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
       .upsert(
-        { store_id: data.store_id, user_id: context.userId, referrer_user_id },
+        { store_id: data.store_id, user_id: context.userId, referrer_user_id, pending_registration: false },
         { onConflict: "store_id,user_id", ignoreDuplicates: false },
       )
       .select("*")
