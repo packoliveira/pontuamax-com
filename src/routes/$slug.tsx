@@ -350,20 +350,25 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 -mt-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="space-y-3">
+    <div className="max-w-md mx-auto p-4 pt-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+      <div className="relative group">
+        <div aria-hidden className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br from-indigo-500/40 via-violet-500/20 to-indigo-500/40 opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500" />
+        <Card className="relative border-indigo-500/25 bg-[#141432]/95 backdrop-blur-xl shadow-2xl">
+          <CardHeader className="pb-4">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-indigo-300/80 font-semibold mb-1">
+              {mode === "signup" ? "Novo por aqui" : "Bem-vindo(a) de volta"}
+            </div>
+            <CardTitle className="text-slate-100 text-xl">{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={submit} className="space-y-4">
             {aviso && (
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 animate-in fade-in slide-in-from-top-1 duration-300">
                 {aviso}
               </div>
             )}
-            <div>
-              <Label>CPF <span className="text-destructive">*</span></Label>
+            <div className="space-y-1.5">
+              <Label className="text-slate-300 text-xs font-medium">CPF <span className="text-rose-400">*</span></Label>
               <Input
                 value={cpf}
                 onChange={(e) => setCpf(formatCPF(e.target.value))}
@@ -371,65 +376,89 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                 inputMode="numeric"
                 autoComplete="username"
                 required
+                className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
               />
             </div>
             {mode === "signup" && (
               <>
-                <div>
-                  <Label>Nome <span className="text-destructive">*</span></Label>
-                  <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" required />
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs font-medium">Nome <span className="text-rose-400">*</span></Label>
+                  <Input
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Como quer ser chamado"
+                    required
+                    className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                  />
                 </div>
-                <div>
-                  <Label>Telefone <span className="text-destructive">*</span></Label>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs font-medium">Telefone <span className="text-rose-400">*</span></Label>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(11) 98765-4321"
                     inputMode="tel"
                     required
+                    className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
                   />
                 </div>
               </>
             )}
-            <div>
-              <Label>Senha <span className="text-destructive">*</span></Label>
+            <div className="space-y-1.5">
+              <Label className="text-slate-300 text-xs font-medium">Senha <span className="text-rose-400">*</span></Label>
               <PasswordInput
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
+                className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
               />
             </div>
             {mode === "signup" && (
-              <div>
-                <Label>Confirmar senha <span className="text-destructive">*</span></Label>
+              <div className="space-y-1.5">
+                <Label className="text-slate-300 text-xs font-medium">Confirmar senha <span className="text-rose-400">*</span></Label>
                 <PasswordInput
                   value={senha2}
                   onChange={(e) => setSenha2(e.target.value)}
                   placeholder="Repita a senha"
                   autoComplete="new-password"
                   required
+                  className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
                 />
                 {senha2.length > 0 && senha !== senha2 && (
-                  <p className="mt-1 text-[11px] text-destructive">As senhas não coincidem</p>
+                  <p className="mt-1 text-[11px] text-rose-400">As senhas não coincidem</p>
                 )}
               </div>
             )}
-            <Button type="submit" disabled={loading} className="w-full text-white" style={{ backgroundColor: "var(--brand-primary)" }}>
-              {loading ? "Entrando..." : mode === "signup" ? "Criar conta" : "Entrar"}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 text-white font-semibold bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/50 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  Entrando...
+                </span>
+              ) : mode === "signup" ? "Criar conta" : "Entrar"}
             </Button>
-            <button type="button" onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }} className="text-xs text-center w-full underline text-muted-foreground">
-              {mode === "login" ? "Ainda não tenho conta" : "Já tenho conta, entrar"}
+            <button
+              type="button"
+              onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }}
+              className="text-xs text-center w-full text-indigo-300 hover:text-indigo-200 transition-colors font-medium py-1"
+            >
+              {mode === "login" ? "Ainda não tenho conta →" : "← Já tenho conta, entrar"}
             </button>
             {mode === "login" && (
-              <p className="text-[11px] text-center text-muted-foreground">
+              <p className="text-[11px] text-center text-slate-500 leading-relaxed">
                 Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
               </p>
             )}
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
