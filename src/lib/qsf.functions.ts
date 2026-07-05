@@ -200,6 +200,66 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
       throw new Error("Loja não encontrada.");
     }
 
+    // MERGE de "cadastro pendente" por CPF: se o webhook (Olist/Bling) já
+    // criou um perfil sintético com o mesmo CPF do usuário que acabou de se
+    // autenticar, transferimos pontos/cashback/transações para a conta real
+    // e removemos o perfil pendente. Isso evita duplicatas visíveis no
+    // painel do lojista com o mesmo CPF.
+    const meuProfile = await supabaseAdmin
+      .from("profiles").select("id, cpf").eq("id", context.userId).maybeSingle();
+    const cpfMeu = (meuProfile.data?.cpf ?? "").replace(/\D/g, "");
+    if (cpfMeu && cpfMeu.length === 11) {
+      const pendentes = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("cpf", cpfMeu)
+        .neq("id", context.userId);
+      for (const p of pendentes.data ?? []) {
+        try {
+          // Transferir vínculos da loja atual
+          const linkPend = await supabaseAdmin
+            .from("store_clients")
+            .select("*")
+            .eq("user_id", p.id);
+          for (const linkOld of linkPend.data ?? []) {
+            const linkNew = await supabaseAdmin
+              .from("store_clients")
+              .select("*")
+              .eq("store_id", linkOld.store_id)
+              .eq("user_id", context.userId)
+              .maybeSingle();
+            if (linkNew.data) {
+              // já existe → soma saldos
+              const novoPontos = (linkNew.data.pontos ?? 0) + (linkOld.pontos ?? 0);
+              const novoCash = Math.round(((Number(linkNew.data.cashback_saldo) || 0) + (Number(linkOld.cashback_saldo) || 0)) * 100) / 100;
+              await supabaseAdmin
+                .from("store_clients")
+                .update({ pontos: novoPontos, cashback_saldo: novoCash, pending_registration: false })
+                .eq("id", linkNew.data.id);
+              await supabaseAdmin.from("store_clients").delete().eq("id", linkOld.id);
+            } else {
+              // transferir para o usuário atual
+              await supabaseAdmin
+                .from("store_clients")
+                .update({ user_id: context.userId, pending_registration: false })
+                .eq("id", linkOld.id);
+            }
+          }
+          // Reapontar transações e notas fiscais
+          await supabaseAdmin.from("transactions").update({ client_user_id: context.userId }).eq("client_user_id", p.id);
+          await supabaseAdmin.from("fiscal_notes").update({ client_user_id: p.id === p.id ? context.userId : p.id }).eq("client_user_id", p.id);
+          // Remover roles/profile e auth user pendente
+          await supabaseAdmin.from("user_roles").delete().eq("user_id", p.id);
+          await supabaseAdmin.from("profiles").delete().eq("id", p.id);
+          await supabaseAdmin.auth.admin.deleteUser(p.id);
+        } catch (mergeErr) {
+          await logVinculo("erro", `merge pendente falhou: ${(mergeErr as Error).message}`, {
+            user_id: context.userId, pending_id: p.id,
+          });
+        }
+      }
+    }
+
     // Verifica se já existe link (para não sobrescrever referrer)
     const existing = await supabaseAdmin
       .from("store_clients")
@@ -234,7 +294,10 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     }
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
-      .insert({ store_id: data.store_id, user_id: context.userId, referrer_user_id })
+      .upsert(
+        { store_id: data.store_id, user_id: context.userId, referrer_user_id },
+        { onConflict: "store_id,user_id", ignoreDuplicates: false },
+      )
       .select("*")
       .single();
     if (error) {
