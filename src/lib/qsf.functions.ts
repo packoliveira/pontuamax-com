@@ -136,6 +136,8 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         nps_ask_comment: z.boolean().optional(),
         nps_template: z.string().min(1).max(2000).optional(),
         voucher_validade_dias: z.number().int().min(1).max(365).optional(),
+        voucher_visivel_apos_uso: z.boolean().optional(),
+        voucher_mostrar_expirados: z.boolean().optional(),
         instagram_program_active: z.boolean().optional(),
         instagram_handle: z.string().max(60).optional().nullable(),
         instagram_points_per_post: z.number().int().min(1).max(100_000).optional(),
