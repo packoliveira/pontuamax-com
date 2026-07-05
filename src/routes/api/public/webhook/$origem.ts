@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { cpfToEmail, phoneToEmail } from "@/lib/qsf-shared";
 
 // Public webhook endpoint for external POS/ERP integrations (Bling, Olist).
 // URL: /api/public/webhook/{bling|olist}
