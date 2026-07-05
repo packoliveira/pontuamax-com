@@ -322,49 +322,53 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
               </div>
             )}
             <div>
-              <Label>CPF</Label>
+              <Label>CPF <span className="text-destructive">*</span></Label>
               <Input
                 value={cpf}
                 onChange={(e) => setCpf(formatCPF(e.target.value))}
                 placeholder="000.000.000-00"
                 inputMode="numeric"
                 autoComplete="username"
+                required
               />
             </div>
             {mode === "signup" && (
               <>
                 <div>
-                  <Label>Nome</Label>
-                  <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" />
+                  <Label>Nome <span className="text-destructive">*</span></Label>
+                  <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" required />
                 </div>
                 <div>
-                  <Label>Telefone (opcional)</Label>
+                  <Label>Telefone <span className="text-destructive">*</span></Label>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(11) 98765-4321"
                     inputMode="tel"
+                    required
                   />
                 </div>
               </>
             )}
             <div>
-              <Label>Senha</Label>
+              <Label>Senha <span className="text-destructive">*</span></Label>
               <PasswordInput
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                required
               />
             </div>
             {mode === "signup" && (
               <div>
-                <Label>Confirmar senha</Label>
+                <Label>Confirmar senha <span className="text-destructive">*</span></Label>
                 <PasswordInput
                   value={senha2}
                   onChange={(e) => setSenha2(e.target.value)}
                   placeholder="Repita a senha"
                   autoComplete="new-password"
+                  required
                 />
                 {senha2.length > 0 && senha !== senha2 && (
                   <p className="mt-1 text-[11px] text-destructive">As senhas não coincidem</p>
