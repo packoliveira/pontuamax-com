@@ -95,25 +95,26 @@ function ConfigPage() {
     onError: (e) => toast.error((e as Error).message),
   });
 
-  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+  if (!loja) return <div className="p-6 text-sm text-[#64748B]">Carregando...</div>;
 
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">Configurações</h1>
-        <p className="text-sm text-muted-foreground">Personalize a página do cliente e as regras de recompensa</p>
+    <div className="space-y-8 max-w-5xl">
+      <div className="space-y-1">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">Ajustes</div>
+        <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">Configurações</h1>
+        <p className="text-sm text-[#64748B]">Personalize a página do cliente, regras de recompensa e integrações</p>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Card><CardHeader><CardTitle className="text-base">Dados da loja</CardTitle></CardHeader><CardContent className="space-y-3">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Dados da loja</CardTitle></CardHeader><CardContent className="space-y-3">
             <div><Label>Nome fantasia</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
             <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} /></div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
             <AssetUploader
               storeId={loja.id}
               kind="logo"
@@ -146,12 +147,12 @@ function ConfigPage() {
             </div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Modalidade de recompensa</CardTitle></CardHeader><CardContent className="space-y-4">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Modalidade de recompensa</CardTitle></CardHeader><CardContent className="space-y-4">
             <RadioGroup value={modalidade} onValueChange={(v) => setModalidade(v as Modalidade)}>
               {(["pontos", "cashback", "ambos"] as const).map((m) => (
-                <div key={m} className="flex items-center gap-2">
+                <div key={m} className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] px-3 py-2 hover:bg-[#F8FAFC] transition-colors duration-200">
                   <RadioGroupItem value={m} id={m} />
-                  <Label htmlFor={m} className="capitalize">{m}</Label>
+                  <Label htmlFor={m} className="capitalize text-[#0F172A] cursor-pointer">{m}</Label>
                 </div>
               ))}
             </RadioGroup>
@@ -164,31 +165,31 @@ function ConfigPage() {
             <div>
               <Label>Validade do voucher de resgate (dias)</Label>
               <Input type="number" min="1" max="365" value={validadeVoucher} onChange={(e) => setValidadeVoucher(e.target.value)} />
-              <p className="text-xs text-muted-foreground mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
+              <p className="text-xs text-[#64748B] mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
             </div>
-            <div className="rounded-md border p-3 space-y-3">
-              <div className="text-sm font-semibold">Visibilidade dos vouchers para o cliente</div>
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
+              <div className="text-sm font-semibold text-[#0F172A]">Visibilidade dos vouchers para o cliente</div>
               <div className="flex items-start justify-between gap-3">
-                <div className="text-xs text-muted-foreground">
-                  <div className="font-medium text-foreground text-sm">Manter voucher visível após utilização</div>
+                <div className="text-xs text-[#64748B]">
+                  <div className="font-medium text-[#0F172A] text-sm">Manter voucher visível após utilização</div>
                   Se ligado, o cliente continua vendo o voucher como "Utilizado" na lista dele. Se desligado (padrão), o voucher some assim que você confirma a entrega.
                 </div>
                 <Switch checked={voucherVisivelAposUso} onCheckedChange={setVoucherVisivelAposUso} />
               </div>
               <div className="flex items-start justify-between gap-3">
-                <div className="text-xs text-muted-foreground">
-                  <div className="font-medium text-foreground text-sm">Mostrar vouchers expirados no histórico</div>
+                <div className="text-xs text-[#64748B]">
+                  <div className="font-medium text-[#0F172A] text-sm">Mostrar vouchers expirados no histórico</div>
                   Se ligado (padrão), o cliente vê os vouchers expirados como aviso. Desligue para escondê-los.
                 </div>
                 <Switch checked={voucherMostrarExpirados} onCheckedChange={setVoucherMostrarExpirados} />
               </div>
             </div>
-            <div className="rounded-md border p-3 text-xs text-muted-foreground">
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 text-xs text-[#64748B]">
               Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente com base nos pontos.
             </div>
           </CardContent></Card>
 
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg">
+          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg" className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200">
             {salvar.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
 
@@ -201,8 +202,11 @@ function ConfigPage() {
           <ValidadePontosCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
-          <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
-          <BrandPreview nome={nome} logo={logo} cor1={cor1} cor2={cor2} modalidade={modalidade} />
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">Prévia ao vivo</div>
+          <div className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden bg-white">
+            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
+            <BrandPreview nome={nome} logo={logo} cor1={cor1} cor2={cor2} modalidade={modalidade} />
+          </div>
         </div>
       </div>
     </div>
@@ -254,13 +258,14 @@ function IntegracoesCard({
   };
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between">
+        <CardTitle className="text-base flex items-center justify-between text-[#0F172A]">
           <span>Integrações (Bling / Olist)</span>
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-              conectada ? "bg-emerald-100 text-emerald-700" : "bg-muted text-muted-foreground"
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              conectada ? "bg-[#22C55E]/10 text-[#15803D]" : "bg-[#F1F5F9] text-[#64748B]"
             }`}
           >
             {conectada ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
@@ -269,7 +274,7 @@ function IntegracoesCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Configure a URL abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
           no PontoaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
         </p>
@@ -329,43 +334,43 @@ function IntegracoesCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button type="button" variant="secondary" onClick={() => test.mutate()} disabled={test.isPending}>
+          <Button type="button" variant="secondary" onClick={() => test.mutate()} disabled={test.isPending} className="rounded-xl">
             <Send className="h-4 w-4 mr-1" />
             {test.isPending ? "Enviando..." : "Testar integração"}
           </Button>
           {lastAt && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-[#64748B]">
               Último evento: {new Date(lastAt).toLocaleString("pt-BR")}
             </span>
           )}
         </div>
 
         <div>
-          <div className="text-sm font-semibold mb-2">Últimos 20 eventos</div>
+          <div className="text-sm font-semibold mb-2 text-[#0F172A]">Últimos 20 eventos</div>
           {!logs || logs.length === 0 ? (
-            <div className="text-xs text-muted-foreground rounded-md border border-dashed p-4">
+            <div className="text-xs text-[#64748B] rounded-xl border border-dashed border-[#E5E7EB] bg-[#F8FAFC] p-4">
               Nenhum evento recebido ainda.
             </div>
           ) : (
-            <div className="rounded-md border divide-y">
+            <div className="rounded-xl border border-[#E5E7EB] divide-y divide-[#E5E7EB] bg-white">
               {logs.map((log) => (
                 <div key={log.id} className="p-2 text-xs flex items-start gap-2">
                   <span
                     className={`mt-0.5 inline-block h-2 w-2 rounded-full ${
-                      log.status === "sucesso" ? "bg-emerald-500" : "bg-red-500"
+                      log.status === "sucesso" ? "bg-[#22C55E]" : "bg-[#EF4444]"
                     }`}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium uppercase">{log.origem}</span>
-                      <span className="text-muted-foreground">
+                      <span className="font-medium uppercase text-[#0F172A]">{log.origem}</span>
+                      <span className="text-[#64748B]">
                         {new Date(log.created_at).toLocaleString("pt-BR")}
                       </span>
                     </div>
-                    {log.mensagem_erro && <div className="text-red-600">{log.mensagem_erro}</div>}
+                    {log.mensagem_erro && <div className="text-[#EF4444]">{log.mensagem_erro}</div>}
                     <details className="mt-1">
-                      <summary className="cursor-pointer text-muted-foreground">Payload</summary>
-                      <pre className="mt-1 whitespace-pre-wrap break-all bg-muted/50 p-2 rounded">
+                      <summary className="cursor-pointer text-[#64748B]">Payload</summary>
+                      <pre className="mt-1 whitespace-pre-wrap break-all bg-[#F1F5F9] p-2 rounded-lg text-[#0F172A]">
                         {JSON.stringify(log.payload_recebido, null, 2)}
                       </pre>
                     </details>
@@ -424,17 +429,19 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
   });
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Instagram className="h-4 w-4" /> Poste no Instagram e ganhe pontos
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Instagram className="h-4 w-4" /></span>
+          Poste no Instagram e ganhe pontos
           <span className="ml-auto"><Switch checked={on} onCheckedChange={setOn} /></span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Quando ativo, os clientes enviam o link do post do Instagram pela página de vocês e você aprova em
-          {" "}<a href="/lojista/instagram" className="underline">Posts do Instagram</a> para creditar os pontos.
+          {" "}<a href="/lojista/instagram" className="text-[#2563EB] hover:underline">Posts do Instagram</a> para creditar os pontos.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -458,7 +465,7 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
             placeholder={`Ex:\n1. Poste uma foto ou reel usando nossos produtos\n2. Marque @${handle || "sua_loja"} na foto\n3. Use a #suahashtag\n4. Perfil precisa estar público`}
           />
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar configurações"}
         </Button>
       </CardContent>
@@ -507,43 +514,45 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   });
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Hourglass className="h-4 w-4" /> Validade dos pontos
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Hourglass className="h-4 w-4" /></span>
+          Validade dos pontos
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Defina se e como os pontos dos clientes expiram. A execução é automática (todo dia) e cria uma movimentação de "expiração" no histórico.
         </p>
 
         <RadioGroup value={modo} onValueChange={(v) => setModo(v as never)} className="space-y-2">
-          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
             <RadioGroupItem value="nenhum" id="mp-nenhum" className="mt-0.5" />
             <div>
-              <div className="text-sm font-medium">Sem expiração</div>
-              <div className="text-xs text-muted-foreground">Os pontos nunca expiram.</div>
+              <div className="text-sm font-medium text-[#0F172A]">Sem expiração</div>
+              <div className="text-xs text-[#64748B]">Os pontos nunca expiram.</div>
             </div>
           </label>
-          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
             <RadioGroupItem value="validade" id="mp-validade" className="mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-medium">Validade por data</div>
-              <div className="text-xs text-muted-foreground">Cada ponto ganho expira depois de N dias.</div>
+              <div className="text-sm font-medium text-[#0F172A]">Validade por data</div>
+              <div className="text-xs text-[#64748B]">Cada ponto ganho expira depois de N dias.</div>
               {modo === "validade" && (
                 <div className="mt-2 flex items-center gap-2">
                   <Input type="number" min={1} className="w-28" value={validadeDias} onChange={(e) => setValidadeDias(e.target.value)} />
-                  <span className="text-xs text-muted-foreground">dias de validade</span>
+                  <span className="text-xs text-[#64748B]">dias de validade</span>
                 </div>
               )}
             </div>
           </label>
-          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
             <RadioGroupItem value="decaimento" id="mp-decai" className="mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-medium">Decaimento periódico</div>
-              <div className="text-xs text-muted-foreground">Cliente perde X pontos a cada N dias.</div>
+              <div className="text-sm font-medium text-[#0F172A]">Decaimento periódico</div>
+              <div className="text-xs text-[#64748B]">Cliente perde X pontos a cada N dias.</div>
               {modo === "decaimento" && (
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div>
@@ -561,12 +570,12 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
         </RadioGroup>
 
         {loja.pontos_expiracao_last_run_at && (
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[11px] text-[#64748B]">
             Última execução: {new Date(loja.pontos_expiracao_last_run_at).toLocaleString("pt-BR")}
           </p>
         )}
 
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar validade"}
         </Button>
       </CardContent>
@@ -601,17 +610,21 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
   });
   const link = typeof window !== "undefined" ? `${window.location.origin}/${loja.slug}?indicou=TELEFONE` : "";
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><Gift className="h-4 w-4" /> Indicação amigo → amigo</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Gift className="h-4 w-4" /></span>
+          Indicação amigo → amigo
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Cada cliente ganha um link único (com o telefone dele) para compartilhar. Quando o amigo se cadastrar por esse link e fizer a 1ª compra, os dois recebem pontos.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={ativa} onCheckedChange={setAtiva} />
-          <span className="text-sm">Ativar programa de indicação</span>
+          <span className="text-sm text-[#0F172A]">Ativar programa de indicação</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -623,10 +636,10 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
             <Input type="number" min={0} value={bIndicado} onChange={(e) => setBIndicado(e.target.value)} disabled={!ativa} />
           </div>
         </div>
-        <div className="rounded-md border p-3 text-xs text-muted-foreground break-all">
-          Formato do link: <code>{link}</code>
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-xs text-[#64748B] break-all">
+          Formato do link: <code className="text-[#0F172A]">{link}</code>
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar indicação"}
         </Button>
       </CardContent>
@@ -653,30 +666,34 @@ function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_c
     onError: (e) => toast.error((e as Error).message),
   });
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><Star className="h-4 w-4" /> Pesquisa de satisfação (NPS)</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Star className="h-4 w-4" /></span>
+          Pesquisa de satisfação (NPS)
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Após cada venda lançada, o cliente recebe um link no WhatsApp para dar uma nota de 0 a 10. Requer WhatsApp ativo.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={on} onCheckedChange={setOn} />
-          <span className="text-sm">Ativar pesquisa NPS pós-venda</span>
+          <span className="text-sm text-[#0F172A]">Ativar pesquisa NPS pós-venda</span>
         </div>
         <div className="flex items-center gap-2">
           <Switch checked={askC} onCheckedChange={setAskC} disabled={!on} />
-          <span className="text-sm">Pedir comentário opcional</span>
+          <span className="text-sm text-[#0F172A]">Pedir comentário opcional</span>
         </div>
         <div>
           <Label>Mensagem enviada</Label>
           <Textarea rows={4} value={tpl} onChange={(e) => setTpl(e.target.value)} disabled={!on} />
-          <p className="text-[11px] text-muted-foreground mt-1">
+          <p className="text-[11px] text-[#64748B] mt-1">
             Variáveis: <code>{"{nome_cliente}"}</code>, <code>{"{nome_loja}"}</code>, <code>{"{link_nps}"}</code>
           </p>
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar NPS"}
         </Button>
       </CardContent>
@@ -825,30 +842,30 @@ function WhatsappQRConnect({ storeId }: { storeId: string }) {
 
   const badge =
     state === "open"
-      ? { text: "Conectado", cls: "bg-emerald-100 text-emerald-700" }
+      ? { text: "Conectado", cls: "bg-[#22C55E]/10 text-[#15803D]" }
       : state === "connecting"
-        ? { text: "Aguardando leitura do QR", cls: "bg-amber-100 text-amber-700" }
+        ? { text: "Aguardando leitura do QR", cls: "bg-[#F59E0B]/10 text-[#B45309]" }
         : state === "unconfigured"
-          ? { text: "Não configurado", cls: "bg-muted text-muted-foreground" }
-          : { text: "Desconectado", cls: "bg-red-100 text-red-700" };
+          ? { text: "Não configurado", cls: "bg-[#F1F5F9] text-[#64748B]" }
+          : { text: "Desconectado", cls: "bg-[#EF4444]/10 text-[#B91C1C]" };
 
   return (
-    <div className="rounded-md border p-3 space-y-3">
+    <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <QrCode className="h-4 w-4" />
-          <span className="text-sm font-medium">Conexão WhatsApp</span>
-          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+          <QrCode className="h-4 w-4 text-[#2563EB]" />
+          <span className="text-sm font-medium text-[#0F172A]">Conexão WhatsApp</span>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>
             {badge.text}
           </span>
         </div>
         {state === "open" ? (
-          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading}>
+          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading} className="rounded-xl border-[#E5E7EB]">
             <Power className="h-3 w-3 mr-1" />
             Desconectar
           </Button>
         ) : (
-          <Button type="button" size="sm" onClick={conectar} disabled={loading}>
+          <Button type="button" size="sm" onClick={conectar} disabled={loading} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
             {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <QrCode className="h-3 w-3 mr-1" />}
             Gerar QR Code
           </Button>
@@ -859,14 +876,14 @@ function WhatsappQRConnect({ storeId }: { storeId: string }) {
           <img
             src={qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`}
             alt="QR Code do WhatsApp"
-            className="w-56 h-56 border rounded-md"
+            className="w-56 h-56 border border-[#E5E7EB] rounded-xl bg-white p-2"
           />
-          <p className="text-xs text-muted-foreground text-center max-w-xs">
+          <p className="text-xs text-[#64748B] text-center max-w-xs">
             Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> → <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
           </p>
         </div>
       )}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-[#64748B]">
         Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até você desconectar ou o WhatsApp derrubar a sessão.
       </p>
     </div>
@@ -946,18 +963,19 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
   ];
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <MessageCircle className="h-4 w-4" />
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><MessageCircle className="h-4 w-4" /></span>
           WhatsApp (Evolution API)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
           <div>
-            <div className="text-sm font-medium">Envio automático de "pontos ganhos"</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-[#0F172A]">Envio automático de "pontos ganhos"</div>
+            <div className="text-xs text-[#64748B]">
               Dispara toda vez que o cliente ganha pontos (manual ou via Bling/Olist).
             </div>
           </div>
@@ -977,7 +995,7 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
         <div>
           <Label>API Key (header apikey)</Label>
           <Input type="password" value={apikey} onChange={(e) => setApikey(e.target.value)} placeholder="••••••••" />
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-[#64748B] mt-1">
             A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente final.
           </p>
         </div>
@@ -992,7 +1010,7 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
               <button
                 key={v}
                 type="button"
-                className="text-[10px] px-1.5 py-0.5 rounded bg-muted hover:bg-muted-foreground/20 font-mono"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#0F172A] hover:bg-[#E5E7EB] font-mono transition-colors duration-200"
                 onClick={() => setTemplate((t) => `${t}${v}`)}
               >
                 {v}
@@ -1001,11 +1019,11 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
           </div>
         </div>
 
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar WhatsApp"}
         </Button>
 
-        <div className="rounded-md border p-3 space-y-2">
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-2">
           <Label>Enviar mensagem de teste</Label>
           <div className="flex gap-2">
             <Input
@@ -1018,12 +1036,13 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
               variant="secondary"
               onClick={() => testar.mutate()}
               disabled={testar.isPending || !testPhone}
+              className="rounded-xl"
             >
               <Send className="h-4 w-4 mr-1" />
               {testar.isPending ? "Enviando..." : "Testar"}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[#64748B]">
             Prefixo 55 é adicionado automaticamente. Sucessos e erros aparecem em "Últimos 20 eventos" acima.
           </p>
         </div>
@@ -1100,19 +1119,23 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
   });
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><Bell className="h-4 w-4" /> Notificações automáticas</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Bell className="h-4 w-4" /></span>
+          Notificações automáticas
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Cron diário (09:00 Brasília) envia estas mensagens via WhatsApp. Requer WhatsApp ativado e Evolution API conectada acima.
         </p>
 
         {/* Aniversário */}
-        <div className="rounded-md border p-3 space-y-3">
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm"><Cake className="h-4 w-4 text-pink-500" /> Aniversário</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><Cake className="h-4 w-4 text-[#EC4899]" /> Aniversário</div>
             <Switch checked={bDayOn} onCheckedChange={setBDayOn} />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1124,14 +1147,14 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <div>
             <Label>Mensagem</Label>
             <Textarea rows={3} value={bDayTpl} onChange={(e) => setBDayTpl(e.target.value)} disabled={!bDayOn} />
-            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}</p>
+            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}</p>
           </div>
         </div>
 
         {/* Inatividade */}
-        <div className="rounded-md border p-3 space-y-3">
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm"><Clock className="h-4 w-4 text-amber-500" /> Cliente sumido</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><Clock className="h-4 w-4 text-[#F59E0B]" /> Cliente sumido</div>
             <Switch checked={inatOn} onCheckedChange={setInatOn} />
           </div>
           <div>
@@ -1141,14 +1164,14 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <div>
             <Label>Mensagem</Label>
             <Textarea rows={3} value={inatTpl} onChange={(e) => setInatTpl(e.target.value)} disabled={!inatOn} />
-            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}</p>
+            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}</p>
           </div>
         </div>
 
         {/* Expiração */}
-        <div className="rounded-md border p-3 space-y-3">
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm"><TimerReset className="h-4 w-4 text-red-500" /> Pontos a expirar</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><TimerReset className="h-4 w-4 text-[#EF4444]" /> Pontos a expirar</div>
             <Switch checked={expOn} onCheckedChange={setExpOn} />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1164,15 +1187,15 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <div>
             <Label>Mensagem</Label>
             <Textarea rows={3} value={expTpl} onChange={(e) => setExpTpl(e.target.value)} disabled={!expOn} />
-            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}</p>
+            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}</p>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
             {salvar.isPending ? "Salvando..." : "Salvar notificações"}
           </Button>
-          <Button type="button" variant="secondary" onClick={() => disparar.mutate()} disabled={disparar.isPending}>
+          <Button type="button" variant="secondary" onClick={() => disparar.mutate()} disabled={disparar.isPending} className="rounded-xl">
             <Send className="h-4 w-4 mr-1" />
             {disparar.isPending ? "Disparando..." : "Disparar agora (teste)"}
           </Button>
