@@ -32,12 +32,12 @@ function Index() {
         <div className="flex items-center gap-2">
           <PontoaMaxMark size={36} />
           <span className="text-lg font-semibold tracking-tight">
-            <span style={{ color: "#155EEF" }}>Pontoa</span>
+            <span style={{ color: "#2563EB" }}>Pontoa</span>
             <span style={{ color: "#22C55E" }}>Max</span>
           </span>
         </div>
         <Link to="/lojista/login">
-          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#155EEF]/5">Entrar como lojista</Button>
+          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">Entrar como lojista</Button>
         </Link>
       </header>
 
@@ -51,14 +51,14 @@ function Index() {
             </div>
             <h1 className="mt-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
               Fidelize e faça<br />
-              <span style={{ color: "#155EEF" }}>seu negócio crescer</span>
+              <span style={{ color: "#2563EB" }}>seu negócio crescer</span>
             </h1>
             <p className="mt-6 text-lg text-[#64748B] md:text-xl">
               Plataforma SaaS premium de pontos, cashback, CRM e campanhas — com uma página personalizada por loja.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
               <Link to="/lojista/onboarding">
-                <Button size="lg" className="w-full bg-[#155EEF] text-white hover:bg-[#0F4CD7] rounded-xl sm:w-auto">
+                <Button size="lg" className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto">
                   <Store className="h-4 w-4" /> Criar minha loja
                 </Button>
               </Link>
@@ -66,7 +66,7 @@ function Index() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full border-[#155EEF]/30 text-[#155EEF] hover:bg-[#155EEF]/5 rounded-xl sm:w-auto"
+                  className="w-full border-[#2563EB]/30 text-[#2563EB] hover:bg-[#2563EB]/5 rounded-xl sm:w-auto"
                 >
                   Já sou lojista, entrar
                 </Button>
@@ -120,7 +120,7 @@ function Index() {
 
         <div className="mt-16 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link to="/lojista/onboarding">
-            <Button size="lg" className="w-full bg-[#155EEF] text-white hover:bg-[#0F4CD7] rounded-xl sm:w-auto">
+            <Button size="lg" className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto">
               Criar minha loja grátis <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -137,7 +137,7 @@ function Index() {
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition duration-200 hover:shadow-md hover:-translate-y-0.5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#155EEF] text-white">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563EB] text-white">
         {icon}
       </div>
       <h3 className="mt-4 text-base font-semibold">{title}</h3>
@@ -256,7 +256,7 @@ function DashboardMockup() {
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <PontoaMaxMark size={22} />
             <span className="text-sm font-semibold tracking-tight">
-              <span style={{ color: "#155EEF" }}>Pontoa</span>
+              <span style={{ color: "#2563EB" }}>Pontoa</span>
               <span style={{ color: "#22C55E" }}>Max</span>
             </span>
           </div>
