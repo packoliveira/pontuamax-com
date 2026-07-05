@@ -64,77 +64,78 @@
 :root {
   --radius: 0.625rem;
   /* Tema claro do painel interno (Lojista + Admin).
-     Identidade visual Cuiá Pontos / QSF Club:
-     azul-marinho profundo como primária, verde-lima como accent. */
-  --background: #FFFFFF;
-  --foreground: #0A2540;
+     Identidade visual PontoaMax: azul profundo (#155EEF) como primária,
+     verde crescimento (#22C55E) como accent/sucesso e laranja (#F59E0B)
+     reservado para avisos/promoções. Fonte: Inter. */
+  --background: #F8FAFC;
+  --foreground: #0F172A;
   --card: #FFFFFF;
-  --card-foreground: #0A2540;
+  --card-foreground: #0F172A;
   --popover: #FFFFFF;
-  --popover-foreground: #0A2540;
-  --primary: #0A2540;
+  --popover-foreground: #0F172A;
+  --primary: #155EEF;
   --primary-foreground: #FFFFFF;
-  --secondary: #F3F4F6;
-  --secondary-foreground: #0A2540;
-  --muted: #F3F4F6;
-  --muted-foreground: #4B5563;
-  --accent: #C4E135;
-  --accent-foreground: #0A2540;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #0F172A;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #22C55E;
+  --accent-foreground: #FFFFFF;
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
-  --border: #E5E7EB;
-  --input: #E5E7EB;
-  --ring: #C4E135;
-  --chart-1: #0A2540;
-  --chart-2: #C4E135;
-  --chart-3: #22D3EE;
-  --chart-4: #F59E0B;
-  --chart-5: #A78BFA;
-  --sidebar: #F9FAFB;
-  --sidebar-foreground: #0A2540;
-  --sidebar-primary: #0A2540;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #155EEF;
+  --chart-1: #155EEF;
+  --chart-2: #22C55E;
+  --chart-3: #F59E0B;
+  --chart-4: #0EA5E9;
+  --chart-5: #8B5CF6;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #155EEF;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F3F4F6;
-  --sidebar-accent-foreground: #0A2540;
-  --sidebar-border: #E5E7EB;
-  --sidebar-ring: #C4E135;
+  --sidebar-accent: #EFF4FF;
+  --sidebar-accent-foreground: #155EEF;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #155EEF;
 }
 
 .dark {
-  /* Internal panel theme (Lojista + Admin). Public store pages keep light theme
-     and override brand colors dynamically per store. */
-  --background: #0F0F10;
+  /* Tema escuro do painel PontoaMax. Páginas públicas da loja continuam claras
+     e sobrescrevem as cores da marca dinamicamente por loja. */
+  --background: #0B1220;
   --foreground: #F5F5F5;
-  --card: #1A1A1C;
+  --card: #111827;
   --card-foreground: #F5F5F5;
-  --popover: #1A1A1C;
+  --popover: #111827;
   --popover-foreground: #F5F5F5;
-  --primary: #C4F135;
-  --primary-foreground: #0F0F10;
-  --secondary: #1A1A1C;
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #111827;
   --secondary-foreground: #F5F5F5;
-  --muted: #1A1A1C;
-  --muted-foreground: #9CA3AF;
-  --accent: #2A2A2D;
-  --accent-foreground: #F5F5F5;
+  --muted: #111827;
+  --muted-foreground: #94A3B8;
+  --accent: #22C55E;
+  --accent-foreground: #0B1220;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #2A2A2D;
-  --input: #2A2A2D;
-  --ring: #C4F135;
-  --chart-1: #C4F135;
-  --chart-2: #22D3EE;
+  --border: #1F2937;
+  --input: #1F2937;
+  --ring: #3B82F6;
+  --chart-1: #3B82F6;
+  --chart-2: #22C55E;
   --chart-3: #F59E0B;
   --chart-4: #A78BFA;
   --chart-5: #F472B6;
-  --sidebar: #1A1A1C;
+  --sidebar: #111827;
   --sidebar-foreground: #F5F5F5;
-  --sidebar-primary: #C4F135;
-  --sidebar-primary-foreground: #0F0F10;
-  --sidebar-accent: #2A2A2D;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1F2937;
   --sidebar-accent-foreground: #F5F5F5;
-  --sidebar-border: #2A2A2D;
-  --sidebar-ring: #C4F135;
+  --sidebar-border: #1F2937;
+  --sidebar-ring: #3B82F6;
 }
 
 @layer base {
@@ -145,6 +146,8 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
