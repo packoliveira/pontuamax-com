@@ -65,22 +65,48 @@ function ClientePage() {
     [loja],
   );
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando...</div>;
+  // Ativa o tema Midnight Indigo em <html> enquanto a página estiver montada,
+  // para que portais (Dialog, Sonner) também herdem os tokens escuros.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("qsf-midnight");
+    return () => { root.classList.remove("qsf-midnight"); };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a]">
+        <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
+          <div className="h-8 w-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
+          Carregando...
+        </div>
+      </div>
+    );
+  }
 
   if (!loja) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex items-center justify-center p-6 text-center bg-[#0a0a1a]">
         <div>
-          <h1 className="text-2xl font-bold">Loja não encontrada</h1>
-          <p className="text-sm text-muted-foreground mt-2">Verifique o endereço com o lojista.</p>
+          <h1 className="text-2xl font-bold text-slate-100">Loja não encontrada</h1>
+          <p className="text-sm text-slate-400 mt-2">Verifique o endereço com o lojista.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={style} className="min-h-screen bg-slate-50">
-      <ClienteFlow loja={loja} />
+    <div
+      style={style}
+      className="min-h-screen bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
+    >
+      {/* Aura de fundo em índigo — bem sutil, fica atrás de tudo */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.18),transparent_60%)]" />
+      <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full bg-violet-600/10 blur-3xl" />
+      <div className="relative">
+        <ClienteFlow loja={loja} />
+      </div>
     </div>
   );
 }
