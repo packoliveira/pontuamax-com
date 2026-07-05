@@ -48,8 +48,8 @@ function extractOlistPayload(p: Record<string, unknown>): {
 
   const idVenda = String(
     p.id_venda_externa ??
-      root.numero ??
       root.id ??
+      root.numero ??
       root.numero_pedido ??
       root.codigo ??
       "",
