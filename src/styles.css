@@ -64,7 +64,7 @@
 :root {
   --radius: 0.625rem;
   /* Tema claro do painel interno (Lojista + Admin).
-     Identidade visual PontoaMax: azul profundo (#155EEF) como primária,
+     Identidade visual PontoaMax: azul profundo (#2563EB) como primária,
      verde crescimento (#22C55E) como accent/sucesso e laranja (#F59E0B)
      reservado para avisos/promoções. Fonte: Inter. */
   --background: #F8FAFC;
