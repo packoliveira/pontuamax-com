@@ -33,10 +33,10 @@ import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PontuaMax — Fidelize seus clientes com pontos, cashback e CRM" },
-      { name: "description", content: "Plataforma SaaS premium de fidelização, cashback, CRM e relacionamento com clientes, com página personalizada por loja." },
-      { property: "og:title", content: "PontuaMax" },
-      { property: "og:description", content: "Fidelização, cashback e CRM em uma plataforma moderna." },
+      { title: "PontuaMax | Programa de Fidelidade para Empresas" },
+      { name: "description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
+      { property: "og:title", content: "PontuaMax | Programa de Fidelidade para Empresas" },
+      { property: "og:description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
     ],
   }),
   component: Index,
