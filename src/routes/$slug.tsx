@@ -186,12 +186,12 @@ function ClienteFlow({ loja }: { loja: Loja }) {
 
 function OwnerPreviewBanner() {
   return (
-    <div className="max-w-2xl mx-auto p-4 -mt-6">
-      <Card>
+    <div className="max-w-2xl mx-auto p-4 -mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <Card className="border-indigo-500/20 bg-[#141432]/70 backdrop-blur-xl">
         <CardHeader>
-          <CardTitle className="text-base">Você está vendo sua loja como visitante</CardTitle>
+          <CardTitle className="text-base text-slate-100">Você está vendo sua loja como visitante</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
+        <CardContent className="space-y-3 text-sm text-slate-400">
           <p>
             Esta é a página pública que seus clientes acessam. Como você está logado
             como dono da loja, nada é criado nem vinculado ao clicar aqui.
@@ -201,7 +201,7 @@ function OwnerPreviewBanner() {
             ou abra este link em uma janela anônima.
           </p>
           <Link to="/lojista">
-            <Button variant="outline" size="sm">Voltar ao painel</Button>
+            <Button variant="outline" size="sm" className="border-indigo-500/30 bg-transparent text-slate-200 hover:bg-indigo-500/10 hover:text-white">Voltar ao painel</Button>
           </Link>
         </CardContent>
       </Card>
@@ -216,23 +216,38 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
     qc.clear();
   };
   return (
-    <header className="px-4 py-6 text-white" style={{ background: "linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))" }}>
+    <header className="px-4 py-6 border-b border-indigo-500/10 backdrop-blur-md bg-[#0a0a1a]/60 sticky top-0 z-20">
       <div className="max-w-2xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {loja.logo_url ? (
-            <img src={loja.logo_url} alt={loja.nome_fantasia} className="h-11 w-11 rounded-lg bg-white/20 object-contain p-1" />
-          ) : (
-            <div className="h-11 w-11 rounded-lg bg-white/20 flex items-center justify-center font-bold">
-              {loja.nome_fantasia.charAt(0)}
-            </div>
-          )}
-          <div>
-            <div className="text-xs uppercase tracking-wider opacity-80">Fidelidade</div>
-            <div className="font-bold text-lg leading-tight">{loja.nome_fantasia}</div>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative shrink-0">
+            <div aria-hidden className="absolute inset-0 rounded-xl bg-indigo-500/40 blur-lg opacity-60" />
+            {loja.logo_url ? (
+              <img
+                src={loja.logo_url}
+                alt={loja.nome_fantasia}
+                className="relative h-12 w-12 rounded-xl bg-[#141432] object-contain p-1.5 border border-indigo-500/30"
+              />
+            ) : (
+              <div
+                className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/30 border border-indigo-400/40"
+              >
+                {loja.nome_fantasia.charAt(0)}
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-indigo-300/80 font-semibold">Fidelidade</div>
+            <div className="font-bold text-base sm:text-lg leading-tight text-white truncate">{loja.nome_fantasia}</div>
           </div>
         </div>
         {showLogout && (
-          <Button size="sm" variant="ghost" className="text-white hover:bg-white/10" onClick={doLogout}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-slate-300 hover:bg-indigo-500/10 hover:text-white transition-colors"
+            onClick={doLogout}
+            aria-label="Sair"
+          >
             <LogOut className="h-4 w-4" />
           </Button>
         )}
