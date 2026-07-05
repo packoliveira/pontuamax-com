@@ -407,7 +407,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         phone: z.string().min(8).max(20),
         nome: z.string().min(1).max(100),
         store_id: z.string().uuid(),
-        cpf: z.string().max(20).optional().nullable(),
+        // CPF é a chave única de identidade do cliente — obrigatório
+        // para evitar cadastros incompletos que colidem depois com o
+        // auto-cadastro do cliente pelo mesmo CPF.
+        cpf: z.string().min(11).max(20),
       })
       .parse(input),
   )
@@ -417,9 +420,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
     if (!owner.data) throw new Error("Você não é dono desta loja.");
     const digits = data.phone.replace(/\D/g, "");
-    const cpfDigits = (data.cpf ?? "").replace(/\D/g, "");
+    const cpfDigits = data.cpf.replace(/\D/g, "");
     if (digits.length < 8) throw new Error("Telefone inválido.");
-    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
+    if (cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
+    if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
 
     // Estratégia: CPF é a chave única do cliente. Se existir perfil com este
     // CPF (mesmo que criado por webhook como "cadastro pendente"), REUSA e
