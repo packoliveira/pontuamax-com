@@ -600,12 +600,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           <p className="text-sm text-muted-foreground">Apresente este código no caixa:</p>
           <div
             key={voucher ?? "empty"}
-            className="text-3xl sm:text-4xl font-mono font-black tracking-widest py-6 rounded-lg break-all"
-            style={{ backgroundColor: "var(--brand-primary)", color: "white" }}
+            className="mx-2 select-all text-3xl sm:text-4xl font-mono font-black tracking-widest py-6 px-3 rounded-lg break-all bg-slate-900 text-white border-2 border-slate-700 shadow-inner"
+            aria-label="Código do voucher"
           >
             {voucher}
           </div>
-          <p className="text-xs text-muted-foreground">Válido por alguns dias — confira em "Meus resgates".</p>
+          <p className="text-xs text-muted-foreground">Válido por alguns dias — você também pode conferir em "Meus vouchers" abaixo.</p>
         </DialogContent>
       </Dialog>
 
