@@ -44,6 +44,7 @@ import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/a
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
 import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
 import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
+import { Route as ApiPublicWebhookOlistErpSlugRouteImport } from './routes/api/public/webhook/olist-erp.$slug'
 
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
@@ -224,6 +225,12 @@ const ApiPublicHooksCampanhasAgendadasRoute =
     path: '/api/public/hooks/campanhas-agendadas',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhookOlistErpSlugRoute =
+  ApiPublicWebhookOlistErpSlugRouteImport.update({
+    id: '/api/public/webhook/olist-erp/$slug',
+    path: '/api/public/webhook/olist-erp/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -261,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
+  '/api/public/webhook/olist-erp/$slug': typeof ApiPublicWebhookOlistErpSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -296,6 +304,7 @@ export interface FileRoutesByTo {
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
+  '/api/public/webhook/olist-erp/$slug': typeof ApiPublicWebhookOlistErpSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -334,6 +343,7 @@ export interface FileRoutesById {
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
+  '/api/public/webhook/olist-erp/$slug': typeof ApiPublicWebhookOlistErpSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
+    | '/api/public/webhook/olist-erp/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -408,6 +419,7 @@ export interface FileRouteTypes {
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
+    | '/api/public/webhook/olist-erp/$slug'
   id:
     | '__root__'
     | '/'
@@ -445,6 +457,7 @@ export interface FileRouteTypes {
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
+    | '/api/public/webhook/olist-erp/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -464,6 +477,7 @@ export interface RootRouteChildren {
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
   ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
+  ApiPublicWebhookOlistErpSlugRoute: typeof ApiPublicWebhookOlistErpSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -713,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCampanhasAgendadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhook/olist-erp/$slug': {
+      id: '/api/public/webhook/olist-erp/$slug'
+      path: '/api/public/webhook/olist-erp/$slug'
+      fullPath: '/api/public/webhook/olist-erp/$slug'
+      preLoaderRoute: typeof ApiPublicWebhookOlistErpSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -788,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
   ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
+  ApiPublicWebhookOlistErpSlugRoute: ApiPublicWebhookOlistErpSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
