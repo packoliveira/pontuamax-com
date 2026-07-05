@@ -75,7 +75,7 @@ function ClientePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a]">
+      <div className="min-h-dvh flex items-center justify-center bg-[#0a0a1a]">
         <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
           <div className="h-8 w-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
           Carregando...
@@ -86,7 +86,7 @@ function ClientePage() {
 
   if (!loja) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 text-center bg-[#0a0a1a]">
+      <div className="min-h-dvh flex items-center justify-center p-6 text-center bg-[#0a0a1a]">
         <div>
           <h1 className="text-2xl font-bold text-slate-100">Loja não encontrada</h1>
           <p className="text-sm text-slate-400 mt-2">Verifique o endereço com o lojista.</p>
@@ -98,7 +98,7 @@ function ClientePage() {
   return (
     <div
       style={style}
-      className="min-h-screen bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
+      className="min-h-dvh bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
     >
       {/* Aura de fundo em índigo — bem sutil, fica atrás de tudo */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.18),transparent_60%)]" />

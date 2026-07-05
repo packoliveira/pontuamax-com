@@ -135,21 +135,23 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden flex items-center justify-between border-b bg-background px-4 py-3">
+        <header className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 backdrop-blur px-3 py-2">
           <div className="flex items-center gap-2">
             <PontoaMaxMark size={28} />
             <PontoaMaxWordmark variant="light" size={16} />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={doLogout} title="Sair" aria-label="Sair">
+            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={doLogout} title="Sair" aria-label="Sair">
               <LogOut className="h-5 w-5" />
             </Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
+              <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Abrir menu">
+                <Menu className="h-5 w-5" />
+              </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-[#0B132B] text-white border-r-0">
+            <SheetContent side="left" className="p-0 w-[85vw] max-w-xs bg-[#0B132B] text-white border-r-0 overflow-y-auto">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <Brand />
               <PublicLinkCard />
@@ -163,7 +165,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
           </Sheet>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="flex-1 p-3 sm:p-4 md:p-8 min-w-0">{children}</main>
       </div>
     </div>
   );

@@ -45,7 +45,7 @@ function NpsPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-slate-50 flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center space-y-3">
             <CheckCircle2 className="h-12 w-12 mx-auto text-green-600" />
@@ -61,7 +61,7 @@ function NpsPage() {
     n <= 6 ? "bg-red-500 hover:bg-red-600" : n <= 8 ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-600 hover:bg-green-700";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-slate-50 flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle className="text-lg">Como foi sua experiência?</CardTitle>

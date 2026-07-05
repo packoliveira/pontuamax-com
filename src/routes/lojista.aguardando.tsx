@@ -41,7 +41,7 @@ function Aguardando() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-orange-50 p-4">
+    <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-violet-50 to-orange-50 p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">

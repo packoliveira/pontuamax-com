@@ -49,9 +49,9 @@ function Page() {
     } finally { setBusy(false); }
   };
 
-  if (!loja) return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
+  if (!loja) return <div className="min-h-dvh grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   if (!uid) return (
-    <div className="min-h-screen grid place-items-center p-6 text-center">
+    <div className="min-h-dvh grid place-items-center p-6 text-center">
       <div><p>Você precisa entrar na sua conta primeiro.</p>
         <Button className="mt-4" onClick={() => nav({ to: "/$slug", params: { slug } })}>Ir para {loja.nome_fantasia}</Button>
       </div>
@@ -59,7 +59,7 @@ function Page() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-dvh bg-slate-50 p-6">
       <div className="max-w-lg mx-auto space-y-4">
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-primary" />
