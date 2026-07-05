@@ -175,6 +175,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         // Busca cliente: 1º por CPF (mais confiável), depois por telefone.
         let clientProfile: { id: string } | null = null;
+        let clientJustCreated = false;
         if (cpf) {
           const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
           if (p.data) clientProfile = p.data;
@@ -198,6 +199,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
             return logAndRespond("erro", `falha criando cliente: ${created.error?.message ?? "?"}`, 500);
           }
           clientProfile = { id: created.data.user.id };
+          clientJustCreated = true;
           await supabaseAdmin.from("profiles").upsert({
             id: clientProfile.id,
             full_name: nome,
@@ -217,9 +219,11 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
             {
               store_id: loja.id,
               user_id: clientProfile.id,
-              // Cliente entrou por venda automática; marca como cadastro pendente
-              // (só quando é criação nova — se já existir, mantém o valor atual)
-              pending_registration: true,
+              // Marca como "cadastro pendente" só quando é vínculo/cliente novo,
+              // para o lojista visualizar quem entrou por venda automática e
+              // ainda não completou o próprio cadastro. Vendas subsequentes do
+              // mesmo cliente não devem reabrir esse status.
+              ...(clientJustCreated ? { pending_registration: true } : {}),
             },
             { onConflict: "store_id,user_id", ignoreDuplicates: false },
           )
