@@ -610,17 +610,21 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
   });
   const link = typeof window !== "undefined" ? `${window.location.origin}/${loja.slug}?indicou=TELEFONE` : "";
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><Gift className="h-4 w-4" /> Indicação amigo → amigo</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Gift className="h-4 w-4" /></span>
+          Indicação amigo → amigo
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Cada cliente ganha um link único (com o telefone dele) para compartilhar. Quando o amigo se cadastrar por esse link e fizer a 1ª compra, os dois recebem pontos.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={ativa} onCheckedChange={setAtiva} />
-          <span className="text-sm">Ativar programa de indicação</span>
+          <span className="text-sm text-[#0F172A]">Ativar programa de indicação</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -632,10 +636,10 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
             <Input type="number" min={0} value={bIndicado} onChange={(e) => setBIndicado(e.target.value)} disabled={!ativa} />
           </div>
         </div>
-        <div className="rounded-md border p-3 text-xs text-muted-foreground break-all">
-          Formato do link: <code>{link}</code>
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-xs text-[#64748B] break-all">
+          Formato do link: <code className="text-[#0F172A]">{link}</code>
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar indicação"}
         </Button>
       </CardContent>
@@ -662,30 +666,34 @@ function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_c
     onError: (e) => toast.error((e as Error).message),
   });
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><Star className="h-4 w-4" /> Pesquisa de satisfação (NPS)</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Star className="h-4 w-4" /></span>
+          Pesquisa de satisfação (NPS)
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Após cada venda lançada, o cliente recebe um link no WhatsApp para dar uma nota de 0 a 10. Requer WhatsApp ativo.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={on} onCheckedChange={setOn} />
-          <span className="text-sm">Ativar pesquisa NPS pós-venda</span>
+          <span className="text-sm text-[#0F172A]">Ativar pesquisa NPS pós-venda</span>
         </div>
         <div className="flex items-center gap-2">
           <Switch checked={askC} onCheckedChange={setAskC} disabled={!on} />
-          <span className="text-sm">Pedir comentário opcional</span>
+          <span className="text-sm text-[#0F172A]">Pedir comentário opcional</span>
         </div>
         <div>
           <Label>Mensagem enviada</Label>
           <Textarea rows={4} value={tpl} onChange={(e) => setTpl(e.target.value)} disabled={!on} />
-          <p className="text-[11px] text-muted-foreground mt-1">
+          <p className="text-[11px] text-[#64748B] mt-1">
             Variáveis: <code>{"{nome_cliente}"}</code>, <code>{"{nome_loja}"}</code>, <code>{"{link_nps}"}</code>
           </p>
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar NPS"}
         </Button>
       </CardContent>
