@@ -100,10 +100,22 @@ function ClientePage() {
       style={style}
       className="min-h-dvh bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
     >
-      {/* Aura de fundo em índigo — bem sutil, fica atrás de tudo */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.18),transparent_60%)]" />
-      <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full bg-violet-600/10 blur-3xl" />
+      {/* Aura de fundo derivada das cores da marca — bem sutil, fica atrás de tudo */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px]"
+        style={{ background: `radial-gradient(ellipse at top, color-mix(in oklab, ${loja.brand_primary} 22%, transparent), transparent 60%)` }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl opacity-40"
+        style={{ backgroundColor: loja.brand_primary }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full blur-3xl opacity-30"
+        style={{ backgroundColor: loja.brand_secondary }}
+      />
       <div className="relative">
         <ClienteFlow loja={loja} />
       </div>
