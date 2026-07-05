@@ -963,18 +963,19 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
   ];
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <MessageCircle className="h-4 w-4" />
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><MessageCircle className="h-4 w-4" /></span>
           WhatsApp (Evolution API)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
           <div>
-            <div className="text-sm font-medium">Envio automático de "pontos ganhos"</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-[#0F172A]">Envio automático de "pontos ganhos"</div>
+            <div className="text-xs text-[#64748B]">
               Dispara toda vez que o cliente ganha pontos (manual ou via Bling/Olist).
             </div>
           </div>
@@ -994,7 +995,7 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
         <div>
           <Label>API Key (header apikey)</Label>
           <Input type="password" value={apikey} onChange={(e) => setApikey(e.target.value)} placeholder="••••••••" />
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-[#64748B] mt-1">
             A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente final.
           </p>
         </div>
@@ -1009,7 +1010,7 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
               <button
                 key={v}
                 type="button"
-                className="text-[10px] px-1.5 py-0.5 rounded bg-muted hover:bg-muted-foreground/20 font-mono"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#0F172A] hover:bg-[#E5E7EB] font-mono transition-colors duration-200"
                 onClick={() => setTemplate((t) => `${t}${v}`)}
               >
                 {v}
@@ -1018,11 +1019,11 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
           </div>
         </div>
 
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar WhatsApp"}
         </Button>
 
-        <div className="rounded-md border p-3 space-y-2">
+        <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-2">
           <Label>Enviar mensagem de teste</Label>
           <div className="flex gap-2">
             <Input
@@ -1035,12 +1036,13 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
               variant="secondary"
               onClick={() => testar.mutate()}
               disabled={testar.isPending || !testPhone}
+              className="rounded-xl"
             >
               <Send className="h-4 w-4 mr-1" />
               {testar.isPending ? "Enviando..." : "Testar"}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[#64748B]">
             Prefixo 55 é adicionado automaticamente. Sucessos e erros aparecem em "Últimos 20 eventos" acima.
           </p>
         </div>
