@@ -1,6 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Sparkles, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram } from "lucide-react";
+import { PontoaMaxMark } from "@/components/pontoamax-logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -110,11 +111,12 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
 
   const Brand = () => (
     <div className="flex items-center gap-2 px-4 py-4 border-b">
-      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <Sparkles className="h-4 w-4" />
-      </div>
+      <PontoaMaxMark size={32} />
       <div>
-        <div className="text-sm font-semibold">QSF Club</div>
+        <div className="text-sm font-semibold tracking-tight">
+          <span className="text-primary">Pontoa</span>
+          <span style={{ color: "#22C55E" }}>Max</span>
+        </div>
         <div className="text-xs text-muted-foreground truncate max-w-[140px]">{loja?.nome_fantasia ?? "—"}</div>
       </div>
     </div>
@@ -136,10 +138,11 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden flex items-center justify-between border-b bg-background px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <span className="font-semibold">QSF Club</span>
+            <PontoaMaxMark size={28} />
+            <span className="font-semibold tracking-tight">
+              <span className="text-primary">Pontoa</span>
+              <span style={{ color: "#22C55E" }}>Max</span>
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />

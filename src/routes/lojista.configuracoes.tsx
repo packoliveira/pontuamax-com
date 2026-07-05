@@ -271,7 +271,7 @@ function IntegracoesCard({
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">
           Configure a URL abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
-          no QSF Club, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
+          no PontoaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
         </p>
 
         <div>

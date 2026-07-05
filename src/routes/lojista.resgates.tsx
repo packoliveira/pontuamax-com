@@ -163,7 +163,7 @@ function ResgatesPage() {
             <Input
               value={codigo}
               onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-              placeholder="QSF-XXXX-XXXX"
+              placeholder="Cole o código do voucher"
               className="font-mono uppercase"
               autoComplete="off"
             />

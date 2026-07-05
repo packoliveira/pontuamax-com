@@ -47,7 +47,7 @@ function Dashboard() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Olá, {loja.nome_fantasia}</h1>
-          <p className="text-sm text-muted-foreground">Sua página: <span className="font-mono">qsfclub.com/{loja.slug}</span></p>
+          <p className="text-sm text-muted-foreground">Sua página: <span className="font-mono">pontoamax.app/{loja.slug}</span></p>
         </div>
         <Link to="/lojista/lancar-venda">
           <Button>Lançar venda <ArrowRight className="h-4 w-4" /></Button>
