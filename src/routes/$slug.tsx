@@ -285,7 +285,12 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
               />
             ) : (
               <div
-                className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/30 border border-indigo-400/40"
+                className="relative h-12 w-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
+                style={{
+                  background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                  borderColor: `color-mix(in oklab, ${loja.brand_primary} 50%, transparent)`,
+                  boxShadow: `0 8px 20px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                }}
               >
                 {loja.nome_fantasia.charAt(0)}
               </div>
