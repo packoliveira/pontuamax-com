@@ -390,6 +390,15 @@ function ClientesPage() {
                     <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="truncate font-semibold text-[#0F172A]">{nome}</span>
+                      {c.pending_registration && (
+                        <Badge
+                          variant="secondary"
+                          className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200"
+                          title="Cliente criado por venda automática (PDV/site). Ainda não completou o próprio cadastro."
+                        >
+                          Cadastro pendente
+                        </Badge>
+                      )}
                       <Button
                         size="sm"
                         variant="ghost"
