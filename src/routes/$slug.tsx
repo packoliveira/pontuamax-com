@@ -1165,8 +1165,14 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
         )}
         <div className="text-[11px] text-muted-foreground mt-1 flex flex-wrap gap-x-2">
           <span>{formatDateTime(t.created_at)}</span>
+          {status === "pendente" && t.voucher_expires_at && (
+            <span>Válido até {formatDateTime(t.voucher_expires_at)}</span>
+          )}
           {status === "entregue" && t.delivered_at && (
-            <span className="text-green-700">Entregue {formatDateTime(t.delivered_at)}</span>
+            <span className="text-green-700">Utilizado em {formatDateTime(t.delivered_at)}</span>
+          )}
+          {status === "expirado" && t.voucher_expires_at && (
+            <span className="text-orange-700">Expirou em {formatDateTime(t.voucher_expires_at)}</span>
           )}
         </div>
       </div>
@@ -1182,10 +1188,12 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
 
 function VoucherStatusBadge({ status }: { status: string }) {
   if (status === "pendente")
-    return <Badge variant="outline" className="text-yellow-700 border-yellow-300"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
   if (status === "entregue")
-    return <Badge className="bg-green-600 hover:bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" /> Entregue</Badge>;
+    return <Badge className="bg-blue-600 hover:bg-blue-600 text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Utilizado</Badge>;
   if (status === "expirado")
-    return <Badge variant="outline" className="text-orange-600 border-orange-300"><AlertTriangle className="h-3 w-3 mr-1" /> Expirado</Badge>;
+    return <Badge className="bg-orange-500 hover:bg-orange-500 text-white"><AlertTriangle className="h-3 w-3 mr-1" /> Expirado</Badge>;
+  if (status === "cancelado")
+    return <Badge className="bg-red-600 hover:bg-red-600 text-white"><X className="h-3 w-3 mr-1" /> Cancelado</Badge>;
   return <Badge variant="secondary">{status}</Badge>;
 }
