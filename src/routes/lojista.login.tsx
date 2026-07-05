@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { traduzirErroAuth, isCredenciaisInvalidas } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sparkles, Loader2, Store, AlertCircle } from "lucide-react";
+import { Loader2, Store, AlertCircle } from "lucide-react";
+import { PontoaMaxMark } from "@/components/pontoamax-logo";
 import { toast } from "sonner";
 import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
@@ -102,15 +103,82 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-orange-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 text-white">
-            <Sparkles className="h-6 w-6" />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-[#F8FAFC]">
+      {/* Lado esquerdo — ilustração abstrata */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12 text-white"
+        style={{ background: "linear-gradient(135deg, #0F4CD7 0%, #155EEF 50%, #1E40AF 100%)" }}>
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="rounded-lg bg-white/10 p-1.5 backdrop-blur">
+            <PontoaMaxMark size={28} />
           </div>
-          <CardTitle className="mt-4">Painel do lojista</CardTitle>
-          <CardDescription>Entre com o email cadastrado</CardDescription>
-        </CardHeader>
+          <span className="text-xl font-semibold tracking-tight">
+            <span className="text-white">Pontoa</span>
+            <span style={{ color: "#4ADE80" }}>Max</span>
+          </span>
+        </div>
+
+        {/* Ilustração: nós conectados representando relacionamento e crescimento */}
+        <svg className="absolute inset-0 h-full w-full opacity-40" viewBox="0 0 600 800" fill="none" aria-hidden="true">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#22C55E" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#155EEF" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <rect width="600" height="800" fill="url(#glow)" />
+          <g stroke="#FFFFFF" strokeOpacity="0.35" strokeWidth="1.5" fill="none">
+            <path d="M60 620 Q 200 420 340 500 T 560 260" />
+            <path d="M80 700 Q 240 560 380 600 T 580 380" />
+            <path d="M40 500 Q 180 320 300 380 T 540 160" />
+          </g>
+          <g fill="#FFFFFF">
+            <circle cx="60" cy="620" r="6" />
+            <circle cx="340" cy="500" r="6" />
+            <circle cx="560" cy="260" r="6" />
+            <circle cx="80" cy="700" r="5" />
+            <circle cx="380" cy="600" r="5" />
+            <circle cx="300" cy="380" r="5" />
+          </g>
+          <g fill="#22C55E">
+            <circle cx="540" cy="160" r="9" />
+            <circle cx="580" cy="380" r="7" />
+          </g>
+        </svg>
+
+        <div className="relative z-10 max-w-md space-y-4">
+          <h2 className="text-3xl font-bold leading-tight tracking-tight">
+            Fidelize, engaje e faça seu negócio crescer.
+          </h2>
+          <p className="text-white/80">
+            Pontos, cashback, CRM e campanhas em uma única plataforma moderna e minimalista.
+          </p>
+          <div className="flex gap-6 pt-4 text-sm">
+            <div>
+              <div className="text-2xl font-bold">+30%</div>
+              <div className="text-white/70">Recompra</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">-40%</div>
+              <div className="text-white/70">Churn</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">2x</div>
+              <div className="text-white/70">Ticket médio</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Lado direito — card de login */}
+      <div className="flex items-center justify-center p-6 md:p-10">
+        <Card className="w-full max-w-md rounded-2xl border-[#E2E8F0] shadow-sm">
+          <CardHeader className="text-center">
+            <div className="mx-auto lg:hidden">
+              <PontoaMaxMark size={44} />
+            </div>
+            <CardTitle className="mt-2 text-2xl">Bem-vindo de volta</CardTitle>
+            <CardDescription>Entre no painel do lojista PontoaMax</CardDescription>
+          </CardHeader>
         <CardContent>
           {sessionEmail && (
             <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-2">
@@ -158,7 +226,11 @@ function Login() {
               <Label htmlFor="senha">Senha</Label>
               <PasswordInput id="senha" value={senha} onChange={(e) => setSenha(e.target.value)} required autoComplete="current-password" />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full rounded-xl bg-[#155EEF] text-white hover:bg-[#0F4CD7] transition-all duration-200"
+              disabled={loading}
+            >
               {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verificando credenciais e loja...</>) : "Entrar"}
             </Button>
             <button
@@ -170,12 +242,13 @@ function Login() {
             </button>
             <p className="text-xs text-center text-muted-foreground">
               Ainda não tem loja?{" "}
-              <Link to="/lojista/onboarding" className="underline text-violet-700">Criar minha loja</Link>
+              <Link to="/lojista/onboarding" className="underline text-[#155EEF]">Criar minha loja</Link>
             </p>
           </form>
         </CardContent>
-      </Card>
-      <EsqueciSenhaDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} />
+        </Card>
+        <EsqueciSenhaDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} />
+      </div>
     </div>
   );
 }
