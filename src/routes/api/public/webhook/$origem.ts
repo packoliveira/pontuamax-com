@@ -208,17 +208,6 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           }
         }
 
-        if (!Number.isFinite(valor) || valor <= 0) {
-          // Olist envia notificações leves (inclusao_pedido, alteracao_pedido)
-          // que contêm apenas id/numero/cliente/situação — sem o total do pedido.
-          // Sem valor não há como creditar pontos. Devolvemos 200 pra Olist
-          // não desativar o webhook, mas registramos como erro pro lojista ver.
-          return logAndRespond(
-            "erro",
-            `Notificação Olist "${tipoEvento || "sem tipo"}" recebida (pedido ${idVenda}), mas não conseguimos obter o valor total do pedido via API. Verifique o token OLIST_API_TOKEN ou aguarde o faturamento.`,
-            200,
-          );
-        }
         if (!cpf && !telefone) {
           return logAndRespond("erro", "informe CPF ou telefone do cliente", 400);
         }
@@ -292,6 +281,19 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           .single();
         if (linkRes.error) return logAndRespond("erro", linkRes.error.message, 500);
         const link = linkRes.data;
+
+        if (!Number.isFinite(valor) || valor <= 0) {
+          // Olist envia notificações leves (inclusao_pedido, alteracao_pedido)
+          // que podem conter CPF/nome antes do total do pedido estar disponível.
+          // Nesses casos, já puxamos o cliente para o painel como cadastro
+          // pendente e só deixamos de pontuar/cashback até receber o valor.
+          return logAndRespond(
+            "erro",
+            `Cliente vinculado como pendente, mas a notificação Olist "${tipoEvento || "sem tipo"}" do pedido ${idVenda} ainda não trouxe valor total para pontuar.`,
+            200,
+            { cliente_vinculado: true },
+          );
+        }
 
         // Calcula pontos + cashback conforme modalidade
         const inclP = loja.modalidade !== "cashback";
