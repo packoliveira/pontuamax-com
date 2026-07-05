@@ -1,7 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram } from "lucide-react";
-import { PontoaMaxMark } from "@/components/pontoamax-logo";
+import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -55,22 +55,22 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
 
   const PublicLinkCard = () =>
     loja?.slug ? (
-      <div className="mx-3 my-2 rounded-md border bg-muted/40 p-2 text-xs">
-        <div className="mb-1 text-muted-foreground">Sua página pública</div>
+      <div className="mx-3 my-2 rounded-lg border border-white/10 bg-white/5 p-2 text-xs">
+        <div className="mb-1 text-white/60">Sua página pública</div>
         <div className="flex items-center gap-1">
           <a
             href={`/${loja.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 truncate font-mono text-foreground hover:underline"
+            className="flex-1 truncate font-mono text-white hover:underline"
             title={publicUrl ?? ""}
           >
             /{loja.slug}
           </a>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={copyLink} title="Copiar link">
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white" onClick={copyLink} title="Copiar link">
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" asChild title="Abrir">
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white" asChild title="Abrir">
             <a href={`/${loja.slug}`} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
@@ -97,11 +97,13 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
             to={item.to as "/lojista"}
             onClick={onClick}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              active
+                ? "bg-white/10 text-white"
+                : "text-white/70 hover:bg-white/5 hover:text-white",
             )}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[#14CBA8]" : "text-white/60")} />
             {item.label}
           </Link>
         );
@@ -110,26 +112,23 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
   );
 
   const Brand = () => (
-    <div className="flex items-center gap-2 px-4 py-4 border-b">
+    <div className="flex items-center gap-2 px-4 py-4 border-b border-white/10">
       <PontoaMaxMark size={32} />
-      <div>
-        <div className="text-sm font-semibold tracking-tight">
-          <span className="text-primary">Pontoa</span>
-          <span style={{ color: "#22C55E" }}>Max</span>
-        </div>
-        <div className="text-xs text-muted-foreground truncate max-w-[140px]">{loja?.nome_fantasia ?? "—"}</div>
+      <div className="min-w-0">
+        <PontoaMaxWordmark variant="dark" size={15} />
+        <div className="text-xs text-white/50 truncate max-w-[140px]">{loja?.nome_fantasia ?? "—"}</div>
       </div>
     </div>
   );
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <aside className="hidden md:flex md:w-64 md:flex-col border-r bg-background">
+    <div className="flex min-h-screen bg-[#F8FAFC]">
+      <aside className="hidden md:flex md:w-64 md:flex-col bg-[#0B132B] text-white">
         <Brand />
         <PublicLinkCard />
         <div className="flex-1"><NavList /></div>
-        <div className="p-3 border-t flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="flex-1 justify-start" onClick={doLogout}>
+        <div className="p-3 border-t border-white/10 flex items-center gap-2">
+          <Button variant="ghost" size="sm" className="flex-1 justify-start text-white/80 hover:bg-white/10 hover:text-white" onClick={doLogout}>
             <LogOut className="h-4 w-4" /> Sair
           </Button>
           <ThemeToggle />
@@ -139,10 +138,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
         <header className="md:hidden flex items-center justify-between border-b bg-background px-4 py-3">
           <div className="flex items-center gap-2">
             <PontoaMaxMark size={28} />
-            <span className="font-semibold tracking-tight">
-              <span className="text-primary">Pontoa</span>
-              <span style={{ color: "#22C55E" }}>Max</span>
-            </span>
+            <PontoaMaxWordmark variant="light" size={16} />
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />
@@ -153,13 +149,13 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72">
+            <SheetContent side="left" className="p-0 w-72 bg-[#0B132B] text-white border-r-0">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <Brand />
               <PublicLinkCard />
               <NavList onClick={() => setOpen(false)} />
-              <div className="p-3 border-t">
-                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setOpen(false); doLogout(); }}>
+              <div className="p-3 border-t border-white/10">
+                <Button variant="ghost" size="sm" className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white" onClick={() => { setOpen(false); doLogout(); }}>
                   <LogOut className="h-4 w-4" /> Sair
                 </Button>
               </div>

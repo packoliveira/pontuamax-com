@@ -64,7 +64,7 @@
 :root {
   --radius: 0.625rem;
   /* Tema claro do painel interno (Lojista + Admin).
-     Identidade visual PontoaMax: azul profundo (#155EEF) como primária,
+     Identidade visual PontoaMax: azul profundo (#2563EB) como primária,
      verde crescimento (#22C55E) como accent/sucesso e laranja (#F59E0B)
      reservado para avisos/promoções. Fonte: Inter. */
   --background: #F8FAFC;
@@ -73,7 +73,7 @@
   --card-foreground: #0F172A;
   --popover: #FFFFFF;
   --popover-foreground: #0F172A;
-  --primary: #155EEF;
+  --primary: #2563EB;
   --primary-foreground: #FFFFFF;
   --secondary: #F1F5F9;
   --secondary-foreground: #0F172A;
@@ -83,22 +83,23 @@
   --accent-foreground: #FFFFFF;
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #155EEF;
-  --chart-1: #155EEF;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #2563EB;
+  --chart-1: #2563EB;
   --chart-2: #22C55E;
   --chart-3: #F59E0B;
-  --chart-4: #0EA5E9;
-  --chart-5: #8B5CF6;
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #0F172A;
-  --sidebar-primary: #155EEF;
+  --chart-4: #14CBA8;
+  --chart-5: #6D28D9;
+  /* Sidebar interna do painel: fundo escuro premium (SaaS moderno) */
+  --sidebar: #0B132B;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #2563EB;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #EFF4FF;
-  --sidebar-accent-foreground: #155EEF;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #155EEF;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #2563EB;
 }
 
 .dark {

@@ -8,7 +8,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { traduzirErroAuth, isCredenciaisInvalidas } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Store, AlertCircle } from "lucide-react";
-import { PontoaMaxMark } from "@/components/pontoamax-logo";
+import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
 import { toast } from "sonner";
 import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
@@ -104,66 +104,70 @@ function Login() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-[#F8FAFC]">
-      {/* Lado esquerdo — ilustração abstrata */}
-      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12 text-white"
-        style={{ background: "linear-gradient(135deg, #0F4CD7 0%, #155EEF 50%, #1E40AF 100%)" }}>
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="rounded-lg bg-white/10 p-1.5 backdrop-blur">
-            <PontoaMaxMark size={28} />
-          </div>
-          <span className="text-xl font-semibold tracking-tight">
-            <span className="text-white">Pontoa</span>
-            <span style={{ color: "#4ADE80" }}>Max</span>
-          </span>
-        </div>
-
-        {/* Ilustração: nós conectados representando relacionamento e crescimento */}
-        <svg className="absolute inset-0 h-full w-full opacity-40" viewBox="0 0 600 800" fill="none" aria-hidden="true">
+      {/* Lado esquerdo — ilustração abstrata com degradê da marca */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12 text-white bg-[#0B132B]">
+        {/* Blobs em degradê roxo → azul → verde-água */}
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <defs>
-            <radialGradient id="glow" cx="50%" cy="30%" r="70%">
-              <stop offset="0%" stopColor="#22C55E" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#155EEF" stopOpacity="0" />
+            <linearGradient id="pm-blob-a" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#6D28D9" />
+              <stop offset="55%" stopColor="#2563EB" />
+              <stop offset="100%" stopColor="#14CBA8" />
+            </linearGradient>
+            <radialGradient id="pm-blob-b" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#14CBA8" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#14CBA8" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id="pm-blob-c" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#6D28D9" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#6D28D9" stopOpacity="0" />
             </radialGradient>
           </defs>
-          <rect width="600" height="800" fill="url(#glow)" />
-          <g stroke="#FFFFFF" strokeOpacity="0.35" strokeWidth="1.5" fill="none">
-            <path d="M60 620 Q 200 420 340 500 T 560 260" />
-            <path d="M80 700 Q 240 560 380 600 T 580 380" />
-            <path d="M40 500 Q 180 320 300 380 T 540 160" />
+          <rect width="600" height="800" fill="#0B132B" />
+          <circle cx="120" cy="180" r="260" fill="url(#pm-blob-c)" />
+          <circle cx="520" cy="640" r="300" fill="url(#pm-blob-b)" />
+          <g opacity="0.85">
+            <rect x="380" y="120" width="180" height="180" rx="40" fill="url(#pm-blob-a)" transform="rotate(18 470 210)" opacity="0.35" />
+            <rect x="60" y="480" width="220" height="220" rx="60" fill="url(#pm-blob-a)" transform="rotate(-14 170 590)" opacity="0.3" />
+            <circle cx="480" cy="360" r="70" fill="none" stroke="url(#pm-blob-a)" strokeWidth="2" opacity="0.5" />
+            <circle cx="280" cy="260" r="120" fill="none" stroke="url(#pm-blob-a)" strokeWidth="2" opacity="0.4" />
+            <circle cx="200" cy="720" r="90" fill="none" stroke="url(#pm-blob-a)" strokeWidth="2" opacity="0.35" />
           </g>
-          <g fill="#FFFFFF">
-            <circle cx="60" cy="620" r="6" />
-            <circle cx="340" cy="500" r="6" />
-            <circle cx="560" cy="260" r="6" />
-            <circle cx="80" cy="700" r="5" />
-            <circle cx="380" cy="600" r="5" />
-            <circle cx="300" cy="380" r="5" />
-          </g>
-          <g fill="#22C55E">
-            <circle cx="540" cy="160" r="9" />
-            <circle cx="580" cy="380" r="7" />
+          {/* Grid sutil */}
+          <g stroke="#FFFFFF" strokeOpacity="0.04" strokeWidth="1">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <line key={`v${i}`} x1={i * 55} y1="0" x2={i * 55} y2="800" />
+            ))}
+            {Array.from({ length: 16 }).map((_, i) => (
+              <line key={`h${i}`} x1="0" y1={i * 55} x2="600" y2={i * 55} />
+            ))}
           </g>
         </svg>
 
+        <div className="relative z-10 flex items-center gap-3">
+          <PontoaMaxMark size={36} />
+          <PontoaMaxWordmark variant="dark" size={22} />
+        </div>
+
         <div className="relative z-10 max-w-md space-y-4">
           <h2 className="text-3xl font-bold leading-tight tracking-tight">
-            Fidelize, engaje e faça seu negócio crescer.
+            A plataforma completa de fidelização, cashback e CRM.
           </h2>
-          <p className="text-white/80">
-            Pontos, cashback, CRM e campanhas em uma única plataforma moderna e minimalista.
+          <p className="text-white/70">
+            Confiança, inteligência e crescimento em uma experiência SaaS moderna.
           </p>
-          <div className="flex gap-6 pt-4 text-sm">
+          <div className="flex gap-8 pt-4 text-sm">
             <div>
               <div className="text-2xl font-bold">+30%</div>
-              <div className="text-white/70">Recompra</div>
+              <div className="text-white/60">Recompra</div>
             </div>
             <div>
               <div className="text-2xl font-bold">-40%</div>
-              <div className="text-white/70">Churn</div>
+              <div className="text-white/60">Churn</div>
             </div>
             <div>
               <div className="text-2xl font-bold">2x</div>
-              <div className="text-white/70">Ticket médio</div>
+              <div className="text-white/60">Ticket médio</div>
             </div>
           </div>
         </div>
@@ -171,10 +175,11 @@ function Login() {
 
       {/* Lado direito — card de login */}
       <div className="flex items-center justify-center p-6 md:p-10">
-        <Card className="w-full max-w-md rounded-2xl border-[#E2E8F0] shadow-sm">
+        <Card className="w-full max-w-md rounded-2xl border-[#E5E7EB] shadow-sm">
           <CardHeader className="text-center">
-            <div className="mx-auto lg:hidden">
+            <div className="mx-auto lg:hidden flex flex-col items-center gap-2">
               <PontoaMaxMark size={44} />
+              <PontoaMaxWordmark variant="light" size={18} />
             </div>
             <CardTitle className="mt-2 text-2xl">Bem-vindo de volta</CardTitle>
             <CardDescription>Entre no painel do lojista PontoaMax</CardDescription>
@@ -228,7 +233,7 @@ function Login() {
             </div>
             <Button
               type="submit"
-              className="w-full rounded-xl bg-[#155EEF] text-white hover:bg-[#0F4CD7] transition-all duration-200"
+              className="w-full rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm transition-all duration-200"
               disabled={loading}
             >
               {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verificando credenciais e loja...</>) : "Entrar"}
@@ -242,7 +247,7 @@ function Login() {
             </button>
             <p className="text-xs text-center text-muted-foreground">
               Ainda não tem loja?{" "}
-              <Link to="/lojista/onboarding" className="underline text-[#155EEF]">Criar minha loja</Link>
+              <Link to="/lojista/onboarding" className="underline text-[#2563EB]">Criar minha loja</Link>
             </p>
           </form>
         </CardContent>
