@@ -27,10 +27,12 @@ function extractOlistPayload(p: Record<string, unknown>): {
   cpf: string;
   telefone: string;
   nome: string;
+  tipoEvento: string;
 } {
   // Desembrulha envelopes comuns
   const root =
     (p.pedido as Record<string, unknown>) ??
+    (p.dados as Record<string, unknown>) ??
     (p.data as Record<string, unknown>) ??
     (p.venda as Record<string, unknown>) ??
     p;
@@ -39,6 +41,7 @@ function extractOlistPayload(p: Record<string, unknown>): {
   const fonePrincipal =
     (cliente.fone as string | undefined) ??
     (cliente.celular as string | undefined) ??
+    (cliente.telefone as string | undefined) ??
     (fones[0]?.fone as string | undefined) ??
     (fones[0]?.numero as string | undefined) ??
     "";
@@ -53,11 +56,23 @@ function extractOlistPayload(p: Record<string, unknown>): {
   ).trim();
 
   const valorRaw =
-    p.valor ?? root.total ?? root.valor_total ?? root.total_pedido ?? root.valor ?? 0;
+    p.valor ??
+    root.total ??
+    root.valor_total ??
+    root.total_pedido ??
+    root.valor ??
+    root.totalPedido ??
+    root.valorTotal ??
+    0;
   const valor = typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
 
   const cpfRaw = String(
-    p.cpf_cliente ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
+    p.cpf_cliente ??
+      cliente.cpfCnpj ??
+      cliente.cpf_cnpj ??
+      cliente.documento ??
+      cliente.cpf ??
+      "",
   );
   const cpf = cpfRaw.replace(/\D/g, "");
 
@@ -66,7 +81,9 @@ function extractOlistPayload(p: Record<string, unknown>): {
 
   const nome = String(p.nome_cliente ?? cliente.nome ?? cliente.razao_social ?? "").trim() || "Cliente";
 
-  return { idVenda, valor, cpf, telefone, nome };
+  const tipoEvento = String(p.tipo ?? p.event ?? p.evento ?? "").trim().toLowerCase();
+
+  return { idVenda, valor, cpf, telefone, nome, tipoEvento };
 }
 
 const CORS = {
