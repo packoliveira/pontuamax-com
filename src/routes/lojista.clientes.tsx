@@ -28,6 +28,7 @@ const NIVEL_COR: Record<string, string> = {
 
 type FiltroCampo = "todos" | "nome" | "telefone" | "cpf";
 type FiltroNivel = "todos" | "bronze" | "prata" | "ouro";
+type FiltroStatus = "todos" | "pendentes" | "cadastrados";
 
 function NivelBadge({ pontos, nivel }: { pontos: number; nivel: string }) {
   const prog = progressoNivel(pontos);
@@ -126,6 +127,7 @@ function ClientesPage() {
   const [q, setQ] = useState("");
   const [filtroCampo, setFiltroCampo] = useState<FiltroCampo>("todos");
   const [filtroNivel, setFiltroNivel] = useState<FiltroNivel>("todos");
+  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("todos");
   const [editing, setEditing] = useState<{ userId: string; value: string } | null>(null);
   const [tagInput, setTagInput] = useState<Record<string, string>>({});
   const [openNew, setOpenNew] = useState(false);
@@ -245,6 +247,8 @@ function ClientesPage() {
 
   const filtered = clientes.filter((c) => {
     if (filtroNivel !== "todos" && c.nivel !== filtroNivel) return false;
+    if (filtroStatus === "pendentes" && !c.pending_registration) return false;
+    if (filtroStatus === "cadastrados" && c.pending_registration) return false;
     if (!q) return true;
     const s = q.toLowerCase().trim();
     const digits = q.replace(/\D/g, "");
@@ -262,6 +266,7 @@ function ClientesPage() {
   });
   const inclP = loja.modalidade !== "cashback";
   const inclC = loja.modalidade !== "pontos";
+  const pendentesCount = clientes.filter((c) => c.pending_registration).length;
 
   return (
     <div className="space-y-8">
@@ -271,6 +276,18 @@ function ClientesPage() {
           <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Clientes</h1>
           <p className="mt-1 text-sm text-[#64748B]">
             {filtered.length} de {clientes.length} cliente(s)
+            {pendentesCount > 0 && (
+              <>
+                {" · "}
+                <button
+                  type="button"
+                  onClick={() => setFiltroStatus("pendentes")}
+                  className="font-semibold text-[#B45309] hover:underline"
+                >
+                  {pendentesCount} pendente(s) de cadastro
+                </button>
+              </>
+            )}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
