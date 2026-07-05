@@ -247,7 +247,7 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
           }
           // Reapontar transações e notas fiscais
           await supabaseAdmin.from("transactions").update({ client_user_id: context.userId }).eq("client_user_id", p.id);
-          await supabaseAdmin.from("fiscal_notes").update({ client_user_id: p.id === p.id ? context.userId : p.id }).eq("client_user_id", p.id);
+          await supabaseAdmin.from("fiscal_notes").update({ client_user_id: context.userId }).eq("client_user_id", p.id);
           // Remover roles/profile e auth user pendente
           await supabaseAdmin.from("user_roles").delete().eq("user_id", p.id);
           await supabaseAdmin.from("profiles").delete().eq("id", p.id);
