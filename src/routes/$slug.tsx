@@ -176,6 +176,7 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   return (
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
+      <BannerHero loja={loja} />
       {isOwnerPreview ? (
         <OwnerPreviewBanner />
       ) : isLoading || hydrating || authenticating || ownerCheckPending ? (
