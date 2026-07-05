@@ -428,7 +428,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     await supabaseAdmin.from("user_roles").upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id,role" });
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
-      .upsert({ store_id: data.store_id, user_id: userId }, { onConflict: "store_id,user_id" })
+      .upsert(
+        { store_id: data.store_id, user_id: userId, pending_registration: false },
+        { onConflict: "store_id,user_id" },
+      )
       .select("*")
       .single();
     if (error) throw new Error(error.message);
