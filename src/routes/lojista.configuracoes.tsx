@@ -429,17 +429,19 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
   });
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Instagram className="h-4 w-4" /> Poste no Instagram e ganhe pontos
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Instagram className="h-4 w-4" /></span>
+          Poste no Instagram e ganhe pontos
           <span className="ml-auto"><Switch checked={on} onCheckedChange={setOn} /></span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Quando ativo, os clientes enviam o link do post do Instagram pela página de vocês e você aprova em
-          {" "}<a href="/lojista/instagram" className="underline">Posts do Instagram</a> para creditar os pontos.
+          {" "}<a href="/lojista/instagram" className="text-[#2563EB] hover:underline">Posts do Instagram</a> para creditar os pontos.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -463,7 +465,7 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
             placeholder={`Ex:\n1. Poste uma foto ou reel usando nossos produtos\n2. Marque @${handle || "sua_loja"} na foto\n3. Use a #suahashtag\n4. Perfil precisa estar público`}
           />
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar configurações"}
         </Button>
       </CardContent>
