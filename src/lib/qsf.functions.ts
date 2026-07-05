@@ -454,6 +454,14 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
       .update({ full_name: data.nome, phone: phoneDigits, cpf: cpfDigits })
       .eq("id", profile.data.id);
 
+    // Marca como cadastro completo em TODAS as lojas onde este CPF estava
+    // pendente (pode ter comprado em mais de uma loja antes de se cadastrar).
+    await supabaseAdmin
+      .from("store_clients")
+      .update({ pending_registration: false })
+      .eq("user_id", profile.data.id)
+      .eq("pending_registration", true);
+
     return { claimed: true as const, email };
   });
 
