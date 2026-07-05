@@ -95,25 +95,26 @@ function ConfigPage() {
     onError: (e) => toast.error((e as Error).message),
   });
 
-  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
+  if (!loja) return <div className="p-6 text-sm text-[#64748B]">Carregando...</div>;
 
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">Configurações</h1>
-        <p className="text-sm text-muted-foreground">Personalize a página do cliente e as regras de recompensa</p>
+    <div className="space-y-8 max-w-5xl">
+      <div className="space-y-1">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">Ajustes</div>
+        <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">Configurações</h1>
+        <p className="text-sm text-[#64748B]">Personalize a página do cliente, regras de recompensa e integrações</p>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Card><CardHeader><CardTitle className="text-base">Dados da loja</CardTitle></CardHeader><CardContent className="space-y-3">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Dados da loja</CardTitle></CardHeader><CardContent className="space-y-3">
             <div><Label>Nome fantasia</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
             <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} /></div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
             <AssetUploader
               storeId={loja.id}
               kind="logo"
@@ -146,12 +147,12 @@ function ConfigPage() {
             </div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Modalidade de recompensa</CardTitle></CardHeader><CardContent className="space-y-4">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Modalidade de recompensa</CardTitle></CardHeader><CardContent className="space-y-4">
             <RadioGroup value={modalidade} onValueChange={(v) => setModalidade(v as Modalidade)}>
               {(["pontos", "cashback", "ambos"] as const).map((m) => (
-                <div key={m} className="flex items-center gap-2">
+                <div key={m} className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] px-3 py-2 hover:bg-[#F8FAFC] transition-colors duration-200">
                   <RadioGroupItem value={m} id={m} />
-                  <Label htmlFor={m} className="capitalize">{m}</Label>
+                  <Label htmlFor={m} className="capitalize text-[#0F172A] cursor-pointer">{m}</Label>
                 </div>
               ))}
             </RadioGroup>
@@ -164,31 +165,31 @@ function ConfigPage() {
             <div>
               <Label>Validade do voucher de resgate (dias)</Label>
               <Input type="number" min="1" max="365" value={validadeVoucher} onChange={(e) => setValidadeVoucher(e.target.value)} />
-              <p className="text-xs text-muted-foreground mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
+              <p className="text-xs text-[#64748B] mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
             </div>
-            <div className="rounded-md border p-3 space-y-3">
-              <div className="text-sm font-semibold">Visibilidade dos vouchers para o cliente</div>
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
+              <div className="text-sm font-semibold text-[#0F172A]">Visibilidade dos vouchers para o cliente</div>
               <div className="flex items-start justify-between gap-3">
-                <div className="text-xs text-muted-foreground">
-                  <div className="font-medium text-foreground text-sm">Manter voucher visível após utilização</div>
+                <div className="text-xs text-[#64748B]">
+                  <div className="font-medium text-[#0F172A] text-sm">Manter voucher visível após utilização</div>
                   Se ligado, o cliente continua vendo o voucher como "Utilizado" na lista dele. Se desligado (padrão), o voucher some assim que você confirma a entrega.
                 </div>
                 <Switch checked={voucherVisivelAposUso} onCheckedChange={setVoucherVisivelAposUso} />
               </div>
               <div className="flex items-start justify-between gap-3">
-                <div className="text-xs text-muted-foreground">
-                  <div className="font-medium text-foreground text-sm">Mostrar vouchers expirados no histórico</div>
+                <div className="text-xs text-[#64748B]">
+                  <div className="font-medium text-[#0F172A] text-sm">Mostrar vouchers expirados no histórico</div>
                   Se ligado (padrão), o cliente vê os vouchers expirados como aviso. Desligue para escondê-los.
                 </div>
                 <Switch checked={voucherMostrarExpirados} onCheckedChange={setVoucherMostrarExpirados} />
               </div>
             </div>
-            <div className="rounded-md border p-3 text-xs text-muted-foreground">
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 text-xs text-[#64748B]">
               Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente com base nos pontos.
             </div>
           </CardContent></Card>
 
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg">
+          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg" className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200">
             {salvar.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
 
@@ -201,8 +202,11 @@ function ConfigPage() {
           <ValidadePontosCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
-          <div className="text-sm font-semibold mb-2 text-muted-foreground">Prévia ao vivo</div>
-          <BrandPreview nome={nome} logo={logo} cor1={cor1} cor2={cor2} modalidade={modalidade} />
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">Prévia ao vivo</div>
+          <div className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden bg-white">
+            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
+            <BrandPreview nome={nome} logo={logo} cor1={cor1} cor2={cor2} modalidade={modalidade} />
+          </div>
         </div>
       </div>
     </div>
