@@ -759,7 +759,9 @@ export type Database = {
           slug: string
           subscription_status: Database["public"]["Enums"]["subscription_status"]
           telefone: string | null
+          voucher_mostrar_expirados: boolean
           voucher_validade_dias: number
+          voucher_visivel_apos_uso: boolean
           webhook_last_at: string | null
           webhook_secret: string
           whatsapp_enabled: boolean
@@ -817,7 +819,9 @@ export type Database = {
           slug: string
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           telefone?: string | null
+          voucher_mostrar_expirados?: boolean
           voucher_validade_dias?: number
+          voucher_visivel_apos_uso?: boolean
           webhook_last_at?: string | null
           webhook_secret?: string
           whatsapp_enabled?: boolean
@@ -875,7 +879,9 @@ export type Database = {
           slug?: string
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           telefone?: string | null
+          voucher_mostrar_expirados?: boolean
           voucher_validade_dias?: number
+          voucher_visivel_apos_uso?: boolean
           webhook_last_at?: string | null
           webhook_secret?: string
           whatsapp_enabled?: boolean
@@ -894,6 +900,7 @@ export type Database = {
           origem: string | null
           pontos_delta: number
           product_id: string | null
+          redeemed_by: string | null
           status: Database["public"]["Enums"]["transaction_status"]
           store_id: string
           tipo: Database["public"]["Enums"]["transaction_tipo"]
@@ -911,6 +918,7 @@ export type Database = {
           origem?: string | null
           pontos_delta?: number
           product_id?: string | null
+          redeemed_by?: string | null
           status?: Database["public"]["Enums"]["transaction_status"]
           store_id: string
           tipo: Database["public"]["Enums"]["transaction_tipo"]
@@ -928,6 +936,7 @@ export type Database = {
           origem?: string | null
           pontos_delta?: number
           product_id?: string | null
+          redeemed_by?: string | null
           status?: Database["public"]["Enums"]["transaction_status"]
           store_id?: string
           tipo?: Database["public"]["Enums"]["transaction_tipo"]
@@ -1008,6 +1017,7 @@ export type Database = {
           origem: string | null
           pontos_delta: number
           product_id: string | null
+          redeemed_by: string | null
           status: Database["public"]["Enums"]["transaction_status"]
           store_id: string
           tipo: Database["public"]["Enums"]["transaction_tipo"]
@@ -1040,6 +1050,7 @@ export type Database = {
           origem: string | null
           pontos_delta: number
           product_id: string | null
+          redeemed_by: string | null
           status: Database["public"]["Enums"]["transaction_status"]
           store_id: string
           tipo: Database["public"]["Enums"]["transaction_tipo"]
@@ -1070,7 +1081,7 @@ export type Database = {
         | "active"
         | "suspended"
         | "cancelled"
-      transaction_status: "pendente" | "entregue" | "expirado"
+      transaction_status: "pendente" | "entregue" | "expirado" | "cancelado"
       transaction_tipo:
         | "venda"
         | "resgate_produto"
@@ -1224,7 +1235,7 @@ export const Constants = {
         "suspended",
         "cancelled",
       ],
-      transaction_status: ["pendente", "entregue", "expirado"],
+      transaction_status: ["pendente", "entregue", "expirado", "cancelado"],
       transaction_tipo: [
         "venda",
         "resgate_produto",

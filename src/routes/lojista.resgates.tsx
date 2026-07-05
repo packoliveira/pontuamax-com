@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeTransactionsQuery } from "@/lib/queries";
-import { confirmarResgate, validarVoucher } from "@/lib/qsf.functions";
+import { confirmarResgate, validarVoucher, cancelarVoucher } from "@/lib/qsf.functions";
 import { formatBRL, formatDate } from "@/lib/qsf-shared";
 import type { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +52,16 @@ function ResgatesPage() {
     },
   });
 
+  const cancelar = useMutation({
+    mutationFn: (id: string) => cancelarVoucher({ data: { transaction_id: id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["transactions", loja?.id] });
+      qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
+      toast.success("Voucher cancelado — saldo devolvido ao cliente.");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
   const validar = useMutation({
     mutationFn: (code: string) => validarVoucher({ data: { voucher_code: code } }),
     onSuccess: (r) => {
@@ -68,8 +78,9 @@ function ResgatesPage() {
     (t) => t.tipo === "resgate_produto" || t.tipo === "resgate_cashback",
   ) as unknown as TxRow[];
   const pendentes = resgates.filter((r) => r.status === "pendente");
-  const entregues = resgates.filter((r) => r.status === "entregue");
+  const utilizados = resgates.filter((r) => r.status === "entregue");
   const expirados = resgates.filter((r) => r.status === "expirado");
+  const cancelados = resgates.filter((r) => r.status === "cancelado");
 
   const tempoRestante = (iso: string | null): { label: string; danger: boolean } | null => {
     if (!iso) return null;
@@ -98,7 +109,7 @@ function ResgatesPage() {
                 ? `${r.products?.nome ?? "Produto"} • ${Math.abs(r.pontos_delta)} pts`
                 : `Voucher de cashback • ${formatBRL(Math.abs(Number(r.cashback_delta)))}`}
             </div>
-            <div className="mt-1 inline-block rounded-md bg-primary/10 border border-primary/30 px-2 py-1 text-base sm:text-lg font-mono font-bold tracking-widest text-primary">
+            <div className="mt-1 inline-block select-all rounded-md bg-slate-900 text-white border border-slate-700 px-2 py-1 text-base sm:text-lg font-mono font-bold tracking-widest">
               {r.voucher_code}
             </div>
             <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2">
@@ -112,12 +123,19 @@ function ResgatesPage() {
           </div>
         </div>
         {r.status === "pendente" && (
-          <Button size="sm" disabled={confirmar.isPending} onClick={() => confirmar.mutate(r.id, { onSuccess: () => toast.success("Voucher entregue — comprovante gerado") })}>
-            <CheckCircle2 className="h-4 w-4 mr-1" /> Entregar
-          </Button>
+          <div className="flex flex-col gap-1">
+            <Button size="sm" disabled={confirmar.isPending} onClick={() => confirmar.mutate(r.id, { onSuccess: () => toast.success("Voucher utilizado — comprovante gerado") })}>
+              <CheckCircle2 className="h-4 w-4 mr-1" /> Confirmar entrega
+            </Button>
+            <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700" disabled={cancelar.isPending}
+              onClick={() => { if (confirm("Cancelar este voucher e devolver o saldo ao cliente?")) cancelar.mutate(r.id); }}>
+              Cancelar
+            </Button>
+          </div>
         )}
-        {r.status === "entregue" && <Badge variant="secondary">Entregue</Badge>}
-        {r.status === "expirado" && <Badge variant="outline" className="text-orange-600 border-orange-300">Expirado</Badge>}
+        {r.status === "entregue" && <Badge className="bg-blue-600 hover:bg-blue-600 text-white">Utilizado</Badge>}
+        {r.status === "expirado" && <Badge className="bg-orange-500 hover:bg-orange-500 text-white">Expirado</Badge>}
+        {r.status === "cancelado" && <Badge className="bg-red-600 hover:bg-red-600 text-white">Cancelado</Badge>}
       </div>
     );
   };
@@ -176,11 +194,19 @@ function ResgatesPage() {
           </div></CardContent></Card>
         </section>
       )}
-      {entregues.length > 0 && (
+      {utilizados.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold mb-2 text-muted-foreground">Histórico</h2>
+          <h2 className="text-sm font-semibold mb-2 text-muted-foreground">Utilizados ({utilizados.length})</h2>
           <Card><CardContent className="p-0"><div className="divide-y">
-            {entregues.slice(0, 30).map((r) => <Row key={r.id} r={r} />)}
+            {utilizados.slice(0, 30).map((r) => <Row key={r.id} r={r} />)}
+          </div></CardContent></Card>
+        </section>
+      )}
+      {cancelados.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold mb-2 text-muted-foreground">Cancelados ({cancelados.length})</h2>
+          <Card><CardContent className="p-0"><div className="divide-y">
+            {cancelados.slice(0, 20).map((r) => <Row key={r.id} r={r} />)}
           </div></CardContent></Card>
         </section>
       )}

@@ -600,12 +600,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           <p className="text-sm text-muted-foreground">Apresente este código no caixa:</p>
           <div
             key={voucher ?? "empty"}
-            className="text-3xl sm:text-4xl font-mono font-black tracking-widest py-6 rounded-lg break-all"
-            style={{ backgroundColor: "var(--brand-primary)", color: "white" }}
+            className="mx-2 select-all text-3xl sm:text-4xl font-mono font-black tracking-widest py-6 px-3 rounded-lg break-all bg-slate-900 text-white border-2 border-slate-700 shadow-inner"
+            aria-label="Código do voucher"
           >
             {voucher}
           </div>
-          <p className="text-xs text-muted-foreground">Válido por alguns dias — confira em "Meus resgates".</p>
+          <p className="text-xs text-muted-foreground">Válido por alguns dias — você também pode conferir em "Meus vouchers" abaixo.</p>
         </DialogContent>
       </Dialog>
 
@@ -990,16 +990,24 @@ type VoucherTx = TxRow & {
 function VouchersSection({
   loja, txs, nome, telefone,
 }: { loja: Loja; txs: unknown[]; nome: string; telefone: string | null }) {
-  const list = (txs as VoucherTx[]).filter(
-    (t) => t.tipo === "resgate_produto" || t.tipo === "resgate_cashback",
-  );
+  const mostrarUsados = loja.voucher_visivel_apos_uso ?? false;
+  const mostrarExpirados = loja.voucher_mostrar_expirados ?? true;
+  const list = (txs as VoucherTx[])
+    .filter((t) => t.tipo === "resgate_produto" || t.tipo === "resgate_cashback")
+    .filter((t) => {
+      const s = t.status ?? "pendente";
+      if (s === "entregue" && !mostrarUsados) return false;
+      if (s === "expirado" && !mostrarExpirados) return false;
+      return true;
+    });
   const [selected, setSelected] = useState<VoucherTx | null>(null);
 
   if (list.length === 0) return null;
 
   const pendentes = list.filter((t) => t.status === "pendente");
-  const entregues = list.filter((t) => t.status === "entregue");
+  const utilizados = list.filter((t) => t.status === "entregue");
   const expirados = list.filter((t) => t.status === "expirado");
+  const cancelados = list.filter((t) => t.status === "cancelado");
 
   const renderList = (arr: VoucherTx[]) => (
     <Card>
@@ -1028,15 +1036,21 @@ function VouchersSection({
         <TabsList className="w-full">
           <TabsTrigger value="todos" className="flex-1">Todos ({list.length})</TabsTrigger>
           <TabsTrigger value="pendentes" className="flex-1">Pendentes ({pendentes.length})</TabsTrigger>
-          <TabsTrigger value="entregues" className="flex-1">Entregues ({entregues.length})</TabsTrigger>
+          {utilizados.length > 0 && (
+            <TabsTrigger value="utilizados" className="flex-1">Utilizados ({utilizados.length})</TabsTrigger>
+          )}
           {expirados.length > 0 && (
             <TabsTrigger value="expirados" className="flex-1">Expirados ({expirados.length})</TabsTrigger>
+          )}
+          {cancelados.length > 0 && (
+            <TabsTrigger value="cancelados" className="flex-1">Cancelados ({cancelados.length})</TabsTrigger>
           )}
         </TabsList>
         <TabsContent value="todos" className="mt-3">{renderList(list)}</TabsContent>
         <TabsContent value="pendentes" className="mt-3">{renderList(pendentes)}</TabsContent>
-        <TabsContent value="entregues" className="mt-3">{renderList(entregues)}</TabsContent>
+        <TabsContent value="utilizados" className="mt-3">{renderList(utilizados)}</TabsContent>
         <TabsContent value="expirados" className="mt-3">{renderList(expirados)}</TabsContent>
+        <TabsContent value="cancelados" className="mt-3">{renderList(cancelados)}</TabsContent>
       </Tabs>
 
       <Dialog open={!!selected} onOpenChange={(o) => { if (!o) setSelected(null); }}>
@@ -1060,8 +1074,8 @@ function VouchersSection({
               </div>
               {selected.voucher_code && (
                 <div
-                  className="text-center text-2xl font-mono font-black tracking-widest py-3 rounded-md break-all"
-                  style={{ backgroundColor: "var(--brand-primary)", color: "white" }}
+                  className="select-all text-center text-2xl font-mono font-black tracking-widest py-3 px-2 rounded-md break-all bg-slate-900 text-white border-2 border-slate-700"
+                  aria-label="Código do voucher"
                 >
                   {selected.voucher_code}
                 </div>
@@ -1145,14 +1159,20 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
           <div className="text-sm font-medium truncate">{detalhe}</div>
         </div>
         {t.voucher_code && (
-          <div className="mt-1 inline-block rounded-md bg-primary/10 border border-primary/30 px-2 py-0.5 text-sm font-mono font-bold tracking-widest text-primary">
+          <div className="mt-1 inline-block select-all rounded-md bg-slate-900 text-white border border-slate-700 px-2 py-0.5 text-sm font-mono font-bold tracking-widest">
             {t.voucher_code}
           </div>
         )}
         <div className="text-[11px] text-muted-foreground mt-1 flex flex-wrap gap-x-2">
           <span>{formatDateTime(t.created_at)}</span>
+          {status === "pendente" && t.voucher_expires_at && (
+            <span>Válido até {formatDateTime(t.voucher_expires_at)}</span>
+          )}
           {status === "entregue" && t.delivered_at && (
-            <span className="text-green-700">Entregue {formatDateTime(t.delivered_at)}</span>
+            <span className="text-green-700">Utilizado em {formatDateTime(t.delivered_at)}</span>
+          )}
+          {status === "expirado" && t.voucher_expires_at && (
+            <span className="text-orange-700">Expirou em {formatDateTime(t.voucher_expires_at)}</span>
           )}
         </div>
       </div>
@@ -1168,10 +1188,12 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
 
 function VoucherStatusBadge({ status }: { status: string }) {
   if (status === "pendente")
-    return <Badge variant="outline" className="text-yellow-700 border-yellow-300"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
   if (status === "entregue")
-    return <Badge className="bg-green-600 hover:bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" /> Entregue</Badge>;
+    return <Badge className="bg-blue-600 hover:bg-blue-600 text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Utilizado</Badge>;
   if (status === "expirado")
-    return <Badge variant="outline" className="text-orange-600 border-orange-300"><AlertTriangle className="h-3 w-3 mr-1" /> Expirado</Badge>;
+    return <Badge className="bg-orange-500 hover:bg-orange-500 text-white"><AlertTriangle className="h-3 w-3 mr-1" /> Expirado</Badge>;
+  if (status === "cancelado")
+    return <Badge className="bg-red-600 hover:bg-red-600 text-white"><X className="h-3 w-3 mr-1" /> Cancelado</Badge>;
   return <Badge variant="secondary">{status}</Badge>;
 }

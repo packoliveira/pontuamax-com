@@ -136,6 +136,8 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         nps_ask_comment: z.boolean().optional(),
         nps_template: z.string().min(1).max(2000).optional(),
         voucher_validade_dias: z.number().int().min(1).max(365).optional(),
+        voucher_visivel_apos_uso: z.boolean().optional(),
+        voucher_mostrar_expirados: z.boolean().optional(),
         instagram_program_active: z.boolean().optional(),
         instagram_handle: z.string().max(60).optional().nullable(),
         instagram_points_per_post: z.number().int().min(1).max(100_000).optional(),
@@ -909,11 +911,27 @@ export const confirmarResgate = createServerFn({ method: "POST" })
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     }
     const deliveredAt = new Date().toISOString();
-    const { error } = await supabaseAdmin
+    // Update condicional: só marca como entregue se ainda estiver pendente.
+    // Impede corrida entre lojista clicando duas vezes / dois caixas simultâneos.
+    const upd = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: deliveredAt })
-      .eq("id", data.transaction_id);
-    if (error) throw new Error(error.message);
+      .update({ status: "entregue", delivered_at: deliveredAt, redeemed_by: context.userId })
+      .eq("id", data.transaction_id)
+      .eq("status", "pendente")
+      .select("id");
+    if (upd.error) throw new Error(upd.error.message);
+    if (!upd.data || upd.data.length === 0) {
+      // Alguém já entregou/expirou/cancelou entre a leitura e o update.
+      const recheck = await supabaseAdmin
+        .from("transactions")
+        .select("status, delivered_at")
+        .eq("id", data.transaction_id)
+        .maybeSingle();
+      if (recheck.data?.status === "entregue") throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
+      if (recheck.data?.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
+      if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
+      throw new Error("Não foi possível confirmar o voucher. Atualize a página e tente novamente.");
+    }
     const store = tx.data.stores as unknown as { nome_fantasia: string | null } | null;
     const profile = tx.data.profiles as { full_name: string | null; phone: string | null } | null;
     const product = tx.data.products as { nome: string | null } | null;
@@ -958,11 +976,24 @@ export const validarVoucher = createServerFn({ method: "POST" })
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
     }
-    const { error } = await supabaseAdmin
+    // Update condicional idempotente: previne dupla entrega em corrida.
+    const upd = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: new Date().toISOString() })
-      .eq("id", tx.data.id);
-    if (error) throw new Error(error.message);
+      .update({ status: "entregue", delivered_at: new Date().toISOString(), redeemed_by: context.userId })
+      .eq("id", tx.data.id)
+      .eq("status", "pendente")
+      .select("id");
+    if (upd.error) throw new Error(upd.error.message);
+    if (!upd.data || upd.data.length === 0) {
+      const recheck = await supabaseAdmin
+        .from("transactions")
+        .select("status, delivered_at")
+        .eq("id", tx.data.id)
+        .maybeSingle();
+      if (recheck.data?.status === "entregue") throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
+      if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
+      throw new Error("Voucher indisponível para entrega.");
+    }
     return {
       ok: true,
       voucher: tx.data.voucher_code,
@@ -972,6 +1003,51 @@ export const validarVoucher = createServerFn({ method: "POST" })
       pontos: Math.abs(Number(tx.data.pontos_delta || 0)),
       cashback: Math.abs(Number(tx.data.cashback_delta || 0)),
     };
+  });
+
+// -------- Lojista: cancelar voucher pendente (devolve saldo/pontos) --------
+export const cancelarVoucher = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ transaction_id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const tx = await supabaseAdmin
+      .from("transactions")
+      .select("id, store_id, status, tipo, pontos_delta, cashback_delta, client_user_id, stores:store_id(owner_id)")
+      .eq("id", data.transaction_id)
+      .maybeSingle();
+    const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
+    if (!tx.data || ownerId !== context.userId) throw new Error("Não autorizado.");
+    if (tx.data.status !== "pendente") throw new Error("Só é possível cancelar vouchers pendentes.");
+    const upd = await supabaseAdmin
+      .from("transactions")
+      .update({ status: "cancelado", redeemed_by: context.userId })
+      .eq("id", tx.data.id)
+      .eq("status", "pendente")
+      .select("id");
+    if (upd.error) throw new Error(upd.error.message);
+    if (!upd.data || upd.data.length === 0) throw new Error("Voucher já foi entregue ou cancelado.");
+    // Devolve pontos/cashback ao cliente.
+    if (tx.data.client_user_id) {
+      const { calcularNivel } = await import("@/lib/qsf-shared");
+      const link = await supabaseAdmin
+        .from("store_clients")
+        .select("id, pontos, cashback_saldo")
+        .eq("store_id", tx.data.store_id)
+        .eq("user_id", tx.data.client_user_id)
+        .maybeSingle();
+      if (link.data) {
+        const pontosDevolver = -Number(tx.data.pontos_delta || 0);
+        const cashbackDevolver = -Number(tx.data.cashback_delta || 0);
+        const novoPontos = Math.max(0, link.data.pontos + pontosDevolver);
+        const novoCashback = Math.max(0, +(Number(link.data.cashback_saldo) + cashbackDevolver).toFixed(2));
+        await supabaseAdmin
+          .from("store_clients")
+          .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+          .eq("id", link.data.id);
+      }
+    }
+    return { ok: true };
   });
 
 function formatVoucherJaUsado(delivered_at: string | null | undefined): string {
@@ -1855,7 +1931,7 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
 
 // -------- Public lookups (no auth) with safe fields only --------
 const PUBLIC_STORE_SELECT =
-  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor";
+  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados";
 
 export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))

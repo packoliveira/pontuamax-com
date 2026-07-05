@@ -16,6 +16,7 @@ export type StorePublic = Pick<
   | "instagram_instructions"
   | "pontos_expiracao_modo" | "pontos_validade_dias"
   | "pontos_decaimento_dias" | "pontos_decaimento_valor"
+  | "voucher_visivel_apos_uso" | "voucher_mostrar_expirados"
 >;
 
 export const myStoreQuery = () =>

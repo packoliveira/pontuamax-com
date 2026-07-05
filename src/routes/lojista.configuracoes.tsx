@@ -48,6 +48,8 @@ function ConfigPage() {
   const [regraP, setRegraP] = useState("1");
   const [pctC, setPctC] = useState("5");
   const [validadeVoucher, setValidadeVoucher] = useState("7");
+  const [voucherVisivelAposUso, setVoucherVisivelAposUso] = useState(false);
+  const [voucherMostrarExpirados, setVoucherMostrarExpirados] = useState(true);
 
   useEffect(() => {
     if (loja) {
@@ -62,6 +64,8 @@ function ConfigPage() {
       setRegraP(String(loja.regra_pontos));
       setPctC(String(loja.percentual_cashback));
       setValidadeVoucher(String(loja.voucher_validade_dias ?? 7));
+      setVoucherVisivelAposUso(loja.voucher_visivel_apos_uso ?? false);
+      setVoucherMostrarExpirados(loja.voucher_mostrar_expirados ?? true);
     }
   }, [loja]);
 
@@ -80,6 +84,8 @@ function ConfigPage() {
           regra_pontos: parseFloat(regraP) || 1,
           percentual_cashback: parseFloat(pctC) || 0,
           voucher_validade_dias: Math.max(1, Math.min(365, parseInt(validadeVoucher, 10) || 7)),
+          voucher_visivel_apos_uso: voucherVisivelAposUso,
+          voucher_mostrar_expirados: voucherMostrarExpirados,
         },
       }),
     onSuccess: () => {
@@ -159,6 +165,23 @@ function ConfigPage() {
               <Label>Validade do voucher de resgate (dias)</Label>
               <Input type="number" min="1" max="365" value={validadeVoucher} onChange={(e) => setValidadeVoucher(e.target.value)} />
               <p className="text-xs text-muted-foreground mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
+            </div>
+            <div className="rounded-md border p-3 space-y-3">
+              <div className="text-sm font-semibold">Visibilidade dos vouchers para o cliente</div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-xs text-muted-foreground">
+                  <div className="font-medium text-foreground text-sm">Manter voucher visível após utilização</div>
+                  Se ligado, o cliente continua vendo o voucher como "Utilizado" na lista dele. Se desligado (padrão), o voucher some assim que você confirma a entrega.
+                </div>
+                <Switch checked={voucherVisivelAposUso} onCheckedChange={setVoucherVisivelAposUso} />
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-xs text-muted-foreground">
+                  <div className="font-medium text-foreground text-sm">Mostrar vouchers expirados no histórico</div>
+                  Se ligado (padrão), o cliente vê os vouchers expirados como aviso. Desligue para escondê-los.
+                </div>
+                <Switch checked={voucherMostrarExpirados} onCheckedChange={setVoucherMostrarExpirados} />
+              </div>
             </div>
             <div className="rounded-md border p-3 text-xs text-muted-foreground">
               Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente com base nos pontos.
