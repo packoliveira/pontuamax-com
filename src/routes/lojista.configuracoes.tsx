@@ -141,10 +141,16 @@ function ConfigPage() {
               onChange={setBannerMobile}
               aspect="banner"
             />
+            <SuggestedBanners onPick={(url) => { setBanner(url); setBannerMobile(url); }} />
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Cor primária</Label><div className="flex gap-2"><Input type="color" value={cor1} onChange={(e) => setCor1(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor1} onChange={(e) => setCor1(e.target.value)} /></div></div>
               <div><Label>Cor secundária</Label><div className="flex gap-2"><Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor2} onChange={(e) => setCor2(e.target.value)} /></div></div>
             </div>
+            <ColorPresets onPick={(a, b) => { setCor1(a); setCor2(b); }} />
+            <p className="text-xs text-[#64748B]">
+              As cores da sua marca pintam a aura de fundo, o logo, a barra de progresso e o botão de resgate na página do cliente.
+              <a href={`/${loja.slug}`} target="_blank" rel="noreferrer" className="ml-1 underline text-[#2563EB]">Ver como o cliente vê →</a>
+            </p>
           </CardContent></Card>
 
           <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Modalidade de recompensa</CardTitle></CardHeader><CardContent className="space-y-4">
