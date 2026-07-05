@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { phoneToEmail } from "@/lib/qsf-shared";
 
 // Webhook nativo do Olist ERP (app "Webhooks" -> "Receber notificações de vendas").
 // URL a colar no painel do Olist ERP:
