@@ -30,6 +30,8 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
+      GET: async () => json({ status: "ok", message: "PontoaMax webhook endpoint ativo" }, 200),
+      HEAD: async () => new Response(null, { status: 200, headers: CORS }),
       POST: async ({ request, params }) => {
         const origem = String(params.origem).toLowerCase();
         if (!["bling", "olist", "teste"].includes(origem)) {
