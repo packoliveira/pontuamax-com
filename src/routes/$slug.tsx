@@ -985,9 +985,9 @@ function MeusPostsInstagram({ loja }: { loja: Loja }) {
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
-        <Instagram className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
-        <h2 className="font-semibold">Meus posts no Instagram</h2>
-        <span className="text-xs text-muted-foreground">acompanhe o status</span>
+        <Instagram className="h-4 w-4 text-indigo-400" />
+        <h2 className="font-semibold text-slate-100">Meus posts no Instagram</h2>
+        <span className="text-xs text-slate-500">acompanhe o status</span>
       </div>
 
       {(aprovados.length > 0) && (
