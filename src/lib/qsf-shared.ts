@@ -49,7 +49,11 @@ export function onlyDigits(s: string) {
 
 export function cpfToEmail(cpf: string) {
   const digits = cpf.replace(/\D/g, "");
-  return `${digits}@cpf.qsfclub.local`;
+  // IMPORTANTE: mantenha um único domínio para e-mail sintético do cliente
+  // final. Qualquer novo fluxo que precise gerar login sintético DEVE
+  // importar esta função — não reimplementar a string em outros lugares —
+  // para evitar duplicidade de conta pelo mesmo CPF.
+  return `${digits}@cliente.qsfclub.local`;
 }
 
 export function formatCPF(v: string) {

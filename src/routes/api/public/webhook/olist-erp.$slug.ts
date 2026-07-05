@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { phoneToEmail } from "@/lib/qsf-shared";
 
 // Webhook nativo do Olist ERP (app "Webhooks" -> "Receber notificações de vendas").
 // URL a colar no painel do Olist ERP:
@@ -214,7 +215,11 @@ export const Route = createFileRoute("/api/public/webhook/olist-erp/$slug")({
             if (p.data) clientProfile = p.data;
           }
           if (!clientProfile) {
-            const email = `${telefone}@cliente.qsfclub.local`;
+            // Este fluxo (Olist ERP polling) usa telefone como identidade
+            // porque nem sempre o CPF vem no pedido. Delega a montagem do
+            // e-mail sintético para o helper compartilhado (mesmo domínio
+            // de cpfToEmail) — nunca reconstruir a string aqui.
+            const email = phoneToEmail(telefone);
             const created = await supabaseAdmin.auth.admin.createUser({
               email,
               password: telefone,
