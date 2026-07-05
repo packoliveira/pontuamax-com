@@ -246,7 +246,7 @@ function DashboardMockup() {
           <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
         </div>
         <div className="mx-auto rounded-md bg-white px-3 py-1 text-[10px] text-[#0A2540]/60">
-          qsfclub.com/lojista
+          pontoamax.app/lojista
         </div>
       </div>
 
@@ -277,7 +277,7 @@ function DashboardMockup() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-bold text-[#0A2540]">Olá, Loja Exemplo</h3>
-              <div className="text-xs text-[#0A2540]/60">Sua página: <span className="font-mono">qsfclub.com/loja-exemplo</span></div>
+              <div className="text-xs text-[#64748B]">Sua página: <span className="font-mono">pontoamax.app/loja-exemplo</span></div>
             </div>
             <div className="rounded-md bg-[#0A2540] px-3 py-1.5 text-xs font-medium text-white">
               Lançar venda →
