@@ -1060,8 +1060,8 @@ function VouchersSection({
               </div>
               {selected.voucher_code && (
                 <div
-                  className="text-center text-2xl font-mono font-black tracking-widest py-3 rounded-md break-all"
-                  style={{ backgroundColor: "var(--brand-primary)", color: "white" }}
+                  className="select-all text-center text-2xl font-mono font-black tracking-widest py-3 px-2 rounded-md break-all bg-slate-900 text-white border-2 border-slate-700"
+                  aria-label="Código do voucher"
                 >
                   {selected.voucher_code}
                 </div>
