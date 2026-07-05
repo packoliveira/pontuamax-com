@@ -44,12 +44,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return json({ error: "JSON inválido" }, 400);
         }
 
+        // Olist ERP only accepts a URL (no custom headers), so we also accept
+        // store/secret via query string: ?store=<slug>&secret=<key>
+        const url = new URL(request.url);
         const storeHeader =
           request.headers.get("x-qsf-store") ??
+          url.searchParams.get("store") ??
+          url.searchParams.get("loja") ??
           (payload.store_slug as string | undefined) ??
           (payload.store_id as string | undefined) ??
           "";
-        const secret = request.headers.get("x-qsf-secret") ?? "";
+        const secret =
+          request.headers.get("x-qsf-secret") ??
+          url.searchParams.get("secret") ??
+          url.searchParams.get("token") ??
+          "";
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
