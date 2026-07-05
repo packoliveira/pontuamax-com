@@ -860,11 +860,11 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
   const ajustes = list.filter((t) => t.tipo === "ajuste");
 
   const renderList = (arr: TxRow[]) => (
-    <Card>
+    <Card className="border-indigo-500/15 bg-[#141432]/60">
       <CardContent className="p-0">
-        <div className="divide-y">
+        <div className="divide-y divide-indigo-500/10">
           {arr.length === 0
-            ? <div className="p-6 text-center text-sm text-muted-foreground">Sem movimentações</div>
+            ? <div className="p-6 text-center text-sm text-slate-500">Sem movimentações</div>
             : arr.map((t) => <TxRowItem key={t.id} t={t} />)}
         </div>
       </CardContent>
