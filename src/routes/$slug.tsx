@@ -1144,9 +1144,9 @@ function VouchersSection({
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
-        <Receipt className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
-        <h2 className="font-semibold">Meus vouchers</h2>
-        <span className="text-xs text-muted-foreground">códigos e comprovantes</span>
+        <Receipt className="h-4 w-4 text-indigo-400" />
+        <h2 className="font-semibold text-slate-100">Meus vouchers</h2>
+        <span className="text-xs text-slate-500">códigos e comprovantes</span>
       </div>
       <Tabs defaultValue="todos">
         <TabsList className="w-full">
