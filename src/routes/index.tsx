@@ -56,21 +56,21 @@ function Index() {
       </header>
 
       {/* HERO */}
-      <section className="mx-auto flex min-h-[calc(100vh-96px)] max-w-6xl items-center px-6 py-16 md:py-28">
+      <section className="mx-auto flex min-h-[calc(100dvh-96px)] max-w-6xl items-center px-4 sm:px-6 py-12 sm:py-16 md:py-28">
         <div className="grid w-full items-center gap-16 md:grid-cols-2">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-xs font-medium text-[#0F172A] shadow-sm">
               <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
               Fidelização • Cashback • Campanhas
             </div>
-            <h1 className="mt-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-3xl font-bold tracking-tight [text-wrap:balance] sm:text-4xl md:text-5xl lg:text-6xl">
               Fidelize clientes e faça{" "}
               <span className="bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] bg-clip-text text-transparent">
                 seu negócio crescer
               </span>
               .
             </h1>
-            <p className="mt-6 text-lg text-[#64748B] md:text-xl">
+            <p className="mt-5 text-base sm:text-lg text-[#64748B] md:text-xl [text-wrap:pretty]">
               Programa de fidelidade com pontos, cashback e campanhas para aumentar a recorrência dos seus clientes e vender mais todos os meses.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
