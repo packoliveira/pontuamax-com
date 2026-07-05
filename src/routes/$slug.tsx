@@ -668,10 +668,14 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                     <span className="text-slate-400">Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span></span>
                     <span className="text-indigo-300 font-semibold">{Math.round(prog.pct)}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-indigo-500/20 overflow-hidden">
+                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-white/5 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.6)]"
-                      style={{ width: `${Math.min(100, prog.pct)}%` }}
+                      className="h-full transition-all duration-1000"
+                      style={{
+                        width: `${Math.min(100, prog.pct)}%`,
+                        background: `linear-gradient(90deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                        boxShadow: `0 0 12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                      }}
                     />
                   </div>
                 </div>
@@ -730,8 +734,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                         disabled={!podeResgatar || resgatarP.isPending}
                         onClick={() => resgatarP.mutate(p.id)}
                         className={podeResgatar
-                          ? "bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-md shadow-indigo-600/30 transition-all active:scale-95"
-                          : "bg-[#0a0a1a] text-slate-500 border border-indigo-500/10 cursor-not-allowed"}
+                          ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
+                          : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"}
+                        style={podeResgatar ? {
+                          background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                        } : undefined}
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
                       </Button>
