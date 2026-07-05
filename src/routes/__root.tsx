@@ -93,13 +93,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "twitter:title", content: "PontoaMax — Fidelização, Cashback e CRM" },
       { name: "twitter:description", content: "Plataforma SaaS de fidelização, cashback, CRM e relacionamento com clientes." },
+      { property: "og:image", content: "https://retail-rewards.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://retail-rewards.lovable.app/og-image.jpg" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" },
