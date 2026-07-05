@@ -358,39 +358,46 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     if (digits.length < 8) throw new Error("Telefone inválido.");
     if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
 
-    // Bloquear duplicidade nesta loja: CPF é a chave única; telefone é complementar.
-    const orClauses = [`phone.eq.${digits}`];
-    if (cpfDigits) orClauses.push(`cpf.eq.${cpfDigits}`);
-    const dup = await supabaseAdmin
-      .from("profiles")
-      .select("id, phone, cpf")
-      .or(orClauses.join(","));
-    const dupIds = (dup.data ?? []).map((p) => p.id);
-    if (dupIds.length > 0) {
-      const links = await supabaseAdmin
-        .from("store_clients")
-        .select("user_id")
-        .eq("store_id", data.store_id)
-        .in("user_id", dupIds);
-      if ((links.data ?? []).length > 0) {
-        const conflict = dup.data!.find((p) => links.data!.some((l) => l.user_id === p.id));
-        if (conflict?.phone === digits) {
-          throw new Error("Já existe um cliente cadastrado nesta loja com este telefone.");
+    // Estratégia: CPF é a chave única do cliente. Se existir perfil com este
+    // CPF (mesmo que criado por webhook como "cadastro pendente"), REUSA e
+    // completa os dados. Só bloqueia se outro cliente da loja tiver o mesmo
+    // telefone mas CPF diferente (colisão real).
+    let existingByCpf: { id: string; phone: string | null; cpf: string | null } | null = null;
+    if (cpfDigits) {
+      const byCpfAll = await supabaseAdmin
+        .from("profiles")
+        .select("id, phone, cpf")
+        .eq("cpf", cpfDigits);
+      existingByCpf = (byCpfAll.data ?? [])[0] ?? null;
+    }
+
+    // Colisão de telefone com outro CPF já cadastrado nesta loja.
+    if (digits) {
+      const byPhone = await supabaseAdmin
+        .from("profiles")
+        .select("id, cpf")
+        .eq("phone", digits);
+      const phoneOwners = (byPhone.data ?? []).filter(
+        (p) => p.id !== existingByCpf?.id && (!cpfDigits || p.cpf !== cpfDigits),
+      );
+      if (phoneOwners.length > 0) {
+        const otherIds = phoneOwners.map((p) => p.id);
+        const links = await supabaseAdmin
+          .from("store_clients")
+          .select("user_id")
+          .eq("store_id", data.store_id)
+          .in("user_id", otherIds);
+        if ((links.data ?? []).length > 0) {
+          throw new Error("Já existe outro cliente nesta loja com este telefone (CPF diferente).");
         }
-        if (cpfDigits && conflict?.cpf === cpfDigits) {
-          throw new Error("Já existe um cliente cadastrado nesta loja com este CPF.");
-        }
-        throw new Error("Já existe um cliente cadastrado nesta loja com este telefone ou CPF.");
       }
     }
 
     // Login do cliente é SEMPRE pelo CPF.
     const email = cpfToEmail(cpfDigits);
-    // Reaproveita cliente existente: procura primeiro por CPF; depois por telefone (legado) quando informado.
     let userId: string | undefined;
-    const byCpf = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpfDigits).maybeSingle();
-    const existing = byCpf.data
-      ? byCpf
+    const existing = existingByCpf
+      ? { data: { id: existingByCpf.id } }
       : await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
     if (existing.data) {
       userId = existing.data.id;
@@ -421,7 +428,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     await supabaseAdmin.from("user_roles").upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id,role" });
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
-      .upsert({ store_id: data.store_id, user_id: userId }, { onConflict: "store_id,user_id" })
+      .upsert(
+        { store_id: data.store_id, user_id: userId, pending_registration: false },
+        { onConflict: "store_id,user_id" },
+      )
       .select("*")
       .single();
     if (error) throw new Error(error.message);
