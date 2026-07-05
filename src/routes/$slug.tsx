@@ -65,22 +65,48 @@ function ClientePage() {
     [loja],
   );
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando...</div>;
+  // Ativa o tema Midnight Indigo em <html> enquanto a página estiver montada,
+  // para que portais (Dialog, Sonner) também herdem os tokens escuros.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("qsf-midnight");
+    return () => { root.classList.remove("qsf-midnight"); };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a]">
+        <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
+          <div className="h-8 w-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
+          Carregando...
+        </div>
+      </div>
+    );
+  }
 
   if (!loja) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex items-center justify-center p-6 text-center bg-[#0a0a1a]">
         <div>
-          <h1 className="text-2xl font-bold">Loja não encontrada</h1>
-          <p className="text-sm text-muted-foreground mt-2">Verifique o endereço com o lojista.</p>
+          <h1 className="text-2xl font-bold text-slate-100">Loja não encontrada</h1>
+          <p className="text-sm text-slate-400 mt-2">Verifique o endereço com o lojista.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={style} className="min-h-screen bg-slate-50">
-      <ClienteFlow loja={loja} />
+    <div
+      style={style}
+      className="min-h-screen bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
+    >
+      {/* Aura de fundo em índigo — bem sutil, fica atrás de tudo */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.18),transparent_60%)]" />
+      <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full bg-violet-600/10 blur-3xl" />
+      <div className="relative">
+        <ClienteFlow loja={loja} />
+      </div>
     </div>
   );
 }
@@ -160,12 +186,12 @@ function ClienteFlow({ loja }: { loja: Loja }) {
 
 function OwnerPreviewBanner() {
   return (
-    <div className="max-w-2xl mx-auto p-4 -mt-6">
-      <Card>
+    <div className="max-w-2xl mx-auto p-4 -mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <Card className="border-indigo-500/20 bg-[#141432]/70 backdrop-blur-xl">
         <CardHeader>
-          <CardTitle className="text-base">Você está vendo sua loja como visitante</CardTitle>
+          <CardTitle className="text-base text-slate-100">Você está vendo sua loja como visitante</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
+        <CardContent className="space-y-3 text-sm text-slate-400">
           <p>
             Esta é a página pública que seus clientes acessam. Como você está logado
             como dono da loja, nada é criado nem vinculado ao clicar aqui.
@@ -175,7 +201,7 @@ function OwnerPreviewBanner() {
             ou abra este link em uma janela anônima.
           </p>
           <Link to="/lojista">
-            <Button variant="outline" size="sm">Voltar ao painel</Button>
+            <Button variant="outline" size="sm" className="border-indigo-500/30 bg-transparent text-slate-200 hover:bg-indigo-500/10 hover:text-white">Voltar ao painel</Button>
           </Link>
         </CardContent>
       </Card>
@@ -190,23 +216,38 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
     qc.clear();
   };
   return (
-    <header className="px-4 py-6 text-white" style={{ background: "linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))" }}>
+    <header className="px-4 py-6 border-b border-indigo-500/10 backdrop-blur-md bg-[#0a0a1a]/60 sticky top-0 z-20">
       <div className="max-w-2xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {loja.logo_url ? (
-            <img src={loja.logo_url} alt={loja.nome_fantasia} className="h-11 w-11 rounded-lg bg-white/20 object-contain p-1" />
-          ) : (
-            <div className="h-11 w-11 rounded-lg bg-white/20 flex items-center justify-center font-bold">
-              {loja.nome_fantasia.charAt(0)}
-            </div>
-          )}
-          <div>
-            <div className="text-xs uppercase tracking-wider opacity-80">Fidelidade</div>
-            <div className="font-bold text-lg leading-tight">{loja.nome_fantasia}</div>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative shrink-0">
+            <div aria-hidden className="absolute inset-0 rounded-xl bg-indigo-500/40 blur-lg opacity-60" />
+            {loja.logo_url ? (
+              <img
+                src={loja.logo_url}
+                alt={loja.nome_fantasia}
+                className="relative h-12 w-12 rounded-xl bg-[#141432] object-contain p-1.5 border border-indigo-500/30"
+              />
+            ) : (
+              <div
+                className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/30 border border-indigo-400/40"
+              >
+                {loja.nome_fantasia.charAt(0)}
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-indigo-300/80 font-semibold">Fidelidade</div>
+            <div className="font-bold text-base sm:text-lg leading-tight text-white truncate">{loja.nome_fantasia}</div>
           </div>
         </div>
         {showLogout && (
-          <Button size="sm" variant="ghost" className="text-white hover:bg-white/10" onClick={doLogout}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-slate-300 hover:bg-indigo-500/10 hover:text-white transition-colors"
+            onClick={doLogout}
+            aria-label="Sair"
+          >
             <LogOut className="h-4 w-4" />
           </Button>
         )}
@@ -309,20 +350,25 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 -mt-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="space-y-3">
+    <div className="max-w-md mx-auto p-4 pt-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
+      <div className="relative group">
+        <div aria-hidden className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br from-indigo-500/40 via-violet-500/20 to-indigo-500/40 opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500" />
+        <Card className="relative border-indigo-500/25 bg-[#141432]/95 backdrop-blur-xl shadow-2xl">
+          <CardHeader className="pb-4">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-indigo-300/80 font-semibold mb-1">
+              {mode === "signup" ? "Novo por aqui" : "Bem-vindo(a) de volta"}
+            </div>
+            <CardTitle className="text-slate-100 text-xl">{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={submit} className="space-y-4">
             {aviso && (
-              <div className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 animate-in fade-in slide-in-from-top-1 duration-300">
                 {aviso}
               </div>
             )}
-            <div>
-              <Label>CPF <span className="text-destructive">*</span></Label>
+            <div className="space-y-1.5">
+              <Label className="text-slate-300 text-xs font-medium">CPF <span className="text-rose-400">*</span></Label>
               <Input
                 value={cpf}
                 onChange={(e) => setCpf(formatCPF(e.target.value))}
@@ -330,65 +376,89 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                 inputMode="numeric"
                 autoComplete="username"
                 required
+                className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
               />
             </div>
             {mode === "signup" && (
               <>
-                <div>
-                  <Label>Nome <span className="text-destructive">*</span></Label>
-                  <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" required />
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs font-medium">Nome <span className="text-rose-400">*</span></Label>
+                  <Input
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Como quer ser chamado"
+                    required
+                    className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                  />
                 </div>
-                <div>
-                  <Label>Telefone <span className="text-destructive">*</span></Label>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs font-medium">Telefone <span className="text-rose-400">*</span></Label>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(11) 98765-4321"
                     inputMode="tel"
                     required
+                    className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
                   />
                 </div>
               </>
             )}
-            <div>
-              <Label>Senha <span className="text-destructive">*</span></Label>
+            <div className="space-y-1.5">
+              <Label className="text-slate-300 text-xs font-medium">Senha <span className="text-rose-400">*</span></Label>
               <PasswordInput
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
+                className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
               />
             </div>
             {mode === "signup" && (
-              <div>
-                <Label>Confirmar senha <span className="text-destructive">*</span></Label>
+              <div className="space-y-1.5">
+                <Label className="text-slate-300 text-xs font-medium">Confirmar senha <span className="text-rose-400">*</span></Label>
                 <PasswordInput
                   value={senha2}
                   onChange={(e) => setSenha2(e.target.value)}
                   placeholder="Repita a senha"
                   autoComplete="new-password"
                   required
+                  className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
                 />
                 {senha2.length > 0 && senha !== senha2 && (
-                  <p className="mt-1 text-[11px] text-destructive">As senhas não coincidem</p>
+                  <p className="mt-1 text-[11px] text-rose-400">As senhas não coincidem</p>
                 )}
               </div>
             )}
-            <Button type="submit" disabled={loading} className="w-full text-white" style={{ backgroundColor: "var(--brand-primary)" }}>
-              {loading ? "Entrando..." : mode === "signup" ? "Criar conta" : "Entrar"}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 text-white font-semibold bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/50 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  Entrando...
+                </span>
+              ) : mode === "signup" ? "Criar conta" : "Entrar"}
             </Button>
-            <button type="button" onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }} className="text-xs text-center w-full underline text-muted-foreground">
-              {mode === "login" ? "Ainda não tenho conta" : "Já tenho conta, entrar"}
+            <button
+              type="button"
+              onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }}
+              className="text-xs text-center w-full text-indigo-300 hover:text-indigo-200 transition-colors font-medium py-1"
+            >
+              {mode === "login" ? "Ainda não tenho conta →" : "← Já tenho conta, entrar"}
             </button>
             {mode === "login" && (
-              <p className="text-[11px] text-center text-muted-foreground">
+              <p className="text-[11px] text-center text-slate-500 leading-relaxed">
                 Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
               </p>
             )}
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
@@ -423,20 +493,28 @@ function VincularStore({ loja }: { loja: Loja }) {
   if (erro) {
     return (
       <div className="p-8 text-center space-y-3 max-w-md mx-auto">
-        <p className="text-sm text-destructive">{erro}</p>
+        <p className="text-sm text-rose-400">{erro}</p>
         <Button
           onClick={async () => {
             await qc.cancelQueries();
             qc.clear();
             await supabase.auth.signOut();
           }}
+          className="bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white"
         >
           Voltar ao login
         </Button>
       </div>
     );
   }
-  return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
+  return (
+    <div className="p-8 text-center max-w-md mx-auto">
+      <div className="inline-flex items-center gap-3 text-sm text-slate-400">
+        <div className="h-4 w-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
+        Preparando sua conta nesta loja...
+      </div>
+    </div>
+  );
 }
 
 function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
@@ -490,43 +568,50 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6 -mt-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-sm text-muted-foreground">Olá,</div>
-          <div className="text-xl font-bold">{nome}</div>
-        </CardContent>
-      </Card>
+    <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="pt-2">
+        <div className="text-xs uppercase tracking-[0.2em] text-indigo-300/70 font-semibold">Olá,</div>
+        <div className="text-2xl font-bold text-white mt-0.5">{nome}</div>
+      </div>
 
       <div className={`grid gap-4 ${inclP && inclC ? "sm:grid-cols-2" : ""}`}>
         {inclP && (
-          <Card className="overflow-hidden">
-            <div className="p-5 text-white" style={{ background: "var(--brand-primary)" }}>
+          <Card className="overflow-hidden border-indigo-500/25 bg-[#141432] qsf-glow relative">
+            <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div className="relative p-5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm opacity-90"><Coins className="h-4 w-4" /> Seus pontos</div>
-                <div className="text-xs uppercase tracking-wide font-semibold flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                  <Coins className="h-3.5 w-3.5 text-indigo-400" /> Seus pontos
+                </div>
+                <div className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 bg-indigo-500/15 text-indigo-200 border border-indigo-500/30 rounded-full px-2 py-0.5">
                   <Trophy className="h-3 w-3" /> {nivel}
                 </div>
               </div>
-              <div className="text-4xl font-bold mt-2">{link.pontos}</div>
+              <div className="text-5xl font-bold mt-3 text-white tabular-nums tracking-tight">
+                {link.pontos.toLocaleString("pt-BR")}
+                <span className="text-base text-indigo-400 font-semibold ml-2">pts</span>
+              </div>
               {loja.pontos_expiracao_modo === "validade" && (
-                <div className="text-[11px] mt-1 opacity-80">
+                <div className="text-[11px] mt-2 text-slate-500">
                   Pontos expiram após {loja.pontos_validade_dias} dias
                 </div>
               )}
               {loja.pontos_expiracao_modo === "decaimento" && (
-                <div className="text-[11px] mt-1 opacity-80">
+                <div className="text-[11px] mt-2 text-slate-500">
                   Você perde {loja.pontos_decaimento_valor} pts a cada {loja.pontos_decaimento_dias} dias
                 </div>
               )}
               {prog.proximo && (
-                <div className="mt-4">
-                  <div className="flex justify-between text-xs opacity-90 mb-1">
-                    <span>Próximo: {prog.proximo}</span>
-                    <span>{Math.round(prog.pct)}%</span>
+                <div className="mt-5">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-400">Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span></span>
+                    <span className="text-indigo-300 font-semibold">{Math.round(prog.pct)}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-white/20 overflow-hidden">
-                    <div className="h-full bg-white transition-all" style={{ width: `${Math.min(100, prog.pct)}%` }} />
+                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-indigo-500/20 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.6)]"
+                      style={{ width: `${Math.min(100, prog.pct)}%` }}
+                    />
                   </div>
                 </div>
               )}
@@ -534,12 +619,18 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           </Card>
         )}
         {inclC && (
-          <Card className="overflow-hidden">
-            <div className="p-5 text-white" style={{ background: "var(--brand-secondary)" }}>
-              <div className="flex items-center gap-2 text-sm opacity-90"><Wallet className="h-4 w-4" /> Seu cashback</div>
-              <div className="text-4xl font-bold mt-2">{formatBRL(Number(link.cashback_saldo))}</div>
+          <Card className="overflow-hidden border-emerald-500/25 bg-[#0d1a1a] relative">
+            <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl" />
+            <div className="relative p-5">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                <Wallet className="h-3.5 w-3.5 text-emerald-400" /> Seu cashback
+              </div>
+              <div className="text-4xl font-bold mt-3 text-white tabular-nums tracking-tight">
+                {formatBRL(Number(link.cashback_saldo))}
+              </div>
               <Button
-                size="sm" variant="secondary" className="mt-4"
+                size="sm"
+                className="mt-4 bg-emerald-500/15 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/25 hover:text-white transition-all"
                 disabled={Number(link.cashback_saldo) <= 0}
                 onClick={() => setCashbackModal(true)}
               >
@@ -552,29 +643,34 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
 
       {inclP && produtos.length > 0 && (
         <section>
-          <h2 className="font-semibold mb-3">Trocar pontos por produtos</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <Gift className="h-4 w-4 text-indigo-400" />
+            <h2 className="font-semibold text-slate-100">Trocar pontos por produtos</h2>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {produtos.map((p) => {
               const podeResgatar = link.pontos >= p.custo_pontos;
               return (
-                <Card key={p.id}>
+                <Card key={p.id} className={`border-indigo-500/20 bg-[#141432] transition-all hover:border-indigo-400/40 hover:-translate-y-0.5 ${podeResgatar ? "hover:shadow-lg hover:shadow-indigo-500/10" : "opacity-70"}`}>
                   <CardContent className="p-3 space-y-2">
-                    <div className="aspect-video w-full overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                    <div className="aspect-video w-full overflow-hidden rounded-md bg-[#0a0a1a] border border-indigo-500/10 flex items-center justify-center">
                       {p.foto_url ? (
                         <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" />
                       ) : (
-                        <Package className="h-8 w-8 text-muted-foreground/40" />
+                        <Package className="h-8 w-8 text-indigo-500/30" />
                       )}
                     </div>
-                    <div className="font-medium text-sm">{p.nome}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
+                    <div className="font-medium text-sm text-slate-100">{p.nome}</div>
+                    <div className="text-xs text-slate-400 line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-bold text-sm" style={{ color: "var(--brand-primary)" }}>{p.custo_pontos} pts</span>
+                      <span className="font-bold text-sm text-indigo-300">{p.custo_pontos} pts</span>
                       <Button
-                        size="sm" disabled={!podeResgatar || resgatarP.isPending}
+                        size="sm"
+                        disabled={!podeResgatar || resgatarP.isPending}
                         onClick={() => resgatarP.mutate(p.id)}
-                        style={podeResgatar ? { backgroundColor: "var(--brand-primary)" } : {}}
-                        className="text-white"
+                        className={podeResgatar
+                          ? "bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-md shadow-indigo-600/30 transition-all active:scale-95"
+                          : "bg-[#0a0a1a] text-slate-500 border border-indigo-500/10 cursor-not-allowed"}
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
                       </Button>
@@ -604,9 +700,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
       )}
 
       <section>
-        <Link to="/nota/$slug" params={{ slug: loja.slug }}
-          className="flex items-center justify-center gap-2 rounded-md border border-dashed p-4 text-sm hover:bg-accent">
-          <FileText className="h-4 w-4" /> Enviar foto de nota fiscal para ganhar pontos
+        <Link
+          to="/nota/$slug"
+          params={{ slug: loja.slug }}
+          className="group flex items-center justify-center gap-2 rounded-xl border border-dashed border-indigo-500/30 bg-[#141432]/50 p-4 text-sm text-slate-300 hover:border-indigo-400/60 hover:bg-indigo-500/10 hover:text-white transition-all"
+        >
+          <FileText className="h-4 w-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+          Enviar foto de nota fiscal para ganhar pontos
         </Link>
       </section>
 
@@ -722,27 +822,27 @@ function formatDateTime(iso: string) {
 function TxRowItem({ t }: { t: TxRow }) {
   const isCredit = t.pontos_delta > 0 || Number(t.cashback_delta) > 0;
   return (
-    <div className="flex items-start justify-between gap-3 p-3 text-sm">
+    <div className="flex items-start justify-between gap-3 p-3 text-sm hover:bg-indigo-500/5 transition-colors">
       <div className="flex items-start gap-2 min-w-0">
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
           {isCredit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
         </div>
         <div className="min-w-0">
-          <div className="font-medium truncate">{describeTx(t)}</div>
-          <div className="text-xs text-muted-foreground">{formatDateTime(t.created_at)}</div>
+          <div className="font-medium truncate text-slate-100">{describeTx(t)}</div>
+          <div className="text-xs text-slate-500">{formatDateTime(t.created_at)}</div>
           {t.tipo === "venda" && Number(t.valor) > 0 && (
-            <div className="text-xs text-muted-foreground">Compra de {formatBRL(Number(t.valor))}</div>
+            <div className="text-xs text-slate-500">Compra de {formatBRL(Number(t.valor))}</div>
           )}
         </div>
       </div>
       <div className="text-right text-xs shrink-0">
         {t.pontos_delta ? (
-          <div className={t.pontos_delta > 0 ? "text-green-700 font-semibold" : "text-destructive font-semibold"}>
+          <div className={t.pontos_delta > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
             {t.pontos_delta > 0 ? "+" : ""}{t.pontos_delta} pts
           </div>
         ) : null}
         {Number(t.cashback_delta) ? (
-          <div className={Number(t.cashback_delta) > 0 ? "text-green-700 font-semibold" : "text-destructive font-semibold"}>
+          <div className={Number(t.cashback_delta) > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
             {Number(t.cashback_delta) > 0 ? "+" : ""}{formatBRL(Number(t.cashback_delta))}
           </div>
         ) : null}
@@ -760,11 +860,11 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
   const ajustes = list.filter((t) => t.tipo === "ajuste");
 
   const renderList = (arr: TxRow[]) => (
-    <Card>
+    <Card className="border-indigo-500/15 bg-[#141432]/60">
       <CardContent className="p-0">
-        <div className="divide-y">
+        <div className="divide-y divide-indigo-500/10">
           {arr.length === 0
-            ? <div className="p-6 text-center text-sm text-muted-foreground">Sem movimentações</div>
+            ? <div className="p-6 text-center text-sm text-slate-500">Sem movimentações</div>
             : arr.map((t) => <TxRowItem key={t.id} t={t} />)}
         </div>
       </CardContent>
@@ -774,9 +874,9 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
-        <h2 className="font-semibold">Histórico</h2>
-        <span className="text-xs text-muted-foreground">acompanhe seu saldo</span>
+        <Sparkles className="h-4 w-4 text-indigo-400" />
+        <h2 className="font-semibold text-slate-100">Histórico</h2>
+        <span className="text-xs text-slate-500">acompanhe seu saldo</span>
       </div>
       <Tabs defaultValue="todos">
         <TabsList className="w-full">
@@ -885,9 +985,9 @@ function MeusPostsInstagram({ loja }: { loja: Loja }) {
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
-        <Instagram className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
-        <h2 className="font-semibold">Meus posts no Instagram</h2>
-        <span className="text-xs text-muted-foreground">acompanhe o status</span>
+        <Instagram className="h-4 w-4 text-indigo-400" />
+        <h2 className="font-semibold text-slate-100">Meus posts no Instagram</h2>
+        <span className="text-xs text-slate-500">acompanhe o status</span>
       </div>
 
       {(aprovados.length > 0) && (
@@ -1044,9 +1144,9 @@ function VouchersSection({
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
-        <Receipt className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
-        <h2 className="font-semibold">Meus vouchers</h2>
-        <span className="text-xs text-muted-foreground">códigos e comprovantes</span>
+        <Receipt className="h-4 w-4 text-indigo-400" />
+        <h2 className="font-semibold text-slate-100">Meus vouchers</h2>
+        <span className="text-xs text-slate-500">códigos e comprovantes</span>
       </div>
       <Tabs defaultValue="todos">
         <TabsList className="w-full">

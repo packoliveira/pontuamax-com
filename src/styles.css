@@ -160,3 +160,49 @@
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
 }
+
+/* ==========================================================================
+ * QSF Midnight Indigo — tema escopado apenas para a página pública /{slug}.
+ * Aplicado via <html class="qsf-midnight"> (montado em useEffect da rota)
+ * para que portais (Dialog, Popover, Sonner) também herdem os tokens.
+ * ========================================================================== */
+.qsf-midnight {
+  --background: #0a0a1a;
+  --foreground: #e2e8f0;
+  --card: #141432;
+  --card-foreground: #f8fafc;
+  --popover: #141432;
+  --popover-foreground: #f8fafc;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #1e1e5a;
+  --secondary-foreground: #f8fafc;
+  --muted: #1a1a3a;
+  --muted-foreground: #94a3b8;
+  --accent: #4f46e5;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1e1e5a;
+  --input: #1e1e5a;
+  --ring: #4f46e5;
+  color-scheme: dark;
+}
+
+/* Glow suave nos cards de destaque do Midnight */
+.qsf-glow {
+  box-shadow:
+    0 0 0 1px rgba(79, 70, 229, 0.15),
+    0 10px 30px -10px rgba(79, 70, 229, 0.35),
+    0 0 40px -20px rgba(129, 140, 248, 0.4);
+}
+
+@keyframes qsf-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.qsf-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(129,140,248,0.15), transparent);
+  background-size: 200% 100%;
+  animation: qsf-shimmer 2.5s ease-in-out infinite;
+}
