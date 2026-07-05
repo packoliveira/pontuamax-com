@@ -197,10 +197,6 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   );
 }
 
-function OwnerPreviewBanner() {
-  return null as never; // (placeholder shifted below — real component below)
-}
-
 function BannerHero({ loja }: { loja: Loja }) {
   const desktop = loja.banner_url;
   const mobile = loja.banner_url_mobile || loja.banner_url;
@@ -244,7 +240,7 @@ function BannerHero({ loja }: { loja: Loja }) {
   );
 }
 
-function OwnerPreviewBannerReal() {
+function OwnerPreviewBanner() {
   return (
     <div className="max-w-2xl mx-auto p-4 -mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <Card className="border-indigo-500/20 bg-[#141432]/70 backdrop-blur-xl">
