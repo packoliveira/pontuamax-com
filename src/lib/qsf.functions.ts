@@ -396,6 +396,67 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
     return { normalized: true };
   });
 
+// -------- CLIENTE: reivindicar cadastro pendente criado por venda --------
+// Quando o lojista lança uma venda (ou o webhook recebe uma venda) para um CPF
+// que ainda não tem conta, criamos um profile "pendente" — sem senha real
+// definida pelo cliente. Quando esse cliente se auto-cadastra pela página
+// pública com o mesmo CPF, esta função REAPROVEITA a conta existente (mesmo
+// user_id, mesmo saldo de pontos/cashback), apenas definindo a senha e o nome
+// escolhidos por ele. Assim NUNCA cria uma segunda conta com o mesmo CPF.
+export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        cpf: z.string().min(11).max(20),
+        senha: z.string().min(6).max(72),
+        nome: z.string().min(1).max(100),
+        phone: z.string().max(20).optional().nullable(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const cpfDigits = data.cpf.replace(/\D/g, "");
+    if (!isValidCPF(cpfDigits)) return { claimed: false as const };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profile = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, phone")
+      .eq("cpf", cpfDigits)
+      .maybeSingle();
+    if (!profile.data) return { claimed: false as const };
+
+    const current = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
+    const user = current.data.user;
+    // Só reivindica se a conta nunca foi usada de fato pelo cliente. Se ela
+    // já tem last_sign_in_at, o cadastro foi completado antes — nesse caso
+    // devolve claimed:false e o frontend segue para o fluxo normal, que vai
+    // detectar "usuário já cadastrado" e sugerir login.
+    if (!user || user.last_sign_in_at) return { claimed: false as const };
+
+    const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || profile.data.phone || null;
+    const email = cpfToEmail(cpfDigits);
+    const updated = await supabaseAdmin.auth.admin.updateUserById(profile.data.id, {
+      email,
+      password: data.senha,
+      email_confirm: true,
+      user_metadata: {
+        ...(user.user_metadata ?? {}),
+        full_name: data.nome,
+        phone: phoneDigits,
+        cpf: cpfDigits,
+      },
+    });
+    if (updated.error) throw new Error(updated.error.message);
+
+    await supabaseAdmin
+      .from("profiles")
+      .update({ full_name: data.nome, phone: phoneDigits, cpf: cpfDigits })
+      .eq("id", profile.data.id);
+
+    return { claimed: true as const, email };
+  });
+
 // -------- LOJISTA: cadastrar novo cliente pelo CPF (durante lançar venda) --------
 // Identidade única do cliente = CPF. Cria/normaliza auth user com email sintético
 // baseado no CPF (fonte da verdade) e senha temporária = CPF (só dígitos).
@@ -407,7 +468,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         phone: z.string().min(8).max(20),
         nome: z.string().min(1).max(100),
         store_id: z.string().uuid(),
-        cpf: z.string().max(20).optional().nullable(),
+        // CPF é a chave única de identidade do cliente — obrigatório
+        // para evitar cadastros incompletos que colidem depois com o
+        // auto-cadastro do cliente pelo mesmo CPF.
+        cpf: z.string().min(11).max(20),
       })
       .parse(input),
   )
@@ -417,9 +481,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
     if (!owner.data) throw new Error("Você não é dono desta loja.");
     const digits = data.phone.replace(/\D/g, "");
-    const cpfDigits = (data.cpf ?? "").replace(/\D/g, "");
+    const cpfDigits = data.cpf.replace(/\D/g, "");
     if (digits.length < 8) throw new Error("Telefone inválido.");
-    if (cpfDigits && cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
+    if (cpfDigits.length !== 11) throw new Error("CPF deve conter 11 dígitos.");
+    if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
 
     // Estratégia: CPF é a chave única do cliente. Se existir perfil com este
     // CPF (mesmo que criado por webhook como "cadastro pendente"), REUSA e
