@@ -650,6 +650,7 @@ export type Database = {
           last_notified_inactivity: string | null
           last_purchase_at: string | null
           nivel: Database["public"]["Enums"]["nivel_cliente"]
+          pending_registration: boolean
           pontos: number
           pontos_decaimento_last_at: string | null
           referral_bonus_paid: boolean
@@ -666,6 +667,7 @@ export type Database = {
           last_notified_inactivity?: string | null
           last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
+          pending_registration?: boolean
           pontos?: number
           pontos_decaimento_last_at?: string | null
           referral_bonus_paid?: boolean
@@ -682,6 +684,7 @@ export type Database = {
           last_notified_inactivity?: string | null
           last_purchase_at?: string | null
           nivel?: Database["public"]["Enums"]["nivel_cliente"]
+          pending_registration?: boolean
           pontos?: number
           pontos_decaimento_last_at?: string | null
           referral_bonus_paid?: boolean
