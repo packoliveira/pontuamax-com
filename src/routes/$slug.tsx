@@ -700,9 +700,13 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
       )}
 
       <section>
-        <Link to="/nota/$slug" params={{ slug: loja.slug }}
-          className="flex items-center justify-center gap-2 rounded-md border border-dashed p-4 text-sm hover:bg-accent">
-          <FileText className="h-4 w-4" /> Enviar foto de nota fiscal para ganhar pontos
+        <Link
+          to="/nota/$slug"
+          params={{ slug: loja.slug }}
+          className="group flex items-center justify-center gap-2 rounded-xl border border-dashed border-indigo-500/30 bg-[#141432]/50 p-4 text-sm text-slate-300 hover:border-indigo-400/60 hover:bg-indigo-500/10 hover:text-white transition-all"
+        >
+          <FileText className="h-4 w-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+          Enviar foto de nota fiscal para ganhar pontos
         </Link>
       </section>
 
