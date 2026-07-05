@@ -254,10 +254,11 @@ function DashboardMockup() {
         {/* sidebar */}
         <aside className="hidden w-52 shrink-0 border-r border-slate-100 bg-white p-3 md:block">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0A2540] text-white">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-semibold text-[#0A2540]">QSF Club</span>
+            <PontoaMaxMark size={22} />
+            <span className="text-sm font-semibold tracking-tight">
+              <span style={{ color: "#155EEF" }}>Pontoa</span>
+              <span style={{ color: "#22C55E" }}>Max</span>
+            </span>
           </div>
           <nav className="mt-3 space-y-1 text-xs">
             <div className="flex items-center gap-2 rounded-md bg-[#0A2540] px-2.5 py-2 font-medium text-white">
