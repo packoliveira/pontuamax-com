@@ -911,11 +911,27 @@ export const confirmarResgate = createServerFn({ method: "POST" })
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     }
     const deliveredAt = new Date().toISOString();
-    const { error } = await supabaseAdmin
+    // Update condicional: só marca como entregue se ainda estiver pendente.
+    // Impede corrida entre lojista clicando duas vezes / dois caixas simultâneos.
+    const upd = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: deliveredAt })
-      .eq("id", data.transaction_id);
-    if (error) throw new Error(error.message);
+      .update({ status: "entregue", delivered_at: deliveredAt, redeemed_by: context.userId })
+      .eq("id", data.transaction_id)
+      .eq("status", "pendente")
+      .select("id");
+    if (upd.error) throw new Error(upd.error.message);
+    if (!upd.data || upd.data.length === 0) {
+      // Alguém já entregou/expirou/cancelou entre a leitura e o update.
+      const recheck = await supabaseAdmin
+        .from("transactions")
+        .select("status, delivered_at")
+        .eq("id", data.transaction_id)
+        .maybeSingle();
+      if (recheck.data?.status === "entregue") throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
+      if (recheck.data?.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
+      if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
+      throw new Error("Não foi possível confirmar o voucher. Atualize a página e tente novamente.");
+    }
     const store = tx.data.stores as unknown as { nome_fantasia: string | null } | null;
     const profile = tx.data.profiles as { full_name: string | null; phone: string | null } | null;
     const product = tx.data.products as { nome: string | null } | null;
