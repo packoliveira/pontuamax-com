@@ -514,43 +514,45 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   });
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Hourglass className="h-4 w-4" /> Validade dos pontos
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Hourglass className="h-4 w-4" /></span>
+          Validade dos pontos
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Defina se e como os pontos dos clientes expiram. A execução é automática (todo dia) e cria uma movimentação de "expiração" no histórico.
         </p>
 
         <RadioGroup value={modo} onValueChange={(v) => setModo(v as never)} className="space-y-2">
-          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
             <RadioGroupItem value="nenhum" id="mp-nenhum" className="mt-0.5" />
             <div>
-              <div className="text-sm font-medium">Sem expiração</div>
-              <div className="text-xs text-muted-foreground">Os pontos nunca expiram.</div>
+              <div className="text-sm font-medium text-[#0F172A]">Sem expiração</div>
+              <div className="text-xs text-[#64748B]">Os pontos nunca expiram.</div>
             </div>
           </label>
-          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
             <RadioGroupItem value="validade" id="mp-validade" className="mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-medium">Validade por data</div>
-              <div className="text-xs text-muted-foreground">Cada ponto ganho expira depois de N dias.</div>
+              <div className="text-sm font-medium text-[#0F172A]">Validade por data</div>
+              <div className="text-xs text-[#64748B]">Cada ponto ganho expira depois de N dias.</div>
               {modo === "validade" && (
                 <div className="mt-2 flex items-center gap-2">
                   <Input type="number" min={1} className="w-28" value={validadeDias} onChange={(e) => setValidadeDias(e.target.value)} />
-                  <span className="text-xs text-muted-foreground">dias de validade</span>
+                  <span className="text-xs text-[#64748B]">dias de validade</span>
                 </div>
               )}
             </div>
           </label>
-          <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer">
+          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
             <RadioGroupItem value="decaimento" id="mp-decai" className="mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-medium">Decaimento periódico</div>
-              <div className="text-xs text-muted-foreground">Cliente perde X pontos a cada N dias.</div>
+              <div className="text-sm font-medium text-[#0F172A]">Decaimento periódico</div>
+              <div className="text-xs text-[#64748B]">Cliente perde X pontos a cada N dias.</div>
               {modo === "decaimento" && (
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div>
@@ -568,12 +570,12 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
         </RadioGroup>
 
         {loja.pontos_expiracao_last_run_at && (
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[11px] text-[#64748B]">
             Última execução: {new Date(loja.pontos_expiracao_last_run_at).toLocaleString("pt-BR")}
           </p>
         )}
 
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
           {salvar.isPending ? "Salvando..." : "Salvar validade"}
         </Button>
       </CardContent>
