@@ -213,7 +213,16 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         // Vincula à loja (upsert)
         const linkRes = await supabaseAdmin
           .from("store_clients")
-          .upsert({ store_id: loja.id, user_id: clientProfile.id }, { onConflict: "store_id,user_id" })
+          .upsert(
+            {
+              store_id: loja.id,
+              user_id: clientProfile.id,
+              // Cliente entrou por venda automática; marca como cadastro pendente
+              // (só quando é criação nova — se já existir, mantém o valor atual)
+              pending_registration: true,
+            },
+            { onConflict: "store_id,user_id", ignoreDuplicates: false },
+          )
           .select("*")
           .single();
         if (linkRes.error) return logAndRespond("erro", linkRes.error.message, 500);
