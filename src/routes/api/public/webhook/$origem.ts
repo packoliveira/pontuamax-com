@@ -171,10 +171,43 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        const { idVenda, valor, cpf, telefone, nome, tipoEvento } =
+        let { idVenda, valor, cpf, telefone, nome, tipoEvento } =
           extractOlistPayload(payload);
 
         if (!idVenda) return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
+
+        // Se a Olist mandou só notificação (sem valor total), tenta buscar
+        // o pedido completo via API Tiny/Olist usando OLIST_API_TOKEN.
+        if ((!Number.isFinite(valor) || valor <= 0) && origem === "olist") {
+          const token = process.env.OLIST_API_TOKEN;
+          if (token) {
+            try {
+              const apiUrl = `https://api.tiny.com.br/api2/pedido.obter.php?token=${encodeURIComponent(token)}&id=${encodeURIComponent(idVenda)}&formato=json`;
+              const resp = await fetch(apiUrl);
+              const dataJson = (await resp.json()) as {
+                retorno?: {
+                  status?: string;
+                  pedido?: Record<string, unknown>;
+                  registros?: Array<{ pedido?: Record<string, unknown> }>;
+                };
+              };
+              const pedido =
+                dataJson.retorno?.pedido ??
+                dataJson.retorno?.registros?.[0]?.pedido ??
+                null;
+              if (pedido) {
+                const full = extractOlistPayload({ pedido });
+                if (Number.isFinite(full.valor) && full.valor > 0) valor = full.valor;
+                if (!cpf && full.cpf) cpf = full.cpf;
+                if (!telefone && full.telefone) telefone = full.telefone;
+                if (!nome || nome === "Cliente") nome = full.nome;
+              }
+            } catch {
+              // segue com validação abaixo
+            }
+          }
+        }
+
         if (!Number.isFinite(valor) || valor <= 0) {
           // Olist envia notificações leves (inclusao_pedido, alteracao_pedido)
           // que contêm apenas id/numero/cliente/situação — sem o total do pedido.
@@ -182,7 +215,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           // não desativar o webhook, mas registramos como erro pro lojista ver.
           return logAndRespond(
             "erro",
-            `Notificação Olist "${tipoEvento || "sem tipo"}" recebida (pedido ${idVenda}), mas sem o valor total. A Olist só envia o total quando o pedido é faturado. Aguarde o faturamento ou use o PDV para lançar a venda.`,
+            `Notificação Olist "${tipoEvento || "sem tipo"}" recebida (pedido ${idVenda}), mas não conseguimos obter o valor total do pedido via API. Verifique o token OLIST_API_TOKEN ou aguarde o faturamento.`,
             200,
           );
         }
