@@ -842,30 +842,30 @@ function WhatsappQRConnect({ storeId }: { storeId: string }) {
 
   const badge =
     state === "open"
-      ? { text: "Conectado", cls: "bg-emerald-100 text-emerald-700" }
+      ? { text: "Conectado", cls: "bg-[#22C55E]/10 text-[#15803D]" }
       : state === "connecting"
-        ? { text: "Aguardando leitura do QR", cls: "bg-amber-100 text-amber-700" }
+        ? { text: "Aguardando leitura do QR", cls: "bg-[#F59E0B]/10 text-[#B45309]" }
         : state === "unconfigured"
-          ? { text: "Não configurado", cls: "bg-muted text-muted-foreground" }
-          : { text: "Desconectado", cls: "bg-red-100 text-red-700" };
+          ? { text: "Não configurado", cls: "bg-[#F1F5F9] text-[#64748B]" }
+          : { text: "Desconectado", cls: "bg-[#EF4444]/10 text-[#B91C1C]" };
 
   return (
-    <div className="rounded-md border p-3 space-y-3">
+    <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <QrCode className="h-4 w-4" />
-          <span className="text-sm font-medium">Conexão WhatsApp</span>
-          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+          <QrCode className="h-4 w-4 text-[#2563EB]" />
+          <span className="text-sm font-medium text-[#0F172A]">Conexão WhatsApp</span>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>
             {badge.text}
           </span>
         </div>
         {state === "open" ? (
-          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading}>
+          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading} className="rounded-xl border-[#E5E7EB]">
             <Power className="h-3 w-3 mr-1" />
             Desconectar
           </Button>
         ) : (
-          <Button type="button" size="sm" onClick={conectar} disabled={loading}>
+          <Button type="button" size="sm" onClick={conectar} disabled={loading} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
             {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <QrCode className="h-3 w-3 mr-1" />}
             Gerar QR Code
           </Button>
@@ -876,14 +876,14 @@ function WhatsappQRConnect({ storeId }: { storeId: string }) {
           <img
             src={qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`}
             alt="QR Code do WhatsApp"
-            className="w-56 h-56 border rounded-md"
+            className="w-56 h-56 border border-[#E5E7EB] rounded-xl bg-white p-2"
           />
-          <p className="text-xs text-muted-foreground text-center max-w-xs">
+          <p className="text-xs text-[#64748B] text-center max-w-xs">
             Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> → <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
           </p>
         </div>
       )}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-[#64748B]">
         Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até você desconectar ou o WhatsApp derrubar a sessão.
       </p>
     </div>
