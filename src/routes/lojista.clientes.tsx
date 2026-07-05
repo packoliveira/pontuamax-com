@@ -341,11 +341,21 @@ function ClientesPage() {
             </SelectContent>
           </Select>
         )}
-        {(q || filtroCampo !== "todos" || filtroNivel !== "todos") && (
+        <Select value={filtroStatus} onValueChange={(v) => setFiltroStatus(v as FiltroStatus)}>
+          <SelectTrigger className="h-10 w-[170px] rounded-xl border-[#E5E7EB]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os status</SelectItem>
+            <SelectItem value="pendentes">Cadastro pendente</SelectItem>
+            <SelectItem value="cadastrados">Cadastro completo</SelectItem>
+          </SelectContent>
+        </Select>
+        {(q || filtroCampo !== "todos" || filtroNivel !== "todos" || filtroStatus !== "todos") && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => { setQ(""); setFiltroCampo("todos"); setFiltroNivel("todos"); }}
+            onClick={() => { setQ(""); setFiltroCampo("todos"); setFiltroNivel("todos"); setFiltroStatus("todos"); }}
             className="rounded-xl text-[#2563EB] hover:bg-[#2563EB]/5"
           >
             Limpar
