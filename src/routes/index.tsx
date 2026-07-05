@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Store,
@@ -11,6 +12,21 @@ import {
   ArrowRight,
   Trophy,
   Check,
+  Home,
+  ShoppingBag,
+  Sparkles,
+  User,
+  Ticket,
+  Zap,
+  ChevronRight,
+  Bell,
+  Signal,
+  Wifi,
+  BatteryFull,
+  Percent,
+  Crown,
+  Flame,
+  ArrowUpRight,
 } from "lucide-react";
 import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
 
@@ -90,9 +106,7 @@ function Index() {
           </div>
 
           <div className="flex justify-center md:justify-end">
-            <div className="animate-[float_6s_ease-in-out_infinite]">
-              <PhoneMockup />
-            </div>
+            <PhoneMockup />
           </div>
         </div>
       </section>
