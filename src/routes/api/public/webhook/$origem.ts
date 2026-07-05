@@ -27,10 +27,12 @@ function extractOlistPayload(p: Record<string, unknown>): {
   cpf: string;
   telefone: string;
   nome: string;
+  tipoEvento: string;
 } {
   // Desembrulha envelopes comuns
   const root =
     (p.pedido as Record<string, unknown>) ??
+    (p.dados as Record<string, unknown>) ??
     (p.data as Record<string, unknown>) ??
     (p.venda as Record<string, unknown>) ??
     p;
@@ -39,6 +41,7 @@ function extractOlistPayload(p: Record<string, unknown>): {
   const fonePrincipal =
     (cliente.fone as string | undefined) ??
     (cliente.celular as string | undefined) ??
+    (cliente.telefone as string | undefined) ??
     (fones[0]?.fone as string | undefined) ??
     (fones[0]?.numero as string | undefined) ??
     "";
@@ -53,11 +56,23 @@ function extractOlistPayload(p: Record<string, unknown>): {
   ).trim();
 
   const valorRaw =
-    p.valor ?? root.total ?? root.valor_total ?? root.total_pedido ?? root.valor ?? 0;
+    p.valor ??
+    root.total ??
+    root.valor_total ??
+    root.total_pedido ??
+    root.valor ??
+    root.totalPedido ??
+    root.valorTotal ??
+    0;
   const valor = typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
 
   const cpfRaw = String(
-    p.cpf_cliente ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
+    p.cpf_cliente ??
+      cliente.cpfCnpj ??
+      cliente.cpf_cnpj ??
+      cliente.documento ??
+      cliente.cpf ??
+      "",
   );
   const cpf = cpfRaw.replace(/\D/g, "");
 
@@ -66,7 +81,9 @@ function extractOlistPayload(p: Record<string, unknown>): {
 
   const nome = String(p.nome_cliente ?? cliente.nome ?? cliente.razao_social ?? "").trim() || "Cliente";
 
-  return { idVenda, valor, cpf, telefone, nome };
+  const tipoEvento = String(p.tipo ?? p.event ?? p.evento ?? "").trim().toLowerCase();
+
+  return { idVenda, valor, cpf, telefone, nome, tipoEvento };
 }
 
 const CORS = {
@@ -154,10 +171,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        const { idVenda, valor, cpf, telefone, nome } = extractOlistPayload(payload);
+        const { idVenda, valor, cpf, telefone, nome, tipoEvento } =
+          extractOlistPayload(payload);
 
         if (!idVenda) return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
-        if (!Number.isFinite(valor) || valor <= 0) return logAndRespond("erro", "valor inválido", 400);
+        if (!Number.isFinite(valor) || valor <= 0) {
+          // Olist envia notificações leves (inclusao_pedido, alteracao_pedido)
+          // que contêm apenas id/numero/cliente/situação — sem o total do pedido.
+          // Sem valor não há como creditar pontos. Devolvemos 200 pra Olist
+          // não desativar o webhook, mas registramos como erro pro lojista ver.
+          return logAndRespond(
+            "erro",
+            `Notificação Olist "${tipoEvento || "sem tipo"}" recebida (pedido ${idVenda}), mas sem o valor total. A Olist só envia o total quando o pedido é faturado. Aguarde o faturamento ou use o PDV para lançar a venda.`,
+            200,
+          );
+        }
         if (!cpf && !telefone) {
           return logAndRespond("erro", "informe CPF ou telefone do cliente", 400);
         }
