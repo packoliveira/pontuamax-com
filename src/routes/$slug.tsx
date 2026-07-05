@@ -198,6 +198,53 @@ function ClienteFlow({ loja }: { loja: Loja }) {
 }
 
 function OwnerPreviewBanner() {
+  return null as never; // (placeholder shifted below — real component below)
+}
+
+function BannerHero({ loja }: { loja: Loja }) {
+  const desktop = loja.banner_url;
+  const mobile = loja.banner_url_mobile || loja.banner_url;
+  if (!desktop && !mobile) return null;
+  return (
+    <div className="relative">
+      <div className="max-w-2xl mx-auto px-4 pt-4">
+        <div
+          className="relative overflow-hidden rounded-2xl border shadow-lg animate-in fade-in zoom-in-95 duration-500"
+          style={{
+            borderColor: `color-mix(in oklab, ${loja.brand_primary} 40%, transparent)`,
+            boxShadow: `0 10px 40px -12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+          }}
+        >
+          {mobile && (
+            <img
+              src={mobile}
+              alt={`Banner ${loja.nome_fantasia}`}
+              className="w-full h-40 object-cover sm:hidden"
+              loading="eager"
+            />
+          )}
+          {desktop && (
+            <img
+              src={desktop}
+              alt={`Banner ${loja.nome_fantasia}`}
+              className="w-full h-40 sm:h-48 md:h-56 object-cover hidden sm:block"
+              loading="eager"
+            />
+          )}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, transparent 60%, color-mix(in oklab, #0a0a1a 80%, transparent))`,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OwnerPreviewBannerReal() {
   return (
     <div className="max-w-2xl mx-auto p-4 -mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <Card className="border-indigo-500/20 bg-[#141432]/70 backdrop-blur-xl">
