@@ -11,7 +11,7 @@ import {
   ArrowRight,
   Trophy,
 } from "lucide-react";
-import { PontoaMaxMark } from "@/components/pontoamax-logo";
+import { PontoaMaxMark, PontoaMaxWordmark } from "@/components/pontoamax-logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,10 +31,7 @@ function Index() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
           <PontoaMaxMark size={36} />
-          <span className="text-lg font-semibold tracking-tight">
-            <span style={{ color: "#2563EB" }}>Pontoa</span>
-            <span style={{ color: "#22C55E" }}>Max</span>
-          </span>
+          <PontoaMaxWordmark variant="light" size={18} />
         </div>
         <Link to="/lojista/login">
           <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">Entrar como lojista</Button>
@@ -255,10 +252,7 @@ function DashboardMockup() {
         <aside className="hidden w-52 shrink-0 border-r border-slate-100 bg-white p-3 md:block">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <PontoaMaxMark size={22} />
-            <span className="text-sm font-semibold tracking-tight">
-              <span style={{ color: "#2563EB" }}>Pontoa</span>
-              <span style={{ color: "#22C55E" }}>Max</span>
-            </span>
+            <PontoaMaxWordmark variant="light" size={14} />
           </div>
           <nav className="mt-3 space-y-1 text-xs">
             <div className="flex items-center gap-2 rounded-md bg-[#0A2540] px-2.5 py-2 font-medium text-white">
