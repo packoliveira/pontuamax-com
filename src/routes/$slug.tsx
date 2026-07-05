@@ -252,12 +252,21 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
         if (!nome.trim()) throw new Error("Informe seu nome");
         const phoneDigits = onlyDigits(phone);
         if (phoneDigits && phoneDigits.length < 10) throw new Error("Telefone inválido");
-        const { error } = await supabase.auth.signUp({
-          email,
-          password: senha,
-          options: { data: { full_name: nome.trim(), phone: phoneDigits || null, cpf: cpfDigits } },
+        // Se já existe um profile "pendente" com este CPF (criado por venda
+        // do lojista ou webhook antes do cliente se cadastrar), REAPROVEITA
+        // essa conta em vez de criar uma nova — assim o cliente já entra
+        // vendo o saldo de pontos/cashback acumulado.
+        const claim = await reivindicarCadastroPendente({
+          data: { cpf: cpfDigits, senha, nome: nome.trim(), phone: phoneDigits || null },
         });
-        if (error) throw error;
+        if (!claim.claimed) {
+          const { error } = await supabase.auth.signUp({
+            email,
+            password: senha,
+            options: { data: { full_name: nome.trim(), phone: phoneDigits || null, cpf: cpfDigits } },
+          });
+          if (error) throw error;
+        }
         // If session not returned (email confirm), sign in
         const { data: s2 } = await supabase.auth.getSession();
         if (!s2.session) {
