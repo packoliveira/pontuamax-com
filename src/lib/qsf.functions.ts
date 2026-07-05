@@ -695,6 +695,12 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
       .update({ full_name: data.full_name.trim(), phone: phoneDigits, cpf: cpfDigits })
       .eq("id", data.client_user_id);
     if (error) throw new Error(error.message);
+    // Cadastro completo pelo lojista → tira o status "pendente" nesta loja.
+    await supabaseAdmin
+      .from("store_clients")
+      .update({ pending_registration: false })
+      .eq("store_id", data.store_id)
+      .eq("user_id", data.client_user_id);
     return { ok: true };
   });
 
