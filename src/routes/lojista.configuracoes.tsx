@@ -795,6 +795,75 @@ function AssetUploader({
   );
 }
 
+const COLOR_PRESETS: { name: string; a: string; b: string }[] = [
+  { name: "Midnight", a: "#6366F1", b: "#A855F7" },
+  { name: "Sunset", a: "#7C3AED", b: "#F97316" },
+  { name: "Esmeralda", a: "#10B981", b: "#F59E0B" },
+  { name: "Rosé", a: "#EC4899", b: "#DB2777" },
+  { name: "Oceano", a: "#2563EB", b: "#06B6D4" },
+  { name: "Café", a: "#7C4A2E", b: "#D97706" },
+  { name: "Ônix & Ouro", a: "#111827", b: "#D4AF37" },
+  { name: "Rubi", a: "#DC2626", b: "#1F2937" },
+];
+
+function ColorPresets({ onPick }: { onPick: (a: string, b: string) => void }) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs uppercase tracking-wide text-[#64748B]">Paletas prontas</Label>
+      <div className="flex flex-wrap gap-2">
+        {COLOR_PRESETS.map((p) => (
+          <button
+            key={p.name}
+            type="button"
+            onClick={() => onPick(p.a, p.b)}
+            className="group flex items-center gap-2 rounded-full border border-[#E5E7EB] pl-1 pr-3 py-1 text-xs font-medium text-[#0F172A] hover:border-[#2563EB] hover:shadow-sm transition-all"
+            title={`${p.a} + ${p.b}`}
+          >
+            <span
+              className="h-6 w-6 rounded-full border border-white shadow-sm"
+              style={{ background: `linear-gradient(135deg, ${p.a}, ${p.b})` }}
+            />
+            {p.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const SUGGESTED_BANNERS: { label: string; url: string }[] = [
+  { label: "Café", url: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1920&h=560&q=80" },
+  { label: "Restaurante", url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&h=560&q=80" },
+  { label: "Varejo", url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1920&h=560&q=80" },
+  { label: "Beleza", url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1920&h=560&q=80" },
+  { label: "Fitness", url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&h=560&q=80" },
+  { label: "Abstrato", url: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920&h=560&q=80" },
+];
+
+function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs uppercase tracking-wide text-[#64748B]">Ou escolha um banner sugerido</Label>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {SUGGESTED_BANNERS.map((b) => (
+          <button
+            key={b.url}
+            type="button"
+            onClick={() => { onPick(b.url); toast.success(`Banner "${b.label}" aplicado — salve para publicar.`); }}
+            className="group relative rounded-lg overflow-hidden border border-[#E5E7EB] hover:border-[#2563EB] hover:shadow-md transition-all"
+          >
+            <img src={b.url} alt={b.label} loading="lazy" className="w-full h-16 object-cover group-hover:scale-105 transition-transform duration-300" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-1">
+              <span className="text-[10px] font-medium text-white">{b.label}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+      <p className="text-[11px] text-[#64748B]">Aplica em desktop e celular. Você pode substituir por uma imagem própria a qualquer momento.</p>
+    </div>
+  );
+}
+
 function WhatsappQRConnect({ storeId }: { storeId: string }) {
   const qc = useQueryClient();
   const [qr, setQr] = useState<string | null>(null);
