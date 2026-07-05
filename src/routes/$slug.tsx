@@ -822,27 +822,27 @@ function formatDateTime(iso: string) {
 function TxRowItem({ t }: { t: TxRow }) {
   const isCredit = t.pontos_delta > 0 || Number(t.cashback_delta) > 0;
   return (
-    <div className="flex items-start justify-between gap-3 p-3 text-sm">
+    <div className="flex items-start justify-between gap-3 p-3 text-sm hover:bg-indigo-500/5 transition-colors">
       <div className="flex items-start gap-2 min-w-0">
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
           {isCredit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
         </div>
         <div className="min-w-0">
-          <div className="font-medium truncate">{describeTx(t)}</div>
-          <div className="text-xs text-muted-foreground">{formatDateTime(t.created_at)}</div>
+          <div className="font-medium truncate text-slate-100">{describeTx(t)}</div>
+          <div className="text-xs text-slate-500">{formatDateTime(t.created_at)}</div>
           {t.tipo === "venda" && Number(t.valor) > 0 && (
-            <div className="text-xs text-muted-foreground">Compra de {formatBRL(Number(t.valor))}</div>
+            <div className="text-xs text-slate-500">Compra de {formatBRL(Number(t.valor))}</div>
           )}
         </div>
       </div>
       <div className="text-right text-xs shrink-0">
         {t.pontos_delta ? (
-          <div className={t.pontos_delta > 0 ? "text-green-700 font-semibold" : "text-destructive font-semibold"}>
+          <div className={t.pontos_delta > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
             {t.pontos_delta > 0 ? "+" : ""}{t.pontos_delta} pts
           </div>
         ) : null}
         {Number(t.cashback_delta) ? (
-          <div className={Number(t.cashback_delta) > 0 ? "text-green-700 font-semibold" : "text-destructive font-semibold"}>
+          <div className={Number(t.cashback_delta) > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
             {Number(t.cashback_delta) > 0 ? "+" : ""}{formatBRL(Number(t.cashback_delta))}
           </div>
         ) : null}
@@ -874,9 +874,9 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="h-4 w-4" style={{ color: "var(--brand-primary)" }} />
-        <h2 className="font-semibold">Histórico</h2>
-        <span className="text-xs text-muted-foreground">acompanhe seu saldo</span>
+        <Sparkles className="h-4 w-4 text-indigo-400" />
+        <h2 className="font-semibold text-slate-100">Histórico</h2>
+        <span className="text-xs text-slate-500">acompanhe seu saldo</span>
       </div>
       <Tabs defaultValue="todos">
         <TabsList className="w-full">
