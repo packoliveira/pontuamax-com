@@ -990,16 +990,24 @@ type VoucherTx = TxRow & {
 function VouchersSection({
   loja, txs, nome, telefone,
 }: { loja: Loja; txs: unknown[]; nome: string; telefone: string | null }) {
-  const list = (txs as VoucherTx[]).filter(
-    (t) => t.tipo === "resgate_produto" || t.tipo === "resgate_cashback",
-  );
+  const mostrarUsados = loja.voucher_visivel_apos_uso ?? false;
+  const mostrarExpirados = loja.voucher_mostrar_expirados ?? true;
+  const list = (txs as VoucherTx[])
+    .filter((t) => t.tipo === "resgate_produto" || t.tipo === "resgate_cashback")
+    .filter((t) => {
+      const s = t.status ?? "pendente";
+      if (s === "entregue" && !mostrarUsados) return false;
+      if (s === "expirado" && !mostrarExpirados) return false;
+      return true;
+    });
   const [selected, setSelected] = useState<VoucherTx | null>(null);
 
   if (list.length === 0) return null;
 
   const pendentes = list.filter((t) => t.status === "pendente");
-  const entregues = list.filter((t) => t.status === "entregue");
+  const utilizados = list.filter((t) => t.status === "entregue");
   const expirados = list.filter((t) => t.status === "expirado");
+  const cancelados = list.filter((t) => t.status === "cancelado");
 
   const renderList = (arr: VoucherTx[]) => (
     <Card>
@@ -1028,15 +1036,21 @@ function VouchersSection({
         <TabsList className="w-full">
           <TabsTrigger value="todos" className="flex-1">Todos ({list.length})</TabsTrigger>
           <TabsTrigger value="pendentes" className="flex-1">Pendentes ({pendentes.length})</TabsTrigger>
-          <TabsTrigger value="entregues" className="flex-1">Entregues ({entregues.length})</TabsTrigger>
+          {utilizados.length > 0 && (
+            <TabsTrigger value="utilizados" className="flex-1">Utilizados ({utilizados.length})</TabsTrigger>
+          )}
           {expirados.length > 0 && (
             <TabsTrigger value="expirados" className="flex-1">Expirados ({expirados.length})</TabsTrigger>
+          )}
+          {cancelados.length > 0 && (
+            <TabsTrigger value="cancelados" className="flex-1">Cancelados ({cancelados.length})</TabsTrigger>
           )}
         </TabsList>
         <TabsContent value="todos" className="mt-3">{renderList(list)}</TabsContent>
         <TabsContent value="pendentes" className="mt-3">{renderList(pendentes)}</TabsContent>
-        <TabsContent value="entregues" className="mt-3">{renderList(entregues)}</TabsContent>
+        <TabsContent value="utilizados" className="mt-3">{renderList(utilizados)}</TabsContent>
         <TabsContent value="expirados" className="mt-3">{renderList(expirados)}</TabsContent>
+        <TabsContent value="cancelados" className="mt-3">{renderList(cancelados)}</TabsContent>
       </Tabs>
 
       <Dialog open={!!selected} onOpenChange={(o) => { if (!o) setSelected(null); }}>
