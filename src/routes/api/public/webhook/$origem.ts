@@ -209,10 +209,14 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           }
         }
 
-        if (!cpf && !telefone) {
-          return logAndRespond("erro", "informe CPF ou telefone do cliente", 400);
+        if (!cpf) {
+          return logAndRespond(
+            "erro",
+            "cpf_cliente é obrigatório (11 dígitos) — a integração deve enviar sempre o CPF do comprador para evitar cadastros duplicados",
+            400,
+          );
         }
-        if (cpf && cpf.length !== 11) return logAndRespond("erro", "CPF deve ter 11 dígitos", 400);
+        if (cpf.length !== 11) return logAndRespond("erro", "CPF deve ter 11 dígitos", 400);
         if (telefone && telefone.length < 8) return logAndRespond("erro", "telefone inválido", 400);
 
         // Idempotência: mesma venda já processada?
@@ -236,9 +240,11 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           if (p.data) clientProfile = p.data;
         }
         if (!clientProfile) {
-          // Email sintético: usa CPF se tiver, senão telefone
-          const localPart = cpf || telefone;
-          const email = `${localPart}@cliente.qsfclub.local`;
+          // Email sintético SEMPRE derivado do CPF (fonte única de identidade).
+          // Usar cpfToEmail garante o mesmo domínio de todos os outros fluxos
+          // (auto-cadastro do cliente, login por CPF, lançamento manual),
+          // evitando que o mesmo CPF vire duas contas diferentes.
+          const email = cpfToEmail(cpf);
           const password = telefone || cpf;
           const created = await supabaseAdmin.auth.admin.createUser({
             email,
