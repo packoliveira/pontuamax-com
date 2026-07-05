@@ -493,20 +493,28 @@ function VincularStore({ loja }: { loja: Loja }) {
   if (erro) {
     return (
       <div className="p-8 text-center space-y-3 max-w-md mx-auto">
-        <p className="text-sm text-destructive">{erro}</p>
+        <p className="text-sm text-rose-400">{erro}</p>
         <Button
           onClick={async () => {
             await qc.cancelQueries();
             qc.clear();
             await supabase.auth.signOut();
           }}
+          className="bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white"
         >
           Voltar ao login
         </Button>
       </div>
     );
   }
-  return <div className="p-8 text-center text-sm text-muted-foreground">Preparando sua conta nesta loja...</div>;
+  return (
+    <div className="p-8 text-center max-w-md mx-auto">
+      <div className="inline-flex items-center gap-3 text-sm text-slate-400">
+        <div className="h-4 w-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
+        Preparando sua conta nesta loja...
+      </div>
+    </div>
+  );
 }
 
 function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
