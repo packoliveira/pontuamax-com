@@ -34,11 +34,11 @@ function Page() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading) return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
-  if (!card) return <div className="min-h-screen grid place-items-center p-6 text-center"><div><h1 className="text-2xl font-bold">Vale não encontrado</h1></div></div>;
+  if (isLoading) return <div className="min-h-dvh grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
+  if (!card) return <div className="min-h-dvh grid place-items-center p-6 text-center"><div><h1 className="text-2xl font-bold">Vale não encontrado</h1></div></div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 grid place-items-center p-6">
+    <div className="min-h-dvh bg-slate-50 grid place-items-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex items-center gap-2"><Ticket className="h-5 w-5 text-primary" /><CardTitle>Vale-presente</CardTitle></div>

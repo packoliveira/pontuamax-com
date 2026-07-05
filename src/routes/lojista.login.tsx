@@ -103,7 +103,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#F8FAFC]">
+    <div className="min-h-dvh grid lg:grid-cols-2 bg-[#F8FAFC]">
       {/* Lado esquerdo — ilustração abstrata com degradê da marca */}
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12 text-white bg-[#0B132B]">
         {/* Blobs em degradê roxo → azul → verde-água */}

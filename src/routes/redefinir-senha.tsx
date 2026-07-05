@@ -90,7 +90,7 @@ function Page() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-violet-50 p-4">
+    <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-100 to-violet-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 text-white">
