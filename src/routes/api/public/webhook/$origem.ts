@@ -171,10 +171,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        const { idVenda, valor, cpf, telefone, nome } = extractOlistPayload(payload);
+        const { idVenda, valor, cpf, telefone, nome, tipoEvento } =
+          extractOlistPayload(payload);
 
         if (!idVenda) return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
-        if (!Number.isFinite(valor) || valor <= 0) return logAndRespond("erro", "valor inválido", 400);
+        if (!Number.isFinite(valor) || valor <= 0) {
+          // Olist envia notificações leves (inclusao_pedido, alteracao_pedido)
+          // que contêm apenas id/numero/cliente/situação — sem o total do pedido.
+          // Sem valor não há como creditar pontos. Devolvemos 200 pra Olist
+          // não desativar o webhook, mas registramos como erro pro lojista ver.
+          return logAndRespond(
+            "erro",
+            `Notificação Olist "${tipoEvento || "sem tipo"}" recebida (pedido ${idVenda}), mas sem o valor total. A Olist só envia o total quando o pedido é faturado. Aguarde o faturamento ou use o PDV para lançar a venda.`,
+            200,
+          );
+        }
         if (!cpf && !telefone) {
           return logAndRespond("erro", "informe CPF ou telefone do cliente", 400);
         }
