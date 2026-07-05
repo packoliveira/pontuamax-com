@@ -251,7 +251,9 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
       if (mode === "signup") {
         if (!nome.trim()) throw new Error("Informe seu nome");
         const phoneDigits = onlyDigits(phone);
-        if (phoneDigits && phoneDigits.length < 10) throw new Error("Telefone inválido");
+        if (!phoneDigits) throw new Error("Informe seu telefone (com DDD)");
+        if (phoneDigits.length < 10) throw new Error("Telefone inválido (informe DDD + número)");
+        if (senha2.length < 6) throw new Error("Confirme sua senha");
         // Se já existe um profile "pendente" com este CPF (criado por venda
         // do lojista ou webhook antes do cliente se cadastrar), REAPROVEITA
         // essa conta em vez de criar uma nova — assim o cliente já entra
