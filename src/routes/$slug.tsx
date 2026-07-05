@@ -14,6 +14,7 @@ import {
 import {
   vincularClienteALoja,
   prepararLoginClientePorCpf,
+  reivindicarCadastroPendente,
   resgatarProduto,
   resgatarCashback,
 } from "@/lib/qsf.functions";
