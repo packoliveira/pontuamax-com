@@ -560,43 +560,50 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6 -mt-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-sm text-muted-foreground">Olá,</div>
-          <div className="text-xl font-bold">{nome}</div>
-        </CardContent>
-      </Card>
+    <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="pt-2">
+        <div className="text-xs uppercase tracking-[0.2em] text-indigo-300/70 font-semibold">Olá,</div>
+        <div className="text-2xl font-bold text-white mt-0.5">{nome}</div>
+      </div>
 
       <div className={`grid gap-4 ${inclP && inclC ? "sm:grid-cols-2" : ""}`}>
         {inclP && (
-          <Card className="overflow-hidden">
-            <div className="p-5 text-white" style={{ background: "var(--brand-primary)" }}>
+          <Card className="overflow-hidden border-indigo-500/25 bg-[#141432] qsf-glow relative">
+            <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div className="relative p-5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm opacity-90"><Coins className="h-4 w-4" /> Seus pontos</div>
-                <div className="text-xs uppercase tracking-wide font-semibold flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                  <Coins className="h-3.5 w-3.5 text-indigo-400" /> Seus pontos
+                </div>
+                <div className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 bg-indigo-500/15 text-indigo-200 border border-indigo-500/30 rounded-full px-2 py-0.5">
                   <Trophy className="h-3 w-3" /> {nivel}
                 </div>
               </div>
-              <div className="text-4xl font-bold mt-2">{link.pontos}</div>
+              <div className="text-5xl font-bold mt-3 text-white tabular-nums tracking-tight">
+                {link.pontos.toLocaleString("pt-BR")}
+                <span className="text-base text-indigo-400 font-semibold ml-2">pts</span>
+              </div>
               {loja.pontos_expiracao_modo === "validade" && (
-                <div className="text-[11px] mt-1 opacity-80">
+                <div className="text-[11px] mt-2 text-slate-500">
                   Pontos expiram após {loja.pontos_validade_dias} dias
                 </div>
               )}
               {loja.pontos_expiracao_modo === "decaimento" && (
-                <div className="text-[11px] mt-1 opacity-80">
+                <div className="text-[11px] mt-2 text-slate-500">
                   Você perde {loja.pontos_decaimento_valor} pts a cada {loja.pontos_decaimento_dias} dias
                 </div>
               )}
               {prog.proximo && (
-                <div className="mt-4">
-                  <div className="flex justify-between text-xs opacity-90 mb-1">
-                    <span>Próximo: {prog.proximo}</span>
-                    <span>{Math.round(prog.pct)}%</span>
+                <div className="mt-5">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-400">Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span></span>
+                    <span className="text-indigo-300 font-semibold">{Math.round(prog.pct)}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-white/20 overflow-hidden">
-                    <div className="h-full bg-white transition-all" style={{ width: `${Math.min(100, prog.pct)}%` }} />
+                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-indigo-500/20 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.6)]"
+                      style={{ width: `${Math.min(100, prog.pct)}%` }}
+                    />
                   </div>
                 </div>
               )}
@@ -604,12 +611,18 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           </Card>
         )}
         {inclC && (
-          <Card className="overflow-hidden">
-            <div className="p-5 text-white" style={{ background: "var(--brand-secondary)" }}>
-              <div className="flex items-center gap-2 text-sm opacity-90"><Wallet className="h-4 w-4" /> Seu cashback</div>
-              <div className="text-4xl font-bold mt-2">{formatBRL(Number(link.cashback_saldo))}</div>
+          <Card className="overflow-hidden border-emerald-500/25 bg-[#0d1a1a] relative">
+            <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl" />
+            <div className="relative p-5">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                <Wallet className="h-3.5 w-3.5 text-emerald-400" /> Seu cashback
+              </div>
+              <div className="text-4xl font-bold mt-3 text-white tabular-nums tracking-tight">
+                {formatBRL(Number(link.cashback_saldo))}
+              </div>
               <Button
-                size="sm" variant="secondary" className="mt-4"
+                size="sm"
+                className="mt-4 bg-emerald-500/15 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/25 hover:text-white transition-all"
                 disabled={Number(link.cashback_saldo) <= 0}
                 onClick={() => setCashbackModal(true)}
               >
@@ -622,29 +635,34 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
 
       {inclP && produtos.length > 0 && (
         <section>
-          <h2 className="font-semibold mb-3">Trocar pontos por produtos</h2>
+          <div className="flex items-center gap-2 mb-3">
+            <Gift className="h-4 w-4 text-indigo-400" />
+            <h2 className="font-semibold text-slate-100">Trocar pontos por produtos</h2>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {produtos.map((p) => {
               const podeResgatar = link.pontos >= p.custo_pontos;
               return (
-                <Card key={p.id}>
+                <Card key={p.id} className={`border-indigo-500/20 bg-[#141432] transition-all hover:border-indigo-400/40 hover:-translate-y-0.5 ${podeResgatar ? "hover:shadow-lg hover:shadow-indigo-500/10" : "opacity-70"}`}>
                   <CardContent className="p-3 space-y-2">
-                    <div className="aspect-video w-full overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                    <div className="aspect-video w-full overflow-hidden rounded-md bg-[#0a0a1a] border border-indigo-500/10 flex items-center justify-center">
                       {p.foto_url ? (
                         <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" />
                       ) : (
-                        <Package className="h-8 w-8 text-muted-foreground/40" />
+                        <Package className="h-8 w-8 text-indigo-500/30" />
                       )}
                     </div>
-                    <div className="font-medium text-sm">{p.nome}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2">{p.descricao}</div>
+                    <div className="font-medium text-sm text-slate-100">{p.nome}</div>
+                    <div className="text-xs text-slate-400 line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-bold text-sm" style={{ color: "var(--brand-primary)" }}>{p.custo_pontos} pts</span>
+                      <span className="font-bold text-sm text-indigo-300">{p.custo_pontos} pts</span>
                       <Button
-                        size="sm" disabled={!podeResgatar || resgatarP.isPending}
+                        size="sm"
+                        disabled={!podeResgatar || resgatarP.isPending}
                         onClick={() => resgatarP.mutate(p.id)}
-                        style={podeResgatar ? { backgroundColor: "var(--brand-primary)" } : {}}
-                        className="text-white"
+                        className={podeResgatar
+                          ? "bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-md shadow-indigo-600/30 transition-all active:scale-95"
+                          : "bg-[#0a0a1a] text-slate-500 border border-indigo-500/10 cursor-not-allowed"}
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
                       </Button>
