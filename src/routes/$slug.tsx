@@ -100,10 +100,22 @@ function ClientePage() {
       style={style}
       className="min-h-dvh bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
     >
-      {/* Aura de fundo em índigo — bem sutil, fica atrás de tudo */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.18),transparent_60%)]" />
-      <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full bg-violet-600/10 blur-3xl" />
+      {/* Aura de fundo derivada das cores da marca — bem sutil, fica atrás de tudo */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px]"
+        style={{ background: `radial-gradient(ellipse at top, color-mix(in oklab, ${loja.brand_primary} 22%, transparent), transparent 60%)` }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl opacity-40"
+        style={{ backgroundColor: loja.brand_primary }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full blur-3xl opacity-30"
+        style={{ backgroundColor: loja.brand_secondary }}
+      />
       <div className="relative">
         <ClienteFlow loja={loja} />
       </div>
@@ -164,6 +176,7 @@ function ClienteFlow({ loja }: { loja: Loja }) {
   return (
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
+      <BannerHero loja={loja} />
       {isOwnerPreview ? (
         <OwnerPreviewBanner />
       ) : isLoading || hydrating || authenticating || ownerCheckPending ? (
@@ -181,6 +194,49 @@ function ClienteFlow({ loja }: { loja: Loja }) {
         />
       )}
     </>
+  );
+}
+
+function BannerHero({ loja }: { loja: Loja }) {
+  const desktop = loja.banner_url;
+  const mobile = loja.banner_url_mobile || loja.banner_url;
+  if (!desktop && !mobile) return null;
+  return (
+    <div className="relative">
+      <div className="max-w-2xl mx-auto px-4 pt-4">
+        <div
+          className="relative overflow-hidden rounded-2xl border shadow-lg animate-in fade-in zoom-in-95 duration-500"
+          style={{
+            borderColor: `color-mix(in oklab, ${loja.brand_primary} 40%, transparent)`,
+            boxShadow: `0 10px 40px -12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+          }}
+        >
+          {mobile && (
+            <img
+              src={mobile}
+              alt={`Banner ${loja.nome_fantasia}`}
+              className="w-full h-40 object-cover sm:hidden"
+              loading="eager"
+            />
+          )}
+          {desktop && (
+            <img
+              src={desktop}
+              alt={`Banner ${loja.nome_fantasia}`}
+              className="w-full h-40 sm:h-48 md:h-56 object-cover hidden sm:block"
+              loading="eager"
+            />
+          )}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: `linear-gradient(180deg, transparent 60%, color-mix(in oklab, #0a0a1a 80%, transparent))`,
+            }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -229,7 +285,12 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
               />
             ) : (
               <div
-                className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/30 border border-indigo-400/40"
+                className="relative h-12 w-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
+                style={{
+                  background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                  borderColor: `color-mix(in oklab, ${loja.brand_primary} 50%, transparent)`,
+                  boxShadow: `0 8px 20px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                }}
               >
                 {loja.nome_fantasia.charAt(0)}
               </div>
@@ -607,10 +668,14 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                     <span className="text-slate-400">Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span></span>
                     <span className="text-indigo-300 font-semibold">{Math.round(prog.pct)}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-indigo-500/20 overflow-hidden">
+                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-white/5 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.6)]"
-                      style={{ width: `${Math.min(100, prog.pct)}%` }}
+                      className="h-full transition-all duration-1000"
+                      style={{
+                        width: `${Math.min(100, prog.pct)}%`,
+                        background: `linear-gradient(90deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                        boxShadow: `0 0 12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                      }}
                     />
                   </div>
                 </div>
@@ -669,8 +734,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                         disabled={!podeResgatar || resgatarP.isPending}
                         onClick={() => resgatarP.mutate(p.id)}
                         className={podeResgatar
-                          ? "bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-md shadow-indigo-600/30 transition-all active:scale-95"
-                          : "bg-[#0a0a1a] text-slate-500 border border-indigo-500/10 cursor-not-allowed"}
+                          ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
+                          : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"}
+                        style={podeResgatar ? {
+                          background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                        } : undefined}
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
                       </Button>
