@@ -258,13 +258,14 @@ function IntegracoesCard({
   };
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between">
+        <CardTitle className="text-base flex items-center justify-between text-[#0F172A]">
           <span>Integrações (Bling / Olist)</span>
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-              conectada ? "bg-emerald-100 text-emerald-700" : "bg-muted text-muted-foreground"
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              conectada ? "bg-[#22C55E]/10 text-[#15803D]" : "bg-[#F1F5F9] text-[#64748B]"
             }`}
           >
             {conectada ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
@@ -273,7 +274,7 @@ function IntegracoesCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Configure a URL abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
           no PontoaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
         </p>
@@ -333,43 +334,43 @@ function IntegracoesCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button type="button" variant="secondary" onClick={() => test.mutate()} disabled={test.isPending}>
+          <Button type="button" variant="secondary" onClick={() => test.mutate()} disabled={test.isPending} className="rounded-xl">
             <Send className="h-4 w-4 mr-1" />
             {test.isPending ? "Enviando..." : "Testar integração"}
           </Button>
           {lastAt && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-[#64748B]">
               Último evento: {new Date(lastAt).toLocaleString("pt-BR")}
             </span>
           )}
         </div>
 
         <div>
-          <div className="text-sm font-semibold mb-2">Últimos 20 eventos</div>
+          <div className="text-sm font-semibold mb-2 text-[#0F172A]">Últimos 20 eventos</div>
           {!logs || logs.length === 0 ? (
-            <div className="text-xs text-muted-foreground rounded-md border border-dashed p-4">
+            <div className="text-xs text-[#64748B] rounded-xl border border-dashed border-[#E5E7EB] bg-[#F8FAFC] p-4">
               Nenhum evento recebido ainda.
             </div>
           ) : (
-            <div className="rounded-md border divide-y">
+            <div className="rounded-xl border border-[#E5E7EB] divide-y divide-[#E5E7EB] bg-white">
               {logs.map((log) => (
                 <div key={log.id} className="p-2 text-xs flex items-start gap-2">
                   <span
                     className={`mt-0.5 inline-block h-2 w-2 rounded-full ${
-                      log.status === "sucesso" ? "bg-emerald-500" : "bg-red-500"
+                      log.status === "sucesso" ? "bg-[#22C55E]" : "bg-[#EF4444]"
                     }`}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium uppercase">{log.origem}</span>
-                      <span className="text-muted-foreground">
+                      <span className="font-medium uppercase text-[#0F172A]">{log.origem}</span>
+                      <span className="text-[#64748B]">
                         {new Date(log.created_at).toLocaleString("pt-BR")}
                       </span>
                     </div>
-                    {log.mensagem_erro && <div className="text-red-600">{log.mensagem_erro}</div>}
+                    {log.mensagem_erro && <div className="text-[#EF4444]">{log.mensagem_erro}</div>}
                     <details className="mt-1">
-                      <summary className="cursor-pointer text-muted-foreground">Payload</summary>
-                      <pre className="mt-1 whitespace-pre-wrap break-all bg-muted/50 p-2 rounded">
+                      <summary className="cursor-pointer text-[#64748B]">Payload</summary>
+                      <pre className="mt-1 whitespace-pre-wrap break-all bg-[#F1F5F9] p-2 rounded-lg text-[#0F172A]">
                         {JSON.stringify(log.payload_recebido, null, 2)}
                       </pre>
                     </details>
