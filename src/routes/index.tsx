@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
-  Sparkles,
   Store,
   Star,
   Wallet,
@@ -12,14 +11,15 @@ import {
   ArrowRight,
   Trophy,
 } from "lucide-react";
+import { PontoaMaxMark } from "@/components/pontoamax-logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "QSF Club — Fidelize seus clientes com pontos e cashback" },
-      { name: "description", content: "Plataforma de fidelização com pontos, cashback e página personalizada por loja." },
-      { property: "og:title", content: "QSF Club" },
-      { property: "og:description", content: "Fidelização de clientes com pontos e cashback." },
+      { title: "PontoaMax — Fidelize seus clientes com pontos, cashback e CRM" },
+      { name: "description", content: "Plataforma SaaS premium de fidelização, cashback, CRM e relacionamento com clientes, com página personalizada por loja." },
+      { property: "og:title", content: "PontoaMax" },
+      { property: "og:description", content: "Fidelização, cashback e CRM em uma plataforma moderna." },
     ],
   }),
   component: Index,
@@ -27,16 +27,17 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0A2540]">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0A2540] text-white">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-semibold">QSF Club</span>
+          <PontoaMaxMark size={36} />
+          <span className="text-lg font-semibold tracking-tight">
+            <span style={{ color: "#155EEF" }}>Pontoa</span>
+            <span style={{ color: "#22C55E" }}>Max</span>
+          </span>
         </div>
         <Link to="/lojista/login">
-          <Button variant="ghost" size="sm" className="text-[#0A2540] hover:bg-[#0A2540]/5">Entrar como lojista</Button>
+          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#155EEF]/5">Entrar como lojista</Button>
         </Link>
       </header>
 
@@ -44,20 +45,20 @@ function Index() {
       <section className="mx-auto max-w-6xl px-6 py-12 md:py-20">
         <div className="grid items-center gap-12 md:grid-cols-2">
           <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#0A2540]/10 bg-white px-3 py-1 text-xs font-medium text-[#0A2540] shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-[#C4E135]" />
-              Pontos • Cashback • Sua marca
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-xs font-medium text-[#0F172A] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
+              Fidelização • Cashback • CRM
             </div>
             <h1 className="mt-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Fidelize seus clientes<br />
-              <span className="text-[#0A2540]">com a cara da sua loja</span>
+              Fidelize e faça<br />
+              <span style={{ color: "#155EEF" }}>seu negócio crescer</span>
             </h1>
-            <p className="mt-6 text-lg text-[#0A2540]/70 md:text-xl">
-              Cada loja tem sua própria página personalizada. Escolha pontos, cashback ou ambos.
+            <p className="mt-6 text-lg text-[#64748B] md:text-xl">
+              Plataforma SaaS premium de pontos, cashback, CRM e campanhas — com uma página personalizada por loja.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
               <Link to="/lojista/onboarding">
-                <Button size="lg" className="w-full bg-[#0A2540] text-white hover:bg-[#0A2540]/90 sm:w-auto">
+                <Button size="lg" className="w-full bg-[#155EEF] text-white hover:bg-[#0F4CD7] rounded-xl sm:w-auto">
                   <Store className="h-4 w-4" /> Criar minha loja
                 </Button>
               </Link>
@@ -65,14 +66,14 @@ function Index() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full border-[#0A2540]/20 text-[#0A2540] hover:bg-[#0A2540]/5 sm:w-auto"
+                  className="w-full border-[#155EEF]/30 text-[#155EEF] hover:bg-[#155EEF]/5 rounded-xl sm:w-auto"
                 >
                   Já sou lojista, entrar
                 </Button>
               </Link>
             </div>
-            <p className="mt-4 text-xs text-[#0A2540]/60">
-              Cada loja terá seu próprio link: qsfclub.com/<span className="font-mono">nomedaloja</span>
+            <p className="mt-4 text-xs text-[#64748B]">
+              Cada loja terá seu próprio link: pontoamax.app/<span className="font-mono">nomedaloja</span>
             </p>
           </div>
 
@@ -109,7 +110,7 @@ function Index() {
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
             Um painel completo pro lojista
           </h2>
-          <p className="mt-4 text-[#0A2540]/70 md:text-lg">
+          <p className="mt-4 text-[#64748B] md:text-lg">
             Acompanhe clientes, pontos distribuídos e resgates em tempo real.
           </p>
         </div>
@@ -119,15 +120,15 @@ function Index() {
 
         <div className="mt-16 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link to="/lojista/onboarding">
-            <Button size="lg" className="w-full bg-[#0A2540] text-white hover:bg-[#0A2540]/90 sm:w-auto">
+            <Button size="lg" className="w-full bg-[#155EEF] text-white hover:bg-[#0F4CD7] rounded-xl sm:w-auto">
               Criar minha loja grátis <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
       </section>
 
-      <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-xs text-[#0A2540]/50">
-        © {new Date().getFullYear()} QSF Club. Fidelize com a cara da sua loja.
+      <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-xs text-[#64748B]">
+        © {new Date().getFullYear()} PontoaMax. Fidelização, cashback e CRM em uma plataforma só.
       </footer>
     </div>
   );
@@ -135,12 +136,12 @@ function Index() {
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="rounded-2xl border border-[#0A2540]/10 bg-white p-6 shadow-sm transition hover:shadow-md">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0A2540] text-white">
+    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition duration-200 hover:shadow-md hover:-translate-y-0.5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#155EEF] text-white">
         {icon}
       </div>
       <h3 className="mt-4 text-base font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-[#0A2540]/70">{desc}</p>
+      <p className="mt-2 text-sm text-[#64748B]">{desc}</p>
     </div>
   );
 }
