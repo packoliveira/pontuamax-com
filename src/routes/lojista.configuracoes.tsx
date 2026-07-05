@@ -1119,19 +1119,23 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
   });
 
   return (
-    <Card>
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><Bell className="h-4 w-4" /> Notificações automáticas</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Bell className="h-4 w-4" /></span>
+          Notificações automáticas
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#64748B]">
           Cron diário (09:00 Brasília) envia estas mensagens via WhatsApp. Requer WhatsApp ativado e Evolution API conectada acima.
         </p>
 
         {/* Aniversário */}
-        <div className="rounded-md border p-3 space-y-3">
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm"><Cake className="h-4 w-4 text-pink-500" /> Aniversário</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><Cake className="h-4 w-4 text-[#EC4899]" /> Aniversário</div>
             <Switch checked={bDayOn} onCheckedChange={setBDayOn} />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1143,14 +1147,14 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <div>
             <Label>Mensagem</Label>
             <Textarea rows={3} value={bDayTpl} onChange={(e) => setBDayTpl(e.target.value)} disabled={!bDayOn} />
-            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}</p>
+            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}</p>
           </div>
         </div>
 
         {/* Inatividade */}
-        <div className="rounded-md border p-3 space-y-3">
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm"><Clock className="h-4 w-4 text-amber-500" /> Cliente sumido</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><Clock className="h-4 w-4 text-[#F59E0B]" /> Cliente sumido</div>
             <Switch checked={inatOn} onCheckedChange={setInatOn} />
           </div>
           <div>
@@ -1160,14 +1164,14 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <div>
             <Label>Mensagem</Label>
             <Textarea rows={3} value={inatTpl} onChange={(e) => setInatTpl(e.target.value)} disabled={!inatOn} />
-            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}</p>
+            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}</p>
           </div>
         </div>
 
         {/* Expiração */}
-        <div className="rounded-md border p-3 space-y-3">
+        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm"><TimerReset className="h-4 w-4 text-red-500" /> Pontos a expirar</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><TimerReset className="h-4 w-4 text-[#EF4444]" /> Pontos a expirar</div>
             <Switch checked={expOn} onCheckedChange={setExpOn} />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1183,15 +1187,15 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <div>
             <Label>Mensagem</Label>
             <Textarea rows={3} value={expTpl} onChange={(e) => setExpTpl(e.target.value)} disabled={!expOn} />
-            <p className="text-[10px] text-muted-foreground mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}</p>
+            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}</p>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending}>
+          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
             {salvar.isPending ? "Salvando..." : "Salvar notificações"}
           </Button>
-          <Button type="button" variant="secondary" onClick={() => disparar.mutate()} disabled={disparar.isPending}>
+          <Button type="button" variant="secondary" onClick={() => disparar.mutate()} disabled={disparar.isPending} className="rounded-xl">
             <Send className="h-4 w-4 mr-1" />
             {disparar.isPending ? "Disparando..." : "Disparar agora (teste)"}
           </Button>
