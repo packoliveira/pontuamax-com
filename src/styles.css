@@ -242,6 +242,29 @@
     0 0 40px -20px rgba(129, 140, 248, 0.4);
 }
 
+/* Refinamentos escopados na loja pública (Midnight Indigo) */
+.qsf-midnight ::selection {
+  background: rgba(129, 140, 248, 0.35);
+  color: #ffffff;
+}
+
+.qsf-midnight :where(button, a, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid rgba(129, 140, 248, 0.75);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.qsf-midnight ::-webkit-scrollbar-thumb {
+  background: rgba(129, 140, 248, 0.28);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.qsf-midnight ::-webkit-scrollbar-thumb:hover {
+  background: rgba(129, 140, 248, 0.5);
+  background-clip: padding-box;
+}
+
 @keyframes qsf-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
