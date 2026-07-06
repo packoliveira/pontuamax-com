@@ -91,7 +91,7 @@ function Page() {
 
   return (
     <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-slate-100 to-violet-50 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-[0_20px_60px_-30px_rgba(124,58,237,0.4)] animate-panel-in">
         <CardHeader className="text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 text-white">
             <Lock className="h-6 w-6" />

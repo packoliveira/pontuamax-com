@@ -96,7 +96,7 @@ function AdminLogin() {
           <ShieldAlert className="h-4 w-4" />
           Painel Administrativo — Acesso Restrito
         </div>
-        <Card className="border-red-500/30 bg-slate-900/80 text-slate-100 shadow-2xl backdrop-blur">
+        <Card className="border-red-500/30 bg-slate-900/80 text-slate-100 shadow-2xl backdrop-blur animate-panel-in">
           <CardHeader className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-red-600 text-white shadow-lg shadow-red-900/50">
               <Lock className="h-7 w-7" />
