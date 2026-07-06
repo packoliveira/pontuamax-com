@@ -55,7 +55,7 @@ function FuncionarioLayout() {
   );
 
   const NavList = ({ onClick }: { onClick?: () => void }) => (
-    <nav className="flex flex-col gap-1 p-3">
+    <nav className="flex flex-col gap-0.5 p-3">
       {visible.map((item) => {
         const active = item.to === "/funcionario" ? pathname === item.to : pathname.startsWith(item.to);
         const Icon = ICONS[item.key] ?? LayoutDashboard;
@@ -65,11 +65,13 @@ function FuncionarioLayout() {
             to={item.to as "/funcionario"}
             onClick={onClick}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-              active ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/5 hover:text-white",
+              "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              active
+                ? "bg-white/[0.08] text-white shadow-[inset_2px_0_0_0_#14CBA8]"
+                : "text-white/70 hover:bg-white/5 hover:text-white hover:translate-x-0.5",
             )}
           >
-            <Icon className={cn("h-4 w-4", active ? "text-[#14CBA8]" : "text-white/60")} />
+            <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[#14CBA8]" : "text-white/60 group-hover:text-white/90")} />
             {item.label}
           </Link>
         );
@@ -106,7 +108,7 @@ function FuncionarioLayout() {
             </Sheet>
           </div>
         </header>
-        <main className="flex-1 p-3 sm:p-4 md:p-8 min-w-0">
+        <main key={pathname} className="flex-1 p-3 sm:p-4 md:p-8 min-w-0 animate-panel-in">
           {loading ? <div className="text-sm text-muted-foreground">Carregando…</div> : <Outlet />}
         </main>
       </div>
