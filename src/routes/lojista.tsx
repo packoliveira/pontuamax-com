@@ -18,7 +18,17 @@ export const Route = createFileRoute("/lojista")({
         .select("subscription_status")
         .eq("owner_id", data.session.user.id)
         .maybeSingle();
-      if (!store) throw redirect({ to: "/lojista/onboarding" });
+      if (!store) {
+        // Não é dono de loja — pode ser funcionário.
+        const { data: emp } = await supabase
+          .from("store_employees")
+          .select("id")
+          .eq("user_id", data.session.user.id)
+          .eq("status", "ativo")
+          .maybeSingle();
+        if (emp) throw redirect({ to: "/funcionario" });
+        throw redirect({ to: "/lojista/onboarding" });
+      }
       if (store.subscription_status !== "active") {
         throw redirect({ to: "/lojista/aguardando" });
       }
