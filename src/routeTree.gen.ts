@@ -40,6 +40,7 @@ import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
+import { Route as FuncionarioHistoricoRouteImport } from './routes/funcionario.historico'
 import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
@@ -206,6 +207,11 @@ const FuncionarioPerfilRoute = FuncionarioPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioHistoricoRoute = FuncionarioHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const FuncionarioClientesRoute = FuncionarioClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -272,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -356,6 +364,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -401,6 +410,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/login'
     | '/funcionario/clientes'
+    | '/funcionario/historico'
     | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -441,6 +451,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/login'
     | '/funcionario/clientes'
+    | '/funcionario/historico'
     | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -484,6 +495,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/login'
     | '/funcionario/clientes'
+    | '/funcionario/historico'
     | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -758,6 +770,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioPerfilRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/historico': {
+      id: '/funcionario/historico'
+      path: '/historico'
+      fullPath: '/funcionario/historico'
+      preLoaderRoute: typeof FuncionarioHistoricoRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/funcionario/clientes': {
       id: '/funcionario/clientes'
       path: '/clientes'
@@ -845,12 +864,14 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface FuncionarioRouteChildren {
   FuncionarioClientesRoute: typeof FuncionarioClientesRoute
+  FuncionarioHistoricoRoute: typeof FuncionarioHistoricoRoute
   FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
 
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
   FuncionarioClientesRoute: FuncionarioClientesRoute,
+  FuncionarioHistoricoRoute: FuncionarioHistoricoRoute,
   FuncionarioPerfilRoute: FuncionarioPerfilRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
 }
