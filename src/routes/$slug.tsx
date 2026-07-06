@@ -177,22 +177,27 @@ function ClienteFlow({ loja }: { loja: Loja }) {
     <>
       <Header loja={loja} showLogout={!!sessionUserId} />
       <BannerHero loja={loja} />
-      {isOwnerPreview ? (
-        <OwnerPreviewBanner />
-      ) : isLoading || hydrating || authenticating || ownerCheckPending ? (
-        <div className="p-8 text-center text-sm text-muted-foreground">Carregando...</div>
-      ) : sessionUserId && link ? (
-        <ClienteLogado loja={loja} link={link} />
-      ) : sessionUserId && !link ? (
-        <VincularStore loja={loja} />
-      ) : (
-        <Auth
-          loja={loja}
-          onAuthStart={() => setAuthenticating(true)}
-          onAuthError={() => setAuthenticating(false)}
-          onAuthenticated={handleAuthSuccess}
-        />
-      )}
+      <div className="animate-panel-in">
+        {isOwnerPreview ? (
+          <OwnerPreviewBanner />
+        ) : isLoading || hydrating || authenticating || ownerCheckPending ? (
+          <div className="flex items-center justify-center gap-3 p-10 text-sm text-slate-400">
+            <div className="h-4 w-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
+            Carregando...
+          </div>
+        ) : sessionUserId && link ? (
+          <ClienteLogado loja={loja} link={link} />
+        ) : sessionUserId && !link ? (
+          <VincularStore loja={loja} />
+        ) : (
+          <Auth
+            loja={loja}
+            onAuthStart={() => setAuthenticating(true)}
+            onAuthError={() => setAuthenticating(false)}
+            onAuthenticated={handleAuthSuccess}
+          />
+        )}
+      </div>
     </>
   );
 }
