@@ -40,6 +40,7 @@ import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
+import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
@@ -205,6 +206,11 @@ const FuncionarioPerfilRoute = FuncionarioPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioClientesRoute = FuncionarioClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/clientes'
     | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -430,6 +440,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/clientes'
     | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/clientes'
     | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -746,6 +758,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioPerfilRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/clientes': {
+      id: '/funcionario/clientes'
+      path: '/clientes'
+      fullPath: '/funcionario/clientes'
+      preLoaderRoute: typeof FuncionarioClientesRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -825,11 +844,13 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface FuncionarioRouteChildren {
+  FuncionarioClientesRoute: typeof FuncionarioClientesRoute
   FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
 
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioClientesRoute: FuncionarioClientesRoute,
   FuncionarioPerfilRoute: FuncionarioPerfilRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
 }
