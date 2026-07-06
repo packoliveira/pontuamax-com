@@ -185,6 +185,60 @@ export type Database = {
           },
         ]
       }
+      employee_audit_logs: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          employee_id: string | null
+          id: string
+          ip: string | null
+          meta: Json
+          store_id: string
+          target_label: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          employee_id?: string | null
+          id?: string
+          ip?: string | null
+          meta?: Json
+          store_id: string
+          target_label?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          employee_id?: string | null
+          id?: string
+          ip?: string | null
+          meta?: Json
+          store_id?: string
+          target_label?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_audit_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "store_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_audit_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_notes: {
         Row: {
           client_user_id: string
@@ -709,6 +763,99 @@ export type Database = {
           },
         ]
       }
+      store_employee_permissions: {
+        Row: {
+          employee_id: string
+          granted: boolean
+          permission_key: string
+        }
+        Insert: {
+          employee_id: string
+          granted?: boolean
+          permission_key: string
+        }
+        Update: {
+          employee_id?: string
+          granted?: boolean
+          permission_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_employee_permissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "store_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_employee_permissions_permission_key_fkey"
+            columns: ["permission_key"]
+            isOneToOne: false
+            referencedRelation: "team_permissions"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      store_employees: {
+        Row: {
+          cpf: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          nome: string
+          phone: string | null
+          role_key: string
+          status: string
+          store_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          nome: string
+          phone?: string | null
+          role_key: string
+          status?: string
+          store_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          phone?: string | null
+          role_key?: string
+          status?: string
+          store_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_employees_role_key_fkey"
+            columns: ["role_key"]
+            isOneToOne: false
+            referencedRelation: "team_roles"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "store_employees_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stores: {
         Row: {
           activated_at: string | null
@@ -892,6 +1039,90 @@ export type Database = {
         }
         Relationships: []
       }
+      team_permissions: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          key: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          key: string
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          key?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      team_role_permissions: {
+        Row: {
+          permission_key: string
+          role_key: string
+        }
+        Insert: {
+          permission_key: string
+          role_key: string
+        }
+        Update: {
+          permission_key?: string
+          role_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_role_permissions_permission_key_fkey"
+            columns: ["permission_key"]
+            isOneToOne: false
+            referencedRelation: "team_permissions"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "team_role_permissions_role_key_fkey"
+            columns: ["role_key"]
+            isOneToOne: false
+            referencedRelation: "team_roles"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      team_roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          is_system: boolean
+          key: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          is_system?: boolean
+          key: string
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          is_system?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           cashback_delta: number
@@ -995,11 +1226,27 @@ export type Database = {
     }
     Functions: {
       bootstrap_first_admin: { Args: never; Returns: boolean }
+      employee_has_permission: {
+        Args: { _perm: string; _store_id: string; _user_id: string }
+        Returns: boolean
+      }
+      get_employee_link: {
+        Args: { _store_id: string; _user_id: string }
+        Returns: {
+          employee_id: string
+          role_key: string
+          status: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_store_owner: {
+        Args: { _store_id: string; _user_id: string }
         Returns: boolean
       }
       resgatar_cashback_atomico: {

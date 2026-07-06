@@ -27,6 +27,13 @@ export const Route = createFileRoute("/lojista/login")({
       .eq("owner_id", uid)
       .maybeSingle();
     if (store) throw redirect({ to: "/lojista" });
+    const { data: emp } = await supabase
+      .from("store_employees")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("status", "ativo")
+      .maybeSingle();
+    if (emp) throw redirect({ to: "/funcionario" });
   },
   component: Login,
 });
@@ -94,6 +101,17 @@ function Login() {
       return;
     }
     if (!store) {
+      // Funcionário?
+      const { data: emp } = await supabase
+        .from("store_employees")
+        .select("id")
+        .eq("user_id", uid)
+        .eq("status", "ativo")
+        .maybeSingle();
+      if (emp) {
+        navigate({ to: "/funcionario" });
+        return;
+      }
       setSessionEmail(email);
       setErrorKind("store");
       setErrorMsg("Login válido, mas essa conta ainda não tem loja cadastrada.");

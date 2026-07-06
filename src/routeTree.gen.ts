@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as FuncionarioRouteImport } from './routes/funcionario'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ValeCodigoRouteImport } from './routes/vale.$codigo'
 import { Route as NpsIdRouteImport } from './routes/nps.$id'
@@ -32,10 +34,17 @@ import { Route as LojistaNotasRouteImport } from './routes/lojista.notas'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 import { Route as LojistaInstagramRouteImport } from './routes/lojista.instagram'
+import { Route as LojistaEquipeRouteImport } from './routes/lojista.equipe'
 import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
+import { Route as FuncionarioVouchersRouteImport } from './routes/funcionario.vouchers'
+import { Route as FuncionarioResgatesRouteImport } from './routes/funcionario.resgates'
+import { Route as FuncionarioPontuarRouteImport } from './routes/funcionario.pontuar'
+import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
+import { Route as FuncionarioHistoricoRouteImport } from './routes/funcionario.historico'
+import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
@@ -54,6 +63,11 @@ const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
   path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncionarioRoute = FuncionarioRouteImport.update({
+  id: '/funcionario',
+  path: '/funcionario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -80,6 +94,11 @@ const LojistaIndexRoute = LojistaIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LojistaRoute,
+} as any)
+const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FuncionarioRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -161,6 +180,11 @@ const LojistaInstagramRoute = LojistaInstagramRouteImport.update({
   path: '/instagram',
   getParentRoute: () => LojistaRoute,
 } as any)
+const LojistaEquipeRoute = LojistaEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => LojistaRoute,
+} as any)
 const LojistaConfiguracoesRoute = LojistaConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -180,6 +204,36 @@ const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
   id: '/aguardando',
   path: '/aguardando',
   getParentRoute: () => LojistaRoute,
+} as any)
+const FuncionarioVouchersRoute = FuncionarioVouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioResgatesRoute = FuncionarioResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioPontuarRoute = FuncionarioPontuarRouteImport.update({
+  id: '/pontuar',
+  path: '/pontuar',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioPerfilRoute = FuncionarioPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioHistoricoRoute = FuncionarioHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioClientesRoute = FuncionarioClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => FuncionarioRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
@@ -237,13 +291,21 @@ export interface FileRoutesByFullPath {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
+  '/funcionario/pontuar': typeof FuncionarioPontuarRoute
+  '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/vouchers': typeof FuncionarioVouchersRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
   '/lojista/instagram': typeof LojistaInstagramRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
@@ -260,6 +322,7 @@ export interface FileRoutesByFullPath {
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -276,10 +339,17 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
+  '/funcionario/pontuar': typeof FuncionarioPontuarRoute
+  '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/vouchers': typeof FuncionarioVouchersRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
   '/lojista/instagram': typeof LojistaInstagramRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
@@ -296,6 +366,7 @@ export interface FileRoutesByTo {
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin': typeof AdminIndexRoute
+  '/funcionario': typeof FuncionarioIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -312,13 +383,21 @@ export interface FileRoutesById {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
+  '/funcionario/pontuar': typeof FuncionarioPontuarRoute
+  '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/vouchers': typeof FuncionarioVouchersRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
   '/lojista/instagram': typeof LojistaInstagramRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
@@ -335,6 +414,7 @@ export interface FileRoutesById {
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -352,13 +432,21 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/admin'
     | '/cadastro'
+    | '/funcionario'
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/clientes'
+    | '/funcionario/historico'
+    | '/funcionario/perfil'
+    | '/funcionario/pontuar'
+    | '/funcionario/resgates'
+    | '/funcionario/vouchers'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
+    | '/lojista/equipe'
     | '/lojista/instagram'
     | '/lojista/lancar-venda'
     | '/lojista/login'
@@ -375,6 +463,7 @@ export interface FileRouteTypes {
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin/'
+    | '/funcionario/'
     | '/lojista/'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -391,10 +480,17 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/clientes'
+    | '/funcionario/historico'
+    | '/funcionario/perfil'
+    | '/funcionario/pontuar'
+    | '/funcionario/resgates'
+    | '/funcionario/vouchers'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
+    | '/lojista/equipe'
     | '/lojista/instagram'
     | '/lojista/lancar-venda'
     | '/lojista/login'
@@ -411,6 +507,7 @@ export interface FileRouteTypes {
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin'
+    | '/funcionario'
     | '/lojista'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -426,13 +523,21 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/admin'
     | '/cadastro'
+    | '/funcionario'
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/clientes'
+    | '/funcionario/historico'
+    | '/funcionario/perfil'
+    | '/funcionario/pontuar'
+    | '/funcionario/resgates'
+    | '/funcionario/vouchers'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
+    | '/lojista/equipe'
     | '/lojista/instagram'
     | '/lojista/lancar-venda'
     | '/lojista/login'
@@ -449,6 +554,7 @@ export interface FileRouteTypes {
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin/'
+    | '/funcionario/'
     | '/lojista/'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -465,6 +571,7 @@ export interface RootRouteChildren {
   SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
+  FuncionarioRoute: typeof FuncionarioRouteWithChildren
   LojistaRoute: typeof LojistaRouteWithChildren
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   NotaSlugRoute: typeof NotaSlugRoute
@@ -494,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/lojista'
       fullPath: '/lojista'
       preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionario': {
+      id: '/funcionario'
+      path: '/funcionario'
+      fullPath: '/funcionario'
+      preLoaderRoute: typeof FuncionarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -530,6 +644,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lojista/'
       preLoaderRoute: typeof LojistaIndexRouteImport
       parentRoute: typeof LojistaRoute
+    }
+    '/funcionario/': {
+      id: '/funcionario/'
+      path: '/'
+      fullPath: '/funcionario/'
+      preLoaderRoute: typeof FuncionarioIndexRouteImport
+      parentRoute: typeof FuncionarioRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -643,6 +764,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaInstagramRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/lojista/equipe': {
+      id: '/lojista/equipe'
+      path: '/equipe'
+      fullPath: '/lojista/equipe'
+      preLoaderRoute: typeof LojistaEquipeRouteImport
+      parentRoute: typeof LojistaRoute
+    }
     '/lojista/configuracoes': {
       id: '/lojista/configuracoes'
       path: '/configuracoes'
@@ -670,6 +798,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/lojista/aguardando'
       preLoaderRoute: typeof LojistaAguardandoRouteImport
       parentRoute: typeof LojistaRoute
+    }
+    '/funcionario/vouchers': {
+      id: '/funcionario/vouchers'
+      path: '/vouchers'
+      fullPath: '/funcionario/vouchers'
+      preLoaderRoute: typeof FuncionarioVouchersRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/resgates': {
+      id: '/funcionario/resgates'
+      path: '/resgates'
+      fullPath: '/funcionario/resgates'
+      preLoaderRoute: typeof FuncionarioResgatesRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/pontuar': {
+      id: '/funcionario/pontuar'
+      path: '/pontuar'
+      fullPath: '/funcionario/pontuar'
+      preLoaderRoute: typeof FuncionarioPontuarRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/perfil': {
+      id: '/funcionario/perfil'
+      path: '/perfil'
+      fullPath: '/funcionario/perfil'
+      preLoaderRoute: typeof FuncionarioPerfilRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/historico': {
+      id: '/funcionario/historico'
+      path: '/historico'
+      fullPath: '/funcionario/historico'
+      preLoaderRoute: typeof FuncionarioHistoricoRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/clientes': {
+      id: '/funcionario/clientes'
+      path: '/clientes'
+      fullPath: '/funcionario/clientes'
+      preLoaderRoute: typeof FuncionarioClientesRouteImport
+      parentRoute: typeof FuncionarioRoute
     }
     '/admin/login': {
       id: '/admin/login'
@@ -749,11 +919,36 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface FuncionarioRouteChildren {
+  FuncionarioClientesRoute: typeof FuncionarioClientesRoute
+  FuncionarioHistoricoRoute: typeof FuncionarioHistoricoRoute
+  FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
+  FuncionarioPontuarRoute: typeof FuncionarioPontuarRoute
+  FuncionarioResgatesRoute: typeof FuncionarioResgatesRoute
+  FuncionarioVouchersRoute: typeof FuncionarioVouchersRoute
+  FuncionarioIndexRoute: typeof FuncionarioIndexRoute
+}
+
+const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioClientesRoute: FuncionarioClientesRoute,
+  FuncionarioHistoricoRoute: FuncionarioHistoricoRoute,
+  FuncionarioPerfilRoute: FuncionarioPerfilRoute,
+  FuncionarioPontuarRoute: FuncionarioPontuarRoute,
+  FuncionarioResgatesRoute: FuncionarioResgatesRoute,
+  FuncionarioVouchersRoute: FuncionarioVouchersRoute,
+  FuncionarioIndexRoute: FuncionarioIndexRoute,
+}
+
+const FuncionarioRouteWithChildren = FuncionarioRoute._addFileChildren(
+  FuncionarioRouteChildren,
+)
+
 interface LojistaRouteChildren {
   LojistaAguardandoRoute: typeof LojistaAguardandoRoute
   LojistaCampanhasRoute: typeof LojistaCampanhasRoute
   LojistaClientesRoute: typeof LojistaClientesRoute
   LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
+  LojistaEquipeRoute: typeof LojistaEquipeRoute
   LojistaInstagramRoute: typeof LojistaInstagramRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
   LojistaLoginRoute: typeof LojistaLoginRoute
@@ -774,6 +969,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaCampanhasRoute: LojistaCampanhasRoute,
   LojistaClientesRoute: LojistaClientesRoute,
   LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
+  LojistaEquipeRoute: LojistaEquipeRoute,
   LojistaInstagramRoute: LojistaInstagramRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
   LojistaLoginRoute: LojistaLoginRoute,
@@ -797,6 +993,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugRoute: SlugRoute,
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
+  FuncionarioRoute: FuncionarioRouteWithChildren,
   LojistaRoute: LojistaRouteWithChildren,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   NotaSlugRoute: NotaSlugRoute,
