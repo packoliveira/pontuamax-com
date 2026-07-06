@@ -39,6 +39,7 @@ import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.confi
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
+import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
@@ -199,6 +200,11 @@ const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
   path: '/aguardando',
   getParentRoute: () => LojistaRoute,
 } as any)
+const FuncionarioPerfilRoute = FuncionarioPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
@@ -339,6 +347,7 @@ export interface FileRoutesById {
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
     | '/lojista/clientes'
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
     | '/lojista/clientes'
@@ -461,6 +472,7 @@ export interface FileRouteTypes {
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/funcionario/perfil'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
     | '/lojista/clientes'
@@ -727,6 +739,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaAguardandoRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/funcionario/perfil': {
+      id: '/funcionario/perfil'
+      path: '/perfil'
+      fullPath: '/funcionario/perfil'
+      preLoaderRoute: typeof FuncionarioPerfilRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -806,10 +825,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface FuncionarioRouteChildren {
+  FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
 
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioPerfilRoute: FuncionarioPerfilRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
 }
 
