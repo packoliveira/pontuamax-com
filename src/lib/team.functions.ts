@@ -175,10 +175,13 @@ export const updateEmployee = createServerFn({ method: "POST" })
   }).parse(i))
   .handler(async ({ data, context }) => {
     const storeId = await getOwnedStoreId(context);
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      nome?: string; cpf?: string | null; phone?: string | null;
+      role_key?: string; status?: "ativo" | "inativo";
+    } = {};
     if (data.nome !== undefined) patch.nome = data.nome;
-    if (data.cpf !== undefined) patch.cpf = data.cpf;
-    if (data.phone !== undefined) patch.phone = data.phone;
+    if (data.cpf !== undefined) patch.cpf = data.cpf ?? null;
+    if (data.phone !== undefined) patch.phone = data.phone ?? null;
     if (data.role_key !== undefined) patch.role_key = data.role_key;
     if (data.status !== undefined) patch.status = data.status;
     const { data: emp, error } = await context.supabase
@@ -190,7 +193,7 @@ export const updateEmployee = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     await writeAudit(storeId, context.userId, "employee.updated", {
-      employeeId: emp.id, targetLabel: emp.email, meta: patch,
+      employeeId: emp.id, targetLabel: emp.email, meta: patch as Record<string, unknown>,
     });
     return emp;
   });
