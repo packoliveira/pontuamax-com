@@ -17,6 +17,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ValeCodigoRouteImport } from './routes/vale.$codigo'
 import { Route as NpsIdRouteImport } from './routes/nps.$id'
@@ -87,6 +88,11 @@ const LojistaIndexRoute = LojistaIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LojistaRoute,
+} as any)
+const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FuncionarioRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -249,7 +255,7 @@ export interface FileRoutesByFullPath {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
-  '/funcionario': typeof FuncionarioRoute
+  '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
@@ -274,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -288,7 +295,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/cadastro': typeof CadastroRoute
-  '/funcionario': typeof FuncionarioRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
@@ -312,6 +318,7 @@ export interface FileRoutesByTo {
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin': typeof AdminIndexRoute
+  '/funcionario': typeof FuncionarioIndexRoute
   '/lojista': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -328,7 +335,7 @@ export interface FileRoutesById {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
-  '/funcionario': typeof FuncionarioRoute
+  '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
@@ -353,6 +360,7 @@ export interface FileRoutesById {
   '/nps/$id': typeof NpsIdRoute
   '/vale/$codigo': typeof ValeCodigoRoute
   '/admin/': typeof AdminIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -395,6 +403,7 @@ export interface FileRouteTypes {
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin/'
+    | '/funcionario/'
     | '/lojista/'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -409,7 +418,6 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/cadastro'
-    | '/funcionario'
     | '/redefinir-senha'
     | '/admin/login'
     | '/lojista/aguardando'
@@ -433,6 +441,7 @@ export interface FileRouteTypes {
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin'
+    | '/funcionario'
     | '/lojista'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -473,6 +482,7 @@ export interface FileRouteTypes {
     | '/nps/$id'
     | '/vale/$codigo'
     | '/admin/'
+    | '/funcionario/'
     | '/lojista/'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -489,7 +499,7 @@ export interface RootRouteChildren {
   SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
-  FuncionarioRoute: typeof FuncionarioRoute
+  FuncionarioRoute: typeof FuncionarioRouteWithChildren
   LojistaRoute: typeof LojistaRouteWithChildren
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   NotaSlugRoute: typeof NotaSlugRoute
@@ -562,6 +572,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lojista/'
       preLoaderRoute: typeof LojistaIndexRouteImport
       parentRoute: typeof LojistaRoute
+    }
+    '/funcionario/': {
+      id: '/funcionario/'
+      path: '/'
+      fullPath: '/funcionario/'
+      preLoaderRoute: typeof FuncionarioIndexRouteImport
+      parentRoute: typeof FuncionarioRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -788,6 +805,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface FuncionarioRouteChildren {
+  FuncionarioIndexRoute: typeof FuncionarioIndexRoute
+}
+
+const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioIndexRoute: FuncionarioIndexRoute,
+}
+
+const FuncionarioRouteWithChildren = FuncionarioRoute._addFileChildren(
+  FuncionarioRouteChildren,
+)
+
 interface LojistaRouteChildren {
   LojistaAguardandoRoute: typeof LojistaAguardandoRoute
   LojistaCampanhasRoute: typeof LojistaCampanhasRoute
@@ -838,7 +867,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugRoute: SlugRoute,
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
-  FuncionarioRoute: FuncionarioRoute,
+  FuncionarioRoute: FuncionarioRouteWithChildren,
   LojistaRoute: LojistaRouteWithChildren,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   NotaSlugRoute: NotaSlugRoute,
