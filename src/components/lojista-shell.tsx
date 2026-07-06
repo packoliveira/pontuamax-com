@@ -88,7 +88,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
   };
 
   const NavList = ({ onClick }: { onClick?: () => void }) => (
-    <nav className="flex flex-col gap-1 p-3">
+    <nav className="flex flex-col gap-0.5 p-3">
       {nav.map((item) => {
         const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
         const Icon = item.icon;
@@ -98,13 +98,13 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
             to={item.to as "/lojista"}
             onClick={onClick}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
               active
-                ? "bg-white/10 text-white"
-                : "text-white/70 hover:bg-white/5 hover:text-white",
+                ? "bg-white/[0.08] text-white shadow-[inset_2px_0_0_0_#14CBA8]"
+                : "text-white/70 hover:bg-white/5 hover:text-white hover:translate-x-0.5",
             )}
           >
-            <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[#14CBA8]" : "text-white/60")} />
+            <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[#14CBA8]" : "text-white/60 group-hover:text-white/90")} />
             {item.label}
           </Link>
         );
@@ -166,7 +166,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
           </Sheet>
           </div>
         </header>
-        <main className="flex-1 p-3 sm:p-4 md:p-8 min-w-0">{children}</main>
+        <main key={pathname} className="flex-1 p-3 sm:p-4 md:p-8 min-w-0 animate-panel-in">{children}</main>
       </div>
     </div>
   );
