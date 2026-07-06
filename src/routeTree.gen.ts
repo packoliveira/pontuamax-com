@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as FuncionarioRouteImport } from './routes/funcionario'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
@@ -55,6 +56,11 @@ const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
 const LojistaRoute = LojistaRouteImport.update({
   id: '/lojista',
   path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncionarioRoute = FuncionarioRouteImport.update({
+  id: '/funcionario',
+  path: '/funcionario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
@@ -281,6 +288,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRoute
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/admin'
     | '/cadastro'
+    | '/funcionario'
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/cadastro'
+    | '/funcionario'
     | '/redefinir-senha'
     | '/admin/login'
     | '/lojista/aguardando'
@@ -437,6 +448,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/admin'
     | '/cadastro'
+    | '/funcionario'
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
+  FuncionarioRoute: typeof FuncionarioRoute
   LojistaRoute: typeof LojistaRouteWithChildren
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   NotaSlugRoute: typeof NotaSlugRoute
@@ -506,6 +519,13 @@ declare module '@tanstack/react-router' {
       path: '/lojista'
       fullPath: '/lojista'
       preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionario': {
+      id: '/funcionario'
+      path: '/funcionario'
+      fullPath: '/funcionario'
+      preLoaderRoute: typeof FuncionarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -818,6 +838,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugRoute: SlugRoute,
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
+  FuncionarioRoute: FuncionarioRoute,
   LojistaRoute: LojistaRouteWithChildren,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   NotaSlugRoute: NotaSlugRoute,
