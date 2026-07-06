@@ -32,6 +32,7 @@ import { Route as LojistaNotasRouteImport } from './routes/lojista.notas'
 import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
 import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
 import { Route as LojistaInstagramRouteImport } from './routes/lojista.instagram'
+import { Route as LojistaEquipeRouteImport } from './routes/lojista.equipe'
 import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
 import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
@@ -161,6 +162,11 @@ const LojistaInstagramRoute = LojistaInstagramRouteImport.update({
   path: '/instagram',
   getParentRoute: () => LojistaRoute,
 } as any)
+const LojistaEquipeRoute = LojistaEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => LojistaRoute,
+} as any)
 const LojistaConfiguracoesRoute = LojistaConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
   '/lojista/instagram': typeof LojistaInstagramRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
   '/lojista/instagram': typeof LojistaInstagramRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/lojista/campanhas': typeof LojistaCampanhasRoute
   '/lojista/clientes': typeof LojistaClientesRoute
   '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
   '/lojista/instagram': typeof LojistaInstagramRoute
   '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
   '/lojista/login': typeof LojistaLoginRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
+    | '/lojista/equipe'
     | '/lojista/instagram'
     | '/lojista/lancar-venda'
     | '/lojista/login'
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
+    | '/lojista/equipe'
     | '/lojista/instagram'
     | '/lojista/lancar-venda'
     | '/lojista/login'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/lojista/campanhas'
     | '/lojista/clientes'
     | '/lojista/configuracoes'
+    | '/lojista/equipe'
     | '/lojista/instagram'
     | '/lojista/lancar-venda'
     | '/lojista/login'
@@ -643,6 +655,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LojistaInstagramRouteImport
       parentRoute: typeof LojistaRoute
     }
+    '/lojista/equipe': {
+      id: '/lojista/equipe'
+      path: '/equipe'
+      fullPath: '/lojista/equipe'
+      preLoaderRoute: typeof LojistaEquipeRouteImport
+      parentRoute: typeof LojistaRoute
+    }
     '/lojista/configuracoes': {
       id: '/lojista/configuracoes'
       path: '/configuracoes'
@@ -754,6 +773,7 @@ interface LojistaRouteChildren {
   LojistaCampanhasRoute: typeof LojistaCampanhasRoute
   LojistaClientesRoute: typeof LojistaClientesRoute
   LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
+  LojistaEquipeRoute: typeof LojistaEquipeRoute
   LojistaInstagramRoute: typeof LojistaInstagramRoute
   LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
   LojistaLoginRoute: typeof LojistaLoginRoute
@@ -774,6 +794,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaCampanhasRoute: LojistaCampanhasRoute,
   LojistaClientesRoute: LojistaClientesRoute,
   LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
+  LojistaEquipeRoute: LojistaEquipeRoute,
   LojistaInstagramRoute: LojistaInstagramRoute,
   LojistaLancarVendaRoute: LojistaLancarVendaRoute,
   LojistaLoginRoute: LojistaLoginRoute,

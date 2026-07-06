@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -241,23 +241,22 @@ function CreateOrEditDialog({
   const [form, setForm] = useState({
     nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "",
   });
-
-  // Reset when opening
-  useState(() => undefined);
   const isEdit = !!employee;
-  if (open && employee && form.email !== employee.email) {
-    setForm({
-      nome: employee.nome,
-      cpf: employee.cpf ?? "",
-      email: employee.email,
-      phone: employee.phone ?? "",
-      role_key: employee.role_key,
-      password: "",
-    });
-  }
-  if (open && !employee && form.email && form.password === undefined) {
-    // no-op; handled by explicit reset button
-  }
+  useEffect(() => {
+    if (!open) return;
+    if (employee) {
+      setForm({
+        nome: employee.nome,
+        cpf: employee.cpf ?? "",
+        email: employee.email,
+        phone: employee.phone ?? "",
+        role_key: employee.role_key,
+        password: "",
+      });
+    } else {
+      setForm({ nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "" });
+    }
+  }, [open, employee]);
 
   const mCreate = useMutation({
     mutationFn: () => createEmployee({ data: {
