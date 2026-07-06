@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
-  UserPlus, Search, ShieldCheck, KeyRound, Trash2, Power, Pencil, Users, Filter, ScrollText,
+  UserPlus, Search, ShieldCheck, KeyRound, Trash2, Power, Pencil, Users, Filter, ScrollText, LogIn, Copy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/equipe")({
@@ -83,12 +83,34 @@ function EquipePage() {
           </h1>
           <p className="text-sm text-[#64748B]">Gerencie funcionários, cargos e permissões da sua loja.</p>
         </div>
-        <Button
-          onClick={() => setOpenCreate(true)}
-          className="rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md hover:opacity-95"
-        >
-          <UserPlus className="h-4 w-4" /> Cadastrar funcionário
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F8FAFC]"
+          >
+            <a href="/funcionario/login" target="_blank" rel="noreferrer">
+              <LogIn className="h-4 w-4" /> Acesso do vendedor
+            </a>
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F8FAFC]"
+            onClick={() => {
+              const url = `${window.location.origin}/funcionario/login`;
+              navigator.clipboard?.writeText(url);
+              toast.success("Link copiado: " + url);
+            }}
+          >
+            <Copy className="h-4 w-4" /> Copiar link
+          </Button>
+          <Button
+            onClick={() => setOpenCreate(true)}
+            className="rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md hover:opacity-95"
+          >
+            <UserPlus className="h-4 w-4" /> Cadastrar funcionário
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="lista" className="space-y-4">
