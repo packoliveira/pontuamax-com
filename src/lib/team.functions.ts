@@ -385,7 +385,7 @@ export const getMyEmployeeContext = createServerFn({ method: "GET" })
     // loja (dados públicos básicos)
     const st = await context.supabase
       .from("stores")
-      .select("id, slug, nome_fantasia, logo_url, brand_primary, brand_secondary, modalidade")
+      .select("id, slug, nome_fantasia, logo_url, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, voucher_validade_dias")
       .eq("id", emp.store_id).maybeSingle();
     if (st.error) throw new Error(st.error.message);
 

@@ -502,9 +502,17 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // owner check
-    const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
-    if (!owner.data) throw new Error("Você não é dono desta loja.");
+    const storePerm = await supabaseAdmin.from("stores").select("id, owner_id").eq("id", data.store_id).maybeSingle();
+    if (!storePerm.data) throw new Error("Loja inválida.");
+    if (storePerm.data.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: "clientes.cadastrar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para cadastrar clientes nesta loja.");
+    }
     const digits = data.phone.replace(/\D/g, "");
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (digits.length < 8) throw new Error("Telefone inválido.");
@@ -610,7 +618,16 @@ export const lancarVenda = createServerFn({ method: "POST" })
       .select("id, owner_id, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, nome_fantasia")
       .eq("id", data.store_id)
       .maybeSingle();
-    if (!loja.data || loja.data.owner_id !== context.userId) throw new Error("Loja inválida.");
+    if (!loja.data) throw new Error("Loja inválida.");
+    if (loja.data.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: "pontos.adicionar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para lançar vendas nesta loja.");
+    }
     const link = await supabaseAdmin
       .from("store_clients")
       .select("*")
@@ -801,8 +818,21 @@ export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
-    if (!owner.data) throw new Error("Loja inválida.");
+    const storePerm = await supabaseAdmin
+      .from("stores")
+      .select("id, owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
+    if (!storePerm.data) throw new Error("Loja inválida.");
+    if (storePerm.data.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: "clientes.editar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para editar clientes nesta loja.");
+    }
     const link = await supabaseAdmin.from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
     const { error } = await supabaseAdmin.from("profiles").update({ birthdate: data.birthdate }).eq("id", data.client_user_id);
@@ -824,9 +854,18 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const owner = await supabaseAdmin
-      .from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
-    if (!owner.data) throw new Error("Loja inválida.");
+    const storePerm = await supabaseAdmin
+      .from("stores").select("id, owner_id").eq("id", data.store_id).maybeSingle();
+    if (!storePerm.data) throw new Error("Loja inválida.");
+    if (storePerm.data.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: "clientes.editar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para editar clientes nesta loja.");
+    }
     const link = await supabaseAdmin
       .from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
@@ -881,9 +920,19 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const owner = await supabaseAdmin
-      .from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
-    if (!owner.data) throw new Error("Loja inválida.");
+    const storePerm = await supabaseAdmin
+      .from("stores").select("id, owner_id").eq("id", data.store_id).maybeSingle();
+    if (!storePerm.data) throw new Error("Loja inválida.");
+    if (storePerm.data.owner_id !== context.userId) {
+      const requiredPerm = data.delta > 0 ? "pontos.adicionar" : "pontos.estornar";
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: requiredPerm,
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para ajustar pontos nesta loja.");
+    }
     const link = await supabaseAdmin
       .from("store_clients").select("id, pontos")
       .eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
@@ -927,7 +976,15 @@ export const estornarVenda = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!tx.data) throw new Error("Venda não encontrada.");
     const owner = (tx.data.stores as unknown as { owner_id: string } | null)?.owner_id;
-    if (owner !== context.userId) throw new Error("Sem permissão para estornar esta venda.");
+    if (owner !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: tx.data.store_id,
+        _perm: "pontos.estornar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para estornar esta venda.");
+    }
     if (tx.data.tipo !== "venda") throw new Error("Só é possível estornar transações do tipo venda.");
     if (typeof tx.data.origem === "string" && tx.data.origem.startsWith("estornada:")) {
       throw new Error("Esta venda já foi estornada.");
@@ -1071,7 +1128,22 @@ export const confirmarResgate = createServerFn({ method: "POST" })
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
-    if (!tx.data || ownerId !== context.userId) throw new Error("Não autorizado.");
+    if (!tx.data) throw new Error("Não autorizado.");
+    if (ownerId !== context.userId) {
+      const canValidate = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: tx.data.store_id,
+        _perm: "vouchers.validar",
+      });
+      if (canValidate.error) throw new Error(canValidate.error.message);
+      const canRedeem = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: tx.data.store_id,
+        _perm: "resgates.produtos",
+      });
+      if (canRedeem.error) throw new Error(canRedeem.error.message);
+      if (!canValidate.data && !canRedeem.data) throw new Error("Não autorizado.");
+    }
     if (tx.data.status === "entregue") {
       throw new Error(formatVoucherJaUsado(tx.data.delivered_at));
     }
@@ -1127,9 +1199,29 @@ export const validarVoucher = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ voucher_code: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const store = await supabaseAdmin
+    let store = await supabaseAdmin
       .from("stores").select("id, nome_fantasia").eq("owner_id", context.userId).maybeSingle();
-    if (!store.data) throw new Error("Loja não encontrada.");
+    if (!store.data) {
+      const emp = await supabaseAdmin
+        .from("store_employees")
+        .select("store_id")
+        .eq("user_id", context.userId)
+        .eq("status", "ativo")
+        .limit(10);
+      for (const row of emp.data ?? []) {
+        const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+          _user_id: context.userId,
+          _store_id: row.store_id,
+          _perm: "vouchers.validar",
+        });
+        if (perm.error) throw new Error(perm.error.message);
+        if (perm.data) {
+          store = await supabaseAdmin.from("stores").select("id, nome_fantasia").eq("id", row.store_id).maybeSingle();
+          break;
+        }
+      }
+    }
+    if (!store.data) throw new Error("Loja não encontrada ou sem permissão para validar vouchers.");
     const code = data.voucher_code.trim().toUpperCase();
     const tx = await supabaseAdmin
       .from("transactions")
@@ -1186,7 +1278,16 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
-    if (!tx.data || ownerId !== context.userId) throw new Error("Não autorizado.");
+    if (!tx.data) throw new Error("Não autorizado.");
+    if (ownerId !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: tx.data.store_id,
+        _perm: "vouchers.validar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Não autorizado.");
+    }
     if (tx.data.status !== "pendente") throw new Error("Só é possível cancelar vouchers pendentes.");
     const upd = await supabaseAdmin
       .from("transactions")
@@ -1936,7 +2037,16 @@ export const addClientTag = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin.from("stores").select("owner_id").eq("id", data.store_id).maybeSingle();
-    if (!loja.data || loja.data.owner_id !== context.userId) throw new Error("Loja inválida.");
+    if (!loja.data) throw new Error("Loja inválida.");
+    if (loja.data.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: "clientes.editar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para editar etiquetas de clientes.");
+    }
     const { error } = await supabaseAdmin.from("client_tags").insert({
       store_id: data.store_id, client_user_id: data.client_user_id, tag: data.tag.trim().toLowerCase(),
     });
@@ -1949,9 +2059,18 @@ export const removeClientTag = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const t = await supabaseAdmin.from("client_tags").select("id, stores:store_id(owner_id)").eq("id", data.id).maybeSingle();
+    const t = await supabaseAdmin.from("client_tags").select("id, store_id, stores:store_id(owner_id)").eq("id", data.id).maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join
-    if (!t.data || (t.data as any).stores.owner_id !== context.userId) throw new Error("Tag não encontrada.");
+    if (!t.data) throw new Error("Tag não encontrada.");
+    if ((t.data as any).stores.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: (t.data as any).store_id,
+        _perm: "clientes.editar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Tag não encontrada.");
+    }
     await supabaseAdmin.from("client_tags").delete().eq("id", data.id);
     return { ok: true };
   });
