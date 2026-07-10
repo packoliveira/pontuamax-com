@@ -260,10 +260,37 @@ function CreateOrEditDialog({
   roles: { key: string; label: string }[];
 }) {
   const qc = useQueryClient();
+  const { data: catalog } = useQuery(rolesAndPermsQuery());
+  const permissions = (catalog?.permissions ?? []) as TeamPermission[];
+  const rolePermissions = catalog?.rolePermissions ?? [];
   const [form, setForm] = useState({
     nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "",
   });
+  // permissões efetivas escolhidas no cadastro (permission_key -> granted)
+  const [permState, setPermState] = useState<Map<string, boolean>>(new Map());
   const isEdit = !!employee;
+
+  const roleDefault = useMemo(() => new Set(
+    rolePermissions.filter((rp) => rp.role_key === form.role_key).map((rp) => rp.permission_key)
+  ), [rolePermissions, form.role_key]);
+
+  // Ao trocar de cargo (ou abrir), reinicializa checklist com o padrão do cargo
+  useEffect(() => {
+    if (!open || isEdit) return;
+    const m = new Map<string, boolean>();
+    for (const p of permissions) m.set(p.key, roleDefault.has(p.key));
+    setPermState(m);
+  }, [open, isEdit, form.role_key, permissions, roleDefault]);
+
+  const groupedPerms = useMemo(() => {
+    const g = new Map<string, TeamPermission[]>();
+    for (const p of permissions) {
+      if (!g.has(p.category)) g.set(p.category, []);
+      g.get(p.category)!.push(p);
+    }
+    return Array.from(g.entries());
+  }, [permissions]);
+
   useEffect(() => {
     if (!open) return;
     if (employee) {
@@ -281,10 +308,20 @@ function CreateOrEditDialog({
   }, [open, employee]);
 
   const mCreate = useMutation({
-    mutationFn: () => createEmployee({ data: {
-      nome: form.nome, cpf: form.cpf || null, email: form.email,
-      phone: form.phone || null, role_key: form.role_key, password: form.password,
-    } }),
+    mutationFn: () => {
+      // apenas overrides = diferenças em relação ao padrão do cargo
+      const overrides: { permission_key: string; granted: boolean }[] = [];
+      for (const p of permissions) {
+        const chosen = permState.get(p.key) === true;
+        const def = roleDefault.has(p.key);
+        if (chosen !== def) overrides.push({ permission_key: p.key, granted: chosen });
+      }
+      return createEmployee({ data: {
+        nome: form.nome, cpf: form.cpf || null, email: form.email,
+        phone: form.phone || null, role_key: form.role_key, password: form.password,
+        overrides,
+      } });
+    },
     onSuccess: () => {
       toast.success("Funcionário cadastrado.");
       qc.invalidateQueries({ queryKey: ["team"] });
@@ -311,7 +348,7 @@ function CreateOrEditDialog({
       onOpenChange(v);
       if (!v) setForm({ nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "" });
     }}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar funcionário" : "Cadastrar funcionário"}</DialogTitle>
           <DialogDescription>
@@ -352,6 +389,68 @@ function CreateOrEditDialog({
             <div className="grid gap-1.5">
               <Label>Senha inicial * <span className="text-xs text-muted-foreground">(mín. 8 caracteres)</span></Label>
               <PasswordInput value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+            </div>
+          )}
+          {!isEdit && permissions.length > 0 && (
+            <div className="grid gap-2 pt-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">
+                  Permissões do cargo <span className="text-xs text-muted-foreground">
+                    ({roles.find((r) => r.key === form.role_key)?.label ?? form.role_key})
+                  </span>
+                </Label>
+                <button
+                  type="button"
+                  className="text-xs text-[#2563EB] hover:underline"
+                  onClick={() => {
+                    const m = new Map<string, boolean>();
+                    for (const p of permissions) m.set(p.key, roleDefault.has(p.key));
+                    setPermState(m);
+                  }}
+                >
+                  Restaurar padrão do cargo
+                </button>
+              </div>
+              <div className="text-xs text-[#64748B]">
+                Marque ou desmarque o que este funcionário poderá acessar. Você pode ajustar depois em "Permissões".
+              </div>
+              <div className="space-y-3 max-h-72 overflow-y-auto rounded-xl border border-[#E5E7EB] p-3">
+                {groupedPerms.map(([cat, list]) => (
+                  <div key={cat}>
+                    <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#64748B]">{cat}</div>
+                    <div className="grid sm:grid-cols-2 gap-1.5">
+                      {list.map((p) => {
+                        const on = permState.get(p.key) === true;
+                        const def = roleDefault.has(p.key);
+                        return (
+                          <label
+                            key={p.key}
+                            className="flex items-start gap-2 text-sm p-2 rounded-lg hover:bg-[#F8FAFC] cursor-pointer"
+                            title={p.description}
+                          >
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 rounded border-[#CBD5E1] text-[#2563EB]"
+                              checked={on}
+                              onChange={(e) => {
+                                const next = new Map(permState);
+                                next.set(p.key, e.target.checked);
+                                setPermState(next);
+                              }}
+                            />
+                            <span className="flex-1">
+                              <span className="text-[#0F172A]">{p.label}</span>
+                              {on !== def && (
+                                <span className="ml-1 text-[10px] text-amber-700">(alterado)</span>
+                              )}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
