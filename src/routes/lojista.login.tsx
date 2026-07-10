@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { traduzirErroAuth, isCredenciaisInvalidas } from "@/lib/auth-errors";
+import { traduzirErroAuth, isCredenciaisInvalidas, validarEmail, validarSenha } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Store, AlertCircle } from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
@@ -47,6 +47,8 @@ function Login() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [errorKind, setErrorKind] = useState<"cred" | "store" | "other" | null>(null);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [erroEmail, setErroEmail] = useState<string | null>(null);
+  const [erroSenha, setErroSenha] = useState<string | null>(null);
   useEffect(() => {
     try {
       const msg = sessionStorage.getItem("auth_flash");
@@ -71,12 +73,23 @@ function Login() {
     e.preventDefault();
     setErrorMsg(null);
     setErrorKind(null);
+    setErroEmail(null);
+    setErroSenha(null);
+    const eE = validarEmail(email);
+    const eS = validarSenha(senha);
+    if (eE || eS) {
+      setErroEmail(eE);
+      setErroSenha(eS);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
     if (error) {
       setLoading(false);
       const cred = isCredenciaisInvalidas(error);
-      const msg = cred ? "Email ou senha incorretos. Confira os dados e tente de novo." : traduzirErroAuth(error);
+      const msg = cred
+        ? "Email ou senha incorretos. Confira os dois campos — se esqueceu a senha, use o link abaixo."
+        : traduzirErroAuth(error);
       setErrorKind(cred ? "cred" : "other");
       setErrorMsg(msg);
       return;
@@ -243,11 +256,28 @@ function Login() {
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); if (erroEmail) setErroEmail(null); }}
+                required
+                autoComplete="email"
+                className={erroEmail ? "border-destructive" : undefined}
+              />
+              {erroEmail && <p className="text-xs text-destructive">{erroEmail}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="senha">Senha</Label>
-              <PasswordInput id="senha" value={senha} onChange={(e) => setSenha(e.target.value)} required autoComplete="current-password" />
+              <PasswordInput
+                id="senha"
+                value={senha}
+                onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }}
+                required
+                autoComplete="current-password"
+                className={erroSenha ? "border-destructive" : undefined}
+              />
+              {erroSenha && <p className="text-xs text-destructive">{erroSenha}</p>}
             </div>
             <Button
               type="submit"
