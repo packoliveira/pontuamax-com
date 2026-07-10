@@ -9,7 +9,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ShieldAlert, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { traduzirErroAuth } from "@/lib/auth-errors";
+import { traduzirErroAuth, validarEmail, validarSenha, isCredenciaisInvalidas } from "@/lib/auth-errors";
 import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
 export const Route = createFileRoute("/admin/login")({
@@ -43,10 +43,23 @@ function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [showBootstrap, setShowBootstrap] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [erroEmail, setErroEmail] = useState<string | null>(null);
+  const [erroSenha, setErroSenha] = useState<string | null>(null);
+  const [erroGeral, setErroGeral] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowBootstrap(false);
+    setErroEmail(null);
+    setErroSenha(null);
+    setErroGeral(null);
+    const eE = validarEmail(email);
+    const eS = validarSenha(senha);
+    if (eE || eS) {
+      setErroEmail(eE);
+      setErroSenha(eS);
+      return;
+    }
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
@@ -81,9 +94,13 @@ function AdminLogin() {
       }
       // Usuário sem loja e sem role admin: nega acesso e desloga.
       await supabase.auth.signOut();
-      toast.error("Acesso negado: esta área é exclusiva do administrador master do sistema.");
+      setErroGeral("Acesso negado: esta área é exclusiva do administrador master do sistema.");
     } catch (err) {
-      toast.error(traduzirErroAuth(err));
+      if (isCredenciaisInvalidas(err)) {
+        setErroGeral("Email ou senha incorretos. Confira os dois campos e tente novamente.");
+      } else {
+        setErroGeral(traduzirErroAuth(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -114,23 +131,30 @@ function AdminLogin() {
                   id="admin-email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); if (erroEmail) setErroEmail(null); }}
                   required
                   autoComplete="email"
-                  className="bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500"
+                  className={`bg-slate-800 text-slate-100 placeholder:text-slate-500 ${erroEmail ? "border-red-500" : "border-slate-700"}`}
                 />
+                {erroEmail && <p className="text-xs text-red-400">{erroEmail}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="admin-senha" className="text-slate-200">Senha</Label>
                 <PasswordInput
                   id="admin-senha"
                   value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
+                  onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }}
                   required
                   autoComplete="current-password"
-                  className="bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500"
+                  className={`bg-slate-800 text-slate-100 placeholder:text-slate-500 ${erroSenha ? "border-red-500" : "border-slate-700"}`}
                 />
+                {erroSenha && <p className="text-xs text-red-400">{erroSenha}</p>}
               </div>
+              {erroGeral && (
+                <div className="rounded-md border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-300">
+                  {erroGeral}
+                </div>
+              )}
               <Button
                 type="submit"
                 disabled={loading}
