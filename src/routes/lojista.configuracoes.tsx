@@ -887,6 +887,35 @@ export function AssetUploader({
       toast.error("Arquivo acima de 5 MB");
       return;
     }
+    // Validação de dimensões para o banner do celular (proporção 2:1, ~1200x600)
+    if (kind === "banner-mobile" && file.type.startsWith("image/") && file.type !== "image/svg+xml") {
+      try {
+        const dims = await readImageDimensions(file);
+        const ratio = dims.width / dims.height;
+        const targetRatio = 2; // 2:1 horizontal
+        const ratioOff = Math.abs(ratio - targetRatio) / targetRatio;
+        const tooSmall = dims.width < 900 || dims.height < 450;
+        const problems: string[] = [];
+        if (ratioOff > 0.1) {
+          problems.push(
+            `proporção ${ratio.toFixed(2)}:1 (recomendado 2:1)`,
+          );
+        }
+        if (tooSmall) {
+          problems.push(`${dims.width}×${dims.height}px (mínimo 1200×600)`);
+        }
+        if (problems.length > 0) {
+          toast.warning("Banner celular fora do recomendado", {
+            description:
+              `Detectamos: ${problems.join(" e ")}. ` +
+              `Para não cortar em celulares pequenos, use 1200×600 px na horizontal e mantenha o logo dentro da área segura central.`,
+            duration: 8000,
+          });
+        }
+      } catch {
+        // silencioso — se não conseguir ler dimensões, seguimos com o upload
+      }
+    }
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "png").toLowerCase();
