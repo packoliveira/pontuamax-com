@@ -470,6 +470,9 @@ export function LivePreview({
           🖥️ Desktop
         </button>
       </div>
+    </div>
+  );
+}
     <div
       className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
       style={{
