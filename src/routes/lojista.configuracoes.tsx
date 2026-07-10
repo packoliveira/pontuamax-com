@@ -833,7 +833,7 @@ export function AssetUploader({
   hint: string;
   value: string;
   onChange: (url: string) => void;
-  aspect?: "banner";
+  aspect?: "banner" | "banner-mobile";
 }) {
   const [uploading, setUploading] = useState(false);
 
@@ -862,7 +862,12 @@ export function AssetUploader({
     }
   }
 
-  const previewClass = aspect === "banner" ? "w-full h-24 object-cover" : "h-20 w-20 object-contain bg-muted";
+  const previewClass =
+    aspect === "banner"
+      ? "w-full h-24 object-cover"
+      : aspect === "banner-mobile"
+        ? "w-full max-w-[220px] aspect-[2/1] object-contain bg-muted/40"
+        : "h-20 w-20 object-contain bg-muted";
 
   return (
     <div className="space-y-2">
