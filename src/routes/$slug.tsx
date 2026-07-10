@@ -206,6 +206,10 @@ function BannerHero({ loja }: { loja: Loja }) {
   const desktop = loja.banner_url;
   const mobile = loja.banner_url_mobile || loja.banner_url;
   if (!desktop && !mobile) return null;
+  const fit: "cover" | "contain" = loja.banner_mobile_fit === "contain" ? "contain" : "cover";
+  const px = loja.banner_mobile_position_x ?? 50;
+  const py = loja.banner_mobile_position_y ?? 50;
+  const zoom = (loja.banner_mobile_zoom ?? 100) / 100;
   return (
     <div className="relative">
       <div className="max-w-2xl mx-auto px-4 pt-4">
@@ -217,12 +221,25 @@ function BannerHero({ loja }: { loja: Loja }) {
           }}
         >
           {mobile && (
-            <img
-              src={mobile}
-              alt={`Banner ${loja.nome_fantasia}`}
-              className="w-full aspect-[2/1] object-cover object-center sm:hidden"
-              loading="eager"
-            />
+            <div
+              className="w-full aspect-[2/1] overflow-hidden sm:hidden"
+              style={{
+                background: fit === "contain" ? `color-mix(in oklab, ${loja.brand_primary} 15%, #0a0a1a)` : undefined,
+              }}
+            >
+              <img
+                src={mobile}
+                alt={`Banner ${loja.nome_fantasia}`}
+                className="w-full h-full"
+                style={{
+                  objectFit: fit,
+                  objectPosition: `${px}% ${py}%`,
+                  transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+                  transformOrigin: `${px}% ${py}%`,
+                }}
+                loading="eager"
+              />
+            </div>
           )}
           {desktop && (
             <img

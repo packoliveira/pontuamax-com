@@ -129,6 +129,10 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         logo_url: z.string().max(500).optional().nullable(),
         banner_url: z.string().max(500).optional().nullable(),
         banner_url_mobile: z.string().max(500).optional().nullable(),
+        banner_mobile_fit: z.enum(["cover", "contain"]).optional(),
+        banner_mobile_position_x: z.number().int().min(0).max(100).optional(),
+        banner_mobile_position_y: z.number().int().min(0).max(100).optional(),
+        banner_mobile_zoom: z.number().int().min(100).max(300).optional(),
         indicacao_ativa: z.boolean().optional(),
         bonus_indicador: z.number().int().min(0).max(10000).optional(),
         bonus_indicado: z.number().int().min(0).max(10000).optional(),
@@ -2093,7 +2097,7 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
 
 // -------- Public lookups (no auth) with safe fields only --------
 const PUBLIC_STORE_SELECT =
-  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados";
+  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, banner_mobile_fit, banner_mobile_position_x, banner_mobile_position_y, banner_mobile_zoom, brand_primary, brand_secondary, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados";
 
 export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))
