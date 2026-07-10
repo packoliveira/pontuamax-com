@@ -6,6 +6,7 @@ import { getMyStoreFull, lookupGiftCardByCodigo, lookupPublicStoreById, lookupPu
 export type StorePublic = Pick<
   Tables<"stores">,
   | "id" | "slug" | "nome_fantasia" | "logo_url" | "banner_url" | "banner_url_mobile"
+  | "banner_mobile_fit" | "banner_mobile_position_x" | "banner_mobile_position_y" | "banner_mobile_zoom"
   | "brand_primary" | "brand_secondary" | "modalidade"
   | "regra_pontos" | "percentual_cashback"
   | "indicacao_ativa" | "bonus_indicador" | "bonus_indicado"
