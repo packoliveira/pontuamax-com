@@ -116,7 +116,10 @@ export const createEmployee = createServerFn({ method: "POST" })
       email: data.email,
       password: data.password,
       email_confirm: true,
-      user_metadata: { full_name: data.nome, phone: data.phone ?? undefined, cpf: data.cpf ?? undefined },
+      // NÃO enviar CPF/telefone no user_metadata para evitar conflito com a trigger
+      // handle_new_user (profiles.cpf tem unique index parcial). CPF do funcionário
+      // fica registrado apenas na tabela store_employees.
+      user_metadata: { full_name: data.nome },
     });
     if (cErr) {
       // e-mail já existe → localiza usuário e reaproveita
