@@ -387,9 +387,10 @@ function PersonalizacaoPage() {
             mobilePositionX={mobilePosX}
             mobilePositionY={mobilePosY}
             mobileZoom={mobileZoom}
+            showSafeArea
           />
           <p className="mt-2 text-[11px] text-[#64748B]">
-            Atualiza em tempo real conforme você ajusta cores, banner e logo.
+            Atualiza em tempo real. A área tracejada mostra a "zona segura" — mantenha logo e textos dentro dela para não cortar em celulares pequenos.
           </p>
         </div>
       </div>
