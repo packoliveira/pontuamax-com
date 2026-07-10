@@ -41,3 +41,51 @@ export function isUsuarioJaCadastrado(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "";
   return /already registered|already exists|already been registered/i.test(msg);
 }
+
+// ---------------------------------------------------------------------------
+// Validadores de campo — usados nas telas de login/cadastro para mostrar
+// mensagens específicas por campo (email, cpf, senha) em vez de um toast
+// genérico. Retornam `null` quando o valor é válido, ou uma string com o
+// motivo do erro em pt-BR.
+// ---------------------------------------------------------------------------
+
+export function validarEmail(email: string): string | null {
+  const v = email.trim();
+  if (!v) return "Informe seu email.";
+  // Regex simples: algo@algo.algo — suficiente pra pegar erros óbvios de digitação.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Email inválido. Confira se digitou correto (ex.: nome@empresa.com).";
+  return null;
+}
+
+export function validarSenha(senha: string, min = 6): string | null {
+  if (!senha) return "Informe sua senha.";
+  if (senha.length < min) return `A senha precisa ter no mínimo ${min} caracteres. Você digitou ${senha.length}.`;
+  return null;
+}
+
+export function validarConfirmacaoSenha(senha: string, confirmacao: string): string | null {
+  if (!confirmacao) return "Confirme sua senha.";
+  if (senha !== confirmacao) return "As senhas não coincidem. Digite a mesma senha nos dois campos.";
+  return null;
+}
+
+// Valida CPF pelo algoritmo dos dígitos verificadores. Aceita string com ou
+// sem máscara; usa só os dígitos.
+export function validarCPF(cpf: string): string | null {
+  const digits = (cpf || "").replace(/\D/g, "");
+  if (!digits) return "Informe seu CPF.";
+  if (digits.length !== 11) return `CPF deve ter 11 dígitos. Você digitou ${digits.length}.`;
+  if (/^(\d)\1{10}$/.test(digits)) return "CPF inválido (dígitos repetidos).";
+  const calc = (base: string, factor: number) => {
+    let sum = 0;
+    for (let i = 0; i < base.length; i++) sum += parseInt(base[i], 10) * (factor - i);
+    const rest = (sum * 10) % 11;
+    return rest === 10 ? 0 : rest;
+  };
+  const d1 = calc(digits.slice(0, 9), 10);
+  const d2 = calc(digits.slice(0, 10), 11);
+  if (d1 !== parseInt(digits[9], 10) || d2 !== parseInt(digits[10], 10)) {
+    return "CPF inválido. Confira os números digitados.";
+  }
+  return null;
+}
