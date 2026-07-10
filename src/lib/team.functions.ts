@@ -99,6 +99,10 @@ export const createEmployee = createServerFn({ method: "POST" })
     phone: phoneSchema,
     role_key: roleSchema,
     password: passwordSchema,
+    overrides: z.array(z.object({
+      permission_key: z.string(),
+      granted: z.boolean(),
+    })).optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
     const storeId = await getOwnedStoreId(context);
@@ -161,6 +165,18 @@ export const createEmployee = createServerFn({ method: "POST" })
     await writeAudit(storeId, context.userId, "employee.created", {
       employeeId: emp.id, targetLabel: data.email, meta: { role_key: data.role_key },
     });
+
+    // 4) aplica overrides de permissão iniciais (se informados)
+    if (data.overrides && data.overrides.length) {
+      const ins = await context.supabase
+        .from("store_employee_permissions")
+        .insert(data.overrides.map((o) => ({
+          employee_id: emp.id,
+          permission_key: o.permission_key,
+          granted: o.granted,
+        })));
+      if (ins.error) throw new Error(ins.error.message);
+    }
     return emp;
   });
 
