@@ -583,6 +583,7 @@ export function LivePreview({
           Resgatar recompensa
         </button>
       </div>
+      </div>
     </div>
   );
 }
