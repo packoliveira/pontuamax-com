@@ -818,8 +818,21 @@ export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
-    if (!owner.data) throw new Error("Loja inválida.");
+    const storePerm = await supabaseAdmin
+      .from("stores")
+      .select("id, owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
+    if (!storePerm.data) throw new Error("Loja inválida.");
+    if (storePerm.data.owner_id !== context.userId) {
+      const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
+        _user_id: context.userId,
+        _store_id: data.store_id,
+        _perm: "clientes.editar",
+      });
+      if (perm.error) throw new Error(perm.error.message);
+      if (!perm.data) throw new Error("Sem permissão para editar clientes nesta loja.");
+    }
     const link = await supabaseAdmin.from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
     const { error } = await supabaseAdmin.from("profiles").update({ birthdate: data.birthdate }).eq("id", data.client_user_id);
