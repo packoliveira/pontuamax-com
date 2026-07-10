@@ -12,7 +12,6 @@ import {
   Gift,
   LayoutDashboard,
   ShoppingCart,
-  Store,
   Ticket,
   Users,
   Wallet,
