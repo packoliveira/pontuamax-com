@@ -399,7 +399,7 @@ function IntegracoesCard({
   );
 }
 
-function LivePreview({
+export function LivePreview({
   nome,
   logo,
   banner,
@@ -818,7 +818,7 @@ function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_c
   );
 }
 
-function AssetUploader({
+export function AssetUploader({
   storeId,
   kind,
   label,
@@ -917,7 +917,7 @@ const COLOR_PRESETS: { name: string; a: string; b: string }[] = [
   { name: "Rubi", a: "#DC2626", b: "#1F2937" },
 ];
 
-function ColorPresets({ onPick }: { onPick: (a: string, b: string) => void }) {
+export function ColorPresets({ onPick }: { onPick: (a: string, b: string) => void }) {
   return (
     <div className="space-y-2">
       <Label className="text-xs uppercase tracking-wide text-[#64748B]">Paletas prontas</Label>
@@ -951,7 +951,7 @@ const SUGGESTED_BANNERS: { label: string; url: string }[] = [
   { label: "Abstrato", url: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920&h=560&q=80" },
 ];
 
-function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) {
+export function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) {
   return (
     <div className="space-y-2">
       <Label className="text-xs uppercase tracking-wide text-[#64748B]">Ou escolha um banner sugerido</Label>
