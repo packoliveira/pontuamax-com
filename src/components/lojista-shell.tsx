@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram, UserCog } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram, UserCog, Palette } from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -27,6 +27,7 @@ const nav: NavItem[] = [
   { to: "/lojista/nps", label: "NPS", icon: Star },
   { to: "/lojista/widget", label: "Widget", icon: Code },
   { to: "/lojista/equipe", label: "Equipe", icon: UserCog },
+  { to: "/lojista/personalizacao", label: "Personalização", icon: Palette },
   { to: "/lojista/configuracoes", label: "Configurações", icon: Settings },
 ];
 
