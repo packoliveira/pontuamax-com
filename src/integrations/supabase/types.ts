@@ -866,6 +866,9 @@ export type Database = {
           banner_mobile_zoom: number
           banner_url: string | null
           banner_url_mobile: string | null
+          bg_color_1: string | null
+          bg_color_2: string | null
+          bg_mode: string
           bonus_indicado: number
           bonus_indicador: number
           brand_primary: string
@@ -930,6 +933,9 @@ export type Database = {
           banner_mobile_zoom?: number
           banner_url?: string | null
           banner_url_mobile?: string | null
+          bg_color_1?: string | null
+          bg_color_2?: string | null
+          bg_mode?: string
           bonus_indicado?: number
           bonus_indicador?: number
           brand_primary?: string
@@ -994,6 +1000,9 @@ export type Database = {
           banner_mobile_zoom?: number
           banner_url?: string | null
           banner_url_mobile?: string | null
+          bg_color_1?: string | null
+          bg_color_2?: string | null
+          bg_mode?: string
           bonus_indicado?: number
           bonus_indicador?: number
           brand_primary?: string
