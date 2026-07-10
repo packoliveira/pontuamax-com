@@ -206,7 +206,7 @@ function BannerHero({ loja }: { loja: Loja }) {
   const desktop = loja.banner_url;
   const mobile = loja.banner_url_mobile || loja.banner_url;
   if (!desktop && !mobile) return null;
-  const fit = loja.banner_mobile_fit ?? "cover";
+  const fit: "cover" | "contain" = loja.banner_mobile_fit === "contain" ? "contain" : "cover";
   const px = loja.banner_mobile_position_x ?? 50;
   const py = loja.banner_mobile_position_y ?? 50;
   const zoom = (loja.banner_mobile_zoom ?? 100) / 100;
