@@ -220,7 +220,7 @@ function BannerHero({ loja }: { loja: Loja }) {
             <img
               src={mobile}
               alt={`Banner ${loja.nome_fantasia}`}
-              className="w-full h-40 object-cover sm:hidden"
+              className="w-full aspect-[2/1] object-cover object-center sm:hidden"
               loading="eager"
             />
           )}
