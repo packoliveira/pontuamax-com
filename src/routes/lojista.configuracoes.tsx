@@ -882,6 +882,22 @@ export function AssetUploader({
 }) {
   const [uploading, setUploading] = useState(false);
 
+  function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(url);
+        reject(e);
+      };
+      img.src = url;
+    });
+  }
+
   async function handleFile(file: File) {
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Arquivo acima de 5 MB");
