@@ -407,6 +407,10 @@ export function LivePreview({
   cor1,
   cor2,
   modalidade,
+  mobileFit = "cover",
+  mobilePositionX = 50,
+  mobilePositionY = 50,
+  mobileZoom = 100,
 }: {
   nome: string;
   logo: string;
@@ -415,12 +419,17 @@ export function LivePreview({
   cor1: string;
   cor2: string;
   modalidade: Modalidade;
+  mobileFit?: "cover" | "contain";
+  mobilePositionX?: number;
+  mobilePositionY?: number;
+  mobileZoom?: number;
 }) {
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
-  const bannerSrc = banner || bannerMobile;
+  const bannerSrc = bannerMobile || banner;
   const gradient = `linear-gradient(135deg, ${cor1}, ${cor2})`;
   const glow = `0 12px 40px -12px ${cor1}80`;
+  const zoom = mobileZoom / 100;
   return (
     <div
       className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
@@ -430,11 +439,26 @@ export function LivePreview({
     >
       <div className="h-1" style={{ background: gradient }} />
       {bannerSrc ? (
-        <div className="w-full h-24 overflow-hidden">
-          <img src={bannerSrc} alt="" className="w-full h-full object-cover" />
+        <div
+          className="w-full aspect-[2/1] overflow-hidden"
+          style={{
+            background: mobileFit === "contain" ? `color-mix(in oklab, ${cor1} 15%, #0a0a1a)` : undefined,
+          }}
+        >
+          <img
+            src={bannerSrc}
+            alt=""
+            className="w-full h-full"
+            style={{
+              objectFit: mobileFit,
+              objectPosition: `${mobilePositionX}% ${mobilePositionY}%`,
+              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+              transformOrigin: `${mobilePositionX}% ${mobilePositionY}%`,
+            }}
+          />
         </div>
       ) : (
-        <div className="w-full h-24" style={{ background: gradient, opacity: 0.85 }} />
+        <div className="w-full aspect-[2/1]" style={{ background: gradient, opacity: 0.85 }} />
       )}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-2">
