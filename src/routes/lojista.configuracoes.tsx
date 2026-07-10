@@ -432,12 +432,17 @@ export function LivePreview({
   bgColor1?: string | null;
   bgColor2?: string | null;
 }) {
+  const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
-  const bannerSrc = bannerMobile || banner;
+  const isDesktop = device === "desktop";
+  const bannerSrc = isDesktop ? (banner || bannerMobile) : (bannerMobile || banner);
   const gradient = `linear-gradient(135deg, ${cor1}, ${cor2})`;
   const glow = `0 12px 40px -12px ${cor1}80`;
-  const zoom = mobileZoom / 100;
+  const zoom = isDesktop ? 1 : mobileZoom / 100;
+  const fit = isDesktop ? "cover" : mobileFit;
+  const posX = isDesktop ? 50 : mobilePositionX;
+  const posY = isDesktop ? 50 : mobilePositionY;
   const bgBase =
     bgMode === "light" ? "#f8fafc" : bgMode === "custom" ? (bgColor1 || "#0B1020") : "#0B1020";
   const bgAccent =
@@ -448,6 +453,23 @@ export function LivePreview({
   const chipBg = isLightBg ? "rgba(15,23,42,0.05)" : "rgba(255,255,255,0.05)";
   const chipBorder = isLightBg ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
   return (
+    <div className="space-y-2">
+      <div className="inline-flex rounded-lg border border-[#E5E7EB] bg-white p-0.5 text-xs">
+        <button
+          type="button"
+          onClick={() => setDevice("mobile")}
+          className={`px-3 py-1 rounded-md transition ${device === "mobile" ? "bg-[#0F172A] text-white" : "text-[#64748B]"}`}
+        >
+          📱 Celular
+        </button>
+        <button
+          type="button"
+          onClick={() => setDevice("desktop")}
+          className={`px-3 py-1 rounded-md transition ${device === "desktop" ? "bg-[#0F172A] text-white" : "text-[#64748B]"}`}
+        >
+          🖥️ Desktop
+        </button>
+      </div>
     <div
       className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
       style={{
@@ -457,9 +479,9 @@ export function LivePreview({
       <div className="h-1" style={{ background: gradient }} />
       {bannerSrc ? (
         <div
-          className="w-full aspect-[2/1] overflow-hidden relative"
+          className={`w-full overflow-hidden relative ${isDesktop ? "aspect-[4/1]" : "aspect-[2/1]"}`}
           style={{
-            background: mobileFit === "contain" ? `color-mix(in oklab, ${cor1} 15%, ${bgBase})` : undefined,
+            background: fit === "contain" ? `color-mix(in oklab, ${cor1} 15%, ${bgBase})` : undefined,
           }}
         >
           <img
@@ -467,13 +489,13 @@ export function LivePreview({
             alt=""
             className="w-full h-full"
             style={{
-              objectFit: mobileFit,
-              objectPosition: `${mobilePositionX}% ${mobilePositionY}%`,
+              objectFit: fit,
+              objectPosition: `${posX}% ${posY}%`,
               transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-              transformOrigin: `${mobilePositionX}% ${mobilePositionY}%`,
+              transformOrigin: `${posX}% ${posY}%`,
             }}
           />
-          {showSafeArea && bannerMobile && (
+          {showSafeArea && bannerMobile && !isDesktop && (
             <div className="pointer-events-none absolute inset-0">
               {/* Zona segura: retângulo central 70% x 70% — conteúdo aqui não corta em nenhum celular */}
               <div
@@ -494,7 +516,7 @@ export function LivePreview({
           )}
         </div>
       ) : (
-        <div className="w-full aspect-[2/1]" style={{ background: gradient, opacity: 0.85 }} />
+        <div className={`w-full ${isDesktop ? "aspect-[4/1]" : "aspect-[2/1]"}`} style={{ background: gradient, opacity: 0.85 }} />
       )}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-2">
