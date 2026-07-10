@@ -411,6 +411,7 @@ export function LivePreview({
   mobilePositionX = 50,
   mobilePositionY = 50,
   mobileZoom = 100,
+  showSafeArea = false,
 }: {
   nome: string;
   logo: string;
@@ -423,6 +424,7 @@ export function LivePreview({
   mobilePositionX?: number;
   mobilePositionY?: number;
   mobileZoom?: number;
+  showSafeArea?: boolean;
 }) {
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
@@ -440,7 +442,7 @@ export function LivePreview({
       <div className="h-1" style={{ background: gradient }} />
       {bannerSrc ? (
         <div
-          className="w-full aspect-[2/1] overflow-hidden"
+          className="w-full aspect-[2/1] overflow-hidden relative"
           style={{
             background: mobileFit === "contain" ? `color-mix(in oklab, ${cor1} 15%, #0a0a1a)` : undefined,
           }}
@@ -456,6 +458,25 @@ export function LivePreview({
               transformOrigin: `${mobilePositionX}% ${mobilePositionY}%`,
             }}
           />
+          {showSafeArea && bannerMobile && (
+            <div className="pointer-events-none absolute inset-0">
+              {/* Zona segura: retângulo central 70% x 70% — conteúdo aqui não corta em nenhum celular */}
+              <div
+                className="absolute rounded-md border-2 border-dashed"
+                style={{
+                  left: "15%",
+                  right: "15%",
+                  top: "15%",
+                  bottom: "15%",
+                  borderColor: "rgba(255,255,255,0.85)",
+                  boxShadow: "0 0 0 9999px rgba(0,0,0,0.15) inset",
+                }}
+              />
+              <div className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                Área segura
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="w-full aspect-[2/1]" style={{ background: gradient, opacity: 0.85 }} />
@@ -861,10 +882,55 @@ export function AssetUploader({
 }) {
   const [uploading, setUploading] = useState(false);
 
+  function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(url);
+        reject(e);
+      };
+      img.src = url;
+    });
+  }
+
   async function handleFile(file: File) {
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Arquivo acima de 5 MB");
       return;
+    }
+    // Validação de dimensões para o banner do celular (proporção 2:1, ~1200x600)
+    if (kind === "banner-mobile" && file.type.startsWith("image/") && file.type !== "image/svg+xml") {
+      try {
+        const dims = await readImageDimensions(file);
+        const ratio = dims.width / dims.height;
+        const targetRatio = 2; // 2:1 horizontal
+        const ratioOff = Math.abs(ratio - targetRatio) / targetRatio;
+        const tooSmall = dims.width < 900 || dims.height < 450;
+        const problems: string[] = [];
+        if (ratioOff > 0.1) {
+          problems.push(
+            `proporção ${ratio.toFixed(2)}:1 (recomendado 2:1)`,
+          );
+        }
+        if (tooSmall) {
+          problems.push(`${dims.width}×${dims.height}px (mínimo 1200×600)`);
+        }
+        if (problems.length > 0) {
+          toast.warning("Banner celular fora do recomendado", {
+            description:
+              `Detectamos: ${problems.join(" e ")}. ` +
+              `Para não cortar em celulares pequenos, use 1200×600 px na horizontal e mantenha o logo dentro da área segura central.`,
+            duration: 8000,
+          });
+        }
+      } catch {
+        // silencioso — se não conseguir ler dimensões, seguimos com o upload
+      }
     }
     setUploading(true);
     try {
