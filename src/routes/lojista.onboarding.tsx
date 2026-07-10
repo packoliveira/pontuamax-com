@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
-import { traduzirErroAuth } from "@/lib/auth-errors";
+import { traduzirErroAuth, validarEmail, validarSenha, validarConfirmacaoSenha, isUsuarioJaCadastrado } from "@/lib/auth-errors";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BrandPreview } from "@/components/brand-preview";
 import { Check, ArrowRight, Copy, Upload, Loader2, ImageIcon } from "lucide-react";
@@ -66,6 +66,10 @@ function Onboarding() {
   const [pctC, setPctC] = useState("5");
   const [slug, setSlug] = useState("");
   const [loading, setLoading] = useState(false);
+  const [erroEmail, setErroEmail] = useState<string | null>(null);
+  const [erroSenha, setErroSenha] = useState<string | null>(null);
+  const [erroSenha2, setErroSenha2] = useState<string | null>(null);
+  const [erroNome, setErroNome] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,10 +95,17 @@ function Onboarding() {
   }, []);
 
   const finalizar = async () => {
-    if (!alreadyAuthed && senha !== senha2) {
-      toast.error("As senhas não coincidem");
-      setStep(1);
-      return;
+    if (!alreadyAuthed) {
+      const eN = respName.trim() ? null : "Informe seu nome.";
+      const eE = validarEmail(email);
+      const eS = validarSenha(senha);
+      const eC = validarConfirmacaoSenha(senha, senha2);
+      if (eN || eE || eS || eC) {
+        setErroNome(eN); setErroEmail(eE); setErroSenha(eS); setErroSenha2(eC);
+        setStep(1);
+        toast.error("Corrija os campos destacados antes de continuar.");
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -105,7 +116,13 @@ function Onboarding() {
           password: senha,
           options: { data: { full_name: respName, phone: telefone } },
         });
-        if (sErr) throw sErr;
+        if (sErr) {
+          if (isUsuarioJaCadastrado(sErr)) {
+            setErroEmail("Esse email já está cadastrado. Volte para a tela de login e entre com sua senha.");
+            setStep(1);
+          }
+          throw sErr;
+        }
         if (!signup.session) {
           const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
           if (liErr) throw liErr;
@@ -178,14 +195,26 @@ function Onboarding() {
 
         {step === 1 && !alreadyAuthed && (
           <Card><CardHeader><CardTitle>Sua conta de lojista</CardTitle></CardHeader><CardContent className="space-y-4">
-            <div><Label>Seu nome</Label><Input value={respName} onChange={(e) => setRespName(e.target.value)} placeholder="Como quer ser chamado" /></div>
-            <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" /></div>
-            <div><Label>Senha</Label><PasswordInput value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} /></div>
+            <div>
+              <Label>Seu nome</Label>
+              <Input value={respName} onChange={(e) => { setRespName(e.target.value); if (erroNome) setErroNome(null); }} placeholder="Como quer ser chamado" className={erroNome ? "border-destructive" : undefined} />
+              {erroNome && <p className="mt-1 text-[11px] text-destructive">{erroNome}</p>}
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (erroEmail) setErroEmail(null); }} placeholder="voce@empresa.com" className={erroEmail ? "border-destructive" : undefined} />
+              {erroEmail && <p className="mt-1 text-[11px] text-destructive">{erroEmail}</p>}
+            </div>
+            <div>
+              <Label>Senha</Label>
+              <PasswordInput value={senha} onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }} placeholder="Mínimo 6 caracteres" minLength={6} className={erroSenha ? "border-destructive" : undefined} />
+              {erroSenha && <p className="mt-1 text-[11px] text-destructive">{erroSenha}</p>}
+            </div>
             <div>
               <Label>Confirmar senha</Label>
-              <PasswordInput value={senha2} onChange={(e) => setSenha2(e.target.value)} placeholder="Repita a senha" minLength={6} />
-              {senha2.length > 0 && senha !== senha2 && (
-                <p className="mt-1 text-[11px] text-destructive">As senhas não coincidem</p>
+              <PasswordInput value={senha2} onChange={(e) => { setSenha2(e.target.value); if (erroSenha2) setErroSenha2(null); }} placeholder="Repita a senha" minLength={6} className={erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-destructive" : undefined} />
+              {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
+                <p className="mt-1 text-[11px] text-destructive">{erroSenha2 ?? "As senhas não coincidem"}</p>
               )}
             </div>
             <Button
