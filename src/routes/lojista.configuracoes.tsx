@@ -136,10 +136,10 @@ function ConfigPage() {
               storeId={loja.id}
               kind="banner-mobile"
               label="Banner (celular)"
-              hint="Recomendado: 1080 × 720 px (vertical). JPG ou PNG até 5 MB."
+              hint="Recomendado: 1200 × 600 px (proporção 2:1, horizontal). JPG ou PNG até 5 MB."
               value={bannerMobile}
               onChange={setBannerMobile}
-              aspect="banner"
+              aspect="banner-mobile"
             />
             <SuggestedBanners onPick={(url) => { setBanner(url); setBannerMobile(url); }} />
             <div className="grid grid-cols-2 gap-3">
