@@ -412,6 +412,9 @@ export function LivePreview({
   mobilePositionY = 50,
   mobileZoom = 100,
   showSafeArea = false,
+  bgMode = "dark",
+  bgColor1 = null,
+  bgColor2 = null,
 }: {
   nome: string;
   logo: string;
@@ -425,6 +428,9 @@ export function LivePreview({
   mobilePositionY?: number;
   mobileZoom?: number;
   showSafeArea?: boolean;
+  bgMode?: "dark" | "light" | "custom";
+  bgColor1?: string | null;
+  bgColor2?: string | null;
 }) {
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
@@ -432,11 +438,20 @@ export function LivePreview({
   const gradient = `linear-gradient(135deg, ${cor1}, ${cor2})`;
   const glow = `0 12px 40px -12px ${cor1}80`;
   const zoom = mobileZoom / 100;
+  const bgBase =
+    bgMode === "light" ? "#f8fafc" : bgMode === "custom" ? (bgColor1 || "#0B1020") : "#0B1020";
+  const bgAccent =
+    bgMode === "custom" ? (bgColor2 || cor1) : bgMode === "light" ? cor1 : cor1;
+  const isLightBg = bgMode === "light" || (bgMode === "custom" && isLightHex(bgBase));
+  const textPrimary = isLightBg ? "#0f172a" : "#ffffff";
+  const textMuted = isLightBg ? "rgba(15,23,42,0.65)" : "rgba(255,255,255,0.7)";
+  const chipBg = isLightBg ? "rgba(15,23,42,0.05)" : "rgba(255,255,255,0.05)";
+  const chipBorder = isLightBg ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
   return (
     <div
       className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
       style={{
-        background: `radial-gradient(120% 80% at 0% 0%, ${cor1}22, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${cor2}22, transparent 60%), #0B1020`,
+        background: `radial-gradient(120% 80% at 0% 0%, ${bgAccent}22, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${cor2}22, transparent 60%), ${bgBase}`,
       }}
     >
       <div className="h-1" style={{ background: gradient }} />
@@ -444,7 +459,7 @@ export function LivePreview({
         <div
           className="w-full aspect-[2/1] overflow-hidden relative"
           style={{
-            background: mobileFit === "contain" ? `color-mix(in oklab, ${cor1} 15%, #0a0a1a)` : undefined,
+            background: mobileFit === "contain" ? `color-mix(in oklab, ${cor1} 15%, ${bgBase})` : undefined,
           }}
         >
           <img
@@ -487,8 +502,8 @@ export function LivePreview({
             <img
               src={logo}
               alt=""
-              className="h-10 w-10 rounded-xl object-contain bg-white/10 p-1 ring-1"
-              style={{ boxShadow: glow, borderColor: cor1 }}
+              className="h-10 w-10 rounded-xl object-contain p-1 ring-1"
+              style={{ boxShadow: glow, borderColor: cor1, background: chipBg }}
             />
           ) : (
             <div
@@ -499,17 +514,17 @@ export function LivePreview({
             </div>
           )}
           <div>
-            <div className="text-sm font-semibold text-white truncate">{nome || "Sua loja"}</div>
-            <div className="text-[10px] uppercase tracking-wider text-white/60">Programa fidelidade</div>
+            <div className="text-sm font-semibold truncate" style={{ color: textPrimary }}>{nome || "Sua loja"}</div>
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: textMuted }}>Programa fidelidade</div>
           </div>
         </div>
 
-        <div className="rounded-xl p-3 bg-white/5 border border-white/10 space-y-2">
-          <div className="flex items-center justify-between text-[11px] text-white/70">
+        <div className="rounded-xl p-3 space-y-2" style={{ background: chipBg, border: `1px solid ${chipBorder}` }}>
+          <div className="flex items-center justify-between text-[11px]" style={{ color: textMuted }}>
             <span>Nível Prata</span>
             <span>240 / 300 pts</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+          <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: chipBg }}>
             <div
               className="h-full rounded-full transition-all"
               style={{
@@ -524,13 +539,13 @@ export function LivePreview({
         {inclP && (
           <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: `${cor1}22` }}>
             <Coins className="h-4 w-4" style={{ color: cor1 }} />
-            <div className="text-xs text-white"><strong>240</strong> pontos</div>
+            <div className="text-xs" style={{ color: textPrimary }}><strong>240</strong> pontos</div>
           </div>
         )}
         {inclC && (
           <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: `${cor2}22` }}>
             <Wallet className="h-4 w-4" style={{ color: cor2 }} />
-            <div className="text-xs text-white"><strong>R$ 32,50</strong> de cashback</div>
+            <div className="text-xs" style={{ color: textPrimary }}><strong>R$ 32,50</strong> de cashback</div>
           </div>
         )}
 
@@ -545,6 +560,17 @@ export function LivePreview({
       </div>
     </div>
   );
+}
+
+function isLightHex(hex: string): boolean {
+  const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!m) return false;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
 }
 
 type IgLoja = {
