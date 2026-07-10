@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { traduzirErroAuth, isCredenciaisInvalidas, isUsuarioJaCadastrado } from "@/lib/auth-errors";
+import { traduzirErroAuth, isCredenciaisInvalidas, isUsuarioJaCadastrado, validarCPF, validarSenha, validarConfirmacaoSenha } from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -397,6 +397,11 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [erroCpf, setErroCpf] = useState<string | null>(null);
+  const [erroNome, setErroNome] = useState<string | null>(null);
+  const [erroPhone, setErroPhone] = useState<string | null>(null);
+  const [erroSenha, setErroSenha] = useState<string | null>(null);
+  const [erroSenha2, setErroSenha2] = useState<string | null>(null);
 
   const switchTo = (novo: "login" | "signup", msg: string) => {
     setMode(novo);
@@ -408,20 +413,36 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAviso(null);
+    setErroCpf(null); setErroNome(null); setErroPhone(null); setErroSenha(null); setErroSenha2(null);
     const cpfDigits = onlyDigits(cpf);
-    if (!isValidCPF(cpfDigits)) return toast.error("CPF inválido");
-    if (senha.length < 6) return toast.error("A senha precisa ter no mínimo 6 caracteres.");
-    if (mode === "signup" && senha !== senha2) return toast.error("As senhas não coincidem");
+    const eC = validarCPF(cpfDigits);
+    // valida também pelo algoritmo local pra manter compatibilidade
+    const eCpfExtra = !eC && !isValidCPF(cpfDigits) ? "CPF inválido. Confira os números digitados." : null;
+    const eS = validarSenha(senha);
+    let eN: string | null = null;
+    let eP: string | null = null;
+    let eS2: string | null = null;
+    if (mode === "signup") {
+      if (!nome.trim()) eN = "Informe seu nome.";
+      const phoneDigits = onlyDigits(phone);
+      if (!phoneDigits) eP = "Informe seu telefone com DDD.";
+      else if (phoneDigits.length < 10) eP = `Telefone incompleto — precisa ter DDD + número (mín. 10 dígitos). Você digitou ${phoneDigits.length}.`;
+      eS2 = validarConfirmacaoSenha(senha, senha2);
+    }
+    if (eC || eCpfExtra || eS || eN || eP || eS2) {
+      setErroCpf(eC ?? eCpfExtra);
+      setErroSenha(eS);
+      setErroNome(eN);
+      setErroPhone(eP);
+      setErroSenha2(eS2);
+      return;
+    }
     setLoading(true);
     onAuthStart?.();
     try {
       const email = cpfToEmail(cpfDigits);
       if (mode === "signup") {
-        if (!nome.trim()) throw new Error("Informe seu nome");
         const phoneDigits = onlyDigits(phone);
-        if (!phoneDigits) throw new Error("Informe seu telefone (com DDD)");
-        if (phoneDigits.length < 10) throw new Error("Telefone inválido (informe DDD + número)");
-        if (senha2.length < 6) throw new Error("Confirme sua senha");
         // Se já existe um profile "pendente" com este CPF (criado por venda
         // do lojista ou webhook antes do cliente se cadastrar), REAPROVEITA
         // essa conta em vez de criar uma nova — assim o cliente já entra
@@ -467,7 +488,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
       if (mode === "signup" && isUsuarioJaCadastrado(err)) {
         switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
       } else if (mode === "login" && isCredenciaisInvalidas(err)) {
-        setAviso("CPF ou senha incorretos. Se a loja cadastrou você, sua senha inicial é o CPF com apenas números.");
+        setAviso("CPF ou senha incorretos. Confira os dois campos. Se a loja cadastrou você, sua senha inicial é o CPF com apenas números.");
       } else {
         toast.error(traduzirErroAuth(err));
       }
@@ -498,13 +519,14 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
               <Label className="text-slate-300 text-xs font-medium">CPF <span className="text-rose-400">*</span></Label>
               <Input
                 value={cpf}
-                onChange={(e) => setCpf(formatCPF(e.target.value))}
+                onChange={(e) => { setCpf(formatCPF(e.target.value)); if (erroCpf) setErroCpf(null); }}
                 placeholder="000.000.000-00"
                 inputMode="numeric"
                 autoComplete="username"
                 required
-                className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
               />
+              {erroCpf && <p className="text-[11px] text-rose-400">{erroCpf}</p>}
             </div>
             {mode === "signup" && (
               <>
@@ -512,22 +534,24 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                   <Label className="text-slate-300 text-xs font-medium">Nome <span className="text-rose-400">*</span></Label>
                   <Input
                     value={nome}
-                    onChange={(e) => setNome(e.target.value)}
+                    onChange={(e) => { setNome(e.target.value); if (erroNome) setErroNome(null); }}
                     placeholder="Como quer ser chamado"
                     required
-                    className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                   />
+                  {erroNome && <p className="text-[11px] text-rose-400">{erroNome}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-slate-300 text-xs font-medium">Telefone <span className="text-rose-400">*</span></Label>
                   <Input
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => { setPhone(e.target.value); if (erroPhone) setErroPhone(null); }}
                     placeholder="(11) 98765-4321"
                     inputMode="tel"
                     required
-                    className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                   />
+                  {erroPhone && <p className="text-[11px] text-rose-400">{erroPhone}</p>}
                 </div>
               </>
             )}
@@ -535,26 +559,27 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
               <Label className="text-slate-300 text-xs font-medium">Senha <span className="text-rose-400">*</span></Label>
               <PasswordInput
                 value={senha}
-                onChange={(e) => setSenha(e.target.value)}
+                onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }}
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
-                className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
               />
+              {erroSenha && <p className="text-[11px] text-rose-400">{erroSenha}</p>}
             </div>
             {mode === "signup" && (
               <div className="space-y-1.5">
                 <Label className="text-slate-300 text-xs font-medium">Confirmar senha <span className="text-rose-400">*</span></Label>
                 <PasswordInput
                   value={senha2}
-                  onChange={(e) => setSenha2(e.target.value)}
+                  onChange={(e) => { setSenha2(e.target.value); if (erroSenha2) setErroSenha2(null); }}
                   placeholder="Repita a senha"
                   autoComplete="new-password"
                   required
-                  className="bg-[#0a0a1a]/80 border-indigo-500/20 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 focus-visible:border-indigo-400/50 h-11 transition-colors"
+                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                 />
-                {senha2.length > 0 && senha !== senha2 && (
-                  <p className="mt-1 text-[11px] text-rose-400">As senhas não coincidem</p>
+                {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
+                  <p className="mt-1 text-[11px] text-rose-400">{erroSenha2 ?? "As senhas não coincidem"}</p>
                 )}
               </div>
             )}
