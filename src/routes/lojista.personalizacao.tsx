@@ -30,6 +30,27 @@ const DEFAULT_COR2 = "#f97316";
 const DEFAULT_FIT: "cover" | "contain" = "cover";
 const DEFAULT_POS = 50;
 const DEFAULT_ZOOM = 100;
+const DEFAULT_BG_MODE: "dark" | "light" | "custom" = "dark";
+const DEFAULT_BG1 = "#0B1020";
+const DEFAULT_BG2 = "#1e1b4b";
+
+const BG_PRESETS: Array<{ label: string; mode: "dark" | "light" | "custom"; c1: string; c2: string }> = [
+  { label: "Midnight (padrão)", mode: "dark", c1: "#0B1020", c2: "#1e1b4b" },
+  { label: "Claro suave", mode: "light", c1: "#f8fafc", c2: "#e2e8f0" },
+  { label: "Grafite", mode: "custom", c1: "#111827", c2: "#1f2937" },
+  { label: "Sépia", mode: "custom", c1: "#f5efe6", c2: "#e8dcc4" },
+];
+
+function hexLuminance(hex: string): number {
+  const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!m) return 0;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
 
 /** Extrai o path interno do bucket "store-assets" a partir de uma URL assinada.
  *  Retorna null quando a URL não pertence ao bucket (ex.: banner sugerido do Unsplash). */
@@ -57,6 +78,9 @@ function PersonalizacaoPage() {
   const [mobilePosX, setMobilePosX] = useState(DEFAULT_POS);
   const [mobilePosY, setMobilePosY] = useState(DEFAULT_POS);
   const [mobileZoom, setMobileZoom] = useState(DEFAULT_ZOOM);
+  const [bgMode, setBgMode] = useState<"dark" | "light" | "custom">(DEFAULT_BG_MODE);
+  const [bgColor1, setBgColor1] = useState<string>(DEFAULT_BG1);
+  const [bgColor2, setBgColor2] = useState<string>(DEFAULT_BG2);
 
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
@@ -80,6 +104,9 @@ function PersonalizacaoPage() {
       setMobilePosX(loja.banner_mobile_position_x ?? DEFAULT_POS);
       setMobilePosY(loja.banner_mobile_position_y ?? DEFAULT_POS);
       setMobileZoom(loja.banner_mobile_zoom ?? DEFAULT_ZOOM);
+      setBgMode(((loja as { bg_mode?: string }).bg_mode as "dark" | "light" | "custom") ?? DEFAULT_BG_MODE);
+      setBgColor1((loja as { bg_color_1?: string | null }).bg_color_1 ?? DEFAULT_BG1);
+      setBgColor2((loja as { bg_color_2?: string | null }).bg_color_2 ?? DEFAULT_BG2);
     }
   }, [loja]);
 
@@ -110,6 +137,9 @@ function PersonalizacaoPage() {
           banner_mobile_position_x: mobilePosX,
           banner_mobile_position_y: mobilePosY,
           banner_mobile_zoom: mobileZoom,
+          bg_mode: bgMode,
+          bg_color_1: bgMode === "custom" ? bgColor1 : null,
+          bg_color_2: bgMode === "custom" ? bgColor2 : null,
         },
       });
 
@@ -142,8 +172,23 @@ function PersonalizacaoPage() {
     setMobilePosX(DEFAULT_POS);
     setMobilePosY(DEFAULT_POS);
     setMobileZoom(DEFAULT_ZOOM);
+    setBgMode(DEFAULT_BG_MODE);
+    setBgColor1(DEFAULT_BG1);
+    setBgColor2(DEFAULT_BG2);
     toast.info("Valores restaurados. Clique em Salvar para aplicar.");
   };
+
+  // Aviso simples de contraste quando o cliente escolhe cores customizadas
+  const contrastWarning = (() => {
+    if (bgMode !== "custom") return null;
+    const lum = hexLuminance(bgColor1);
+    const textLum = lum > 0.6 ? 0.05 : 0.95; // texto que a página vai usar
+    const ratio = (Math.max(lum, textLum) + 0.05) / (Math.min(lum, textLum) + 0.05);
+    if (ratio < 4.5) {
+      return "Contraste baixo entre fundo e texto. Escolha uma cor mais escura ou mais clara para melhorar a leitura.";
+    }
+    return null;
+  })();
 
   const ResetButton = ({ onReset, disabled }: { onReset: () => void; disabled?: boolean }) => (
     <Button
@@ -355,6 +400,87 @@ function PersonalizacaoPage() {
             </CardContent>
           </Card>
 
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#0F172A] via-[#334155] to-[#F8FAFC]" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base text-[#0F172A]">Fundo da página do cliente</CardTitle>
+              <ResetButton
+                onReset={() => { setBgMode(DEFAULT_BG_MODE); setBgColor1(DEFAULT_BG1); setBgColor2(DEFAULT_BG2); }}
+              />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-xs">Modo do fundo</Label>
+                <RadioGroup
+                  value={bgMode}
+                  onValueChange={(v) => setBgMode(v as "dark" | "light" | "custom")}
+                  className="mt-2 grid grid-cols-3 gap-2"
+                >
+                  {[
+                    { v: "dark", label: "Escuro", desc: "Midnight Indigo (padrão)" },
+                    { v: "light", label: "Claro", desc: "Fundo branco suave" },
+                    { v: "custom", label: "Personalizado", desc: "Suas 2 cores" },
+                  ].map((opt) => (
+                    <label
+                      key={opt.v}
+                      className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
+                        bgMode === opt.v ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value={opt.v} />
+                        <span className="font-semibold text-[#0F172A]">{opt.label}</span>
+                      </div>
+                      <span className="mt-1 text-[#64748B]">{opt.desc}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+
+              {bgMode === "custom" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Cor de fundo principal</Label>
+                    <div className="flex gap-2">
+                      <Input type="color" value={bgColor1} onChange={(e) => setBgColor1(e.target.value)} className="w-16 h-10 p-1" />
+                      <Input value={bgColor1} onChange={(e) => setBgColor1(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Cor de fundo secundária</Label>
+                    <div className="flex gap-2">
+                      <Input type="color" value={bgColor2} onChange={(e) => setBgColor2(e.target.value)} className="w-16 h-10 p-1" />
+                      <Input value={bgColor2} onChange={(e) => setBgColor2(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div className="text-xs text-[#64748B] mb-2">Presets</div>
+                <div className="flex flex-wrap gap-2">
+                  {BG_PRESETS.map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => { setBgMode(p.mode); setBgColor1(p.c1); setBgColor2(p.c2); }}
+                      className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-xs hover:border-[#2563EB]"
+                    >
+                      <span className="h-4 w-8 rounded" style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})` }} />
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {contrastWarning && (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
+                  {contrastWarning}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg" className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200">
               {salvar.isPending ? "Salvando..." : "Salvar personalização"}
@@ -388,6 +514,9 @@ function PersonalizacaoPage() {
             mobilePositionY={mobilePosY}
             mobileZoom={mobileZoom}
             showSafeArea
+            bgMode={bgMode}
+            bgColor1={bgColor1}
+            bgColor2={bgColor2}
           />
           <p className="mt-2 text-[11px] text-[#64748B]">
             Atualiza em tempo real. A área tracejada mostra a "zona segura" — mantenha logo e textos dentro dela para não cortar em celulares pequenos.

@@ -57,12 +57,18 @@ function ClientePage() {
   const { slug } = Route.useParams();
   const { data: loja, isLoading } = useQuery(storeBySlugQuery(slug));
 
+  const bg = useMemo(() => resolveBg(loja), [loja]);
   const style = useMemo(
     () =>
       loja
-        ? ({ ["--brand-primary" as string]: loja.brand_primary, ["--brand-secondary" as string]: loja.brand_secondary } as React.CSSProperties)
+        ? ({
+            ["--brand-primary" as string]: loja.brand_primary,
+            ["--brand-secondary" as string]: loja.brand_secondary,
+            backgroundColor: bg.base,
+            color: bg.text,
+          } as React.CSSProperties)
         : {},
-    [loja],
+    [loja, bg],
   );
 
   // Ativa o tema Midnight Indigo em <html> enquanto a página estiver montada,
@@ -70,12 +76,16 @@ function ClientePage() {
   useEffect(() => {
     const root = document.documentElement;
     root.classList.add("qsf-midnight");
-    return () => { root.classList.remove("qsf-midnight"); };
-  }, []);
+    if (bg.isLight) root.classList.add("qsf-light");
+    return () => {
+      root.classList.remove("qsf-midnight");
+      root.classList.remove("qsf-light");
+    };
+  }, [bg.isLight]);
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-[#0a0a1a]">
+      <div className="min-h-dvh flex items-center justify-center" style={{ backgroundColor: bg.base }}>
         <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
           <div className="h-8 w-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
           Carregando...
@@ -86,10 +96,10 @@ function ClientePage() {
 
   if (!loja) {
     return (
-      <div className="min-h-dvh flex items-center justify-center p-6 text-center bg-[#0a0a1a]">
+      <div className="min-h-dvh flex items-center justify-center p-6 text-center" style={{ backgroundColor: bg.base }}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Loja não encontrada</h1>
-          <p className="text-sm text-slate-400 mt-2">Verifique o endereço com o lojista.</p>
+          <h1 className="text-2xl font-bold" style={{ color: bg.text }}>Loja não encontrada</h1>
+          <p className="text-sm opacity-70 mt-2" style={{ color: bg.text }}>Verifique o endereço com o lojista.</p>
         </div>
       </div>
     );
@@ -98,29 +108,63 @@ function ClientePage() {
   return (
     <div
       style={style}
-      className="min-h-dvh bg-[#0a0a1a] text-slate-200 relative overflow-hidden"
+      className="min-h-dvh relative overflow-hidden"
     >
       {/* Aura de fundo derivada das cores da marca — bem sutil, fica atrás de tudo */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[520px]"
-        style={{ background: `radial-gradient(ellipse at top, color-mix(in oklab, ${loja.brand_primary} 22%, transparent), transparent 60%)` }}
+        style={{ background: `radial-gradient(ellipse at top, color-mix(in oklab, ${bg.accent} 22%, transparent), transparent 60%)` }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl opacity-40"
-        style={{ backgroundColor: loja.brand_primary }}
+        className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl"
+        style={{ backgroundColor: loja.brand_primary, opacity: bg.isLight ? 0.15 : 0.4 }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full blur-3xl opacity-30"
-        style={{ backgroundColor: loja.brand_secondary }}
+        className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full blur-3xl"
+        style={{ backgroundColor: loja.brand_secondary, opacity: bg.isLight ? 0.12 : 0.3 }}
       />
       <div className="relative">
         <ClienteFlow loja={loja} />
       </div>
     </div>
   );
+}
+
+/** Deriva o fundo da página pública a partir das preferências da loja. */
+function resolveBg(loja: Loja | null | undefined): {
+  base: string;
+  accent: string;
+  text: string;
+  isLight: boolean;
+} {
+  const DARK = { base: "#0a0a1a", text: "#e2e8f0" };
+  const LIGHT = { base: "#f8fafc", text: "#0f172a" };
+  if (!loja) return { ...DARK, accent: "#6366f1", isLight: false };
+  const mode = (loja.bg_mode as "dark" | "light" | "custom" | null) ?? "dark";
+  if (mode === "light") return { ...LIGHT, accent: loja.brand_primary, isLight: true };
+  if (mode === "custom") {
+    const base = loja.bg_color_1 || DARK.base;
+    const accent = loja.bg_color_2 || loja.brand_primary;
+    const isLight = isLightColor(base);
+    return { base, accent, text: isLight ? LIGHT.text : DARK.text, isLight };
+  }
+  return { ...DARK, accent: loja.brand_primary, isLight: false };
+}
+
+function isLightColor(hex: string): boolean {
+  const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!m) return false;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  // Luminância relativa aproximada
+  const l = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return l > 0.6;
 }
 
 function ClienteFlow({ loja }: { loja: Loja }) {

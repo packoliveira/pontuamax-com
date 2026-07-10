@@ -265,6 +265,29 @@
   background-clip: padding-box;
 }
 
+/* Variante Light — quando o lojista escolhe fundo claro (bg_mode = "light"
+ * ou "custom" com cor clara). Ajusta os tokens shadcn e sobrescreve as
+ * classes utilitárias `text-slate-*` mais usadas para manter contraste. */
+.qsf-midnight.qsf-light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  color-scheme: light;
+}
+.qsf-light :where(.text-slate-100, .text-slate-200) { color: #0f172a; }
+.qsf-light :where(.text-slate-300, .text-slate-400) { color: #475569; }
+.qsf-light :where(.text-slate-500)                   { color: #64748b; }
+.qsf-light ::selection { background: rgba(79, 70, 229, 0.22); color: #0f172a; }
+
 @keyframes qsf-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
