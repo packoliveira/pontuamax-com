@@ -28,6 +28,7 @@ import { Route as LojistaSorteiosRouteImport } from './routes/lojista.sorteios'
 import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
 import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
 import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
+import { Route as LojistaPersonalizacaoRouteImport } from './routes/lojista.personalizacao'
 import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
 import { Route as LojistaNpsRouteImport } from './routes/lojista.nps'
 import { Route as LojistaNotasRouteImport } from './routes/lojista.notas'
@@ -148,6 +149,11 @@ const LojistaPromocoesRoute = LojistaPromocoesRouteImport.update({
 const LojistaProdutosRoute = LojistaProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaPersonalizacaoRoute = LojistaPersonalizacaoRouteImport.update({
+  id: '/personalizacao',
+  path: '/personalizacao',
   getParentRoute: () => LojistaRoute,
 } as any)
 const LojistaOnboardingRoute = LojistaOnboardingRouteImport.update({
@@ -312,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/nps': typeof LojistaNpsRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/personalizacao': typeof LojistaPersonalizacaoRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/nps': typeof LojistaNpsRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/personalizacao': typeof LojistaPersonalizacaoRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/lojista/notas': typeof LojistaNotasRoute
   '/lojista/nps': typeof LojistaNpsRoute
   '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/personalizacao': typeof LojistaPersonalizacaoRoute
   '/lojista/produtos': typeof LojistaProdutosRoute
   '/lojista/promocoes': typeof LojistaPromocoesRoute
   '/lojista/resgates': typeof LojistaResgatesRoute
@@ -453,6 +462,7 @@ export interface FileRouteTypes {
     | '/lojista/notas'
     | '/lojista/nps'
     | '/lojista/onboarding'
+    | '/lojista/personalizacao'
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/lojista/notas'
     | '/lojista/nps'
     | '/lojista/onboarding'
+    | '/lojista/personalizacao'
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
@@ -544,6 +555,7 @@ export interface FileRouteTypes {
     | '/lojista/notas'
     | '/lojista/nps'
     | '/lojista/onboarding'
+    | '/lojista/personalizacao'
     | '/lojista/produtos'
     | '/lojista/promocoes'
     | '/lojista/resgates'
@@ -720,6 +732,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos'
       fullPath: '/lojista/produtos'
       preLoaderRoute: typeof LojistaProdutosRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/personalizacao': {
+      id: '/lojista/personalizacao'
+      path: '/personalizacao'
+      fullPath: '/lojista/personalizacao'
+      preLoaderRoute: typeof LojistaPersonalizacaoRouteImport
       parentRoute: typeof LojistaRoute
     }
     '/lojista/onboarding': {
@@ -955,6 +974,7 @@ interface LojistaRouteChildren {
   LojistaNotasRoute: typeof LojistaNotasRoute
   LojistaNpsRoute: typeof LojistaNpsRoute
   LojistaOnboardingRoute: typeof LojistaOnboardingRoute
+  LojistaPersonalizacaoRoute: typeof LojistaPersonalizacaoRoute
   LojistaProdutosRoute: typeof LojistaProdutosRoute
   LojistaPromocoesRoute: typeof LojistaPromocoesRoute
   LojistaResgatesRoute: typeof LojistaResgatesRoute
@@ -976,6 +996,7 @@ const LojistaRouteChildren: LojistaRouteChildren = {
   LojistaNotasRoute: LojistaNotasRoute,
   LojistaNpsRoute: LojistaNpsRoute,
   LojistaOnboardingRoute: LojistaOnboardingRoute,
+  LojistaPersonalizacaoRoute: LojistaPersonalizacaoRoute,
   LojistaProdutosRoute: LojistaProdutosRoute,
   LojistaPromocoesRoute: LojistaPromocoesRoute,
   LojistaResgatesRoute: LojistaResgatesRoute,
