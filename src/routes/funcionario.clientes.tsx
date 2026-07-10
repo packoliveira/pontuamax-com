@@ -225,8 +225,8 @@ function FuncClientes() {
                         <Cake className="h-3 w-3" />
                         {canEdit && isEditing ? (
                           <>
-                            <Input type="date" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} className="h-7 w-40 rounded-lg border-[#E5E7EB]" />
-                            <Button size="sm" className="h-7 rounded-lg bg-[#2563EB] px-2 text-white hover:bg-[#1D4ED8]" onClick={() => salvarBirth.mutate({ user_id: c.user_id, birthdate: editing.value || null })}>Salvar</Button>
+                            <Input type="date" value={editing?.value ?? ""} onChange={(e) => setEditing({ userId: c.user_id, value: e.target.value })} className="h-7 w-40 rounded-lg border-[#E5E7EB]" />
+                            <Button size="sm" className="h-7 rounded-lg bg-[#2563EB] px-2 text-white hover:bg-[#1D4ED8]" onClick={() => salvarBirth.mutate({ user_id: c.user_id, birthdate: editing?.value || null })}>Salvar</Button>
                             <Button size="sm" variant="ghost" className="h-7 rounded-lg px-2" onClick={() => setEditing(null)}>Cancelar</Button>
                           </>
                         ) : (
