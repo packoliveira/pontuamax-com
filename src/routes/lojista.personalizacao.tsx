@@ -191,10 +191,10 @@ function PersonalizacaoPage() {
                   storeId={loja.id}
                   kind="banner-mobile"
                   label="Banner (celular)"
-                  hint="Recomendado: 1080 × 720 px (vertical). JPG ou PNG até 5 MB."
+                  hint="Recomendado: 1200 × 600 px (proporção 2:1, horizontal). JPG ou PNG até 5 MB. Deixe o conteúdo importante no centro."
                   value={bannerMobile}
                   onChange={setBannerMobile}
-                  aspect="banner"
+                  aspect="banner-mobile"
                 />
                 {bannerMobile && <ResetButton onReset={() => setBannerMobile("")} />}
               </div>
