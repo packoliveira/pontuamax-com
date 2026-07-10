@@ -260,10 +260,37 @@ function CreateOrEditDialog({
   roles: { key: string; label: string }[];
 }) {
   const qc = useQueryClient();
+  const { data: catalog } = useQuery(rolesAndPermsQuery());
+  const permissions = (catalog?.permissions ?? []) as TeamPermission[];
+  const rolePermissions = catalog?.rolePermissions ?? [];
   const [form, setForm] = useState({
     nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "",
   });
+  // permissões efetivas escolhidas no cadastro (permission_key -> granted)
+  const [permState, setPermState] = useState<Map<string, boolean>>(new Map());
   const isEdit = !!employee;
+
+  const roleDefault = useMemo(() => new Set(
+    rolePermissions.filter((rp) => rp.role_key === form.role_key).map((rp) => rp.permission_key)
+  ), [rolePermissions, form.role_key]);
+
+  // Ao trocar de cargo (ou abrir), reinicializa checklist com o padrão do cargo
+  useEffect(() => {
+    if (!open || isEdit) return;
+    const m = new Map<string, boolean>();
+    for (const p of permissions) m.set(p.key, roleDefault.has(p.key));
+    setPermState(m);
+  }, [open, isEdit, form.role_key, permissions, roleDefault]);
+
+  const groupedPerms = useMemo(() => {
+    const g = new Map<string, TeamPermission[]>();
+    for (const p of permissions) {
+      if (!g.has(p.category)) g.set(p.category, []);
+      g.get(p.category)!.push(p);
+    }
+    return Array.from(g.entries());
+  }, [permissions]);
+
   useEffect(() => {
     if (!open) return;
     if (employee) {
@@ -281,10 +308,20 @@ function CreateOrEditDialog({
   }, [open, employee]);
 
   const mCreate = useMutation({
-    mutationFn: () => createEmployee({ data: {
-      nome: form.nome, cpf: form.cpf || null, email: form.email,
-      phone: form.phone || null, role_key: form.role_key, password: form.password,
-    } }),
+    mutationFn: () => {
+      // apenas overrides = diferenças em relação ao padrão do cargo
+      const overrides: { permission_key: string; granted: boolean }[] = [];
+      for (const p of permissions) {
+        const chosen = permState.get(p.key) === true;
+        const def = roleDefault.has(p.key);
+        if (chosen !== def) overrides.push({ permission_key: p.key, granted: chosen });
+      }
+      return createEmployee({ data: {
+        nome: form.nome, cpf: form.cpf || null, email: form.email,
+        phone: form.phone || null, role_key: form.role_key, password: form.password,
+        overrides,
+      } });
+    },
     onSuccess: () => {
       toast.success("Funcionário cadastrado.");
       qc.invalidateQueries({ queryKey: ["team"] });
@@ -312,6 +349,7 @@ function CreateOrEditDialog({
       if (!v) setForm({ nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "" });
     }}>
       <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar funcionário" : "Cadastrar funcionário"}</DialogTitle>
           <DialogDescription>
