@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RotateCcw } from "lucide-react";
@@ -25,6 +27,9 @@ export const Route = createFileRoute("/lojista/personalizacao")({
 
 const DEFAULT_COR1 = "#7c3aed";
 const DEFAULT_COR2 = "#f97316";
+const DEFAULT_FIT: "cover" | "contain" = "cover";
+const DEFAULT_POS = 50;
+const DEFAULT_ZOOM = 100;
 
 /** Extrai o path interno do bucket "store-assets" a partir de uma URL assinada.
  *  Retorna null quando a URL não pertence ao bucket (ex.: banner sugerido do Unsplash). */
@@ -48,6 +53,10 @@ function PersonalizacaoPage() {
   const [bannerMobile, setBannerMobile] = useState("");
   const [cor1, setCor1] = useState(DEFAULT_COR1);
   const [cor2, setCor2] = useState(DEFAULT_COR2);
+  const [mobileFit, setMobileFit] = useState<"cover" | "contain">(DEFAULT_FIT);
+  const [mobilePosX, setMobilePosX] = useState(DEFAULT_POS);
+  const [mobilePosY, setMobilePosY] = useState(DEFAULT_POS);
+  const [mobileZoom, setMobileZoom] = useState(DEFAULT_ZOOM);
 
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
@@ -67,6 +76,10 @@ function PersonalizacaoPage() {
       setInitial({ logo: l, banner: b, bannerMobile: bm });
       setCor1(loja.brand_primary);
       setCor2(loja.brand_secondary);
+      setMobileFit((loja.banner_mobile_fit as "cover" | "contain") ?? DEFAULT_FIT);
+      setMobilePosX(loja.banner_mobile_position_x ?? DEFAULT_POS);
+      setMobilePosY(loja.banner_mobile_position_y ?? DEFAULT_POS);
+      setMobileZoom(loja.banner_mobile_zoom ?? DEFAULT_ZOOM);
     }
   }, [loja]);
 
@@ -93,6 +106,10 @@ function PersonalizacaoPage() {
           banner_url_mobile: bannerMobile || null,
           brand_primary: cor1,
           brand_secondary: cor2,
+          banner_mobile_fit: mobileFit,
+          banner_mobile_position_x: mobilePosX,
+          banner_mobile_position_y: mobilePosY,
+          banner_mobile_zoom: mobileZoom,
         },
       });
 
@@ -121,6 +138,10 @@ function PersonalizacaoPage() {
     setBannerMobile("");
     setCor1(DEFAULT_COR1);
     setCor2(DEFAULT_COR2);
+    setMobileFit(DEFAULT_FIT);
+    setMobilePosX(DEFAULT_POS);
+    setMobilePosY(DEFAULT_POS);
+    setMobileZoom(DEFAULT_ZOOM);
     toast.info("Valores restaurados. Clique em Salvar para aplicar.");
   };
 
@@ -198,6 +219,105 @@ function PersonalizacaoPage() {
                 />
                 {bannerMobile && <ResetButton onReset={() => setBannerMobile("")} />}
               </div>
+              {bannerMobile && (
+                <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold text-[#0F172A]">Encaixe do banner celular</div>
+                      <div className="text-xs text-[#64748B]">Como sua imagem se encaixa na tela do celular.</div>
+                    </div>
+                    <ResetButton
+                      onReset={() => {
+                        setMobileFit(DEFAULT_FIT);
+                        setMobilePosX(DEFAULT_POS);
+                        setMobilePosY(DEFAULT_POS);
+                        setMobileZoom(DEFAULT_ZOOM);
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Modo de encaixe</Label>
+                    <RadioGroup
+                      value={mobileFit}
+                      onValueChange={(v) => setMobileFit(v as "cover" | "contain")}
+                      className="mt-2 grid grid-cols-2 gap-2"
+                    >
+                      <label
+                        className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
+                          mobileFit === "cover" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem value="cover" />
+                          <span className="font-semibold text-[#0F172A]">Preencher</span>
+                        </div>
+                        <span className="mt-1 text-[#64748B]">Ocupa todo o espaço, pode cortar bordas.</span>
+                      </label>
+                      <label
+                        className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
+                          mobileFit === "contain" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem value="contain" />
+                          <span className="font-semibold text-[#0F172A]">Mostrar tudo</span>
+                        </div>
+                        <span className="mt-1 text-[#64748B]">Mostra a imagem inteira, com margens.</span>
+                      </label>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Posição horizontal</Label>
+                        <span className="text-xs text-[#64748B]">{mobilePosX}%</span>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={[mobilePosX]}
+                        onValueChange={(v) => setMobilePosX(v[0] ?? 50)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Posição vertical</Label>
+                        <span className="text-xs text-[#64748B]">{mobilePosY}%</span>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={[mobilePosY]}
+                        onValueChange={(v) => setMobilePosY(v[0] ?? 50)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Zoom</Label>
+                        <span className="text-xs text-[#64748B]">{mobileZoom}%</span>
+                      </div>
+                      <Slider
+                        min={100}
+                        max={300}
+                        step={5}
+                        value={[mobileZoom]}
+                        onValueChange={(v) => setMobileZoom(v[0] ?? 100)}
+                        className="mt-2"
+                        disabled={mobileFit === "contain"}
+                      />
+                      {mobileFit === "contain" && (
+                        <p className="mt-1 text-[11px] text-[#94A3B8]">Zoom só se aplica no modo Preencher.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               <SuggestedBanners onPick={(url) => { setBanner(url); setBannerMobile(url); }} />
               <p className="text-xs text-[#64748B]">
                 Ao clicar em Salvar, os arquivos removidos ou substituídos são apagados do armazenamento.
@@ -263,6 +383,10 @@ function PersonalizacaoPage() {
             cor1={cor1}
             cor2={cor2}
             modalidade={loja.modalidade as Modalidade}
+            mobileFit={mobileFit}
+            mobilePositionX={mobilePosX}
+            mobilePositionY={mobilePosY}
+            mobileZoom={mobileZoom}
           />
           <p className="mt-2 text-[11px] text-[#64748B]">
             Atualiza em tempo real conforme você ajusta cores, banner e logo.
