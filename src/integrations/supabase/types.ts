@@ -860,6 +860,10 @@ export type Database = {
         Row: {
           activated_at: string | null
           admin_notes: string | null
+          banner_mobile_fit: string
+          banner_mobile_position_x: number
+          banner_mobile_position_y: number
+          banner_mobile_zoom: number
           banner_url: string | null
           banner_url_mobile: string | null
           bonus_indicado: number
@@ -920,6 +924,10 @@ export type Database = {
         Insert: {
           activated_at?: string | null
           admin_notes?: string | null
+          banner_mobile_fit?: string
+          banner_mobile_position_x?: number
+          banner_mobile_position_y?: number
+          banner_mobile_zoom?: number
           banner_url?: string | null
           banner_url_mobile?: string | null
           bonus_indicado?: number
@@ -980,6 +988,10 @@ export type Database = {
         Update: {
           activated_at?: string | null
           admin_notes?: string | null
+          banner_mobile_fit?: string
+          banner_mobile_position_x?: number
+          banner_mobile_position_y?: number
+          banner_mobile_zoom?: number
           banner_url?: string | null
           banner_url_mobile?: string | null
           bonus_indicado?: number
