@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RotateCcw } from "lucide-react";
+import { Download, Upload, Smartphone, Monitor, Wallet, Coins, Gift, Sparkles } from "lucide-react";
 import {
   AssetUploader,
   ColorPresets,
@@ -42,6 +43,7 @@ const DEFAULT_TEXT_ON_DARK = "#ffffff";
 const DEFAULT_KICKER_TEXT = "Fidelidade";
 const DEFAULT_TITLE_SIZE: "sm" | "md" | "lg" | "xl" | "2xl" = "md";
 const DEFAULT_TITLE_WEIGHT: "normal" | "semibold" | "bold" | "black" = "bold";
+const DEFAULT_KICKER_SIZE: "xs" | "sm" | "md" = "sm";
 
 const BG_PRESETS: Array<{ label: string; mode: "dark" | "light" | "custom"; c1: string; c2: string }> = [
   { label: "Midnight (padrão)", mode: "dark", c1: "#0B1020", c2: "#1e1b4b" },
@@ -59,6 +61,27 @@ function hexLuminance(hex: string): number {
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+/** Relative luminance para WCAG (0..1). */
+function relLuminance(hex: string): number {
+  const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!m) return 0;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const toLin = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const r = toLin(parseInt(h.slice(0, 2), 16));
+  const g = toLin(parseInt(h.slice(2, 4), 16));
+  const b = toLin(parseInt(h.slice(4, 6), 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrastRatio(a: string, b: string): number {
+  const la = relLuminance(a);
+  const lb = relLuminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
 /** Extrai o path interno do bucket "store-assets" a partir de uma URL assinada.
@@ -102,6 +125,8 @@ function PersonalizacaoPage() {
   const [kickerShow, setKickerShow] = useState(true);
   const [titleSize, setTitleSize] = useState<"sm" | "md" | "lg" | "xl" | "2xl">(DEFAULT_TITLE_SIZE);
   const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(DEFAULT_TITLE_WEIGHT);
+  const [kickerSize, setKickerSize] = useState<"xs" | "sm" | "md">(DEFAULT_KICKER_SIZE);
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
 
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
@@ -139,6 +164,7 @@ function PersonalizacaoPage() {
       setKickerShow((raw.header_kicker_show as boolean) ?? true);
       setTitleSize(((raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
       setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
+      setKickerSize(((raw.header_kicker_size as "xs" | "sm" | "md") ?? DEFAULT_KICKER_SIZE));
     }
   }, [loja]);
 
@@ -182,6 +208,7 @@ function PersonalizacaoPage() {
           header_title_weight: titleWeight,
           header_kicker_text: kickerText,
           header_kicker_show: kickerShow,
+          header_kicker_size: kickerSize,
         },
       });
 
@@ -227,6 +254,7 @@ function PersonalizacaoPage() {
     setKickerShow(true);
     setTitleSize(DEFAULT_TITLE_SIZE);
     setTitleWeight(DEFAULT_TITLE_WEIGHT);
+    setKickerSize(DEFAULT_KICKER_SIZE);
     toast.info("Valores restaurados. Clique em Salvar para aplicar.");
   };
 
