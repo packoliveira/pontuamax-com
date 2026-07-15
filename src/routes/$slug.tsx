@@ -281,7 +281,7 @@ function BannerHero({ loja }: { loja: Loja }) {
     <div className="relative">
       <div className="max-w-2xl mx-auto px-4 pt-4">
         <div
-          className="relative overflow-hidden rounded-2xl border shadow-lg animate-in fade-in zoom-in-95 duration-500"
+          className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border shadow-lg animate-in fade-in zoom-in-95 duration-500"
           style={{
             borderColor: `color-mix(in oklab, ${loja.brand_primary} 40%, transparent)`,
             boxShadow: `0 10px 40px -12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
@@ -557,11 +557,11 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
       <div className="relative group">
         <div
           aria-hidden
-          className="absolute -inset-0.5 rounded-2xl opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
+          className="absolute -inset-0.5 rounded-[2rem] opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
           style={{ background: `linear-gradient(135deg, color-mix(in oklab, ${loja.brand_primary} 40%, transparent), color-mix(in oklab, ${loja.brand_secondary} 20%, transparent), color-mix(in oklab, ${loja.brand_primary} 40%, transparent))` }}
         />
         <Card
-          className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl"
+          className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl rounded-[2rem] border"
           style={{ borderColor: `color-mix(in oklab, ${loja.brand_primary} 25%, transparent)` }}
         >
           <CardHeader className="pb-4">
