@@ -86,14 +86,22 @@ function Icon({ kind, size, color }: { kind: IconKind; size: number; color: stri
 export function RewardRain({
   colors,
   count,
+  contained = false,
+  opacity: opacityOverride,
 }: {
   colors?: string[];
   count?: number;
+  /** Render as absolute inset-0 inside the nearest positioned parent (for previews/cards).
+   *  Default false → fixed viewport overlay (default behavior on the login page). */
+  contained?: boolean;
+  /** Multiplier applied on top of the per-particle opacity (0.1–1). */
+  opacity?: number;
 }) {
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
   const palette = colors && colors.length > 0 ? colors : DEFAULT_COLORS;
   const target = count ?? (mobile ? 10 : 22);
+  const opMul = Math.max(0.1, Math.min(1, opacityOverride ?? 1));
 
   const particles = useMemo<Particle[]>(() => {
     if (reduced) return [];
@@ -108,9 +116,9 @@ export function RewardRain({
       drift: rand(-8, 8),
       rotate: rand(-45, 45),
       color: pick(palette),
-      opacity: rand(0.55, 0.9),
+      opacity: rand(0.55, 0.9) * opMul,
     }));
-  }, [reduced, target, mobile, palette]);
+  }, [reduced, target, mobile, palette, opMul]);
 
   if (reduced) return null;
 
@@ -119,7 +127,7 @@ export function RewardRain({
       aria-hidden
       className="reward-rain-root"
       style={{
-        position: "fixed",
+        position: contained ? "absolute" : "fixed",
         inset: 0,
         overflow: "hidden",
         pointerEvents: "none",
