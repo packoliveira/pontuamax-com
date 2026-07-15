@@ -975,6 +975,83 @@ function PersonalizacaoPage() {
                   </span>
                 </div>
               </div>
+
+              {rewardRain && (
+                <div className="space-y-4 rounded-xl border border-[#E5E7EB] bg-white p-4">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-[#0F172A]">Cores dos ícones</Label>
+                      <button
+                        type="button"
+                        onClick={() => setRainColors(DEFAULT_RAIN_COLORS)}
+                        className="text-[11px] text-[#2563EB] hover:underline"
+                      >
+                        Restaurar padrão
+                      </button>
+                    </div>
+                    <p className="mt-1 text-[11px] text-[#64748B]">
+                      Adicione até 8 cores. Os ícones caem aleatoriamente nessas cores.
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      {rainColors.map((c, i) => (
+                        <div key={i} className="relative">
+                          <input
+                            type="color"
+                            value={c}
+                            onChange={(e) => {
+                              const next = [...rainColors];
+                              next[i] = e.target.value;
+                              setRainColors(next);
+                            }}
+                            className="h-9 w-9 cursor-pointer rounded-lg border border-[#E5E7EB] bg-white p-0.5"
+                            aria-label={`Cor ${i + 1}`}
+                          />
+                          {rainColors.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => setRainColors(rainColors.filter((_, j) => j !== i))}
+                              className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#0F172A] text-[10px] leading-none text-white shadow"
+                              aria-label="Remover cor"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {rainColors.length < 8 && (
+                        <button
+                          type="button"
+                          onClick={() => setRainColors([...rainColors, "#FFFFFF"])}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-[#CBD5E1] text-lg text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]"
+                          aria-label="Adicionar cor"
+                        >
+                          +
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-[#0F172A]">Opacidade dos ícones</Label>
+                      <span className="text-[11px] font-medium tabular-nums text-[#64748B]">
+                        {Math.round(rainOpacity * 100)}%
+                      </span>
+                    </div>
+                    <Slider
+                      className="mt-2"
+                      min={10}
+                      max={100}
+                      step={5}
+                      value={[Math.round(rainOpacity * 100)]}
+                      onValueChange={(v) => setRainOpacity((v[0] ?? 75) / 100)}
+                    />
+                    <p className="mt-1 text-[11px] text-[#64748B]">
+                      Menor = mais discreto. Maior = destaca sobre qualquer cor de fundo.
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -990,7 +1067,7 @@ function PersonalizacaoPage() {
                   background: `linear-gradient(135deg, ${bgMode === "custom" ? bgColor1 : bgMode === "light" ? "#f8fafc" : "#0B1020"}, ${bgMode === "custom" ? bgColor2 : bgMode === "light" ? "#e2e8f0" : "#1e1b4b"})`,
                 }}
               >
-                <RewardRain colors={[cor1, cor2, accentCashback || "#FBBF24", "#FFFFFF", "#F97316", "#F59E0B"]} />
+                <RewardRain contained colors={rainColors} opacity={rainOpacity} />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div
                     className="rounded-2xl border px-6 py-5 text-center backdrop-blur-sm"
