@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RewardRain } from "@/components/reward-rain";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RotateCcw } from "lucide-react";
@@ -127,6 +130,8 @@ function PersonalizacaoPage() {
   const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(DEFAULT_TITLE_WEIGHT);
   const [kickerSize, setKickerSize] = useState<"xs" | "sm" | "md">(DEFAULT_KICKER_SIZE);
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
+  const [rewardRain, setRewardRain] = useState(false);
+  const [rainPreviewOpen, setRainPreviewOpen] = useState(false);
 
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
@@ -165,6 +170,7 @@ function PersonalizacaoPage() {
       setTitleSize(((raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
       setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
       setKickerSize(((raw.header_kicker_size as "xs" | "sm" | "md") ?? DEFAULT_KICKER_SIZE));
+      setRewardRain(Boolean(raw.reward_rain_enabled));
     }
   }, [loja]);
 
@@ -209,6 +215,7 @@ function PersonalizacaoPage() {
           header_kicker_text: kickerText,
           header_kicker_show: kickerShow,
           header_kicker_size: kickerSize,
+          reward_rain_enabled: rewardRain,
         },
       });
 
