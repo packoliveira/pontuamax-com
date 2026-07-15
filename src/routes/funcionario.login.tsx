@@ -68,9 +68,9 @@ function FuncionarioLogin() {
           <PontuaMaxMark size={40} />
           <PontuaMaxWordmark variant="dark" size={20} />
         </div>
-        <Card className="rounded-2xl border-white/10 bg-white shadow-2xl">
+        <Card className="rounded-3xl border-0 bg-white/95 shadow-none ring-1 ring-black/5 backdrop-blur">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
               <ShieldCheck className="h-6 w-6" />
             </div>
             <CardTitle className="text-xl text-[#0F172A]">Acesso do vendedor</CardTitle>
