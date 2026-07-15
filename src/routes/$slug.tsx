@@ -651,7 +651,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 text-white font-semibold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full h-12 rounded-full text-white font-semibold transition-all active:scale-[0.98] hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
                 background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
                 boxShadow: `0 10px 25px -8px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
