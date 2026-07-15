@@ -270,6 +270,78 @@ function PersonalizacaoPage() {
     return null;
   })();
 
+  // Avisos de contraste extras para texto sobre fundo escuro e CTA
+  const pageBg = bgMode === "custom" ? bgColor1 : bgMode === "light" ? "#f8fafc" : "#0B1020";
+  const contrastTextOnDark = contrastRatio(textOnDark || "#ffffff", pageBg);
+  const ctaBg = brandCta || cor1;
+  const contrastCta = contrastRatio(textOnDark || "#ffffff", ctaBg);
+  const contrastAlerts = [
+    contrastTextOnDark < 4.5
+      ? `Texto sobre fundo escuro tem contraste ${contrastTextOnDark.toFixed(2)}:1 (mínimo recomendado 4.5:1).`
+      : null,
+    contrastCta < 3
+      ? `Botão Resgatar (CTA) tem contraste ${contrastCta.toFixed(2)}:1 com o texto (mínimo 3:1 para textos grandes).`
+      : null,
+  ].filter(Boolean) as string[];
+
+  // Exportar / importar tema
+  const exportTheme = () => {
+    const theme = {
+      version: 1,
+      brand_primary: cor1,
+      brand_secondary: cor2,
+      bg_mode: bgMode,
+      bg_color_1: bgColor1,
+      bg_color_2: bgColor2,
+      brand_accent_points: accentPoints,
+      brand_accent_cashback: accentCashback,
+      brand_cta: brandCta,
+      brand_vip: brandVip,
+      brand_price: brandPrice,
+      text_on_dark: textOnDark,
+      header_title_size: titleSize,
+      header_title_weight: titleWeight,
+      header_kicker_text: kickerText,
+      header_kicker_show: kickerShow,
+      header_kicker_size: kickerSize,
+    };
+    const blob = new Blob([JSON.stringify(theme, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tema-${loja?.slug || "loja"}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Tema exportado");
+  };
+  const importTheme = async (file: File) => {
+    try {
+      const text = await file.text();
+      const t = JSON.parse(text) as Record<string, unknown>;
+      const s = (k: string, fb: string) => (typeof t[k] === "string" ? (t[k] as string) : fb);
+      const b = (k: string, fb: boolean) => (typeof t[k] === "boolean" ? (t[k] as boolean) : fb);
+      setCor1(s("brand_primary", cor1));
+      setCor2(s("brand_secondary", cor2));
+      setBgMode((s("bg_mode", bgMode) as "dark" | "light" | "custom"));
+      setBgColor1(s("bg_color_1", bgColor1));
+      setBgColor2(s("bg_color_2", bgColor2));
+      setAccentPoints(s("brand_accent_points", accentPoints));
+      setAccentCashback(s("brand_accent_cashback", accentCashback));
+      setBrandCta(s("brand_cta", brandCta));
+      setBrandVip(s("brand_vip", brandVip));
+      setBrandPrice(s("brand_price", brandPrice));
+      setTextOnDark(s("text_on_dark", textOnDark));
+      setTitleSize(s("header_title_size", titleSize) as typeof titleSize);
+      setTitleWeight(s("header_title_weight", titleWeight) as typeof titleWeight);
+      setKickerText(s("header_kicker_text", kickerText));
+      setKickerShow(b("header_kicker_show", kickerShow));
+      setKickerSize(s("header_kicker_size", kickerSize) as typeof kickerSize);
+      toast.success("Tema importado. Clique em Salvar para aplicar.");
+    } catch {
+      toast.error("Arquivo de tema inválido.");
+    }
+  };
+
   const ResetButton = ({ onReset, disabled }: { onReset: () => void; disabled?: boolean }) => (
     <Button
       type="button"
