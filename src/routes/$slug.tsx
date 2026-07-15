@@ -281,7 +281,7 @@ function BannerHero({ loja }: { loja: Loja }) {
     <div className="relative">
       <div className="max-w-2xl mx-auto px-4 pt-4">
         <div
-          className="relative overflow-hidden rounded-2xl border shadow-lg animate-in fade-in zoom-in-95 duration-500"
+          className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border shadow-lg animate-in fade-in zoom-in-95 duration-500"
           style={{
             borderColor: `color-mix(in oklab, ${loja.brand_primary} 40%, transparent)`,
             boxShadow: `0 10px 40px -12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
@@ -365,16 +365,16 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
       <div className="max-w-2xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
-            <div aria-hidden className="absolute inset-0 rounded-xl bg-indigo-500/40 blur-lg opacity-60" />
+            <div aria-hidden className="absolute inset-0 rounded-2xl bg-indigo-500/40 blur-lg opacity-60" />
             {loja.logo_url ? (
               <img
                 src={loja.logo_url}
                 alt={loja.nome_fantasia}
-                className="relative h-12 w-12 rounded-xl bg-[#141432] object-contain p-1.5 border border-indigo-500/30"
+                className="relative h-12 w-12 rounded-2xl bg-[#141432] object-contain p-1.5 border border-indigo-500/30"
               />
             ) : (
               <div
-                className="relative h-12 w-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
+                className="relative h-12 w-12 rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
                 style={{
                   background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
                   borderColor: `color-mix(in oklab, ${loja.brand_primary} 50%, transparent)`,
@@ -557,11 +557,11 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
       <div className="relative group">
         <div
           aria-hidden
-          className="absolute -inset-0.5 rounded-2xl opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
+          className="absolute -inset-0.5 rounded-[2rem] opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
           style={{ background: `linear-gradient(135deg, color-mix(in oklab, ${loja.brand_primary} 40%, transparent), color-mix(in oklab, ${loja.brand_secondary} 20%, transparent), color-mix(in oklab, ${loja.brand_primary} 40%, transparent))` }}
         />
         <Card
-          className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl"
+          className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl rounded-[2rem] border"
           style={{ borderColor: `color-mix(in oklab, ${loja.brand_primary} 25%, transparent)` }}
         >
           <CardHeader className="pb-4">
@@ -589,7 +589,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                 inputMode="numeric"
                 autoComplete="username"
                 required
-                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
               />
               {erroCpf && <p className="text-[11px] text-rose-400">{erroCpf}</p>}
             </div>
@@ -602,7 +602,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                     onChange={(e) => { setNome(e.target.value); if (erroNome) setErroNome(null); }}
                     placeholder="Como quer ser chamado"
                     required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                   />
                   {erroNome && <p className="text-[11px] text-rose-400">{erroNome}</p>}
                 </div>
@@ -614,7 +614,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                     placeholder="(11) 98765-4321"
                     inputMode="tel"
                     required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                   />
                   {erroPhone && <p className="text-[11px] text-rose-400">{erroPhone}</p>}
                 </div>
@@ -628,7 +628,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
-                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
               />
               {erroSenha && <p className="text-[11px] text-rose-400">{erroSenha}</p>}
             </div>
@@ -641,7 +641,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                   placeholder="Repita a senha"
                   autoComplete="new-password"
                   required
-                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                 />
                 {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
                   <p className="mt-1 text-[11px] text-rose-400">{erroSenha2 ?? "As senhas não coincidem"}</p>
@@ -651,7 +651,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 text-white font-semibold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full h-12 rounded-full text-white font-semibold transition-all active:scale-[0.98] hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
                 background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
                 boxShadow: `0 10px 25px -8px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
