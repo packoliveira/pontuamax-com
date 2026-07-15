@@ -482,12 +482,6 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
     return { claimed: true as const, email };
   });
 
-// -------- LOJISTA: cadastrar novo cliente pelo CPF (durante lançar venda) --------
-// Identidade única do cliente = CPF. Cria/normaliza auth user com email sintético
-// baseado no CPF (fonte da verdade) e senha temporária = CPF (só dígitos).
-export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
-  ;
-
 // -------- CLIENTE: criar conta via CPF (sem confirmação de email) --------
 export const criarClienteViaCpf = createServerFn({ method: "POST" })
   .inputValidator((input) =>
@@ -560,7 +554,10 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
     return { email };
   });
 
-const _cadastrarClientePorTelefone_placeholder = createServerFn({ method: "POST" })
+// -------- LOJISTA: cadastrar novo cliente pelo CPF (durante lançar venda) --------
+// Identidade única do cliente = CPF. Cria/normaliza auth user com email sintético
+// baseado no CPF (fonte da verdade) e senha temporária = CPF (só dígitos).
+export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
