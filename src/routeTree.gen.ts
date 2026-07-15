@@ -46,6 +46,7 @@ import { Route as FuncionarioPontuarRouteImport } from './routes/funcionario.pon
 import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
 import { Route as FuncionarioHistoricoRouteImport } from './routes/funcionario.historico'
 import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
+import { Route as AdminPlanosRouteImport } from './routes/admin.planos'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
@@ -241,6 +242,11 @@ const FuncionarioClientesRoute = FuncionarioClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const AdminPlanosRoute = AdminPlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/planos': typeof AdminPlanosRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
   '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/planos': typeof AdminPlanosRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
   '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/lojista': typeof LojistaRouteWithChildren
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/planos': typeof AdminPlanosRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
   '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
@@ -445,6 +454,7 @@ export interface FileRouteTypes {
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/admin/planos'
     | '/funcionario/clientes'
     | '/funcionario/historico'
     | '/funcionario/perfil'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/admin/planos'
     | '/funcionario/clientes'
     | '/funcionario/historico'
     | '/funcionario/perfil'
@@ -538,6 +549,7 @@ export interface FileRouteTypes {
     | '/lojista'
     | '/redefinir-senha'
     | '/admin/login'
+    | '/admin/planos'
     | '/funcionario/clientes'
     | '/funcionario/historico'
     | '/funcionario/perfil'
@@ -860,6 +872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioClientesRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/admin/planos': {
+      id: '/admin/planos'
+      path: '/planos'
+      fullPath: '/admin/planos'
+      preLoaderRoute: typeof AdminPlanosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -928,11 +947,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminPlanosRoute: typeof AdminPlanosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
+  AdminPlanosRoute: AdminPlanosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
