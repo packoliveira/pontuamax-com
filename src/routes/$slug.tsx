@@ -501,10 +501,20 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
   return (
     <div className="max-w-md mx-auto p-4 pt-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
       <div className="relative group">
-        <div aria-hidden className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br from-indigo-500/40 via-violet-500/20 to-indigo-500/40 opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500" />
-        <Card className="relative border-indigo-500/25 bg-[#141432]/95 backdrop-blur-xl shadow-2xl">
+        <div
+          aria-hidden
+          className="absolute -inset-0.5 rounded-2xl opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
+          style={{ background: `linear-gradient(135deg, color-mix(in oklab, ${loja.brand_primary} 40%, transparent), color-mix(in oklab, ${loja.brand_secondary} 20%, transparent), color-mix(in oklab, ${loja.brand_primary} 40%, transparent))` }}
+        />
+        <Card
+          className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl"
+          style={{ borderColor: `color-mix(in oklab, ${loja.brand_primary} 25%, transparent)` }}
+        >
           <CardHeader className="pb-4">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-indigo-300/80 font-semibold mb-1">
+            <div
+              className="text-[10px] uppercase tracking-[0.25em] font-semibold mb-1"
+              style={{ color: `color-mix(in oklab, ${loja.brand_primary} 70%, #cbd5e1)` }}
+            >
               {mode === "signup" ? "Novo por aqui" : "Bem-vindo(a) de volta"}
             </div>
             <CardTitle className="text-slate-100 text-xl">{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
@@ -587,7 +597,11 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 text-white font-semibold bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/50 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full h-11 text-white font-semibold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              style={{
+                background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                boxShadow: `0 10px 25px -8px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+              }}
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
@@ -599,7 +613,8 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
             <button
               type="button"
               onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }}
-              className="text-xs text-center w-full text-indigo-300 hover:text-indigo-200 transition-colors font-medium py-1"
+              className="text-xs text-center w-full transition-colors font-medium py-1 hover:opacity-80"
+              style={{ color: `color-mix(in oklab, ${loja.brand_primary} 70%, #cbd5e1)` }}
             >
               {mode === "login" ? "Ainda não tenho conta →" : "← Já tenho conta, entrar"}
             </button>
