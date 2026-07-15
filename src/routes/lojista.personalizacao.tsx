@@ -933,6 +933,76 @@ function PersonalizacaoPage() {
             </CardContent>
           </Card>
 
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#FB7185]" />
+            <CardHeader className="space-y-0">
+              <CardTitle className="text-base text-[#0F172A]">Efeitos visuais</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start justify-between gap-4 rounded-xl border border-[#E5E7EB] bg-white p-4">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-[#0F172A]">Chuva de Recompensas</div>
+                  <p className="mt-1 text-xs text-[#64748B]">
+                    Exibe moedas, cashback, cupons e símbolos de premiação caindo suavemente
+                    no fundo da página de login dos clientes.
+                  </p>
+                  <div className="mt-3">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setRainPreviewOpen(true)}
+                      className="rounded-lg h-8 text-xs"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1" />
+                      Visualizar efeito
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1 pt-1">
+                  <Switch checked={rewardRain} onCheckedChange={setRewardRain} />
+                  <span className="text-[10px] font-medium text-[#64748B]">
+                    {rewardRain ? "Ativada" : "Desativada"}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Dialog open={rainPreviewOpen} onOpenChange={setRainPreviewOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Prévia — Chuva de Recompensas</DialogTitle>
+              </DialogHeader>
+              <div
+                className="relative overflow-hidden rounded-xl border border-[#E5E7EB]"
+                style={{
+                  height: 420,
+                  background: `linear-gradient(135deg, ${bgMode === "custom" ? bgColor1 : bgMode === "light" ? "#f8fafc" : "#0B1020"}, ${bgMode === "custom" ? bgColor2 : bgMode === "light" ? "#e2e8f0" : "#1e1b4b"})`,
+                }}
+              >
+                <RewardRain colors={[cor1, cor2, accentCashback || "#FBBF24", "#FFFFFF", "#F97316", "#F59E0B"]} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className="rounded-2xl border px-6 py-5 text-center backdrop-blur-sm"
+                    style={{
+                      background: bgMode === "light" ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.55)",
+                      borderColor: `color-mix(in oklab, ${cor1} 40%, transparent)`,
+                      color: bgMode === "light" ? "#0F172A" : "#FFFFFF",
+                      zIndex: 1,
+                    }}
+                  >
+                    <div className="text-xs uppercase tracking-wider opacity-70">Prévia</div>
+                    <div className="mt-1 text-lg font-semibold">Login do cliente</div>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-[#64748B]">
+                Os elementos caem em baixa opacidade e ignoram cliques — não atrapalham o formulário de login.
+              </p>
+            </DialogContent>
+          </Dialog>
+
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg" className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200">
               {salvar.isPending ? "Salvando..." : "Salvar personalização"}
