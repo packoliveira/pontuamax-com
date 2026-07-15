@@ -589,7 +589,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                 inputMode="numeric"
                 autoComplete="username"
                 required
-                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
               />
               {erroCpf && <p className="text-[11px] text-rose-400">{erroCpf}</p>}
             </div>
@@ -602,7 +602,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                     onChange={(e) => { setNome(e.target.value); if (erroNome) setErroNome(null); }}
                     placeholder="Como quer ser chamado"
                     required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                   />
                   {erroNome && <p className="text-[11px] text-rose-400">{erroNome}</p>}
                 </div>
@@ -614,7 +614,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                     placeholder="(11) 98765-4321"
                     inputMode="tel"
                     required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                   />
                   {erroPhone && <p className="text-[11px] text-rose-400">{erroPhone}</p>}
                 </div>
@@ -628,7 +628,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                 placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 required
-                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
               />
               {erroSenha && <p className="text-[11px] text-rose-400">{erroSenha}</p>}
             </div>
@@ -641,7 +641,7 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
                   placeholder="Repita a senha"
                   autoComplete="new-password"
                   required
-                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-11 transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                 />
                 {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
                   <p className="mt-1 text-[11px] text-rose-400">{erroSenha2 ?? "As senhas não coincidem"}</p>
