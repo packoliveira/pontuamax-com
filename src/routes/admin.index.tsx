@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText } from "lucide-react";
+import { Copy, ExternalLink, Link2 } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
@@ -182,6 +183,8 @@ function AdminDashboard() {
         <StatCard icon={<UserPlus className="h-5 w-5" />} label="Novas este mês" value={novasMes} accent="text-blue-600" />
         <StatCard icon={<TrendingDown className="h-5 w-5" />} label="Churn este mês" value={churnMes} accent={churnMes > 0 ? "text-red-600" : undefined} />
       </div>
+
+      <QuickLinksSection />
 
       <Card>
         <CardHeader>
