@@ -34,6 +34,15 @@ const DEFAULT_BG_MODE: "dark" | "light" | "custom" = "dark";
 const DEFAULT_BG1 = "#0B1020";
 const DEFAULT_BG2 = "#1e1b4b";
 
+const DEFAULT_ACCENT_POINTS = "#818cf8";
+const DEFAULT_ACCENT_CASHBACK = "#22c55e";
+const DEFAULT_VIP = "#a78bfa";
+const DEFAULT_PRICE = "#22c55e";
+const DEFAULT_TEXT_ON_DARK = "#ffffff";
+const DEFAULT_KICKER_TEXT = "Fidelidade";
+const DEFAULT_TITLE_SIZE: "sm" | "md" | "lg" | "xl" | "2xl" = "md";
+const DEFAULT_TITLE_WEIGHT: "normal" | "semibold" | "bold" | "black" = "bold";
+
 const BG_PRESETS: Array<{ label: string; mode: "dark" | "light" | "custom"; c1: string; c2: string }> = [
   { label: "Midnight (padrão)", mode: "dark", c1: "#0B1020", c2: "#1e1b4b" },
   { label: "Claro suave", mode: "light", c1: "#f8fafc", c2: "#e2e8f0" },
@@ -82,6 +91,18 @@ function PersonalizacaoPage() {
   const [bgColor1, setBgColor1] = useState<string>(DEFAULT_BG1);
   const [bgColor2, setBgColor2] = useState<string>(DEFAULT_BG2);
 
+  // Cores de apoio + cabeçalho personalizável da página do cliente
+  const [accentPoints, setAccentPoints] = useState(DEFAULT_ACCENT_POINTS);
+  const [accentCashback, setAccentCashback] = useState(DEFAULT_ACCENT_CASHBACK);
+  const [brandCta, setBrandCta] = useState<string>("");
+  const [brandVip, setBrandVip] = useState(DEFAULT_VIP);
+  const [brandPrice, setBrandPrice] = useState(DEFAULT_PRICE);
+  const [textOnDark, setTextOnDark] = useState(DEFAULT_TEXT_ON_DARK);
+  const [kickerText, setKickerText] = useState(DEFAULT_KICKER_TEXT);
+  const [kickerShow, setKickerShow] = useState(true);
+  const [titleSize, setTitleSize] = useState<"sm" | "md" | "lg" | "xl" | "2xl">(DEFAULT_TITLE_SIZE);
+  const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(DEFAULT_TITLE_WEIGHT);
+
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
     logo: "",
@@ -107,6 +128,17 @@ function PersonalizacaoPage() {
       setBgMode(((loja as { bg_mode?: string }).bg_mode as "dark" | "light" | "custom") ?? DEFAULT_BG_MODE);
       setBgColor1((loja as { bg_color_1?: string | null }).bg_color_1 ?? DEFAULT_BG1);
       setBgColor2((loja as { bg_color_2?: string | null }).bg_color_2 ?? DEFAULT_BG2);
+      const l = loja as Record<string, unknown>;
+      setAccentPoints((l.brand_accent_points as string) || DEFAULT_ACCENT_POINTS);
+      setAccentCashback((l.brand_accent_cashback as string) || DEFAULT_ACCENT_CASHBACK);
+      setBrandCta((l.brand_cta as string) || "");
+      setBrandVip((l.brand_vip as string) || DEFAULT_VIP);
+      setBrandPrice((l.brand_price as string) || DEFAULT_PRICE);
+      setTextOnDark((l.text_on_dark as string) || DEFAULT_TEXT_ON_DARK);
+      setKickerText((l.header_kicker_text as string) ?? DEFAULT_KICKER_TEXT);
+      setKickerShow((l.header_kicker_show as boolean) ?? true);
+      setTitleSize(((l.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
+      setTitleWeight(((l.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
     }
   }, [loja]);
 
@@ -140,6 +172,16 @@ function PersonalizacaoPage() {
           bg_mode: bgMode,
           bg_color_1: bgMode === "custom" ? bgColor1 : null,
           bg_color_2: bgMode === "custom" ? bgColor2 : null,
+          brand_accent_points: accentPoints || null,
+          brand_accent_cashback: accentCashback || null,
+          brand_cta: brandCta || null,
+          brand_vip: brandVip || null,
+          brand_price: brandPrice || null,
+          text_on_dark: textOnDark || null,
+          header_title_size: titleSize,
+          header_title_weight: titleWeight,
+          header_kicker_text: kickerText,
+          header_kicker_show: kickerShow,
         },
       });
 
