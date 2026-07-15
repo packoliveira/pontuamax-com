@@ -102,7 +102,7 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
           signature: sigHeader,
           signature_valid: true,
           status: "received",
-          payload,
+          payload: payload as never,
         }).select("id").maybeSingle();
         if (eventInsert.error) {
           if (eventInsert.error.code === "23505") {
