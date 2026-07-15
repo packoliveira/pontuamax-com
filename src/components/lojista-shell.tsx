@@ -10,6 +10,7 @@ import { myStoreQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const nav: NavItem[] = [
@@ -133,6 +134,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
           <Button variant="ghost" size="sm" className="flex-1 justify-start text-white/80 hover:bg-white/10 hover:text-white" onClick={doLogout}>
             <LogOut className="h-4 w-4" /> Sair
           </Button>
+          <NotificationsBell variant="dark" />
           <ThemeToggle />
         </div>
       </aside>
@@ -143,6 +145,7 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
             <PontuaMaxWordmark variant="light" size={16} />
           </div>
           <div className="flex items-center gap-0.5">
+            <NotificationsBell />
             <ThemeToggle />
             <Button variant="ghost" size="icon" className="h-11 w-11" onClick={doLogout} title="Sair" aria-label="Sair">
               <LogOut className="h-5 w-5" />
