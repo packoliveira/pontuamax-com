@@ -18,6 +18,9 @@ const ICONS: Record<string, any> = {
 export const Route = createFileRoute("/funcionario")({
   ssr: false,
   beforeLoad: async ({ location }) => {
+    // rotas públicas dentro do painel do funcionário
+    const publicPaths = ["/funcionario/login", "/funcionario/esqueci-senha"];
+    if (publicPaths.includes(location.pathname)) return;
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/funcionario/login" });
     const { data: emp } = await supabase
@@ -37,6 +40,11 @@ function FuncionarioLayout() {
   const { data, hasAny, loading } = useEmployeeContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+
+  // rotas públicas renderizam sem o chrome do painel
+  if (pathname === "/funcionario/login" || pathname === "/funcionario/esqueci-senha") {
+    return <Outlet />;
+  }
 
   const visible = EMPLOYEE_MENU.filter((m) => hasAny(m.requires));
 
