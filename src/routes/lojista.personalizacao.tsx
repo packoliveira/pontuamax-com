@@ -217,6 +217,16 @@ function PersonalizacaoPage() {
     setBgMode(DEFAULT_BG_MODE);
     setBgColor1(DEFAULT_BG1);
     setBgColor2(DEFAULT_BG2);
+    setAccentPoints(DEFAULT_ACCENT_POINTS);
+    setAccentCashback(DEFAULT_ACCENT_CASHBACK);
+    setBrandCta("");
+    setBrandVip(DEFAULT_VIP);
+    setBrandPrice(DEFAULT_PRICE);
+    setTextOnDark(DEFAULT_TEXT_ON_DARK);
+    setKickerText(DEFAULT_KICKER_TEXT);
+    setKickerShow(true);
+    setTitleSize(DEFAULT_TITLE_SIZE);
+    setTitleWeight(DEFAULT_TITLE_WEIGHT);
     toast.info("Valores restaurados. Clique em Salvar para aplicar.");
   };
 
