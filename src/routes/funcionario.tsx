@@ -17,13 +17,16 @@ const ICONS: Record<string, any> = {
 
 export const Route = createFileRoute("/funcionario")({
   ssr: false,
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { data } = await supabase.auth.getSession();
-    if (!data.session) throw redirect({ to: "/lojista/login" });
+    if (!data.session) throw redirect({ to: "/funcionario/login" });
     const { data: emp } = await supabase
-      .from("store_employees").select("id, status")
+      .from("store_employees").select("id, status, must_change_password")
       .eq("user_id", data.session.user.id).eq("status", "ativo").maybeSingle();
-    if (!emp) throw redirect({ to: "/lojista/login" });
+    if (!emp) throw redirect({ to: "/funcionario/login" });
+    if (emp.must_change_password && location.pathname !== "/funcionario/trocar-senha") {
+      throw redirect({ to: "/funcionario/trocar-senha" });
+    }
   },
   component: FuncionarioLayout,
 });
@@ -39,7 +42,7 @@ function FuncionarioLayout() {
 
   const doLogout = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/lojista/login", replace: true });
+    navigate({ to: "/funcionario/login", replace: true });
   };
 
   const Brand = () => (
