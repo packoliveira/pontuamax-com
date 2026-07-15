@@ -168,6 +168,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         header_kicker_size: z.enum(["xs", "sm", "md"]).optional().nullable(),
         header_title_size_mobile: z.enum(["sm", "md", "lg", "xl", "2xl"]).optional().nullable(),
         header_kicker_size_mobile: z.enum(["xs", "sm", "md"]).optional().nullable(),
+        reward_rain_enabled: z.boolean().optional(),
       })
       .parse(input),
   )
