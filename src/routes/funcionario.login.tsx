@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle, Loader2, ShieldCheck } from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 import { formatCPF, onlyDigits, isValidCPF } from "@/lib/qsf-shared";
-import { resolveFuncionarioEmailByCpf } from "@/lib/team.functions";
+import { resolveFuncionarioEmailByCpf, registrarLoginFuncionario } from "@/lib/team.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/funcionario/login")({
@@ -52,6 +52,7 @@ function FuncionarioLogin() {
       const { email } = await resolveFuncionarioEmailByCpf({ data: { cpf: digits } });
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
       if (error) throw new Error(error.message.includes("Invalid") ? "CPF ou senha incorretos." : error.message);
+      try { await registrarLoginFuncionario(); } catch { /* auditoria não bloqueia */ }
       navigate({ to: "/funcionario", replace: true });
     } catch (err) {
       setErro((err as Error).message);
@@ -105,7 +106,9 @@ function FuncionarioLogin() {
                 {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Entrando…</> : "Entrar"}
               </Button>
               <p className="text-center text-xs text-[#64748B]">
-                Esqueceu a senha? Peça ao seu gerente para redefinir em <strong>Equipe</strong>.
+                <Link to="/funcionario/esqueci-senha" className="text-[#2563EB] hover:underline">
+                  Esqueci minha senha
+                </Link>
               </p>
               <div className="mt-2 text-center text-xs text-[#94A3B8]">
                 É lojista? <Link to="/lojista/login" className="text-[#2563EB] hover:underline">Entrar como lojista</Link>

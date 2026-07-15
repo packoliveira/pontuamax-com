@@ -1262,6 +1262,25 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     const store = tx.data.stores as unknown as { nome_fantasia: string | null } | null;
     const profile = tx.data.profiles as { full_name: string | null; phone: string | null } | null;
     const product = tx.data.products as { nome: string | null } | null;
+    // Trilha de auditoria
+    try {
+      const { logEmployeeAction } = await import("@/lib/team.functions");
+      await logEmployeeAction({
+        storeId: tx.data.store_id,
+        actorUserId: context.userId,
+        action: "resgate.confirmado",
+        targetLabel: tx.data.voucher_code,
+        meta: {
+          transaction_id: tx.data.id,
+          tipo: tx.data.tipo,
+          cliente: profile?.full_name ?? null,
+          produto: product?.nome ?? null,
+          pontos_usados: Math.abs(Number(tx.data.pontos_delta ?? 0)),
+          cashback_aplicado: Math.abs(Number(tx.data.cashback_delta ?? 0)),
+          delivered_at: deliveredAt,
+        },
+      });
+    } catch { /* ignore */ }
     return {
       ok: true,
       comprovante: {
@@ -1341,6 +1360,21 @@ export const validarVoucher = createServerFn({ method: "POST" })
       if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
       throw new Error("Voucher indisponível para entrega.");
     }
+    try {
+      const { logEmployeeAction } = await import("@/lib/team.functions");
+      await logEmployeeAction({
+        storeId: store.data.id,
+        actorUserId: context.userId,
+        action: "voucher.validado",
+        targetLabel: tx.data.voucher_code,
+        meta: {
+          transaction_id: tx.data.id,
+          tipo: tx.data.tipo,
+          pontos: Math.abs(Number(tx.data.pontos_delta || 0)),
+          cashback: Math.abs(Number(tx.data.cashback_delta || 0)),
+        },
+      });
+    } catch { /* ignore */ }
     return {
       ok: true,
       voucher: tx.data.voucher_code,
@@ -1403,6 +1437,20 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
           .eq("id", link.data.id);
       }
     }
+    try {
+      const { logEmployeeAction } = await import("@/lib/team.functions");
+      await logEmployeeAction({
+        storeId: tx.data.store_id,
+        actorUserId: context.userId,
+        action: "voucher.cancelado",
+        meta: {
+          transaction_id: tx.data.id,
+          tipo: tx.data.tipo,
+          pontos_devolvidos: -Number(tx.data.pontos_delta || 0),
+          cashback_devolvido: -Number(tx.data.cashback_delta || 0),
+        },
+      });
+    } catch { /* ignore */ }
     return { ok: true };
   });
 

@@ -47,6 +47,7 @@ import { Route as FuncionarioPontuarRouteImport } from './routes/funcionario.pon
 import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
 import { Route as FuncionarioLoginRouteImport } from './routes/funcionario.login'
 import { Route as FuncionarioHistoricoRouteImport } from './routes/funcionario.historico'
+import { Route as FuncionarioEsqueciSenhaRouteImport } from './routes/funcionario.esqueci-senha'
 import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
 import { Route as AdminPlanosRouteImport } from './routes/admin.planos'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -250,6 +251,11 @@ const FuncionarioHistoricoRoute = FuncionarioHistoricoRouteImport.update({
   path: '/historico',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioEsqueciSenhaRoute = FuncionarioEsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const FuncionarioClientesRoute = FuncionarioClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/planos': typeof AdminPlanosRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/esqueci-senha': typeof FuncionarioEsqueciSenhaRoute
   '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/login': typeof FuncionarioLoginRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/planos': typeof AdminPlanosRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/esqueci-senha': typeof FuncionarioEsqueciSenhaRoute
   '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/login': typeof FuncionarioLoginRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
@@ -429,6 +437,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/planos': typeof AdminPlanosRoute
   '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/esqueci-senha': typeof FuncionarioEsqueciSenhaRoute
   '/funcionario/historico': typeof FuncionarioHistoricoRoute
   '/funcionario/login': typeof FuncionarioLoginRoute
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
@@ -483,6 +492,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/planos'
     | '/funcionario/clientes'
+    | '/funcionario/esqueci-senha'
     | '/funcionario/historico'
     | '/funcionario/login'
     | '/funcionario/perfil'
@@ -532,6 +542,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/planos'
     | '/funcionario/clientes'
+    | '/funcionario/esqueci-senha'
     | '/funcionario/historico'
     | '/funcionario/login'
     | '/funcionario/perfil'
@@ -584,6 +595,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/planos'
     | '/funcionario/clientes'
+    | '/funcionario/esqueci-senha'
     | '/funcionario/historico'
     | '/funcionario/login'
     | '/funcionario/perfil'
@@ -916,6 +928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioHistoricoRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/esqueci-senha': {
+      id: '/funcionario/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/funcionario/esqueci-senha'
+      preLoaderRoute: typeof FuncionarioEsqueciSenhaRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/funcionario/clientes': {
       id: '/funcionario/clientes'
       path: '/clientes'
@@ -1019,6 +1038,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface FuncionarioRouteChildren {
   FuncionarioClientesRoute: typeof FuncionarioClientesRoute
+  FuncionarioEsqueciSenhaRoute: typeof FuncionarioEsqueciSenhaRoute
   FuncionarioHistoricoRoute: typeof FuncionarioHistoricoRoute
   FuncionarioLoginRoute: typeof FuncionarioLoginRoute
   FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
@@ -1031,6 +1051,7 @@ interface FuncionarioRouteChildren {
 
 const FuncionarioRouteChildren: FuncionarioRouteChildren = {
   FuncionarioClientesRoute: FuncionarioClientesRoute,
+  FuncionarioEsqueciSenhaRoute: FuncionarioEsqueciSenhaRoute,
   FuncionarioHistoricoRoute: FuncionarioHistoricoRoute,
   FuncionarioLoginRoute: FuncionarioLoginRoute,
   FuncionarioPerfilRoute: FuncionarioPerfilRoute,

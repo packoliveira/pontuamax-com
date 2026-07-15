@@ -33,6 +33,26 @@ async function writeAudit(storeId: string, actorId: string, action: string, opts
   });
 }
 
+/** Escreve um log de auditoria de qualquer módulo. Não lança em erro. */
+export async function logEmployeeAction(params: {
+  storeId: string;
+  actorUserId: string;
+  action: string;
+  employeeId?: string | null;
+  targetLabel?: string | null;
+  meta?: Record<string, unknown>;
+}) {
+  try {
+    await writeAudit(params.storeId, params.actorUserId, params.action, {
+      employeeId: params.employeeId ?? null,
+      targetLabel: params.targetLabel ?? null,
+      meta: params.meta ?? {},
+    });
+  } catch (e) {
+    console.warn("[audit] falha ao registrar", params.action, (e as Error).message);
+  }
+}
+
 // ============== Catálogos ==============
 
 export const listRolesAndPermissions = createServerFn({ method: "GET" })
@@ -288,6 +308,10 @@ export const resetEmployeePassword = createServerFn({ method: "POST" })
       password: data.new_password,
     });
     if (error) throw new Error(error.message);
+    // força troca no próximo acesso
+    await supabaseAdmin.from("store_employees")
+      .update({ must_change_password: true })
+      .eq("id", emp.id);
     await writeAudit(storeId, context.userId, "employee.password_reset", {
       employeeId: emp.id, targetLabel: emp.email,
     });
@@ -456,5 +480,62 @@ export const trocarSenhaFuncionario = createServerFn({ method: "POST" })
         employeeId: emp.id,
       });
     }
+    return { ok: true };
+  });
+
+// ============== Auditoria de login ==============
+
+/** Registra o login bem-sucedido do funcionário. */
+export const registrarLoginFuncionario = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: emp } = await context.supabase
+      .from("store_employees")
+      .select("id, store_id, email, nome")
+      .eq("user_id", context.userId).eq("status", "ativo").maybeSingle();
+    if (!emp) return { ok: false };
+    await logEmployeeAction({
+      storeId: emp.store_id,
+      actorUserId: context.userId,
+      action: "employee.login",
+      employeeId: emp.id,
+      targetLabel: emp.email,
+      meta: { nome: emp.nome, at: new Date().toISOString() },
+    });
+    return { ok: true };
+  });
+
+// ============== Recuperação de senha (CPF + telefone) ==============
+
+/** Solicita ao gerente da loja a redefinição de senha; registra pedido na trilha de auditoria. */
+export const solicitarRecuperacaoSenhaFuncionario = createServerFn({ method: "POST" })
+  .inputValidator((i) => z.object({
+    cpf: z.string().trim().min(11).max(20),
+    phone: z.string().trim().min(8).max(30),
+  }).parse(i))
+  .handler(async ({ data }) => {
+    const cpfDigits = data.cpf.replace(/\D+/g, "");
+    const phoneDigits = data.phone.replace(/\D+/g, "");
+    if (cpfDigits.length < 11) throw new Error("CPF inválido.");
+    if (phoneDigits.length < 8) throw new Error("Telefone inválido.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: emp } = await supabaseAdmin
+      .from("store_employees")
+      .select("id, store_id, email, nome, phone, user_id")
+      .eq("cpf", cpfDigits).eq("status", "ativo")
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    // Resposta genérica: nunca revelamos se o CPF existe ou se o telefone confere.
+    if (!emp) return { ok: true };
+    const empPhone = (emp.phone ?? "").replace(/\D+/g, "");
+    if (empPhone && empPhone.slice(-8) !== phoneDigits.slice(-8)) return { ok: true };
+    // Registra pedido no log para o gerente aprovar em "Equipe → Redefinir senha".
+    await supabaseAdmin.from("employee_audit_logs").insert({
+      store_id: emp.store_id,
+      actor_user_id: emp.user_id,
+      employee_id: emp.id,
+      action: "employee.password_recovery_requested",
+      target_label: emp.email,
+      meta: { nome: emp.nome, phone_last4: phoneDigits.slice(-4), at: new Date().toISOString() } as never,
+    });
     return { ok: true };
   });
