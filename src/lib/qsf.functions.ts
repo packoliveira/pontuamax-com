@@ -1437,6 +1437,20 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
           .eq("id", link.data.id);
       }
     }
+    try {
+      const { logEmployeeAction } = await import("@/lib/team.functions");
+      await logEmployeeAction({
+        storeId: tx.data.store_id,
+        actorUserId: context.userId,
+        action: "voucher.cancelado",
+        meta: {
+          transaction_id: tx.data.id,
+          tipo: tx.data.tipo,
+          pontos_devolvidos: -Number(tx.data.pontos_delta || 0),
+          cashback_devolvido: -Number(tx.data.cashback_delta || 0),
+        },
+      });
+    } catch { /* ignore */ }
     return { ok: true };
   });
 
