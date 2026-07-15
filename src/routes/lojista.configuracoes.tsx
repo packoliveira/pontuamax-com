@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
 import { Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
+import { Link as LinkIcon, Unplug } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
@@ -200,6 +202,7 @@ function ConfigPage() {
           </Button>
 
           <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
+          <OlistOAuthCard storeId={loja.id} />
           <WhatsappCard loja={loja} />
           <NotificacoesCard loja={loja} />
           <IndicacaoCard loja={loja} />
