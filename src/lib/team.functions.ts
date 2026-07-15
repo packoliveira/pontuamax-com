@@ -288,6 +288,10 @@ export const resetEmployeePassword = createServerFn({ method: "POST" })
       password: data.new_password,
     });
     if (error) throw new Error(error.message);
+    // força troca no próximo acesso
+    await supabaseAdmin.from("store_employees")
+      .update({ must_change_password: true })
+      .eq("id", emp.id);
     await writeAudit(storeId, context.userId, "employee.password_reset", {
       employeeId: emp.id, targetLabel: emp.email,
     });
