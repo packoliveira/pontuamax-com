@@ -1052,7 +1052,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           email: string
+          first_login_at: string | null
           id: string
+          must_change_password: boolean
           nome: string
           phone: string | null
           role_key: string
@@ -1066,7 +1068,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email: string
+          first_login_at?: string | null
           id?: string
+          must_change_password?: boolean
           nome: string
           phone?: string | null
           role_key: string
@@ -1080,7 +1084,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string
+          first_login_at?: string | null
           id?: string
+          must_change_password?: boolean
           nome?: string
           phone?: string | null
           role_key?: string

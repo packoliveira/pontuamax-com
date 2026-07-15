@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Coins,
   Gift,
+  Sparkles,
   LayoutDashboard,
   ShoppingCart,
   Ticket,
@@ -29,6 +30,8 @@ function Dashboard() {
   const { data: clientes = [] } = useQuery(storeClientsQuery(storeId));
   const { data: txs = [] } = useQuery(storeTransactionsQuery(storeId));
   if (!data) return null;
+  const firstLoginAt = (data.employee as { first_login_at?: string | null }).first_login_at;
+  const showWelcome = firstLoginAt ? (Date.now() - new Date(firstLoginAt).getTime()) < 24 * 3600 * 1000 : false;
 
   const inicioMes = new Date();
   inicioMes.setDate(1);
@@ -57,6 +60,19 @@ function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {showWelcome && (
+        <div className="rounded-2xl border border-[#14CBA8]/30 bg-gradient-to-r from-[#14CBA8]/10 via-[#2563EB]/10 to-[#6D28D9]/10 p-4 flex items-start gap-3">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-[#14CBA8] shadow-sm">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="text-sm text-[#0F172A]">
+            <div className="font-semibold">Bem-vindo(a) ao painel!</div>
+            <div className="text-[#475569]">
+              Use os atalhos abaixo para atender clientes. Comece por <strong>Lançar venda</strong> para pontuar uma compra.
+            </div>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Dashboard</div>
