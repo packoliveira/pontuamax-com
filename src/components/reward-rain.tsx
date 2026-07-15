@@ -7,7 +7,7 @@ type Particle = {
   id: number;
   kind: IconKind;
   left: number; // vw
-  top: number; // % (used when reduced motion is enabled)
+  top: number;
   size: number; // px
   duration: number; // s
   delay: number; // s
@@ -105,14 +105,14 @@ export function RewardRain({
   const opMul = Math.max(0.1, Math.min(1, opacityOverride ?? 1));
 
   const particles = useMemo<Particle[]>(() => {
-    const n = reduced ? Math.max(6, Math.ceil(target * 0.45)) : target;
+      const n = reduced ? Math.max(6, Math.ceil(target * 0.65)) : target;
     return Array.from({ length: n }, (_, i) => ({
       id: i,
       kind: pick(KINDS),
       left: rand(0, 100),
       top: rand(6, 92),
       size: rand(mobile ? 14 : 18, mobile ? 26 : 34),
-      duration: rand(9, 16),
+        duration: reduced ? rand(18, 28) : rand(9, 16),
       delay: rand(-16, 0),
       drift: rand(-8, 8),
       rotate: rand(-45, 45),
@@ -138,10 +138,10 @@ export function RewardRain({
           key={p.id}
           style={{
             position: "absolute",
-            top: reduced ? `${p.top}%` : "-6%",
+            top: "-6%",
             left: `${p.left}%`,
             opacity: p.opacity,
-            animation: reduced ? undefined : `reward-rain-fall ${p.duration}s linear ${p.delay}s infinite`,
+            animation: `reward-rain-fall ${p.duration}s linear ${p.delay}s infinite`,
             transform: "translate3d(0,0,0)",
             willChange: "transform, opacity",
             // Dual shadow: dark halo + light halo → destaca em qualquer fundo
