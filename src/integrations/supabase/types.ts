@@ -1242,7 +1242,9 @@ export type Database = {
           pontos_expiracao_modo: string
           pontos_validade_dias: number
           regra_pontos: number
+          reward_rain_colors: string[]
           reward_rain_enabled: boolean
+          reward_rain_opacity: number
           setup_paid_at: string | null
           slug: string
           subscription_status: string
@@ -1324,7 +1326,9 @@ export type Database = {
           pontos_expiracao_modo?: string
           pontos_validade_dias?: number
           regra_pontos?: number
+          reward_rain_colors?: string[]
           reward_rain_enabled?: boolean
+          reward_rain_opacity?: number
           setup_paid_at?: string | null
           slug: string
           subscription_status?: string
@@ -1406,7 +1410,9 @@ export type Database = {
           pontos_expiracao_modo?: string
           pontos_validade_dias?: number
           regra_pontos?: number
+          reward_rain_colors?: string[]
           reward_rain_enabled?: boolean
+          reward_rain_opacity?: number
           setup_paid_at?: string | null
           slug?: string
           subscription_status?: string

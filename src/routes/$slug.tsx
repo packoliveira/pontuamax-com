@@ -239,14 +239,19 @@ function ClienteFlow({ loja }: { loja: Loja }) {
           <div className="relative">
             {loja.reward_rain_enabled && (
               <RewardRain
-                colors={[
-                  loja.brand_primary,
-                  loja.brand_secondary,
-                  loja.brand_accent_cashback || "#FBBF24",
-                  "#FFFFFF",
-                  "#F97316",
-                  "#F59E0B",
-                ]}
+                colors={
+                  ((loja as unknown as { reward_rain_colors?: string[] }).reward_rain_colors ?? []).length > 0
+                    ? (loja as unknown as { reward_rain_colors: string[] }).reward_rain_colors
+                    : [
+                        loja.brand_primary,
+                        loja.brand_secondary,
+                        loja.brand_accent_cashback || "#FBBF24",
+                        "#FFFFFF",
+                        "#F97316",
+                        "#F59E0B",
+                      ]
+                }
+                opacity={(loja as unknown as { reward_rain_opacity?: number }).reward_rain_opacity ?? 0.75}
               />
             )}
             <div className="relative" style={{ zIndex: 1 }}>
