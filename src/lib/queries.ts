@@ -23,7 +23,7 @@ export type StorePublic = Pick<
   | "header_title_size" | "header_title_weight"
   | "header_kicker_text" | "header_kicker_show"
   | "header_kicker_size" | "header_title_size_mobile" | "header_kicker_size_mobile"
-  | "reward_rain_enabled"
+  | "reward_rain_enabled" | "reward_rain_colors" | "reward_rain_opacity"
 >;
 
 export const myStoreQuery = () =>
