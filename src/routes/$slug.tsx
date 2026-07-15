@@ -366,7 +366,15 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
           <div className="min-w-0">
             {(loja.header_kicker_show ?? true) && (
               <div
-                className="text-[10px] uppercase tracking-[0.2em] font-semibold"
+                className={`uppercase tracking-[0.2em] font-semibold ${
+                  {
+                    xs: "text-[9px] sm:text-[10px]",
+                    sm: "text-[10px] sm:text-[11px]",
+                    md: "text-[11px] sm:text-xs",
+                  }[(loja.header_kicker_size_mobile ?? loja.header_kicker_size ?? "sm") as "xs" | "sm" | "md"]
+                } sm:${
+                  { xs: "text-[10px]", sm: "text-[11px]", md: "text-xs" }[(loja.header_kicker_size ?? "sm") as "xs" | "sm" | "md"]
+                }`}
                 style={{ color: `color-mix(in oklab, ${loja.brand_primary} 60%, #cbd5e1)` }}
               >
                 {loja.header_kicker_text || "Fidelidade"}
@@ -380,7 +388,7 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
                   lg: "text-lg sm:text-xl",
                   xl: "text-xl sm:text-2xl",
                   "2xl": "text-2xl sm:text-3xl",
-                }[loja.header_title_size ?? "md"]
+                }[(loja.header_title_size_mobile ?? loja.header_title_size ?? "md") as "sm" | "md" | "lg" | "xl" | "2xl"]
               } ${
                 {
                   normal: "font-normal",
