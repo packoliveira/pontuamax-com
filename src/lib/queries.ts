@@ -22,6 +22,7 @@ export type StorePublic = Pick<
   | "brand_vip" | "brand_price" | "text_on_dark"
   | "header_title_size" | "header_title_weight"
   | "header_kicker_text" | "header_kicker_show"
+  | "header_kicker_size" | "header_title_size_mobile" | "header_kicker_size_mobile"
 >;
 
 export const myStoreQuery = () =>

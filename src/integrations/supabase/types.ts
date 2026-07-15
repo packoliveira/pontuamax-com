@@ -1143,8 +1143,11 @@ export type Database = {
           evolution_instance: string | null
           evolution_url: string | null
           header_kicker_show: boolean
+          header_kicker_size: string | null
+          header_kicker_size_mobile: string | null
           header_kicker_text: string
           header_title_size: string
+          header_title_size_mobile: string | null
           header_title_weight: string
           id: string
           indicacao_ativa: boolean
@@ -1221,8 +1224,11 @@ export type Database = {
           evolution_instance?: string | null
           evolution_url?: string | null
           header_kicker_show?: boolean
+          header_kicker_size?: string | null
+          header_kicker_size_mobile?: string | null
           header_kicker_text?: string
           header_title_size?: string
+          header_title_size_mobile?: string | null
           header_title_weight?: string
           id?: string
           indicacao_ativa?: boolean
@@ -1299,8 +1305,11 @@ export type Database = {
           evolution_instance?: string | null
           evolution_url?: string | null
           header_kicker_show?: boolean
+          header_kicker_size?: string | null
+          header_kicker_size_mobile?: string | null
           header_kicker_text?: string
           header_title_size?: string
+          header_title_size_mobile?: string | null
           header_title_weight?: string
           id?: string
           indicacao_ativa?: boolean

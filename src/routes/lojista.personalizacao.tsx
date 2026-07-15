@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RotateCcw } from "lucide-react";
+import { Download, Upload, Smartphone, Monitor, Wallet, Coins, Gift, Sparkles } from "lucide-react";
 import {
   AssetUploader,
   ColorPresets,
@@ -42,6 +43,7 @@ const DEFAULT_TEXT_ON_DARK = "#ffffff";
 const DEFAULT_KICKER_TEXT = "Fidelidade";
 const DEFAULT_TITLE_SIZE: "sm" | "md" | "lg" | "xl" | "2xl" = "md";
 const DEFAULT_TITLE_WEIGHT: "normal" | "semibold" | "bold" | "black" = "bold";
+const DEFAULT_KICKER_SIZE: "xs" | "sm" | "md" = "sm";
 
 const BG_PRESETS: Array<{ label: string; mode: "dark" | "light" | "custom"; c1: string; c2: string }> = [
   { label: "Midnight (padrão)", mode: "dark", c1: "#0B1020", c2: "#1e1b4b" },
@@ -59,6 +61,27 @@ function hexLuminance(hex: string): number {
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+/** Relative luminance para WCAG (0..1). */
+function relLuminance(hex: string): number {
+  const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!m) return 0;
+  let h = m[1];
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const toLin = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const r = toLin(parseInt(h.slice(0, 2), 16));
+  const g = toLin(parseInt(h.slice(2, 4), 16));
+  const b = toLin(parseInt(h.slice(4, 6), 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrastRatio(a: string, b: string): number {
+  const la = relLuminance(a);
+  const lb = relLuminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
 /** Extrai o path interno do bucket "store-assets" a partir de uma URL assinada.
@@ -102,6 +125,8 @@ function PersonalizacaoPage() {
   const [kickerShow, setKickerShow] = useState(true);
   const [titleSize, setTitleSize] = useState<"sm" | "md" | "lg" | "xl" | "2xl">(DEFAULT_TITLE_SIZE);
   const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(DEFAULT_TITLE_WEIGHT);
+  const [kickerSize, setKickerSize] = useState<"xs" | "sm" | "md">(DEFAULT_KICKER_SIZE);
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
 
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
@@ -139,6 +164,7 @@ function PersonalizacaoPage() {
       setKickerShow((raw.header_kicker_show as boolean) ?? true);
       setTitleSize(((raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
       setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
+      setKickerSize(((raw.header_kicker_size as "xs" | "sm" | "md") ?? DEFAULT_KICKER_SIZE));
     }
   }, [loja]);
 
@@ -182,6 +208,7 @@ function PersonalizacaoPage() {
           header_title_weight: titleWeight,
           header_kicker_text: kickerText,
           header_kicker_show: kickerShow,
+          header_kicker_size: kickerSize,
         },
       });
 
@@ -227,6 +254,7 @@ function PersonalizacaoPage() {
     setKickerShow(true);
     setTitleSize(DEFAULT_TITLE_SIZE);
     setTitleWeight(DEFAULT_TITLE_WEIGHT);
+    setKickerSize(DEFAULT_KICKER_SIZE);
     toast.info("Valores restaurados. Clique em Salvar para aplicar.");
   };
 
@@ -241,6 +269,78 @@ function PersonalizacaoPage() {
     }
     return null;
   })();
+
+  // Avisos de contraste extras para texto sobre fundo escuro e CTA
+  const pageBg = bgMode === "custom" ? bgColor1 : bgMode === "light" ? "#f8fafc" : "#0B1020";
+  const contrastTextOnDark = contrastRatio(textOnDark || "#ffffff", pageBg);
+  const ctaBg = brandCta || cor1;
+  const contrastCta = contrastRatio(textOnDark || "#ffffff", ctaBg);
+  const contrastAlerts = [
+    contrastTextOnDark < 4.5
+      ? `Texto sobre fundo escuro tem contraste ${contrastTextOnDark.toFixed(2)}:1 (mínimo recomendado 4.5:1).`
+      : null,
+    contrastCta < 3
+      ? `Botão Resgatar (CTA) tem contraste ${contrastCta.toFixed(2)}:1 com o texto (mínimo 3:1 para textos grandes).`
+      : null,
+  ].filter(Boolean) as string[];
+
+  // Exportar / importar tema
+  const exportTheme = () => {
+    const theme = {
+      version: 1,
+      brand_primary: cor1,
+      brand_secondary: cor2,
+      bg_mode: bgMode,
+      bg_color_1: bgColor1,
+      bg_color_2: bgColor2,
+      brand_accent_points: accentPoints,
+      brand_accent_cashback: accentCashback,
+      brand_cta: brandCta,
+      brand_vip: brandVip,
+      brand_price: brandPrice,
+      text_on_dark: textOnDark,
+      header_title_size: titleSize,
+      header_title_weight: titleWeight,
+      header_kicker_text: kickerText,
+      header_kicker_show: kickerShow,
+      header_kicker_size: kickerSize,
+    };
+    const blob = new Blob([JSON.stringify(theme, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tema-${loja?.slug || "loja"}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Tema exportado");
+  };
+  const importTheme = async (file: File) => {
+    try {
+      const text = await file.text();
+      const t = JSON.parse(text) as Record<string, unknown>;
+      const s = (k: string, fb: string) => (typeof t[k] === "string" ? (t[k] as string) : fb);
+      const b = (k: string, fb: boolean) => (typeof t[k] === "boolean" ? (t[k] as boolean) : fb);
+      setCor1(s("brand_primary", cor1));
+      setCor2(s("brand_secondary", cor2));
+      setBgMode((s("bg_mode", bgMode) as "dark" | "light" | "custom"));
+      setBgColor1(s("bg_color_1", bgColor1));
+      setBgColor2(s("bg_color_2", bgColor2));
+      setAccentPoints(s("brand_accent_points", accentPoints));
+      setAccentCashback(s("brand_accent_cashback", accentCashback));
+      setBrandCta(s("brand_cta", brandCta));
+      setBrandVip(s("brand_vip", brandVip));
+      setBrandPrice(s("brand_price", brandPrice));
+      setTextOnDark(s("text_on_dark", textOnDark));
+      setTitleSize(s("header_title_size", titleSize) as typeof titleSize);
+      setTitleWeight(s("header_title_weight", titleWeight) as typeof titleWeight);
+      setKickerText(s("header_kicker_text", kickerText));
+      setKickerShow(b("header_kicker_show", kickerShow));
+      setKickerSize(s("header_kicker_size", kickerSize) as typeof kickerSize);
+      toast.success("Tema importado. Clique em Salvar para aplicar.");
+    } catch {
+      toast.error("Arquivo de tema inválido.");
+    }
+  };
 
   const ResetButton = ({ onReset, disabled }: { onReset: () => void; disabled?: boolean }) => (
     <Button
@@ -474,15 +574,27 @@ function PersonalizacaoPage() {
             <CardContent className="space-y-5">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {([
-                  { label: "Saldo de pontos", val: accentPoints, set: setAccentPoints, hint: "Cor do ícone e do 'pts'" },
-                  { label: "Saldo de cashback", val: accentCashback, set: setAccentCashback, hint: "Ícone e botão de cashback" },
-                  { label: "Botão Resgatar (CTA)", val: brandCta, set: setBrandCta, hint: "Vazio = gradiente das cores da marca" },
-                  { label: "Selo VIP / nível", val: brandVip, set: setBrandVip, hint: "Chip do nível (Bronze/Prata/Ouro)" },
-                  { label: "Preço / valor R$", val: brandPrice, set: setBrandPrice, hint: "Realce em valores monetários" },
-                  { label: "Texto sobre fundo escuro", val: textOnDark, set: setTextOnDark, hint: "Nome da loja, saldos, títulos" },
+                  { label: "Saldo de pontos", val: accentPoints, set: setAccentPoints, def: DEFAULT_ACCENT_POINTS, hint: "Cor do ícone e do 'pts'" },
+                  { label: "Saldo de cashback", val: accentCashback, set: setAccentCashback, def: DEFAULT_ACCENT_CASHBACK, hint: "Ícone e botão de cashback" },
+                  { label: "Botão Resgatar (CTA)", val: brandCta, set: setBrandCta, def: "", hint: "Vazio = gradiente das cores da marca" },
+                  { label: "Selo VIP / nível", val: brandVip, set: setBrandVip, def: DEFAULT_VIP, hint: "Chip do nível (Bronze/Prata/Ouro)" },
+                  { label: "Preço / valor R$", val: brandPrice, set: setBrandPrice, def: DEFAULT_PRICE, hint: "Realce em valores monetários" },
+                  { label: "Texto sobre fundo escuro", val: textOnDark, set: setTextOnDark, def: DEFAULT_TEXT_ON_DARK, hint: "Nome da loja, saldos, títulos" },
                 ] as const).map((c) => (
                   <div key={c.label} className="space-y-1">
-                    <Label className="text-xs">{c.label}</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">{c.label}</Label>
+                      {c.val !== c.def && (
+                        <button
+                          type="button"
+                          onClick={() => c.set(c.def)}
+                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                          title="Restaurar padrão desta cor"
+                        >
+                          <RotateCcw className="h-3 w-3" /> reset
+                        </button>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <Input
                         type="color"
@@ -501,12 +613,27 @@ function PersonalizacaoPage() {
                 ))}
               </div>
 
+              {contrastAlerts.length > 0 && (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 space-y-1">
+                  {contrastAlerts.map((msg) => (
+                    <div key={msg}>⚠ {msg}</div>
+                  ))}
+                </div>
+              )}
+
               <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
                 <div className="text-sm font-semibold text-[#0F172A]">Cabeçalho da página do cliente</div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs">Texto acima do nome</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Texto acima do nome</Label>
+                      {kickerText !== DEFAULT_KICKER_TEXT && (
+                        <button type="button" onClick={() => setKickerText(DEFAULT_KICKER_TEXT)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                          <RotateCcw className="h-3 w-3" /> reset
+                        </button>
+                      )}
+                    </div>
                     <Input
                       placeholder="Ex.: Fidelidade, Clube VIP, Recompensas..."
                       value={kickerText}
@@ -523,7 +650,14 @@ function PersonalizacaoPage() {
                     </label>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Tamanho do nome da loja</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Tamanho do nome da loja</Label>
+                      {titleSize !== DEFAULT_TITLE_SIZE && (
+                        <button type="button" onClick={() => setTitleSize(DEFAULT_TITLE_SIZE)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                          <RotateCcw className="h-3 w-3" /> reset
+                        </button>
+                      )}
+                    </div>
                     <select
                       value={titleSize}
                       onChange={(e) => setTitleSize(e.target.value as typeof titleSize)}
@@ -537,7 +671,14 @@ function PersonalizacaoPage() {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Peso do nome da loja</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Peso do nome da loja</Label>
+                      {titleWeight !== DEFAULT_TITLE_WEIGHT && (
+                        <button type="button" onClick={() => setTitleWeight(DEFAULT_TITLE_WEIGHT)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                          <RotateCcw className="h-3 w-3" /> reset
+                        </button>
+                      )}
+                    </div>
                     <select
                       value={titleWeight}
                       onChange={(e) => setTitleWeight(e.target.value as typeof titleWeight)}
@@ -549,10 +690,51 @@ function PersonalizacaoPage() {
                       <option value="black">Extra-negrito</option>
                     </select>
                   </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Tamanho do texto acima (kicker)</Label>
+                      {kickerSize !== DEFAULT_KICKER_SIZE && (
+                        <button type="button" onClick={() => setKickerSize(DEFAULT_KICKER_SIZE)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                          <RotateCcw className="h-3 w-3" /> reset
+                        </button>
+                      )}
+                    </div>
+                    <select
+                      value={kickerSize}
+                      onChange={(e) => setKickerSize(e.target.value as typeof kickerSize)}
+                      className="w-full h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm"
+                    >
+                      <option value="xs">Muito pequeno</option>
+                      <option value="sm">Pequeno (padrão)</option>
+                      <option value="md">Médio</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="rounded-lg bg-[#0a0a1a] p-4">
-                  <div className="text-[11px] text-[#94A3B8] mb-2">Prévia do cabeçalho</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[11px] text-[#94A3B8]">Prévia do cabeçalho</div>
+                    <div className="flex items-center gap-1 rounded-md bg-white/5 p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDevice("mobile")}
+                        className={`px-2 py-1 rounded text-[10px] flex items-center gap-1 ${previewDevice === "mobile" ? "bg-white/15 text-white" : "text-white/50"}`}
+                      >
+                        <Smartphone className="h-3 w-3" /> Mobile
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDevice("desktop")}
+                        className={`px-2 py-1 rounded text-[10px] flex items-center gap-1 ${previewDevice === "desktop" ? "bg-white/15 text-white" : "text-white/50"}`}
+                      >
+                        <Monitor className="h-3 w-3" /> Desktop
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    className="mx-auto transition-all"
+                    style={{ maxWidth: previewDevice === "mobile" ? 320 : "100%" }}
+                  >
                   <div className="flex items-center gap-3">
                     <div
                       className="h-11 w-11 rounded-xl flex items-center justify-center font-bold text-white"
@@ -563,15 +745,20 @@ function PersonalizacaoPage() {
                     <div className="min-w-0">
                       {kickerShow && (
                         <div
-                          className="text-[10px] uppercase tracking-[0.2em] font-semibold"
-                          style={{ color: `color-mix(in oklab, ${cor1} 60%, #cbd5e1)` }}
+                          className="uppercase tracking-[0.2em] font-semibold"
+                          style={{
+                            color: `color-mix(in oklab, ${cor1} 60%, #cbd5e1)`,
+                            fontSize: { xs: "9px", sm: "10px", md: "12px" }[kickerSize],
+                          }}
                         >
                           {kickerText || "Fidelidade"}
                         </div>
                       )}
                       <div
                         className={`leading-tight truncate ${
-                          { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", "2xl": "text-2xl" }[titleSize]
+                          previewDevice === "mobile"
+                            ? { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", "2xl": "text-2xl" }[titleSize]
+                            : { sm: "text-sm", md: "text-lg", lg: "text-xl", xl: "text-2xl", "2xl": "text-3xl" }[titleSize]
                         } ${
                           { normal: "font-normal", semibold: "font-semibold", bold: "font-bold", black: "font-black" }[titleWeight]
                         }`}
@@ -580,6 +767,74 @@ function PersonalizacaoPage() {
                         {loja.nome_fantasia}
                       </div>
                     </div>
+                  </div>
+                  </div>
+                </div>
+
+                {/* Prévia ao vivo da página de pontos */}
+                <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
+                  <div className="text-sm font-semibold text-[#0F172A]">Prévia — página de pontos</div>
+                  <div
+                    className="mx-auto rounded-2xl p-4 space-y-3 transition-all"
+                    style={{
+                      maxWidth: previewDevice === "mobile" ? 320 : "100%",
+                      background:
+                        bgMode === "custom"
+                          ? `linear-gradient(135deg, ${bgColor1}, ${bgColor2})`
+                          : bgMode === "light"
+                            ? "linear-gradient(135deg, #f8fafc, #e2e8f0)"
+                            : "linear-gradient(135deg, #0B1020, #1e1b4b)",
+                    }}
+                  >
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                        <div className="flex items-center gap-1 text-[10px]" style={{ color: textOnDark, opacity: 0.7 }}>
+                          <Coins className="h-3 w-3" style={{ color: accentPoints }} /> Seus pontos
+                        </div>
+                        <div className="mt-1 text-2xl font-bold tabular-nums" style={{ color: textOnDark }}>
+                          1.240 <span className="text-xs font-semibold" style={{ color: accentPoints }}>pts</span>
+                        </div>
+                        <div
+                          className="mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold border"
+                          style={{
+                            background: `color-mix(in oklab, ${brandVip} 18%, transparent)`,
+                            borderColor: `color-mix(in oklab, ${brandVip} 40%, transparent)`,
+                            color: `color-mix(in oklab, ${brandVip} 30%, #f1f5f9)`,
+                          }}
+                        >
+                          <Sparkles className="h-2.5 w-2.5" /> VIP Ouro
+                        </div>
+                      </div>
+                      <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                        <div className="flex items-center gap-1 text-[10px]" style={{ color: textOnDark, opacity: 0.7 }}>
+                          <Wallet className="h-3 w-3" style={{ color: accentCashback }} /> Seu cashback
+                        </div>
+                        <div className="mt-1 text-2xl font-bold tabular-nums" style={{ color: brandPrice || textOnDark }}>
+                          R$ 47,90
+                        </div>
+                        <div
+                          className="mt-2 inline-block rounded-full px-2 py-0.5 text-[9px] font-semibold border"
+                          style={{
+                            background: `color-mix(in oklab, ${accentCashback} 18%, transparent)`,
+                            borderColor: `color-mix(in oklab, ${accentCashback} 40%, transparent)`,
+                            color: `color-mix(in oklab, ${accentCashback} 25%, #ecfeff)`,
+                          }}
+                        >
+                          disponível
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="w-full rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2"
+                      style={{
+                        background: brandCta || `linear-gradient(135deg, ${cor1}, ${cor2})`,
+                        color: textOnDark,
+                        boxShadow: `0 6px 16px -6px color-mix(in oklab, ${brandCta || cor1} 60%, transparent)`,
+                      }}
+                    >
+                      <Gift className="h-4 w-4" /> Resgatar recompensa
+                    </button>
                   </div>
                 </div>
               </div>
@@ -686,6 +941,31 @@ function PersonalizacaoPage() {
               <RotateCcw className="h-4 w-4 mr-1" />
               Restaurar tudo
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={exportTheme}
+              className="rounded-xl"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Exportar tema
+            </Button>
+            <label className="inline-flex">
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void importTheme(f);
+                  e.currentTarget.value = "";
+                }}
+              />
+              <span className="inline-flex items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white px-4 h-11 text-sm font-medium cursor-pointer hover:bg-[#F8FAFC]">
+                <Upload className="h-4 w-4" /> Importar tema
+              </span>
+            </label>
           </div>
         </div>
 
