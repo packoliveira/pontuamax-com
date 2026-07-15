@@ -33,8 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText } from "lucide-react";
+import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText, Tags } from "lucide-react";
 import { Copy, ExternalLink, Link2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
@@ -185,6 +186,22 @@ function AdminDashboard() {
       </div>
 
       <QuickLinksSection />
+
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Tags className="h-4 w-4 text-primary" /> Planos de assinatura
+            </CardTitle>
+            <Button asChild size="sm">
+              <Link to="/admin/planos">Gerenciar planos</Link>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Configure preços, limites e recursos comercializados aos lojistas.
+          </p>
+        </CardHeader>
+      </Card>
 
       <Card>
         <CardHeader>
