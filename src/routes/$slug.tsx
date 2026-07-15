@@ -369,11 +369,9 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
                 className="uppercase tracking-[0.2em] font-semibold"
                 style={{
                   color: `color-mix(in oklab, ${loja.brand_primary} 60%, #cbd5e1)`,
-                  fontSize: `var(--pm-kicker-size, ${
-                    { xs: "9px", sm: "10px", md: "11px" }[
-                      (loja.header_kicker_size_mobile ?? loja.header_kicker_size ?? "sm") as "xs" | "sm" | "md"
-                    ]
-                  })`,
+                  fontSize: { xs: "9px", sm: "10px", md: "12px" }[
+                    (loja.header_kicker_size ?? "sm") as "xs" | "sm" | "md"
+                  ],
                 }}
               >
                 {loja.header_kicker_text || "Fidelidade"}
@@ -387,7 +385,7 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
                   lg: "text-lg sm:text-xl",
                   xl: "text-xl sm:text-2xl",
                   "2xl": "text-2xl sm:text-3xl",
-                }[(loja.header_title_size_mobile ?? loja.header_title_size ?? "md") as "sm" | "md" | "lg" | "xl" | "2xl"]
+                }[(loja.header_title_size ?? "md") as "sm" | "md" | "lg" | "xl" | "2xl"]
               } ${
                 {
                   normal: "font-normal",
