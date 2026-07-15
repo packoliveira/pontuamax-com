@@ -1800,6 +1800,10 @@ export type Database = {
         Args: { _store_id: string; _user_id: string }
         Returns: boolean
       }
+      is_store_owner_or_employee: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       resgatar_cashback_atomico: {
         Args: {
           p_expires_at: string
