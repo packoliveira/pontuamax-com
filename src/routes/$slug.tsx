@@ -776,15 +776,22 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
             <div className="relative p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                  <Coins className="h-3.5 w-3.5 text-indigo-400" /> Seus pontos
+                  <Coins className="h-3.5 w-3.5" style={{ color: loja.brand_accent_points || "#818cf8" }} /> Seus pontos
                 </div>
-                <div className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 bg-indigo-500/15 text-indigo-200 border border-indigo-500/30 rounded-full px-2 py-0.5">
+                <div
+                  className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 rounded-full px-2 py-0.5 border"
+                  style={{
+                    background: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 18%, transparent)`,
+                    borderColor: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 40%, transparent)`,
+                    color: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 30%, #f1f5f9)`,
+                  }}
+                >
                   <Trophy className="h-3 w-3" /> {nivel}
                 </div>
               </div>
-              <div className="text-5xl font-bold mt-3 text-white tabular-nums tracking-tight">
+              <div className="text-5xl font-bold mt-3 tabular-nums tracking-tight" style={{ color: loja.text_on_dark || "#ffffff" }}>
                 {link.pontos.toLocaleString("pt-BR")}
-                <span className="text-base text-indigo-400 font-semibold ml-2">pts</span>
+                <span className="text-base font-semibold ml-2" style={{ color: loja.brand_accent_points || "#818cf8" }}>pts</span>
               </div>
               {loja.pontos_expiracao_modo === "validade" && (
                 <div className="text-[11px] mt-2 text-slate-500">
@@ -822,14 +829,19 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
             <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl" />
             <div className="relative p-5">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                <Wallet className="h-3.5 w-3.5 text-emerald-400" /> Seu cashback
+                <Wallet className="h-3.5 w-3.5" style={{ color: loja.brand_accent_cashback || "#34d399" }} /> Seu cashback
               </div>
-              <div className="text-4xl font-bold mt-3 text-white tabular-nums tracking-tight">
+              <div className="text-4xl font-bold mt-3 tabular-nums tracking-tight" style={{ color: loja.brand_price || loja.text_on_dark || "#ffffff" }}>
                 {formatBRL(Number(link.cashback_saldo))}
               </div>
               <Button
                 size="sm"
-                className="mt-4 bg-emerald-500/15 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/25 hover:text-white transition-all"
+                className="mt-4 border transition-all hover:brightness-110"
+                style={{
+                  background: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 18%, transparent)`,
+                  borderColor: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 40%, transparent)`,
+                  color: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 25%, #ecfeff)`,
+                }}
                 disabled={Number(link.cashback_saldo) <= 0}
                 onClick={() => setCashbackModal(true)}
               >
