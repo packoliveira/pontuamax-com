@@ -1281,6 +1281,25 @@ export const confirmarResgate = createServerFn({ method: "POST" })
         },
       });
     } catch { /* ignore */ }
+    try {
+      const { notifyMerchant, resolveActorLabel } = await import("@/lib/team.functions");
+      const actor = await resolveActorLabel(context.userId, tx.data.store_id);
+      const pts = Math.abs(Number(tx.data.pontos_delta ?? 0));
+      const cb = Math.abs(Number(tx.data.cashback_delta ?? 0));
+      const partes = [
+        pts ? `${pts} pts` : null,
+        cb ? `R$ ${cb.toFixed(2)} cashback` : null,
+      ].filter(Boolean).join(" • ");
+      await notifyMerchant({
+        storeId: tx.data.store_id,
+        actorUserId: context.userId,
+        actorLabel: actor,
+        tipo: "resgate.confirmado",
+        titulo: `Resgate confirmado${actor ? ` por ${actor}` : ""}`,
+        mensagem: `${profile?.full_name ?? "Cliente"} — ${product?.nome ?? tx.data.tipo}${partes ? " • " + partes : ""}`,
+        metadata: { transaction_id: tx.data.id, voucher: tx.data.voucher_code, pontos: pts, cashback: cb },
+      });
+    } catch { /* ignore */ }
     return {
       ok: true,
       comprovante: {
@@ -1375,6 +1394,23 @@ export const validarVoucher = createServerFn({ method: "POST" })
         },
       });
     } catch { /* ignore */ }
+    try {
+      const { notifyMerchant, resolveActorLabel } = await import("@/lib/team.functions");
+      const actor = await resolveActorLabel(context.userId, store.data.id);
+      const pts = Math.abs(Number(tx.data.pontos_delta || 0));
+      const cb = Math.abs(Number(tx.data.cashback_delta || 0));
+      const partes = [pts ? `${pts} pts` : null, cb ? `R$ ${cb.toFixed(2)} cashback` : null].filter(Boolean).join(" • ");
+      const clienteNome = (tx.data.profiles as { full_name: string | null } | null)?.full_name ?? "Cliente";
+      await notifyMerchant({
+        storeId: store.data.id,
+        actorUserId: context.userId,
+        actorLabel: actor,
+        tipo: "voucher.validado",
+        titulo: `Voucher validado${actor ? ` por ${actor}` : ""}`,
+        mensagem: `${clienteNome} — ${tx.data.voucher_code}${partes ? " • " + partes : ""}`,
+        metadata: { transaction_id: tx.data.id, voucher: tx.data.voucher_code, pontos: pts, cashback: cb },
+      });
+    } catch { /* ignore */ }
     return {
       ok: true,
       voucher: tx.data.voucher_code,
@@ -1449,6 +1485,22 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
           pontos_devolvidos: -Number(tx.data.pontos_delta || 0),
           cashback_devolvido: -Number(tx.data.cashback_delta || 0),
         },
+      });
+    } catch { /* ignore */ }
+    try {
+      const { notifyMerchant, resolveActorLabel } = await import("@/lib/team.functions");
+      const actor = await resolveActorLabel(context.userId, tx.data.store_id);
+      const pts = -Number(tx.data.pontos_delta || 0);
+      const cb = -Number(tx.data.cashback_delta || 0);
+      const partes = [pts ? `${pts} pts devolvidos` : null, cb ? `R$ ${cb.toFixed(2)} cashback devolvido` : null].filter(Boolean).join(" • ");
+      await notifyMerchant({
+        storeId: tx.data.store_id,
+        actorUserId: context.userId,
+        actorLabel: actor,
+        tipo: "voucher.cancelado",
+        titulo: `Voucher cancelado${actor ? ` por ${actor}` : ""}`,
+        mensagem: `${tx.data.tipo}${partes ? " • " + partes : ""}`,
+        metadata: { transaction_id: tx.data.id, pontos: pts, cashback: cb },
       });
     } catch { /* ignore */ }
     return { ok: true };
