@@ -53,6 +53,79 @@ export async function logEmployeeAction(params: {
   }
 }
 
+/** Cria uma notificação para o lojista. Não lança em erro. */
+export async function notifyMerchant(params: {
+  storeId: string;
+  actorUserId?: string | null;
+  actorLabel?: string | null;
+  tipo: string;
+  titulo: string;
+  mensagem?: string | null;
+  metadata?: Record<string, unknown>;
+}) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("merchant_notifications").insert({
+      store_id: params.storeId,
+      actor_user_id: params.actorUserId ?? null,
+      actor_label: params.actorLabel ?? null,
+      tipo: params.tipo,
+      titulo: params.titulo,
+      mensagem: params.mensagem ?? null,
+      metadata: (params.metadata ?? {}) as never,
+    });
+  } catch (e) {
+    console.warn("[notify] falha", params.tipo, (e as Error).message);
+  }
+}
+
+/** Resolve rótulo do funcionário (nome/email) para exibição em notificações. */
+export async function resolveActorLabel(userId: string, storeId: string): Promise<string | null> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("store_employees")
+      .select("nome, email")
+      .eq("user_id", userId)
+      .eq("store_id", storeId)
+      .maybeSingle();
+    if (data) return data.nome || data.email || null;
+  } catch { /* ignore */ }
+  return null;
+}
+
+// ============== Notificações do lojista (API) ==============
+
+export const listarNotificacoesLojista = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const storeId = await getOwnedStoreId(context);
+    const { data, error } = await context.supabase
+      .from("merchant_notifications")
+      .select("id, tipo, titulo, mensagem, metadata, actor_label, read_at, created_at")
+      .eq("store_id", storeId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    const unread = (data ?? []).filter((n: any) => !n.read_at).length;
+    return { items: data ?? [], unread };
+  });
+
+export const marcarNotificacoesLidas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ ids: z.array(z.string().uuid()).optional() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const storeId = await getOwnedStoreId(context);
+    const q = context.supabase
+      .from("merchant_notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("store_id", storeId)
+      .is("read_at", null);
+    const { error } = data.ids && data.ids.length > 0 ? await q.in("id", data.ids) : await q;
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // ============== Catálogos ==============
 
 export const listRolesAndPermissions = createServerFn({ method: "GET" })
@@ -501,6 +574,15 @@ export const registrarLoginFuncionario = createServerFn({ method: "POST" })
       employeeId: emp.id,
       targetLabel: emp.email,
       meta: { nome: emp.nome, at: new Date().toISOString() },
+    });
+    await notifyMerchant({
+      storeId: emp.store_id,
+      actorUserId: context.userId,
+      actorLabel: emp.nome || emp.email || null,
+      tipo: "employee.login",
+      titulo: `Funcionário conectado: ${emp.nome || emp.email}`,
+      mensagem: `Login em ${new Date().toLocaleString("pt-BR")}`,
+      metadata: { employee_id: emp.id, email: emp.email },
     });
     return { ok: true };
   });

@@ -606,6 +606,60 @@ export type Database = {
           },
         ]
       }
+      merchant_notifications: {
+        Row: {
+          actor_label: string | null
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          mensagem: string | null
+          metadata: Json
+          read_at: string | null
+          store_id: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          actor_label?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          mensagem?: string | null
+          metadata?: Json
+          read_at?: string | null
+          store_id: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          actor_label?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          mensagem?: string | null
+          metadata?: Json
+          read_at?: string | null
+          store_id?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_notifications_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_notifications_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_logs: {
         Row: {
           client_user_id: string
