@@ -575,6 +575,15 @@ export const registrarLoginFuncionario = createServerFn({ method: "POST" })
       targetLabel: emp.email,
       meta: { nome: emp.nome, at: new Date().toISOString() },
     });
+    await notifyMerchant({
+      storeId: emp.store_id,
+      actorUserId: context.userId,
+      actorLabel: emp.nome || emp.email || null,
+      tipo: "employee.login",
+      titulo: `Funcionário conectado: ${emp.nome || emp.email}`,
+      mensagem: `Login em ${new Date().toLocaleString("pt-BR")}`,
+      metadata: { employee_id: emp.id, email: emp.email },
+    });
     return { ok: true };
   });
 
