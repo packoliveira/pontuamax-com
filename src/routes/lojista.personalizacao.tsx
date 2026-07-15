@@ -34,6 +34,15 @@ const DEFAULT_BG_MODE: "dark" | "light" | "custom" = "dark";
 const DEFAULT_BG1 = "#0B1020";
 const DEFAULT_BG2 = "#1e1b4b";
 
+const DEFAULT_ACCENT_POINTS = "#818cf8";
+const DEFAULT_ACCENT_CASHBACK = "#22c55e";
+const DEFAULT_VIP = "#a78bfa";
+const DEFAULT_PRICE = "#22c55e";
+const DEFAULT_TEXT_ON_DARK = "#ffffff";
+const DEFAULT_KICKER_TEXT = "Fidelidade";
+const DEFAULT_TITLE_SIZE: "sm" | "md" | "lg" | "xl" | "2xl" = "md";
+const DEFAULT_TITLE_WEIGHT: "normal" | "semibold" | "bold" | "black" = "bold";
+
 const BG_PRESETS: Array<{ label: string; mode: "dark" | "light" | "custom"; c1: string; c2: string }> = [
   { label: "Midnight (padrão)", mode: "dark", c1: "#0B1020", c2: "#1e1b4b" },
   { label: "Claro suave", mode: "light", c1: "#f8fafc", c2: "#e2e8f0" },
@@ -82,6 +91,18 @@ function PersonalizacaoPage() {
   const [bgColor1, setBgColor1] = useState<string>(DEFAULT_BG1);
   const [bgColor2, setBgColor2] = useState<string>(DEFAULT_BG2);
 
+  // Cores de apoio + cabeçalho personalizável da página do cliente
+  const [accentPoints, setAccentPoints] = useState(DEFAULT_ACCENT_POINTS);
+  const [accentCashback, setAccentCashback] = useState(DEFAULT_ACCENT_CASHBACK);
+  const [brandCta, setBrandCta] = useState<string>("");
+  const [brandVip, setBrandVip] = useState(DEFAULT_VIP);
+  const [brandPrice, setBrandPrice] = useState(DEFAULT_PRICE);
+  const [textOnDark, setTextOnDark] = useState(DEFAULT_TEXT_ON_DARK);
+  const [kickerText, setKickerText] = useState(DEFAULT_KICKER_TEXT);
+  const [kickerShow, setKickerShow] = useState(true);
+  const [titleSize, setTitleSize] = useState<"sm" | "md" | "lg" | "xl" | "2xl">(DEFAULT_TITLE_SIZE);
+  const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(DEFAULT_TITLE_WEIGHT);
+
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
     logo: "",
@@ -107,6 +128,17 @@ function PersonalizacaoPage() {
       setBgMode(((loja as { bg_mode?: string }).bg_mode as "dark" | "light" | "custom") ?? DEFAULT_BG_MODE);
       setBgColor1((loja as { bg_color_1?: string | null }).bg_color_1 ?? DEFAULT_BG1);
       setBgColor2((loja as { bg_color_2?: string | null }).bg_color_2 ?? DEFAULT_BG2);
+      const raw = loja as Record<string, unknown>;
+      setAccentPoints((raw.brand_accent_points as string) || DEFAULT_ACCENT_POINTS);
+      setAccentCashback((raw.brand_accent_cashback as string) || DEFAULT_ACCENT_CASHBACK);
+      setBrandCta((raw.brand_cta as string) || "");
+      setBrandVip((raw.brand_vip as string) || DEFAULT_VIP);
+      setBrandPrice((raw.brand_price as string) || DEFAULT_PRICE);
+      setTextOnDark((raw.text_on_dark as string) || DEFAULT_TEXT_ON_DARK);
+      setKickerText((raw.header_kicker_text as string) ?? DEFAULT_KICKER_TEXT);
+      setKickerShow((raw.header_kicker_show as boolean) ?? true);
+      setTitleSize(((raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
+      setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
     }
   }, [loja]);
 
@@ -140,6 +172,16 @@ function PersonalizacaoPage() {
           bg_mode: bgMode,
           bg_color_1: bgMode === "custom" ? bgColor1 : null,
           bg_color_2: bgMode === "custom" ? bgColor2 : null,
+          brand_accent_points: accentPoints || null,
+          brand_accent_cashback: accentCashback || null,
+          brand_cta: brandCta || null,
+          brand_vip: brandVip || null,
+          brand_price: brandPrice || null,
+          text_on_dark: textOnDark || null,
+          header_title_size: titleSize,
+          header_title_weight: titleWeight,
+          header_kicker_text: kickerText,
+          header_kicker_show: kickerShow,
         },
       });
 
@@ -175,6 +217,16 @@ function PersonalizacaoPage() {
     setBgMode(DEFAULT_BG_MODE);
     setBgColor1(DEFAULT_BG1);
     setBgColor2(DEFAULT_BG2);
+    setAccentPoints(DEFAULT_ACCENT_POINTS);
+    setAccentCashback(DEFAULT_ACCENT_CASHBACK);
+    setBrandCta("");
+    setBrandVip(DEFAULT_VIP);
+    setBrandPrice(DEFAULT_PRICE);
+    setTextOnDark(DEFAULT_TEXT_ON_DARK);
+    setKickerText(DEFAULT_KICKER_TEXT);
+    setKickerShow(true);
+    setTitleSize(DEFAULT_TITLE_SIZE);
+    setTitleWeight(DEFAULT_TITLE_WEIGHT);
     toast.info("Valores restaurados. Clique em Salvar para aplicar.");
   };
 
@@ -396,6 +448,144 @@ function PersonalizacaoPage() {
               <ColorPresets onPick={(a, b) => { setCor1(a); setCor2(b); }} />
               <p className="text-xs text-[#64748B]">
                 As cores pintam a aura de fundo, o logo, a barra de progresso e o botão de resgate na página do cliente.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#22C55E] via-[#F59E0B] to-[#6D28D9]" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base text-[#0F172A]">Cores de apoio & cabeçalho</CardTitle>
+              <ResetButton
+                onReset={() => {
+                  setAccentPoints(DEFAULT_ACCENT_POINTS);
+                  setAccentCashback(DEFAULT_ACCENT_CASHBACK);
+                  setBrandCta("");
+                  setBrandVip(DEFAULT_VIP);
+                  setBrandPrice(DEFAULT_PRICE);
+                  setTextOnDark(DEFAULT_TEXT_ON_DARK);
+                  setKickerText(DEFAULT_KICKER_TEXT);
+                  setKickerShow(true);
+                  setTitleSize(DEFAULT_TITLE_SIZE);
+                  setTitleWeight(DEFAULT_TITLE_WEIGHT);
+                }}
+              />
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {([
+                  { label: "Saldo de pontos", val: accentPoints, set: setAccentPoints, hint: "Cor do ícone e do 'pts'" },
+                  { label: "Saldo de cashback", val: accentCashback, set: setAccentCashback, hint: "Ícone e botão de cashback" },
+                  { label: "Botão Resgatar (CTA)", val: brandCta, set: setBrandCta, hint: "Vazio = gradiente das cores da marca" },
+                  { label: "Selo VIP / nível", val: brandVip, set: setBrandVip, hint: "Chip do nível (Bronze/Prata/Ouro)" },
+                  { label: "Preço / valor R$", val: brandPrice, set: setBrandPrice, hint: "Realce em valores monetários" },
+                  { label: "Texto sobre fundo escuro", val: textOnDark, set: setTextOnDark, hint: "Nome da loja, saldos, títulos" },
+                ] as const).map((c) => (
+                  <div key={c.label} className="space-y-1">
+                    <Label className="text-xs">{c.label}</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={c.val || "#000000"}
+                        onChange={(e) => c.set(e.target.value)}
+                        className="w-14 h-10 p-1"
+                      />
+                      <Input
+                        placeholder="#RRGGBB"
+                        value={c.val}
+                        onChange={(e) => c.set(e.target.value)}
+                      />
+                    </div>
+                    <div className="text-[11px] text-[#94A3B8]">{c.hint}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
+                <div className="text-sm font-semibold text-[#0F172A]">Cabeçalho da página do cliente</div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Texto acima do nome</Label>
+                    <Input
+                      placeholder="Ex.: Fidelidade, Clube VIP, Recompensas..."
+                      value={kickerText}
+                      onChange={(e) => setKickerText(e.target.value.slice(0, 40))}
+                      maxLength={40}
+                    />
+                    <label className="flex items-center gap-2 text-xs text-[#475569] mt-1">
+                      <input
+                        type="checkbox"
+                        checked={kickerShow}
+                        onChange={(e) => setKickerShow(e.target.checked)}
+                      />
+                      Mostrar este texto
+                    </label>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Tamanho do nome da loja</Label>
+                    <select
+                      value={titleSize}
+                      onChange={(e) => setTitleSize(e.target.value as typeof titleSize)}
+                      className="w-full h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm"
+                    >
+                      <option value="sm">Pequeno</option>
+                      <option value="md">Médio (padrão)</option>
+                      <option value="lg">Grande</option>
+                      <option value="xl">Muito grande</option>
+                      <option value="2xl">Máximo</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Peso do nome da loja</Label>
+                    <select
+                      value={titleWeight}
+                      onChange={(e) => setTitleWeight(e.target.value as typeof titleWeight)}
+                      className="w-full h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="semibold">Semi-negrito</option>
+                      <option value="bold">Negrito (padrão)</option>
+                      <option value="black">Extra-negrito</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="rounded-lg bg-[#0a0a1a] p-4">
+                  <div className="text-[11px] text-[#94A3B8] mb-2">Prévia do cabeçalho</div>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-11 w-11 rounded-xl flex items-center justify-center font-bold text-white"
+                      style={{ background: `linear-gradient(135deg, ${cor1}, ${cor2})` }}
+                    >
+                      {(loja.nome_fantasia || "L").charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      {kickerShow && (
+                        <div
+                          className="text-[10px] uppercase tracking-[0.2em] font-semibold"
+                          style={{ color: `color-mix(in oklab, ${cor1} 60%, #cbd5e1)` }}
+                        >
+                          {kickerText || "Fidelidade"}
+                        </div>
+                      )}
+                      <div
+                        className={`leading-tight truncate ${
+                          { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", "2xl": "text-2xl" }[titleSize]
+                        } ${
+                          { normal: "font-normal", semibold: "font-semibold", bold: "font-bold", black: "font-black" }[titleWeight]
+                        }`}
+                        style={{ color: textOnDark || "#ffffff" }}
+                      >
+                        {loja.nome_fantasia}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#64748B]">
+                Essas cores aparecem na página que seus clientes veem — saldo de pontos, cashback, botão de resgatar, selo VIP, preços em R$ e o cabeçalho com o nome da sua loja.
               </p>
             </CardContent>
           </Card>

@@ -154,6 +154,17 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         pontos_validade_dias: z.number().int().min(1).max(3650).optional(),
         pontos_decaimento_dias: z.number().int().min(1).max(365).optional(),
         pontos_decaimento_valor: z.number().int().min(1).max(100_000).optional(),
+        // Personalização estendida da página pública do cliente
+        brand_accent_points: z.string().max(20).optional().nullable(),
+        brand_accent_cashback: z.string().max(20).optional().nullable(),
+        brand_cta: z.string().max(20).optional().nullable(),
+        brand_vip: z.string().max(20).optional().nullable(),
+        brand_price: z.string().max(20).optional().nullable(),
+        text_on_dark: z.string().max(20).optional().nullable(),
+        header_title_size: z.enum(["sm", "md", "lg", "xl", "2xl"]).optional(),
+        header_title_weight: z.enum(["normal", "semibold", "bold", "black"]).optional(),
+        header_kicker_text: z.string().max(40).optional(),
+        header_kicker_show: z.boolean().optional(),
       })
       .parse(input),
   )
@@ -2291,7 +2302,7 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
 
 // -------- Public lookups (no auth) with safe fields only --------
 const PUBLIC_STORE_SELECT =
-  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, banner_mobile_fit, banner_mobile_position_x, banner_mobile_position_y, banner_mobile_zoom, brand_primary, brand_secondary, bg_mode, bg_color_1, bg_color_2, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados";
+  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, banner_mobile_fit, banner_mobile_position_x, banner_mobile_position_y, banner_mobile_zoom, brand_primary, brand_secondary, bg_mode, bg_color_1, bg_color_2, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados, brand_accent_points, brand_accent_cashback, brand_cta, brand_vip, brand_price, text_on_dark, header_title_size, header_title_weight, header_kicker_text, header_kicker_show";
 
 export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))

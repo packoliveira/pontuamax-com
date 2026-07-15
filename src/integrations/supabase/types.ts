@@ -1128,8 +1128,13 @@ export type Database = {
           bg_mode: string
           bonus_indicado: number
           bonus_indicador: number
+          brand_accent_cashback: string | null
+          brand_accent_points: string | null
+          brand_cta: string | null
+          brand_price: string | null
           brand_primary: string
           brand_secondary: string
+          brand_vip: string | null
           cancelled_at: string | null
           cnpj: string | null
           created_at: string
@@ -1137,6 +1142,10 @@ export type Database = {
           evolution_apikey: string | null
           evolution_instance: string | null
           evolution_url: string | null
+          header_kicker_show: boolean
+          header_kicker_text: string
+          header_title_size: string
+          header_title_weight: string
           id: string
           indicacao_ativa: boolean
           instagram_handle: string | null
@@ -1174,6 +1183,7 @@ export type Database = {
           slug: string
           subscription_status: string
           telefone: string | null
+          text_on_dark: string | null
           voucher_mostrar_expirados: boolean
           voucher_validade_dias: number
           voucher_visivel_apos_uso: boolean
@@ -1196,8 +1206,13 @@ export type Database = {
           bg_mode?: string
           bonus_indicado?: number
           bonus_indicador?: number
+          brand_accent_cashback?: string | null
+          brand_accent_points?: string | null
+          brand_cta?: string | null
+          brand_price?: string | null
           brand_primary?: string
           brand_secondary?: string
+          brand_vip?: string | null
           cancelled_at?: string | null
           cnpj?: string | null
           created_at?: string
@@ -1205,6 +1220,10 @@ export type Database = {
           evolution_apikey?: string | null
           evolution_instance?: string | null
           evolution_url?: string | null
+          header_kicker_show?: boolean
+          header_kicker_text?: string
+          header_title_size?: string
+          header_title_weight?: string
           id?: string
           indicacao_ativa?: boolean
           instagram_handle?: string | null
@@ -1242,6 +1261,7 @@ export type Database = {
           slug: string
           subscription_status?: string
           telefone?: string | null
+          text_on_dark?: string | null
           voucher_mostrar_expirados?: boolean
           voucher_validade_dias?: number
           voucher_visivel_apos_uso?: boolean
@@ -1264,8 +1284,13 @@ export type Database = {
           bg_mode?: string
           bonus_indicado?: number
           bonus_indicador?: number
+          brand_accent_cashback?: string | null
+          brand_accent_points?: string | null
+          brand_cta?: string | null
+          brand_price?: string | null
           brand_primary?: string
           brand_secondary?: string
+          brand_vip?: string | null
           cancelled_at?: string | null
           cnpj?: string | null
           created_at?: string
@@ -1273,6 +1298,10 @@ export type Database = {
           evolution_apikey?: string | null
           evolution_instance?: string | null
           evolution_url?: string | null
+          header_kicker_show?: boolean
+          header_kicker_text?: string
+          header_title_size?: string
+          header_title_weight?: string
           id?: string
           indicacao_ativa?: boolean
           instagram_handle?: string | null
@@ -1310,6 +1339,7 @@ export type Database = {
           slug?: string
           subscription_status?: string
           telefone?: string | null
+          text_on_dark?: string | null
           voucher_mostrar_expirados?: boolean
           voucher_validade_dias?: number
           voucher_visivel_apos_uso?: boolean

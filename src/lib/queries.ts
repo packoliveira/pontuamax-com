@@ -18,6 +18,10 @@ export type StorePublic = Pick<
   | "pontos_expiracao_modo" | "pontos_validade_dias"
   | "pontos_decaimento_dias" | "pontos_decaimento_valor"
   | "voucher_visivel_apos_uso" | "voucher_mostrar_expirados"
+  | "brand_accent_points" | "brand_accent_cashback" | "brand_cta"
+  | "brand_vip" | "brand_price" | "text_on_dark"
+  | "header_title_size" | "header_title_weight"
+  | "header_kicker_text" | "header_kicker_show"
 >;
 
 export const myStoreQuery = () =>

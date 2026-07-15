@@ -364,8 +364,35 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
             )}
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-indigo-300/80 font-semibold">Fidelidade</div>
-            <div className="font-bold text-base sm:text-lg leading-tight text-white truncate">{loja.nome_fantasia}</div>
+            {(loja.header_kicker_show ?? true) && (
+              <div
+                className="text-[10px] uppercase tracking-[0.2em] font-semibold"
+                style={{ color: `color-mix(in oklab, ${loja.brand_primary} 60%, #cbd5e1)` }}
+              >
+                {loja.header_kicker_text || "Fidelidade"}
+              </div>
+            )}
+            <div
+              className={`leading-tight truncate ${
+                {
+                  sm: "text-sm",
+                  md: "text-base sm:text-lg",
+                  lg: "text-lg sm:text-xl",
+                  xl: "text-xl sm:text-2xl",
+                  "2xl": "text-2xl sm:text-3xl",
+                }[loja.header_title_size ?? "md"]
+              } ${
+                {
+                  normal: "font-normal",
+                  semibold: "font-semibold",
+                  bold: "font-bold",
+                  black: "font-black",
+                }[loja.header_title_weight ?? "bold"]
+              }`}
+              style={{ color: loja.text_on_dark || "#ffffff" }}
+            >
+              {loja.nome_fantasia}
+            </div>
           </div>
         </div>
         {showLogout && (
@@ -749,15 +776,22 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
             <div className="relative p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                  <Coins className="h-3.5 w-3.5 text-indigo-400" /> Seus pontos
+                  <Coins className="h-3.5 w-3.5" style={{ color: loja.brand_accent_points || "#818cf8" }} /> Seus pontos
                 </div>
-                <div className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 bg-indigo-500/15 text-indigo-200 border border-indigo-500/30 rounded-full px-2 py-0.5">
+                <div
+                  className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 rounded-full px-2 py-0.5 border"
+                  style={{
+                    background: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 18%, transparent)`,
+                    borderColor: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 40%, transparent)`,
+                    color: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 30%, #f1f5f9)`,
+                  }}
+                >
                   <Trophy className="h-3 w-3" /> {nivel}
                 </div>
               </div>
-              <div className="text-5xl font-bold mt-3 text-white tabular-nums tracking-tight">
+              <div className="text-5xl font-bold mt-3 tabular-nums tracking-tight" style={{ color: loja.text_on_dark || "#ffffff" }}>
                 {link.pontos.toLocaleString("pt-BR")}
-                <span className="text-base text-indigo-400 font-semibold ml-2">pts</span>
+                <span className="text-base font-semibold ml-2" style={{ color: loja.brand_accent_points || "#818cf8" }}>pts</span>
               </div>
               {loja.pontos_expiracao_modo === "validade" && (
                 <div className="text-[11px] mt-2 text-slate-500">
@@ -795,14 +829,19 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
             <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl" />
             <div className="relative p-5">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                <Wallet className="h-3.5 w-3.5 text-emerald-400" /> Seu cashback
+                <Wallet className="h-3.5 w-3.5" style={{ color: loja.brand_accent_cashback || "#34d399" }} /> Seu cashback
               </div>
-              <div className="text-4xl font-bold mt-3 text-white tabular-nums tracking-tight">
+              <div className="text-4xl font-bold mt-3 tabular-nums tracking-tight" style={{ color: loja.brand_price || loja.text_on_dark || "#ffffff" }}>
                 {formatBRL(Number(link.cashback_saldo))}
               </div>
               <Button
                 size="sm"
-                className="mt-4 bg-emerald-500/15 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/25 hover:text-white transition-all"
+                className="mt-4 border transition-all hover:brightness-110"
+                style={{
+                  background: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 18%, transparent)`,
+                  borderColor: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 40%, transparent)`,
+                  color: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 25%, #ecfeff)`,
+                }}
                 disabled={Number(link.cashback_saldo) <= 0}
                 onClick={() => setCashbackModal(true)}
               >
@@ -835,7 +874,7 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                     <div className="font-medium text-sm text-slate-100">{p.nome}</div>
                     <div className="text-xs text-slate-400 line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-bold text-sm text-indigo-300">{p.custo_pontos} pts</span>
+                      <span className="font-bold text-sm" style={{ color: loja.brand_accent_points || "#a5b4fc" }}>{p.custo_pontos} pts</span>
                       <Button
                         size="sm"
                         disabled={!podeResgatar || resgatarP.isPending}
@@ -844,8 +883,11 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                           ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
                           : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"}
                         style={podeResgatar ? {
-                          background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                          background: loja.brand_cta
+                            ? loja.brand_cta
+                            : `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_cta || loja.brand_primary} 60%, transparent)`,
+                          color: loja.text_on_dark || "#ffffff",
                         } : undefined}
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
