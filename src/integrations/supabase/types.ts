@@ -14,542 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_audit_logs: {
-        Row: {
-          action: string
-          actor_email: string | null
-          actor_id: string
-          created_at: string
-          details: Json
-          id: string
-          target_id: string | null
-          target_label: string | null
-          target_type: string | null
-        }
-        Insert: {
-          action: string
-          actor_email?: string | null
-          actor_id: string
-          created_at?: string
-          details?: Json
-          id?: string
-          target_id?: string | null
-          target_label?: string | null
-          target_type?: string | null
-        }
-        Update: {
-          action?: string
-          actor_email?: string | null
-          actor_id?: string
-          created_at?: string
-          details?: Json
-          id?: string
-          target_id?: string | null
-          target_label?: string | null
-          target_type?: string | null
-        }
-        Relationships: []
-      }
-      campaign_recipients: {
-        Row: {
-          campaign_id: string
-          client_user_id: string
-          created_at: string
-          enviado_em: string | null
-          erro: string | null
-          id: string
-          mensagem_render: string | null
-          status: string
-          telefone: string | null
-        }
-        Insert: {
-          campaign_id: string
-          client_user_id: string
-          created_at?: string
-          enviado_em?: string | null
-          erro?: string | null
-          id?: string
-          mensagem_render?: string | null
-          status?: string
-          telefone?: string | null
-        }
-        Update: {
-          campaign_id?: string
-          client_user_id?: string
-          created_at?: string
-          enviado_em?: string | null
-          erro?: string | null
-          id?: string
-          mensagem_render?: string | null
-          status?: string
-          telefone?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "campaign_recipients_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "campaigns"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      campaigns: {
-        Row: {
-          agendada_para: string | null
-          created_at: string
-          enviado_em: string | null
-          id: string
-          mensagem: string
-          nome: string
-          segmento: string
-          segmento_param: string | null
-          status: string
-          store_id: string
-          total_destinatarios: number
-          total_enviados: number
-          total_falhas: number
-          updated_at: string
-        }
-        Insert: {
-          agendada_para?: string | null
-          created_at?: string
-          enviado_em?: string | null
-          id?: string
-          mensagem: string
-          nome: string
-          segmento?: string
-          segmento_param?: string | null
-          status?: string
-          store_id: string
-          total_destinatarios?: number
-          total_enviados?: number
-          total_falhas?: number
-          updated_at?: string
-        }
-        Update: {
-          agendada_para?: string | null
-          created_at?: string
-          enviado_em?: string | null
-          id?: string
-          mensagem?: string
-          nome?: string
-          segmento?: string
-          segmento_param?: string | null
-          status?: string
-          store_id?: string
-          total_destinatarios?: number
-          total_enviados?: number
-          total_falhas?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "campaigns_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_tags: {
-        Row: {
-          client_user_id: string
-          created_at: string
-          id: string
-          store_id: string
-          tag: string
-        }
-        Insert: {
-          client_user_id: string
-          created_at?: string
-          id?: string
-          store_id: string
-          tag: string
-        }
-        Update: {
-          client_user_id?: string
-          created_at?: string
-          id?: string
-          store_id?: string
-          tag?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_tags_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_audit_logs: {
-        Row: {
-          action: string
-          actor_user_id: string | null
-          created_at: string
-          employee_id: string | null
-          id: string
-          ip: string | null
-          meta: Json
-          store_id: string
-          target_label: string | null
-          user_agent: string | null
-        }
-        Insert: {
-          action: string
-          actor_user_id?: string | null
-          created_at?: string
-          employee_id?: string | null
-          id?: string
-          ip?: string | null
-          meta?: Json
-          store_id: string
-          target_label?: string | null
-          user_agent?: string | null
-        }
-        Update: {
-          action?: string
-          actor_user_id?: string | null
-          created_at?: string
-          employee_id?: string | null
-          id?: string
-          ip?: string | null
-          meta?: Json
-          store_id?: string
-          target_label?: string | null
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_audit_logs_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "store_employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_audit_logs_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      fiscal_notes: {
-        Row: {
-          client_user_id: string
-          cnpj_extraido: string | null
-          created_at: string
-          id: string
-          image_hash: string
-          image_path: string
-          motivo_rejeicao: string | null
-          ocr_raw: Json | null
-          pontos_creditados: number | null
-          status: string
-          store_id: string
-          updated_at: string
-          valor: number | null
-        }
-        Insert: {
-          client_user_id: string
-          cnpj_extraido?: string | null
-          created_at?: string
-          id?: string
-          image_hash: string
-          image_path: string
-          motivo_rejeicao?: string | null
-          ocr_raw?: Json | null
-          pontos_creditados?: number | null
-          status?: string
-          store_id: string
-          updated_at?: string
-          valor?: number | null
-        }
-        Update: {
-          client_user_id?: string
-          cnpj_extraido?: string | null
-          created_at?: string
-          id?: string
-          image_hash?: string
-          image_path?: string
-          motivo_rejeicao?: string | null
-          ocr_raw?: Json | null
-          pontos_creditados?: number | null
-          status?: string
-          store_id?: string
-          updated_at?: string
-          valor?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fiscal_notes_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      gift_cards: {
-        Row: {
-          codigo: string
-          created_at: string
-          id: string
-          pontos: number
-          redeemed_at: string | null
-          redeemed_by: string | null
-          store_id: string
-        }
-        Insert: {
-          codigo: string
-          created_at?: string
-          id?: string
-          pontos: number
-          redeemed_at?: string | null
-          redeemed_by?: string | null
-          store_id: string
-        }
-        Update: {
-          codigo?: string
-          created_at?: string
-          id?: string
-          pontos?: number
-          redeemed_at?: string | null
-          redeemed_by?: string | null
-          store_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gift_cards_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      instagram_submissions: {
-        Row: {
-          client_note: string | null
-          client_user_id: string
-          created_at: string
-          id: string
-          points_awarded: number
-          post_url: string
-          rejection_reason: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: Database["public"]["Enums"]["instagram_submission_status"]
-          store_id: string
-          transaction_id: string | null
-          updated_at: string
-          verify_after: string | null
-        }
-        Insert: {
-          client_note?: string | null
-          client_user_id: string
-          created_at?: string
-          id?: string
-          points_awarded?: number
-          post_url: string
-          rejection_reason?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: Database["public"]["Enums"]["instagram_submission_status"]
-          store_id: string
-          transaction_id?: string | null
-          updated_at?: string
-          verify_after?: string | null
-        }
-        Update: {
-          client_note?: string | null
-          client_user_id?: string
-          created_at?: string
-          id?: string
-          points_awarded?: number
-          post_url?: string
-          rejection_reason?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: Database["public"]["Enums"]["instagram_submission_status"]
-          store_id?: string
-          transaction_id?: string | null
-          updated_at?: string
-          verify_after?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "instagram_submissions_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "instagram_submissions_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      integration_logs: {
-        Row: {
-          created_at: string
-          id: string
-          mensagem_erro: string | null
-          origem: string
-          payload_recebido: Json | null
-          status: string
-          store_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          mensagem_erro?: string | null
-          origem: string
-          payload_recebido?: Json | null
-          status: string
-          store_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          mensagem_erro?: string | null
-          origem?: string
-          payload_recebido?: Json | null
-          status?: string
-          store_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "integration_logs_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_logs: {
-        Row: {
-          client_user_id: string
-          created_at: string
-          id: string
-          mensagem_erro: string | null
-          status: string
-          store_id: string
-          tipo: string
-        }
-        Insert: {
-          client_user_id: string
-          created_at?: string
-          id?: string
-          mensagem_erro?: string | null
-          status: string
-          store_id: string
-          tipo: string
-        }
-        Update: {
-          client_user_id?: string
-          created_at?: string
-          id?: string
-          mensagem_erro?: string | null
-          status?: string
-          store_id?: string
-          tipo?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_logs_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      nps_responses: {
-        Row: {
-          client_user_id: string
-          comment: string | null
-          created_at: string
-          id: string
-          score: number
-          store_id: string
-          transaction_id: string
-        }
-        Insert: {
-          client_user_id: string
-          comment?: string | null
-          created_at?: string
-          id?: string
-          score: number
-          store_id: string
-          transaction_id: string
-        }
-        Update: {
-          client_user_id?: string
-          comment?: string | null
-          created_at?: string
-          id?: string
-          score?: number
-          store_id?: string
-          transaction_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nps_responses_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nps_responses_transaction_id_fkey"
-            columns: ["transaction_id"]
-            isOneToOne: true
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       products: {
         Row: {
           ativo: boolean
           created_at: string
           custo_pontos: number
           descricao: string | null
-          foto_url: string | null
+          estoque: number | null
           id: string
+          imagem_url: string | null
           nome: string
           store_id: string
+          updated_at: string
         }
         Insert: {
           ativo?: boolean
           created_at?: string
           custo_pontos: number
           descricao?: string | null
-          foto_url?: string | null
+          estoque?: number | null
           id?: string
+          imagem_url?: string | null
           nome: string
           store_id: string
+          updated_at?: string
         }
         Update: {
           ativo?: boolean
           created_at?: string
           custo_pontos?: number
           descricao?: string | null
-          foto_url?: string | null
+          estoque?: number | null
           id?: string
+          imagem_url?: string | null
           nome?: string
           store_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -563,190 +63,88 @@ export type Database = {
       }
       profiles: {
         Row: {
-          birthdate: string | null
+          aniversario: string | null
+          avatar_url: string | null
           cpf: string | null
           created_at: string
-          full_name: string | null
+          email: string | null
           id: string
-          phone: string | null
+          nome: string | null
+          pending_registration: boolean
+          telefone: string | null
+          updated_at: string
         }
         Insert: {
-          birthdate?: string | null
+          aniversario?: string | null
+          avatar_url?: string | null
           cpf?: string | null
           created_at?: string
-          full_name?: string | null
+          email?: string | null
           id: string
-          phone?: string | null
+          nome?: string | null
+          pending_registration?: boolean
+          telefone?: string | null
+          updated_at?: string
         }
         Update: {
-          birthdate?: string | null
+          aniversario?: string | null
+          avatar_url?: string | null
           cpf?: string | null
           created_at?: string
-          full_name?: string | null
+          email?: string | null
           id?: string
-          phone?: string | null
+          nome?: string | null
+          pending_registration?: boolean
+          telefone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
-      promotions: {
-        Row: {
-          ativo: boolean
-          created_at: string
-          data_fim: string | null
-          data_inicio: string | null
-          dias_semana: number[]
-          hora_fim: string
-          hora_inicio: string
-          id: string
-          multiplicador: number
-          nome: string
-          store_id: string
-          updated_at: string
-        }
-        Insert: {
-          ativo?: boolean
-          created_at?: string
-          data_fim?: string | null
-          data_inicio?: string | null
-          dias_semana?: number[]
-          hora_fim?: string
-          hora_inicio?: string
-          id?: string
-          multiplicador?: number
-          nome: string
-          store_id: string
-          updated_at?: string
-        }
-        Update: {
-          ativo?: boolean
-          created_at?: string
-          data_fim?: string | null
-          data_inicio?: string | null
-          dias_semana?: number[]
-          hora_fim?: string
-          hora_inicio?: string
-          id?: string
-          multiplicador?: number
-          nome?: string
-          store_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "promotions_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      raffles: {
-        Row: {
-          created_at: string
-          filtro_nivel_min: string | null
-          filtro_tag: string | null
-          ganhador_nome: string | null
-          ganhador_user_id: string | null
-          id: string
-          premio: string
-          sorted_at: string | null
-          status: string
-          store_id: string
-          titulo: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          filtro_nivel_min?: string | null
-          filtro_tag?: string | null
-          ganhador_nome?: string | null
-          ganhador_user_id?: string | null
-          id?: string
-          premio: string
-          sorted_at?: string | null
-          status?: string
-          store_id: string
-          titulo: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          filtro_nivel_min?: string | null
-          filtro_tag?: string | null
-          ganhador_nome?: string | null
-          ganhador_user_id?: string | null
-          id?: string
-          premio?: string
-          sorted_at?: string | null
-          status?: string
-          store_id?: string
-          titulo?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "raffles_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       store_clients: {
         Row: {
-          cashback_saldo: number
           created_at: string
           id: string
-          last_notified_birthday: string | null
-          last_notified_expiry: string | null
-          last_notified_inactivity: string | null
-          last_purchase_at: string | null
-          nivel: Database["public"]["Enums"]["nivel_cliente"]
-          pending_registration: boolean
-          pontos: number
-          pontos_decaimento_last_at: string | null
-          referral_bonus_paid: boolean
-          referrer_user_id: string | null
+          observacoes: string | null
+          profile_id: string
+          saldo_cashback: number
+          saldo_pontos: number
           store_id: string
-          user_id: string
+          tags: string[]
+          total_gasto: number
+          updated_at: string
         }
         Insert: {
-          cashback_saldo?: number
           created_at?: string
           id?: string
-          last_notified_birthday?: string | null
-          last_notified_expiry?: string | null
-          last_notified_inactivity?: string | null
-          last_purchase_at?: string | null
-          nivel?: Database["public"]["Enums"]["nivel_cliente"]
-          pending_registration?: boolean
-          pontos?: number
-          pontos_decaimento_last_at?: string | null
-          referral_bonus_paid?: boolean
-          referrer_user_id?: string | null
+          observacoes?: string | null
+          profile_id: string
+          saldo_cashback?: number
+          saldo_pontos?: number
           store_id: string
-          user_id: string
+          tags?: string[]
+          total_gasto?: number
+          updated_at?: string
         }
         Update: {
-          cashback_saldo?: number
           created_at?: string
           id?: string
-          last_notified_birthday?: string | null
-          last_notified_expiry?: string | null
-          last_notified_inactivity?: string | null
-          last_purchase_at?: string | null
-          nivel?: Database["public"]["Enums"]["nivel_cliente"]
-          pending_registration?: boolean
-          pontos?: number
-          pontos_decaimento_last_at?: string | null
-          referral_bonus_paid?: boolean
-          referrer_user_id?: string | null
+          observacoes?: string | null
+          profile_id?: string
+          saldo_cashback?: number
+          saldo_pontos?: number
           store_id?: string
-          user_id?: string
+          tags?: string[]
+          total_gasto?: number
+          updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "store_clients_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "store_clients_store_id_fkey"
             columns: ["store_id"]
@@ -754,30 +152,32 @@ export type Database = {
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "store_clients_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       store_employee_permissions: {
         Row: {
+          allowed: boolean
+          created_at: string
           employee_id: string
-          granted: boolean
-          permission_key: string
+          id: string
+          permission: string
+          updated_at: string
         }
         Insert: {
+          allowed: boolean
+          created_at?: string
           employee_id: string
-          granted?: boolean
-          permission_key: string
+          id?: string
+          permission: string
+          updated_at?: string
         }
         Update: {
+          allowed?: boolean
+          created_at?: string
           employee_id?: string
-          granted?: boolean
-          permission_key?: string
+          id?: string
+          permission?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -787,66 +187,43 @@ export type Database = {
             referencedRelation: "store_employees"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "store_employee_permissions_permission_key_fkey"
-            columns: ["permission_key"]
-            isOneToOne: false
-            referencedRelation: "team_permissions"
-            referencedColumns: ["key"]
-          },
         ]
       }
       store_employees: {
         Row: {
-          cpf: string | null
+          ativo: boolean
           created_at: string
-          created_by: string | null
           email: string
           id: string
           nome: string
-          phone: string | null
-          role_key: string
-          status: string
+          role_name: string
           store_id: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
-          cpf?: string | null
+          ativo?: boolean
           created_at?: string
-          created_by?: string | null
           email: string
           id?: string
           nome: string
-          phone?: string | null
-          role_key: string
-          status?: string
+          role_name?: string
           store_id: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
-          cpf?: string | null
+          ativo?: boolean
           created_at?: string
-          created_by?: string | null
           email?: string
           id?: string
           nome?: string
-          phone?: string | null
-          role_key?: string
-          status?: string
+          role_name?: string
           store_id?: string
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "store_employees_role_key_fkey"
-            columns: ["role_key"]
-            isOneToOne: false
-            referencedRelation: "team_roles"
-            referencedColumns: ["key"]
-          },
           {
             foreignKeyName: "store_employees_store_id_fkey"
             columns: ["store_id"]
@@ -858,360 +235,185 @@ export type Database = {
       }
       stores: {
         Row: {
-          activated_at: string | null
-          admin_notes: string | null
+          ativo: boolean
+          banner_desktop_url: string | null
           banner_mobile_fit: string
-          banner_mobile_position_x: number
-          banner_mobile_position_y: number
+          banner_mobile_position: string
+          banner_mobile_url: string | null
           banner_mobile_zoom: number
-          banner_url: string | null
-          banner_url_mobile: string | null
-          bg_color_1: string | null
-          bg_color_2: string | null
-          bg_mode: string
-          bonus_indicado: number
-          bonus_indicador: number
-          brand_primary: string
-          brand_secondary: string
-          cancelled_at: string | null
+          cashback_percentual: number
           cnpj: string | null
+          cor_accent: string
+          cor_primaria: string
+          cor_secundaria: string
           created_at: string
-          evolution_apikey: string | null
-          evolution_instance: string | null
-          evolution_url: string | null
+          endereco: Json
           id: string
-          indicacao_ativa: boolean
-          instagram_handle: string | null
-          instagram_instructions: string | null
-          instagram_min_days_live: number
-          instagram_points_per_post: number
-          instagram_program_active: boolean
           logo_url: string | null
-          modalidade: Database["public"]["Enums"]["modalidade"]
-          mrr_amount: number
-          nome_fantasia: string
-          notif_birthday_bonus_points: number
-          notif_birthday_enabled: boolean
-          notif_birthday_template: string
-          notif_expiry_days: number
-          notif_expiry_enabled: boolean
-          notif_expiry_template: string
-          notif_expiry_warn_days: number
-          notif_inactivity_days: number
-          notif_inactivity_enabled: boolean
-          notif_inactivity_template: string
-          nps_ask_comment: boolean
-          nps_enabled: boolean
-          nps_template: string
+          name: string
           owner_id: string
-          percentual_cashback: number
-          plan: Database["public"]["Enums"]["plan_tier"]
-          pontos_decaimento_dias: number
-          pontos_decaimento_valor: number
-          pontos_expiracao_last_run_at: string | null
-          pontos_expiracao_modo: string
-          pontos_validade_dias: number
-          regra_pontos: number
-          setup_paid_at: string | null
+          plano: string
+          pontos_por_real: number
           slug: string
-          subscription_status: Database["public"]["Enums"]["subscription_status"]
-          telefone: string | null
-          voucher_mostrar_expirados: boolean
-          voucher_validade_dias: number
-          voucher_visivel_apos_uso: boolean
-          webhook_last_at: string | null
+          subscription_status: string
+          updated_at: string
           webhook_secret: string
-          whatsapp_enabled: boolean
-          whatsapp_template_pontos: string
         }
         Insert: {
-          activated_at?: string | null
-          admin_notes?: string | null
+          ativo?: boolean
+          banner_desktop_url?: string | null
           banner_mobile_fit?: string
-          banner_mobile_position_x?: number
-          banner_mobile_position_y?: number
+          banner_mobile_position?: string
+          banner_mobile_url?: string | null
           banner_mobile_zoom?: number
-          banner_url?: string | null
-          banner_url_mobile?: string | null
-          bg_color_1?: string | null
-          bg_color_2?: string | null
-          bg_mode?: string
-          bonus_indicado?: number
-          bonus_indicador?: number
-          brand_primary?: string
-          brand_secondary?: string
-          cancelled_at?: string | null
+          cashback_percentual?: number
           cnpj?: string | null
+          cor_accent?: string
+          cor_primaria?: string
+          cor_secundaria?: string
           created_at?: string
-          evolution_apikey?: string | null
-          evolution_instance?: string | null
-          evolution_url?: string | null
+          endereco?: Json
           id?: string
-          indicacao_ativa?: boolean
-          instagram_handle?: string | null
-          instagram_instructions?: string | null
-          instagram_min_days_live?: number
-          instagram_points_per_post?: number
-          instagram_program_active?: boolean
           logo_url?: string | null
-          modalidade?: Database["public"]["Enums"]["modalidade"]
-          mrr_amount?: number
-          nome_fantasia: string
-          notif_birthday_bonus_points?: number
-          notif_birthday_enabled?: boolean
-          notif_birthday_template?: string
-          notif_expiry_days?: number
-          notif_expiry_enabled?: boolean
-          notif_expiry_template?: string
-          notif_expiry_warn_days?: number
-          notif_inactivity_days?: number
-          notif_inactivity_enabled?: boolean
-          notif_inactivity_template?: string
-          nps_ask_comment?: boolean
-          nps_enabled?: boolean
-          nps_template?: string
+          name: string
           owner_id: string
-          percentual_cashback?: number
-          plan?: Database["public"]["Enums"]["plan_tier"]
-          pontos_decaimento_dias?: number
-          pontos_decaimento_valor?: number
-          pontos_expiracao_last_run_at?: string | null
-          pontos_expiracao_modo?: string
-          pontos_validade_dias?: number
-          regra_pontos?: number
-          setup_paid_at?: string | null
+          plano?: string
+          pontos_por_real?: number
           slug: string
-          subscription_status?: Database["public"]["Enums"]["subscription_status"]
-          telefone?: string | null
-          voucher_mostrar_expirados?: boolean
-          voucher_validade_dias?: number
-          voucher_visivel_apos_uso?: boolean
-          webhook_last_at?: string | null
+          subscription_status?: string
+          updated_at?: string
           webhook_secret?: string
-          whatsapp_enabled?: boolean
-          whatsapp_template_pontos?: string
         }
         Update: {
-          activated_at?: string | null
-          admin_notes?: string | null
+          ativo?: boolean
+          banner_desktop_url?: string | null
           banner_mobile_fit?: string
-          banner_mobile_position_x?: number
-          banner_mobile_position_y?: number
+          banner_mobile_position?: string
+          banner_mobile_url?: string | null
           banner_mobile_zoom?: number
-          banner_url?: string | null
-          banner_url_mobile?: string | null
-          bg_color_1?: string | null
-          bg_color_2?: string | null
-          bg_mode?: string
-          bonus_indicado?: number
-          bonus_indicador?: number
-          brand_primary?: string
-          brand_secondary?: string
-          cancelled_at?: string | null
+          cashback_percentual?: number
           cnpj?: string | null
+          cor_accent?: string
+          cor_primaria?: string
+          cor_secundaria?: string
           created_at?: string
-          evolution_apikey?: string | null
-          evolution_instance?: string | null
-          evolution_url?: string | null
+          endereco?: Json
           id?: string
-          indicacao_ativa?: boolean
-          instagram_handle?: string | null
-          instagram_instructions?: string | null
-          instagram_min_days_live?: number
-          instagram_points_per_post?: number
-          instagram_program_active?: boolean
           logo_url?: string | null
-          modalidade?: Database["public"]["Enums"]["modalidade"]
-          mrr_amount?: number
-          nome_fantasia?: string
-          notif_birthday_bonus_points?: number
-          notif_birthday_enabled?: boolean
-          notif_birthday_template?: string
-          notif_expiry_days?: number
-          notif_expiry_enabled?: boolean
-          notif_expiry_template?: string
-          notif_expiry_warn_days?: number
-          notif_inactivity_days?: number
-          notif_inactivity_enabled?: boolean
-          notif_inactivity_template?: string
-          nps_ask_comment?: boolean
-          nps_enabled?: boolean
-          nps_template?: string
+          name?: string
           owner_id?: string
-          percentual_cashback?: number
-          plan?: Database["public"]["Enums"]["plan_tier"]
-          pontos_decaimento_dias?: number
-          pontos_decaimento_valor?: number
-          pontos_expiracao_last_run_at?: string | null
-          pontos_expiracao_modo?: string
-          pontos_validade_dias?: number
-          regra_pontos?: number
-          setup_paid_at?: string | null
+          plano?: string
+          pontos_por_real?: number
           slug?: string
-          subscription_status?: Database["public"]["Enums"]["subscription_status"]
-          telefone?: string | null
-          voucher_mostrar_expirados?: boolean
-          voucher_validade_dias?: number
-          voucher_visivel_apos_uso?: boolean
-          webhook_last_at?: string | null
+          subscription_status?: string
+          updated_at?: string
           webhook_secret?: string
-          whatsapp_enabled?: boolean
-          whatsapp_template_pontos?: string
-        }
-        Relationships: []
-      }
-      team_permissions: {
-        Row: {
-          category: string
-          created_at: string
-          description: string
-          key: string
-          label: string
-          sort_order: number
-        }
-        Insert: {
-          category?: string
-          created_at?: string
-          description: string
-          key: string
-          label: string
-          sort_order?: number
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string
-          key?: string
-          label?: string
-          sort_order?: number
         }
         Relationships: []
       }
       team_role_permissions: {
         Row: {
-          permission_key: string
-          role_key: string
+          allowed: boolean
+          created_at: string
+          id: string
+          permission: string
+          role_name: string
+          store_id: string
+          updated_at: string
         }
         Insert: {
-          permission_key: string
-          role_key: string
+          allowed?: boolean
+          created_at?: string
+          id?: string
+          permission: string
+          role_name: string
+          store_id: string
+          updated_at?: string
         }
         Update: {
-          permission_key?: string
-          role_key?: string
+          allowed?: boolean
+          created_at?: string
+          id?: string
+          permission?: string
+          role_name?: string
+          store_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "team_role_permissions_permission_key_fkey"
-            columns: ["permission_key"]
+            foreignKeyName: "team_role_permissions_store_id_fkey"
+            columns: ["store_id"]
             isOneToOne: false
-            referencedRelation: "team_permissions"
-            referencedColumns: ["key"]
-          },
-          {
-            foreignKeyName: "team_role_permissions_role_key_fkey"
-            columns: ["role_key"]
-            isOneToOne: false
-            referencedRelation: "team_roles"
-            referencedColumns: ["key"]
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
           },
         ]
-      }
-      team_roles: {
-        Row: {
-          created_at: string
-          description: string | null
-          is_system: boolean
-          key: string
-          label: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          is_system?: boolean
-          key: string
-          label: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          is_system?: boolean
-          key?: string
-          label?: string
-          sort_order?: number
-        }
-        Relationships: []
       }
       transactions: {
         Row: {
           cashback_delta: number
-          client_user_id: string
           created_at: string
-          delivered_at: string | null
+          expires_at: string | null
           id: string
-          id_venda_externa: string | null
-          origem: string | null
+          metadata: Json
+          origem: string
           pontos_delta: number
           product_id: string | null
-          redeemed_by: string | null
-          status: Database["public"]["Enums"]["transaction_status"]
+          profile_id: string
           store_id: string
-          tipo: Database["public"]["Enums"]["transaction_tipo"]
-          valor: number
+          tipo: string
+          usado_em: string | null
+          validado_por: string | null
+          valor_reais: number
           voucher_code: string | null
-          voucher_expires_at: string | null
         }
         Insert: {
           cashback_delta?: number
-          client_user_id: string
           created_at?: string
-          delivered_at?: string | null
+          expires_at?: string | null
           id?: string
-          id_venda_externa?: string | null
-          origem?: string | null
+          metadata?: Json
+          origem?: string
           pontos_delta?: number
           product_id?: string | null
-          redeemed_by?: string | null
-          status?: Database["public"]["Enums"]["transaction_status"]
+          profile_id: string
           store_id: string
-          tipo: Database["public"]["Enums"]["transaction_tipo"]
-          valor?: number
+          tipo: string
+          usado_em?: string | null
+          validado_por?: string | null
+          valor_reais?: number
           voucher_code?: string | null
-          voucher_expires_at?: string | null
         }
         Update: {
           cashback_delta?: number
-          client_user_id?: string
           created_at?: string
-          delivered_at?: string | null
+          expires_at?: string | null
           id?: string
-          id_venda_externa?: string | null
-          origem?: string | null
+          metadata?: Json
+          origem?: string
           pontos_delta?: number
           product_id?: string | null
-          redeemed_by?: string | null
-          status?: Database["public"]["Enums"]["transaction_status"]
+          profile_id?: string
           store_id?: string
-          tipo?: Database["public"]["Enums"]["transaction_tipo"]
-          valor?: number
+          tipo?: string
+          usado_em?: string | null
+          validado_por?: string | null
+          valor_reais?: number
           voucher_code?: string | null
-          voucher_expires_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "transactions_client_user_id_profiles_fkey"
-            columns: ["client_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "transactions_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1225,16 +427,19 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -1246,18 +451,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      bootstrap_first_admin: { Args: never; Returns: boolean }
       employee_has_permission: {
-        Args: { _perm: string; _store_id: string; _user_id: string }
+        Args: { _permission: string; _store_id: string; _user_id: string }
         Returns: boolean
-      }
-      get_employee_link: {
-        Args: { _store_id: string; _user_id: string }
-        Returns: {
-          employee_id: string
-          role_key: string
-          status: string
-        }[]
       }
       has_role: {
         Args: {
@@ -1271,30 +467,23 @@ export type Database = {
         Returns: boolean
       }
       resgatar_cashback_atomico: {
-        Args: {
-          p_expires_at: string
-          p_store_id: string
-          p_user_id: string
-          p_valor: number
-          p_voucher_code: string
-        }
+        Args: { _profile_id: string; _store_id: string; _valor: number }
         Returns: {
           cashback_delta: number
-          client_user_id: string
           created_at: string
-          delivered_at: string | null
+          expires_at: string | null
           id: string
-          id_venda_externa: string | null
-          origem: string | null
+          metadata: Json
+          origem: string
           pontos_delta: number
           product_id: string | null
-          redeemed_by: string | null
-          status: Database["public"]["Enums"]["transaction_status"]
+          profile_id: string
           store_id: string
-          tipo: Database["public"]["Enums"]["transaction_tipo"]
-          valor: number
+          tipo: string
+          usado_em: string | null
+          validado_por: string | null
+          valor_reais: number
           voucher_code: string | null
-          voucher_expires_at: string | null
         }
         SetofOptions: {
           from: "*"
@@ -1304,30 +493,23 @@ export type Database = {
         }
       }
       resgatar_produto_atomico: {
-        Args: {
-          p_expires_at: string
-          p_product_id: string
-          p_store_id: string
-          p_user_id: string
-          p_voucher_code: string
-        }
+        Args: { _product_id: string; _profile_id: string; _store_id: string }
         Returns: {
           cashback_delta: number
-          client_user_id: string
           created_at: string
-          delivered_at: string | null
+          expires_at: string | null
           id: string
-          id_venda_externa: string | null
-          origem: string | null
+          metadata: Json
+          origem: string
           pontos_delta: number
           product_id: string | null
-          redeemed_by: string | null
-          status: Database["public"]["Enums"]["transaction_status"]
+          profile_id: string
           store_id: string
-          tipo: Database["public"]["Enums"]["transaction_tipo"]
-          valor: number
+          tipo: string
+          usado_em: string | null
+          validado_por: string | null
+          valor_reais: number
           voucher_code: string | null
-          voucher_expires_at: string | null
         }
         SetofOptions: {
           from: "*"
@@ -1338,31 +520,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "lojista" | "cliente" | "admin"
-      instagram_submission_status:
-        | "pendente"
-        | "aprovado"
-        | "rejeitado"
-        | "estornado"
-      modalidade: "pontos" | "cashback" | "ambos"
-      nivel_cliente: "bronze" | "prata" | "ouro"
-      plan_tier: "starter" | "pro" | "premium"
-      subscription_status:
-        | "pending_payment"
-        | "active"
-        | "suspended"
-        | "cancelled"
-      transaction_status: "pendente" | "entregue" | "expirado" | "cancelado"
-      transaction_tipo:
-        | "venda"
-        | "resgate_produto"
-        | "resgate_cashback"
-        | "indicacao"
-        | "vale_presente"
-        | "nota_fiscal"
-        | "ajuste"
-        | "instagram_bonus"
-        | "expiracao"
+      app_role: "admin" | "lojista" | "cliente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1490,34 +648,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["lojista", "cliente", "admin"],
-      instagram_submission_status: [
-        "pendente",
-        "aprovado",
-        "rejeitado",
-        "estornado",
-      ],
-      modalidade: ["pontos", "cashback", "ambos"],
-      nivel_cliente: ["bronze", "prata", "ouro"],
-      plan_tier: ["starter", "pro", "premium"],
-      subscription_status: [
-        "pending_payment",
-        "active",
-        "suspended",
-        "cancelled",
-      ],
-      transaction_status: ["pendente", "entregue", "expirado", "cancelado"],
-      transaction_tipo: [
-        "venda",
-        "resgate_produto",
-        "resgate_cashback",
-        "indicacao",
-        "vale_presente",
-        "nota_fiscal",
-        "ajuste",
-        "instagram_bonus",
-        "expiracao",
-      ],
+      app_role: ["admin", "lojista", "cliente"],
     },
   },
 } as const
