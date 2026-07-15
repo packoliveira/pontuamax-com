@@ -128,17 +128,17 @@ function PersonalizacaoPage() {
       setBgMode(((loja as { bg_mode?: string }).bg_mode as "dark" | "light" | "custom") ?? DEFAULT_BG_MODE);
       setBgColor1((loja as { bg_color_1?: string | null }).bg_color_1 ?? DEFAULT_BG1);
       setBgColor2((loja as { bg_color_2?: string | null }).bg_color_2 ?? DEFAULT_BG2);
-      const l = loja as Record<string, unknown>;
-      setAccentPoints((l.brand_accent_points as string) || DEFAULT_ACCENT_POINTS);
-      setAccentCashback((l.brand_accent_cashback as string) || DEFAULT_ACCENT_CASHBACK);
-      setBrandCta((l.brand_cta as string) || "");
-      setBrandVip((l.brand_vip as string) || DEFAULT_VIP);
-      setBrandPrice((l.brand_price as string) || DEFAULT_PRICE);
-      setTextOnDark((l.text_on_dark as string) || DEFAULT_TEXT_ON_DARK);
-      setKickerText((l.header_kicker_text as string) ?? DEFAULT_KICKER_TEXT);
-      setKickerShow((l.header_kicker_show as boolean) ?? true);
-      setTitleSize(((l.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
-      setTitleWeight(((l.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
+      const raw = loja as Record<string, unknown>;
+      setAccentPoints((raw.brand_accent_points as string) || DEFAULT_ACCENT_POINTS);
+      setAccentCashback((raw.brand_accent_cashback as string) || DEFAULT_ACCENT_CASHBACK);
+      setBrandCta((raw.brand_cta as string) || "");
+      setBrandVip((raw.brand_vip as string) || DEFAULT_VIP);
+      setBrandPrice((raw.brand_price as string) || DEFAULT_PRICE);
+      setTextOnDark((raw.text_on_dark as string) || DEFAULT_TEXT_ON_DARK);
+      setKickerText((raw.header_kicker_text as string) ?? DEFAULT_KICKER_TEXT);
+      setKickerShow((raw.header_kicker_show as boolean) ?? true);
+      setTitleSize(((raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
+      setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
     }
   }, [loja]);
 
