@@ -486,6 +486,81 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
 // Identidade única do cliente = CPF. Cria/normaliza auth user com email sintético
 // baseado no CPF (fonte da verdade) e senha temporária = CPF (só dígitos).
 export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
+  ;
+
+// -------- CLIENTE: criar conta via CPF (sem confirmação de email) --------
+export const criarClienteViaCpf = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        cpf: z.string().min(11).max(20),
+        senha: z.string().min(6).max(72),
+        nome: z.string().min(1).max(100),
+        phone: z.string().max(20).optional().nullable(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const cpfDigits = data.cpf.replace(/\D/g, "");
+    if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
+    const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || null;
+    const email = cpfToEmail(cpfDigits);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const existing = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("cpf", cpfDigits)
+      .maybeSingle();
+    if (existing.data) {
+      const cur = await supabaseAdmin.auth.admin.getUserById(existing.data.id);
+      if (cur.data.user && cur.data.user.last_sign_in_at) {
+        throw new Error("Já existe uma conta com este CPF. Faça login.");
+      }
+      const upd = await supabaseAdmin.auth.admin.updateUserById(existing.data.id, {
+        email,
+        password: data.senha,
+        email_confirm: true,
+        user_metadata: {
+          ...(cur.data.user?.user_metadata ?? {}),
+          full_name: data.nome,
+          phone: phoneDigits,
+          cpf: cpfDigits,
+        },
+      });
+      if (upd.error) throw new Error(upd.error.message);
+      await supabaseAdmin
+        .from("profiles")
+        .update({ full_name: data.nome, phone: phoneDigits, cpf: cpfDigits })
+        .eq("id", existing.data.id);
+      await supabaseAdmin
+        .from("store_clients")
+        .update({ pending_registration: false })
+        .eq("user_id", existing.data.id)
+        .eq("pending_registration", true);
+      return { email };
+    }
+    const created = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: data.senha,
+      email_confirm: true,
+      user_metadata: { full_name: data.nome, phone: phoneDigits, cpf: cpfDigits },
+    });
+    if (created.error || !created.data.user) {
+      throw new Error(created.error?.message ?? "Falha ao criar conta.");
+    }
+    await supabaseAdmin.from("profiles").upsert({
+      id: created.data.user.id,
+      full_name: data.nome,
+      phone: phoneDigits,
+      cpf: cpfDigits,
+    });
+    await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: created.data.user.id, role: "cliente" as const }, { onConflict: "user_id,role" });
+    return { email };
+  });
+
+const _cadastrarClientePorTelefone_placeholder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
