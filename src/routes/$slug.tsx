@@ -874,7 +874,7 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                     <div className="font-medium text-sm text-slate-100">{p.nome}</div>
                     <div className="text-xs text-slate-400 line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-bold text-sm text-indigo-300">{p.custo_pontos} pts</span>
+                      <span className="font-bold text-sm" style={{ color: loja.brand_accent_points || "#a5b4fc" }}>{p.custo_pontos} pts</span>
                       <Button
                         size="sm"
                         disabled={!podeResgatar || resgatarP.isPending}
@@ -883,8 +883,11 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                           ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
                           : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"}
                         style={podeResgatar ? {
-                          background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                          background: loja.brand_cta
+                            ? loja.brand_cta
+                            : `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_cta || loja.brand_primary} 60%, transparent)`,
+                          color: loja.text_on_dark || "#ffffff",
                         } : undefined}
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
