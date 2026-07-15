@@ -17,6 +17,7 @@ import {
   reivindicarCadastroPendente,
   resgatarProduto,
   resgatarCashback,
+  criarClienteViaCpf,
 } from "@/lib/qsf.functions";
 import { formatBRL, formatDate, calcularNivel, progressoNivel, cpfToEmail, formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
 import { Button } from "@/components/ui/button";
