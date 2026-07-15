@@ -365,16 +365,16 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
       <div className="max-w-2xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
-            <div aria-hidden className="absolute inset-0 rounded-xl bg-indigo-500/40 blur-lg opacity-60" />
+            <div aria-hidden className="absolute inset-0 rounded-2xl bg-indigo-500/40 blur-lg opacity-60" />
             {loja.logo_url ? (
               <img
                 src={loja.logo_url}
                 alt={loja.nome_fantasia}
-                className="relative h-12 w-12 rounded-xl bg-[#141432] object-contain p-1.5 border border-indigo-500/30"
+                className="relative h-12 w-12 rounded-2xl bg-[#141432] object-contain p-1.5 border border-indigo-500/30"
               />
             ) : (
               <div
-                className="relative h-12 w-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
+                className="relative h-12 w-12 rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
                 style={{
                   background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
                   borderColor: `color-mix(in oklab, ${loja.brand_primary} 50%, transparent)`,
