@@ -1158,6 +1158,81 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          ativo: boolean
+          campanhas_sms: boolean
+          campanhas_whatsapp: boolean
+          created_at: string
+          descricao: string | null
+          destaque: boolean
+          id: string
+          instagram_ativo: boolean
+          integracao_erp: boolean
+          max_clientes: number | null
+          max_funcionarios: number | null
+          max_lojas: number | null
+          nome: string
+          nps_ativo: boolean
+          ordem: number
+          preco_anual: number
+          preco_mensal: number
+          setup_fee: number
+          slug: string
+          sorteios_ativo: boolean
+          suporte_prioritario: boolean
+          vale_presente_ativo: boolean
+        }
+        Insert: {
+          ativo?: boolean
+          campanhas_sms?: boolean
+          campanhas_whatsapp?: boolean
+          created_at?: string
+          descricao?: string | null
+          destaque?: boolean
+          id?: string
+          instagram_ativo?: boolean
+          integracao_erp?: boolean
+          max_clientes?: number | null
+          max_funcionarios?: number | null
+          max_lojas?: number | null
+          nome: string
+          nps_ativo?: boolean
+          ordem?: number
+          preco_anual?: number
+          preco_mensal?: number
+          setup_fee?: number
+          slug: string
+          sorteios_ativo?: boolean
+          suporte_prioritario?: boolean
+          vale_presente_ativo?: boolean
+        }
+        Update: {
+          ativo?: boolean
+          campanhas_sms?: boolean
+          campanhas_whatsapp?: boolean
+          created_at?: string
+          descricao?: string | null
+          destaque?: boolean
+          id?: string
+          instagram_ativo?: boolean
+          integracao_erp?: boolean
+          max_clientes?: number | null
+          max_funcionarios?: number | null
+          max_lojas?: number | null
+          nome?: string
+          nps_ativo?: boolean
+          ordem?: number
+          preco_anual?: number
+          preco_mensal?: number
+          setup_fee?: number
+          slug?: string
+          sorteios_ativo?: boolean
+          suporte_prioritario?: boolean
+          vale_presente_ativo?: boolean
+        }
+        Relationships: []
+      }
       team_permissions: {
         Row: {
           category: string
