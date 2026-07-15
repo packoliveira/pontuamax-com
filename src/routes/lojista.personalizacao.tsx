@@ -941,6 +941,31 @@ function PersonalizacaoPage() {
               <RotateCcw className="h-4 w-4 mr-1" />
               Restaurar tudo
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={exportTheme}
+              className="rounded-xl"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Exportar tema
+            </Button>
+            <label className="inline-flex">
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void importTheme(f);
+                  e.currentTarget.value = "";
+                }}
+              />
+              <span className="inline-flex items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white px-4 h-11 text-sm font-medium cursor-pointer hover:bg-[#F8FAFC]">
+                <Upload className="h-4 w-4" /> Importar tema
+              </span>
+            </label>
           </div>
         </div>
 
