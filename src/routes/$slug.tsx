@@ -364,8 +364,35 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
             )}
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-indigo-300/80 font-semibold">Fidelidade</div>
-            <div className="font-bold text-base sm:text-lg leading-tight text-white truncate">{loja.nome_fantasia}</div>
+            {(loja.header_kicker_show ?? true) && (
+              <div
+                className="text-[10px] uppercase tracking-[0.2em] font-semibold"
+                style={{ color: `color-mix(in oklab, ${loja.brand_primary} 60%, #cbd5e1)` }}
+              >
+                {loja.header_kicker_text || "Fidelidade"}
+              </div>
+            )}
+            <div
+              className={`leading-tight truncate ${
+                {
+                  sm: "text-sm",
+                  md: "text-base sm:text-lg",
+                  lg: "text-lg sm:text-xl",
+                  xl: "text-xl sm:text-2xl",
+                  "2xl": "text-2xl sm:text-3xl",
+                }[loja.header_title_size ?? "md"]
+              } ${
+                {
+                  normal: "font-normal",
+                  semibold: "font-semibold",
+                  bold: "font-bold",
+                  black: "font-black",
+                }[loja.header_title_weight ?? "bold"]
+              }`}
+              style={{ color: loja.text_on_dark || "#ffffff" }}
+            >
+              {loja.nome_fantasia}
+            </div>
           </div>
         </div>
         {showLogout && (
