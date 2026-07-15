@@ -260,6 +260,126 @@ export type Database = {
           },
         ]
       }
+      erp_credentials: {
+        Row: {
+          access_token: string | null
+          account_id: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_refresh_at: string | null
+          provider: string
+          refresh_token: string | null
+          scopes: string[] | null
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_refresh_at?: string | null
+          provider: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          account_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_refresh_at?: string | null
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_credentials_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_credentials_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_webhook_events: {
+        Row: {
+          error_message: string | null
+          evento: string
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          provider: string
+          received_at: string
+          resource_id: string
+          signature: string | null
+          signature_valid: boolean | null
+          status: string
+          store_id: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          evento: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          provider: string
+          received_at?: string
+          resource_id: string
+          signature?: string | null
+          signature_valid?: boolean | null
+          status?: string
+          store_id?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          evento?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          provider?: string
+          received_at?: string
+          resource_id?: string
+          signature?: string | null
+          signature_valid?: boolean | null
+          status?: string
+          store_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_webhook_events_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_webhook_events_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_notes: {
         Row: {
           client_user_id: string
@@ -579,6 +699,45 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: true
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oauth_states: {
+        Row: {
+          created_at: string
+          expires_at: string
+          provider: string
+          state: string
+          store_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          provider: string
+          state: string
+          store_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          provider?: string
+          state?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_states_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_states_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
             referencedColumns: ["id"]
           },
         ]
@@ -974,6 +1133,7 @@ export type Database = {
           cancelled_at: string | null
           cnpj: string | null
           created_at: string
+          erp_provider: string | null
           evolution_apikey: string | null
           evolution_instance: string | null
           evolution_url: string | null
@@ -1041,6 +1201,7 @@ export type Database = {
           cancelled_at?: string | null
           cnpj?: string | null
           created_at?: string
+          erp_provider?: string | null
           evolution_apikey?: string | null
           evolution_instance?: string | null
           evolution_url?: string | null
@@ -1108,6 +1269,7 @@ export type Database = {
           cancelled_at?: string | null
           cnpj?: string | null
           created_at?: string
+          erp_provider?: string | null
           evolution_apikey?: string | null
           evolution_instance?: string | null
           evolution_url?: string | null

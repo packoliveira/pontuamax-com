@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
 import { Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
+import { Link as LinkIcon, Unplug } from "lucide-react";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
@@ -200,6 +202,7 @@ function ConfigPage() {
           </Button>
 
           <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
+          <OlistOAuthCard storeId={loja.id} />
           <WhatsappCard loja={loja} />
           <NotificacoesCard loja={loja} />
           <IndicacaoCard loja={loja} />
@@ -1530,6 +1533,86 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
             {disparar.isPending ? "Disparando..." : "Disparar agora (teste)"}
           </Button>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+function OlistOAuthCard({ storeId }: { storeId: string }) {
+  const qc = useQueryClient();
+  const { data: status } = useQuery({
+    queryKey: ["olist-status", storeId],
+    queryFn: () => getStatusOlist({ data: { storeId } }),
+  });
+
+  const conectar = useMutation({
+    mutationFn: () => iniciarConexaoOlist({ data: { storeId } }),
+    onSuccess: (r) => {
+      if (r?.url) window.location.href = r.url;
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const desconectar = useMutation({
+    mutationFn: () => desconectarOlist({ data: { storeId } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["olist-status", storeId] });
+      toast.success("Desconectado do Olist");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const conectado = status?.status === "connected";
+
+  return (
+    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-[#14CBA8] via-[#2563EB] to-[#6D28D9]" />
+      <CardHeader>
+        <CardTitle className="text-base flex items-center justify-between text-[#0F172A]">
+          <span>Olist ERP (OAuth2 — API V3)</span>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              conectado ? "bg-[#22C55E]/10 text-[#15803D]" : "bg-[#F1F5F9] text-[#64748B]"
+            }`}
+          >
+            {conectado ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+            {conectado ? "Conectada" : "Não conectada"}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-[#64748B]">
+          Conexão oficial via OAuth2. As vendas são recebidas por webhook assinado e
+          consultadas em tempo real pela API V3 do Olist — sem colar URL nem segredo.
+        </p>
+        {conectado ? (
+          <>
+            <div className="text-xs text-[#334155] space-y-1">
+              <div><b>Conta Olist:</b> {status?.account_id ?? "—"}</div>
+              <div><b>Renovado em:</b> {status?.last_refresh_at ? new Date(status.last_refresh_at).toLocaleString("pt-BR") : "—"}</div>
+              <div><b>Expira em:</b> {status?.expires_at ? new Date(status.expires_at).toLocaleString("pt-BR") : "—"}</div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => desconectar.mutate()}
+              disabled={desconectar.isPending}
+              className="rounded-xl"
+            >
+              <Unplug className="h-4 w-4 mr-1" />
+              {desconectar.isPending ? "Desconectando..." : "Desconectar Olist"}
+            </Button>
+          </>
+        ) : (
+          <Button
+            type="button"
+            onClick={() => conectar.mutate()}
+            disabled={conectar.isPending}
+            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          >
+            <LinkIcon className="h-4 w-4 mr-1" />
+            {conectar.isPending ? "Redirecionando..." : "Conectar com Olist"}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

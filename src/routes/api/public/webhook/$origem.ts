@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { cpfToEmail } from "@/lib/qsf-shared";
+import { timingSafeEqual, randomBytes } from "crypto";
 
 // Public webhook endpoint for external POS/ERP integrations (Bling, Olist).
 // URL: /api/public/webhook/{bling|olist}
@@ -88,10 +89,17 @@ function extractOlistPayload(p: Record<string, unknown>): {
 }
 
 const CORS = {
-  "Access-Control-Allow-Origin": "*",
+  // Webhooks não são chamados por browsers; mantemos apenas o mínimo para
+  // ferramentas de teste (curl/Postman não precisam de CORS).
   "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, x-qsf-secret, x-qsf-store",
 };
+function safeEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return timingSafeEqual(ba, bb);
+}
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -106,8 +114,17 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
       HEAD: async () => new Response(null, { status: 200, headers: CORS }),
       POST: async ({ request, params }) => {
         const origem = String(params.origem).toLowerCase();
-        if (!["bling", "olist", "teste"].includes(origem)) {
-          return json({ error: "origem inválida (use bling|olist)" }, 404);
+        if (origem === "olist") {
+          return json(
+            {
+              error:
+                "Endpoint /api/public/webhook/olist descontinuado. Use OAuth2 V3 em /api/public/webhook/olist/v3 — conecte pelo painel do lojista.",
+            },
+            410,
+          );
+        }
+        if (!["bling", "teste"].includes(origem)) {
+          return json({ error: "origem inválida (use bling|teste)" }, 404);
         }
 
         const raw = await request.text();
@@ -162,7 +179,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return json({ status, message, ...extra }, httpStatus);
         };
 
-        if (!secret || secret !== loja.webhook_secret) {
+        if (!secret || !safeEqual(secret, loja.webhook_secret)) {
           return logAndRespond("erro", "segredo inválido", 401);
         }
 
@@ -245,7 +262,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           // (auto-cadastro do cliente, login por CPF, lançamento manual),
           // evitando que o mesmo CPF vire duas contas diferentes.
           const email = cpfToEmail(cpf);
-          const password = telefone || cpf;
+          // Senha aleatória — o cliente completa cadastro pelo /cadastro
+          // e define a própria senha via signup. Nunca deixe a senha
+          // ser derivada de CPF/telefone (facilmente adivinhável).
+          const password = randomBytes(24).toString("hex");
           const created = await supabaseAdmin.auth.admin.createUser({
             email,
               password,
