@@ -280,19 +280,10 @@ function BannerHero({ loja }: { loja: Loja }) {
   return (
     <div className="relative">
       <div className="max-w-2xl mx-auto px-4 pt-4">
-        <div
-          className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border shadow-lg animate-in fade-in zoom-in-95 duration-500"
-          style={{
-            borderColor: `color-mix(in oklab, ${loja.brand_primary} 40%, transparent)`,
-            boxShadow: `0 10px 40px -12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
-          }}
-        >
+        <div className="relative animate-in fade-in zoom-in-95 duration-500">
           {mobile && (
             <div
-              className="w-full aspect-[2/1] overflow-hidden sm:hidden"
-              style={{
-                background: fit === "contain" ? `color-mix(in oklab, ${loja.brand_primary} 15%, #0a0a1a)` : undefined,
-              }}
+              className="w-full aspect-[2/1] sm:hidden"
             >
               <img
                 src={mobile}
@@ -312,17 +303,10 @@ function BannerHero({ loja }: { loja: Loja }) {
             <img
               src={desktop}
               alt={`Banner ${loja.nome_fantasia}`}
-              className="w-full h-40 sm:h-48 md:h-56 object-cover hidden sm:block"
+              className="w-full h-40 sm:h-48 md:h-56 object-contain hidden sm:block"
               loading="eager"
             />
           )}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: `linear-gradient(180deg, transparent 60%, color-mix(in oklab, #0a0a1a 80%, transparent))`,
-            }}
-          />
         </div>
       </div>
     </div>
