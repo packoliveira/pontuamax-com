@@ -108,7 +108,7 @@ export function RewardRain({
       drift: rand(-8, 8),
       rotate: rand(-45, 45),
       color: pick(palette),
-      opacity: rand(0.15, 0.35),
+      opacity: rand(0.55, 0.9),
     }));
   }, [reduced, target, mobile, palette]);
 
@@ -119,7 +119,7 @@ export function RewardRain({
       aria-hidden
       className="reward-rain-root"
       style={{
-        position: "absolute",
+        position: "fixed",
         inset: 0,
         overflow: "hidden",
         pointerEvents: "none",
@@ -137,6 +137,9 @@ export function RewardRain({
             animation: `reward-rain-fall ${p.duration}s linear ${p.delay}s infinite`,
             transform: "translate3d(0,0,0)",
             willChange: "transform, opacity",
+            // Dual shadow: dark halo + light halo → destaca em qualquer fundo
+            filter:
+              "drop-shadow(0 0 6px rgba(0,0,0,0.55)) drop-shadow(0 0 10px rgba(255,255,255,0.35))",
             // custom props consumed by keyframes
             ["--drift" as string]: `${p.drift}vw`,
             ["--rot" as string]: `${p.rotate}deg`,
@@ -149,8 +152,8 @@ export function RewardRain({
       <style>{`
         @keyframes reward-rain-fall {
           0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
-          8%   { opacity: var(--op, 0.25); }
-          80%  { opacity: var(--op, 0.25); }
+          8%   { opacity: var(--op, 0.75); }
+          80%  { opacity: var(--op, 0.75); }
           100% { transform: translate3d(var(--drift, 0), 108vh, 0) rotate(var(--rot, 30deg)); opacity: 0; }
         }
         @media (prefers-reduced-motion: reduce) {
