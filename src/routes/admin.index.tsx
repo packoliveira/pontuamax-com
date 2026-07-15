@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText } from "lucide-react";
+import { Copy, ExternalLink, Link2 } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
@@ -183,6 +184,8 @@ function AdminDashboard() {
         <StatCard icon={<TrendingDown className="h-5 w-5" />} label="Churn este mês" value={churnMes} accent={churnMes > 0 ? "text-red-600" : undefined} />
       </div>
 
+      <QuickLinksSection />
+
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3">
@@ -263,6 +266,95 @@ function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label
       <CardContent className="pt-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">{icon}<span>{label}</span></div>
         <div className={`mt-1 text-2xl font-bold ${accent ?? ""}`}>{value}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function QuickLinksSection() {
+  const base = typeof window !== "undefined" ? window.location.origin : "https://pontuamax.com";
+  const groups: Array<{
+    title: string;
+    color: string;
+    items: Array<{ label: string; path: string; desc: string }>;
+  }> = [
+    {
+      title: "Admin Master",
+      color: "text-red-600",
+      items: [
+        { label: "Login Admin", path: "/admin/login", desc: "Acesso do dono do sistema (você)" },
+        { label: "Painel Admin", path: "/admin", desc: "Dashboard global" },
+      ],
+    },
+    {
+      title: "Lojista",
+      color: "text-blue-600",
+      items: [
+        { label: "Login Lojista", path: "/lojista/login", desc: "Donos de loja assinantes" },
+        { label: "Painel Lojista", path: "/lojista", desc: "Dashboard da loja" },
+        { label: "Cadastro Lojista", path: "/lojista/cadastro", desc: "Nova loja / assinar plano" },
+      ],
+    },
+    {
+      title: "Funcionário",
+      color: "text-purple-600",
+      items: [
+        { label: "Login Funcionário", path: "/funcionario/login", desc: "Vendedores da loja" },
+        { label: "Painel Funcionário", path: "/funcionario", desc: "Operação de caixa/atendimento" },
+      ],
+    },
+    {
+      title: "Cliente Final",
+      color: "text-emerald-600",
+      items: [
+        { label: "Login / Cadastro Cliente", path: "/auth", desc: "Consumidor acumula pontos" },
+        { label: "Painel Cliente", path: "/cliente", desc: "Extrato e resgates" },
+      ],
+    },
+  ];
+
+  const copy = (url: string) => {
+    navigator.clipboard.writeText(url).then(
+      () => toast.success("Link copiado!"),
+      () => toast.error("Não foi possível copiar"),
+    );
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Link2 className="h-4 w-4 text-red-600" /> Links de acesso da plataforma
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {groups.map((g) => (
+          <div key={g.title} className="rounded-lg border p-3 space-y-2">
+            <div className={`font-semibold text-sm ${g.color}`}>{g.title}</div>
+            <div className="space-y-1.5">
+              {g.items.map((it) => {
+                const url = `${base}${it.path}`;
+                return (
+                  <div key={it.path} className="rounded-md bg-muted/50 p-2 space-y-1">
+                    <div className="text-xs font-medium">{it.label}</div>
+                    <div className="text-[10px] text-muted-foreground leading-tight">{it.desc}</div>
+                    <code className="block text-[10px] break-all bg-background rounded px-1.5 py-1 border">{url}</code>
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] flex-1" onClick={() => copy(url)}>
+                        <Copy className="h-3 w-3" /> Copiar
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] flex-1" asChild>
+                        <a href={it.path} target="_blank" rel="noreferrer">
+                          <ExternalLink className="h-3 w-3" /> Abrir
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );
