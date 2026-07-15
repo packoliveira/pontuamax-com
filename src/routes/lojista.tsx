@@ -19,7 +19,16 @@ export const Route = createFileRoute("/lojista")({
         .eq("owner_id", data.session.user.id)
         .maybeSingle();
       if (!store) {
-        // Não é dono de loja — pode ser funcionário.
+        // Não é dono de loja — pode ser funcionário ou admin master.
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.session.user.id);
+        const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+        if (isAdmin) {
+          // Admin master não é lojista — volta pro painel dele.
+          throw redirect({ to: "/admin" });
+        }
         const { data: emp } = await supabase
           .from("store_employees")
           .select("id")
