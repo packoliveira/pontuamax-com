@@ -452,12 +452,12 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
           data: { cpf: cpfDigits, senha, nome: nome.trim(), phone: phoneDigits || null },
         });
         if (!claim.claimed) {
-          const { error } = await supabase.auth.signUp({
-            email,
-            password: senha,
-            options: { data: { full_name: nome.trim(), phone: phoneDigits || null, cpf: cpfDigits } },
+          // Cria via server (admin) com email_confirm=true — o email é
+          // sintético (@cliente.qsfclub.local) e não existe, então NÃO
+          // pode passar por confirmação do Supabase.
+          await criarClienteViaCpf({
+            data: { cpf: cpfDigits, senha, nome: nome.trim(), phone: phoneDigits || null },
           });
-          if (error) throw error;
         }
         // If session not returned (email confirm), sign in
         const { data: s2 } = await supabase.auth.getSession();
