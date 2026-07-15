@@ -1789,6 +1789,7 @@ export type Database = {
           status: string
         }[]
       }
+      get_store_for_employee: { Args: { _store_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
