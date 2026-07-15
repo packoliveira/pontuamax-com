@@ -242,9 +242,15 @@ function IntegracoesCard({
   lastAt: string | null;
 }) {
   const qc = useQueryClient();
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const urlBling = `${origin}/api/public/webhook/bling`;
-  const urlOlist = `${origin}/api/public/webhook/olist`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://pontuamax-com.lovable.app";
+  const webhookOrigin = origin.includes("localhost") || origin.includes("id-preview--")
+    ? "https://pontuamax-com.lovable.app"
+    : origin;
+  const query = `store=${encodeURIComponent(slug)}&secret=${encodeURIComponent(secret)}`;
+  const urlBling = `${webhookOrigin}/api/public/webhook/bling?${query}`;
+  const urlOlist = `${webhookOrigin}/api/public/webhook/olist?${query}`;
+  const headerUrlBling = `${webhookOrigin}/api/public/webhook/bling`;
+  const headerUrlOlist = `${webhookOrigin}/api/public/webhook/olist`;
 
   const conectada =
     !!lastAt && Date.now() - new Date(lastAt).getTime() < 30 * 24 * 60 * 60 * 1000;
@@ -292,12 +298,12 @@ function IntegracoesCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-[#64748B]">
-          Configure a URL abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
+          Configure a URL completa abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
           no PontuaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
         </p>
 
         <div>
-          <Label>URL do webhook (Bling)</Label>
+          <Label>URL completa do webhook (Bling)</Label>
           <div className="flex gap-2">
             <Input readOnly value={urlBling} className="font-mono text-xs" />
             <Button type="button" variant="outline" size="icon" onClick={() => copy(urlBling, "URL")}>
@@ -306,7 +312,7 @@ function IntegracoesCard({
           </div>
         </div>
         <div>
-          <Label>URL do webhook (Olist)</Label>
+          <Label>URL completa do webhook (Olist)</Label>
           <div className="flex gap-2">
             <Input readOnly value={urlOlist} className="font-mono text-xs" />
             <Button type="button" variant="outline" size="icon" onClick={() => copy(urlOlist, "URL")}>
@@ -316,7 +322,7 @@ function IntegracoesCard({
         </div>
 
         <div>
-          <Label>Identificador da loja (header x-qsf-store)</Label>
+          <Label>Identificador da loja</Label>
           <div className="flex gap-2">
             <Input readOnly value={slug} className="font-mono text-xs" />
             <Button type="button" variant="outline" size="icon" onClick={() => copy(slug, "Slug")}>
@@ -326,7 +332,7 @@ function IntegracoesCard({
         </div>
 
         <div>
-          <Label>Chave secreta (header x-qsf-secret)</Label>
+          <Label>Chave secreta</Label>
           <div className="flex gap-2">
             <Input readOnly value={secret} className="font-mono text-xs" />
             <Button type="button" variant="outline" size="icon" onClick={() => copy(secret, "Segredo")}>
@@ -345,7 +351,7 @@ function IntegracoesCard({
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Envie sempre nos headers <code>x-qsf-store</code> e <code>x-qsf-secret</code>. Payload esperado:
+            Para Olist/Tiny, use a URL completa acima. Se a integração permitir headers, use <code>{headerUrlOlist}</code> ou <code>{headerUrlBling}</code> com <code>x-qsf-store</code> e <code>x-qsf-secret</code>. Payload esperado:
             <code className="ml-1">{`{ id_venda_externa, valor, telefone_cliente, nome_cliente? }`}</code>.
           </p>
         </div>
