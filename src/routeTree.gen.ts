@@ -56,7 +56,6 @@ import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/
 import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
 import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
 import { Route as ApiPublicWebhookOlistV3RouteImport } from './routes/api/public/webhook/olist.v3'
-import { Route as ApiPublicWebhookOlistErpSlugRouteImport } from './routes/api/public/webhook/olist-erp.$slug'
 import { Route as ApiPublicOauthOlistCallbackRouteImport } from './routes/api/public/oauth/olist.callback'
 
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
@@ -298,12 +297,6 @@ const ApiPublicWebhookOlistV3Route = ApiPublicWebhookOlistV3RouteImport.update({
   path: '/api/public/webhook/olist/v3',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicWebhookOlistErpSlugRoute =
-  ApiPublicWebhookOlistErpSlugRouteImport.update({
-    id: '/api/public/webhook/olist-erp/$slug',
-    path: '/api/public/webhook/olist-erp/$slug',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicOauthOlistCallbackRoute =
   ApiPublicOauthOlistCallbackRouteImport.update({
     id: '/api/public/oauth/olist/callback',
@@ -359,7 +352,6 @@ export interface FileRoutesByFullPath {
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
   '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
-  '/api/public/webhook/olist-erp/$slug': typeof ApiPublicWebhookOlistErpSlugRoute
   '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
 }
 export interface FileRoutesByTo {
@@ -407,7 +399,6 @@ export interface FileRoutesByTo {
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
   '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
-  '/api/public/webhook/olist-erp/$slug': typeof ApiPublicWebhookOlistErpSlugRoute
   '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
 }
 export interface FileRoutesById {
@@ -459,7 +450,6 @@ export interface FileRoutesById {
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
   '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
-  '/api/public/webhook/olist-erp/$slug': typeof ApiPublicWebhookOlistErpSlugRoute
   '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
 }
 export interface FileRouteTypes {
@@ -512,7 +502,6 @@ export interface FileRouteTypes {
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
     | '/api/public/oauth/olist/callback'
-    | '/api/public/webhook/olist-erp/$slug'
     | '/api/public/webhook/olist/v3'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -560,7 +549,6 @@ export interface FileRouteTypes {
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
     | '/api/public/oauth/olist/callback'
-    | '/api/public/webhook/olist-erp/$slug'
     | '/api/public/webhook/olist/v3'
   id:
     | '__root__'
@@ -611,7 +599,6 @@ export interface FileRouteTypes {
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
     | '/api/public/oauth/olist/callback'
-    | '/api/public/webhook/olist-erp/$slug'
     | '/api/public/webhook/olist/v3'
   fileRoutesById: FileRoutesById
 }
@@ -634,7 +621,6 @@ export interface RootRouteChildren {
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
   ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
   ApiPublicOauthOlistCallbackRoute: typeof ApiPublicOauthOlistCallbackRoute
-  ApiPublicWebhookOlistErpSlugRoute: typeof ApiPublicWebhookOlistErpSlugRoute
   ApiPublicWebhookOlistV3Route: typeof ApiPublicWebhookOlistV3Route
 }
 
@@ -969,13 +955,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhookOlistV3RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/webhook/olist-erp/$slug': {
-      id: '/api/public/webhook/olist-erp/$slug'
-      path: '/api/public/webhook/olist-erp/$slug'
-      fullPath: '/api/public/webhook/olist-erp/$slug'
-      preLoaderRoute: typeof ApiPublicWebhookOlistErpSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/oauth/olist/callback': {
       id: '/api/public/oauth/olist/callback'
       path: '/api/public/oauth/olist/callback'
@@ -1090,7 +1069,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
   ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
   ApiPublicOauthOlistCallbackRoute: ApiPublicOauthOlistCallbackRoute,
-  ApiPublicWebhookOlistErpSlugRoute: ApiPublicWebhookOlistErpSlugRoute,
   ApiPublicWebhookOlistV3Route: ApiPublicWebhookOlistV3Route,
 }
 export const routeTree = rootRouteImport
