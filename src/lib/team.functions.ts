@@ -33,6 +33,26 @@ async function writeAudit(storeId: string, actorId: string, action: string, opts
   });
 }
 
+/** Escreve um log de auditoria de qualquer módulo. Não lança em erro. */
+export async function logEmployeeAction(params: {
+  storeId: string;
+  actorUserId: string;
+  action: string;
+  employeeId?: string | null;
+  targetLabel?: string | null;
+  meta?: Record<string, unknown>;
+}) {
+  try {
+    await writeAudit(params.storeId, params.actorUserId, params.action, {
+      employeeId: params.employeeId ?? null,
+      targetLabel: params.targetLabel ?? null,
+      meta: params.meta ?? {},
+    });
+  } catch (e) {
+    console.warn("[audit] falha ao registrar", params.action, (e as Error).message);
+  }
+}
+
 // ============== Catálogos ==============
 
 export const listRolesAndPermissions = createServerFn({ method: "GET" })
