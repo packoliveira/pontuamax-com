@@ -206,7 +206,7 @@ function Login() {
 
       {/* Lado direito — card de login */}
       <div className="flex items-center justify-center p-6 md:p-10">
-        <Card className="w-full max-w-md rounded-2xl border-[#E5E7EB] shadow-[0_20px_60px_-30px_rgba(37,99,235,0.35)] animate-panel-in">
+        <Card className="w-full max-w-md rounded-3xl border-0 bg-white/95 shadow-none ring-1 ring-black/5 backdrop-blur animate-panel-in">
           <CardHeader className="text-center">
             <div className="mx-auto lg:hidden flex flex-col items-center gap-2">
               <PontuaMaxMark size={44} />
