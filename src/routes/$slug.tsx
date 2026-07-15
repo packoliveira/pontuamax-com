@@ -33,6 +33,7 @@ import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpR
 import { Badge } from "@/components/ui/badge";
 import { Receipt, CheckCircle2, AlertTriangle, Printer } from "lucide-react";
 import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
+import { RewardRain } from "@/components/reward-rain";
 
 const REF_KEY = "qsf_referrer_phone";
 function getStoredReferrer(): string | null {
@@ -235,12 +236,28 @@ function ClienteFlow({ loja }: { loja: Loja }) {
         ) : sessionUserId && !link ? (
           <VincularStore loja={loja} />
         ) : (
-          <Auth
-            loja={loja}
-            onAuthStart={() => setAuthenticating(true)}
-            onAuthError={() => setAuthenticating(false)}
-            onAuthenticated={handleAuthSuccess}
-          />
+          <div className="relative">
+            {loja.reward_rain_enabled && (
+              <RewardRain
+                colors={[
+                  loja.brand_primary,
+                  loja.brand_secondary,
+                  loja.brand_accent_cashback || "#FBBF24",
+                  "#FFFFFF",
+                  "#F97316",
+                  "#F59E0B",
+                ]}
+              />
+            )}
+            <div className="relative" style={{ zIndex: 1 }}>
+              <Auth
+                loja={loja}
+                onAuthStart={() => setAuthenticating(true)}
+                onAuthError={() => setAuthenticating(false)}
+                onAuthenticated={handleAuthSuccess}
+              />
+            </div>
+          </div>
         )}
       </div>
     </>
