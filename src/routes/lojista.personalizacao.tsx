@@ -132,6 +132,9 @@ function PersonalizacaoPage() {
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
   const [rewardRain, setRewardRain] = useState(false);
   const [rainPreviewOpen, setRainPreviewOpen] = useState(false);
+  const DEFAULT_RAIN_COLORS = ["#F59E0B", "#F97316", "#FBBF24", "#FB7185", "#FFFFFF", "#FCD34D"];
+  const [rainColors, setRainColors] = useState<string[]>(DEFAULT_RAIN_COLORS);
+  const [rainOpacity, setRainOpacity] = useState<number>(0.75);
 
   // Guardamos as URLs originais para saber quais arquivos apagar no Save.
   const [initial, setInitial] = useState<{ logo: string; banner: string; bannerMobile: string }>({
@@ -171,6 +174,10 @@ function PersonalizacaoPage() {
       setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
       setKickerSize(((raw.header_kicker_size as "xs" | "sm" | "md") ?? DEFAULT_KICKER_SIZE));
       setRewardRain(Boolean(raw.reward_rain_enabled));
+      const rc = raw.reward_rain_colors as string[] | null | undefined;
+      setRainColors(Array.isArray(rc) && rc.length > 0 ? rc : DEFAULT_RAIN_COLORS);
+      const ro = raw.reward_rain_opacity as number | null | undefined;
+      setRainOpacity(typeof ro === "number" && ro > 0 ? ro : 0.75);
     }
   }, [loja]);
 
@@ -216,6 +223,8 @@ function PersonalizacaoPage() {
           header_kicker_show: kickerShow,
           header_kicker_size: kickerSize,
           reward_rain_enabled: rewardRain,
+          reward_rain_colors: rainColors,
+          reward_rain_opacity: rainOpacity,
         },
       });
 
