@@ -41,6 +41,7 @@ import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
 import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
 import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
 import { Route as FuncionarioVouchersRouteImport } from './routes/funcionario.vouchers'
+import { Route as FuncionarioTrocarSenhaRouteImport } from './routes/funcionario.trocar-senha'
 import { Route as FuncionarioResgatesRouteImport } from './routes/funcionario.resgates'
 import { Route as FuncionarioPontuarRouteImport } from './routes/funcionario.pontuar'
 import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
@@ -219,6 +220,11 @@ const FuncionarioVouchersRoute = FuncionarioVouchersRouteImport.update({
   path: '/vouchers',
   getParentRoute: () => FuncionarioRoute,
 } as any)
+const FuncionarioTrocarSenhaRoute = FuncionarioTrocarSenhaRouteImport.update({
+  id: '/trocar-senha',
+  path: '/trocar-senha',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
 const FuncionarioResgatesRoute = FuncionarioResgatesRouteImport.update({
   id: '/resgates',
   path: '/resgates',
@@ -326,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/funcionario/pontuar': typeof FuncionarioPontuarRoute
   '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/trocar-senha': typeof FuncionarioTrocarSenhaRoute
   '/funcionario/vouchers': typeof FuncionarioVouchersRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/funcionario/pontuar': typeof FuncionarioPontuarRoute
   '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/trocar-senha': typeof FuncionarioTrocarSenhaRoute
   '/funcionario/vouchers': typeof FuncionarioVouchersRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -426,6 +434,7 @@ export interface FileRoutesById {
   '/funcionario/perfil': typeof FuncionarioPerfilRoute
   '/funcionario/pontuar': typeof FuncionarioPontuarRoute
   '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/trocar-senha': typeof FuncionarioTrocarSenhaRoute
   '/funcionario/vouchers': typeof FuncionarioVouchersRoute
   '/lojista/aguardando': typeof LojistaAguardandoRoute
   '/lojista/campanhas': typeof LojistaCampanhasRoute
@@ -479,6 +488,7 @@ export interface FileRouteTypes {
     | '/funcionario/perfil'
     | '/funcionario/pontuar'
     | '/funcionario/resgates'
+    | '/funcionario/trocar-senha'
     | '/funcionario/vouchers'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -527,6 +537,7 @@ export interface FileRouteTypes {
     | '/funcionario/perfil'
     | '/funcionario/pontuar'
     | '/funcionario/resgates'
+    | '/funcionario/trocar-senha'
     | '/funcionario/vouchers'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -578,6 +589,7 @@ export interface FileRouteTypes {
     | '/funcionario/perfil'
     | '/funcionario/pontuar'
     | '/funcionario/resgates'
+    | '/funcionario/trocar-senha'
     | '/funcionario/vouchers'
     | '/lojista/aguardando'
     | '/lojista/campanhas'
@@ -862,6 +874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FuncionarioVouchersRouteImport
       parentRoute: typeof FuncionarioRoute
     }
+    '/funcionario/trocar-senha': {
+      id: '/funcionario/trocar-senha'
+      path: '/trocar-senha'
+      fullPath: '/funcionario/trocar-senha'
+      preLoaderRoute: typeof FuncionarioTrocarSenhaRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
     '/funcionario/resgates': {
       id: '/funcionario/resgates'
       path: '/resgates'
@@ -1005,6 +1024,7 @@ interface FuncionarioRouteChildren {
   FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
   FuncionarioPontuarRoute: typeof FuncionarioPontuarRoute
   FuncionarioResgatesRoute: typeof FuncionarioResgatesRoute
+  FuncionarioTrocarSenhaRoute: typeof FuncionarioTrocarSenhaRoute
   FuncionarioVouchersRoute: typeof FuncionarioVouchersRoute
   FuncionarioIndexRoute: typeof FuncionarioIndexRoute
 }
@@ -1016,6 +1036,7 @@ const FuncionarioRouteChildren: FuncionarioRouteChildren = {
   FuncionarioPerfilRoute: FuncionarioPerfilRoute,
   FuncionarioPontuarRoute: FuncionarioPontuarRoute,
   FuncionarioResgatesRoute: FuncionarioResgatesRoute,
+  FuncionarioTrocarSenhaRoute: FuncionarioTrocarSenhaRoute,
   FuncionarioVouchersRoute: FuncionarioVouchersRoute,
   FuncionarioIndexRoute: FuncionarioIndexRoute,
 }
