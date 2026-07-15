@@ -412,3 +412,49 @@ export const checkMyPermission = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { allowed: allowed === true };
   });
+
+// ============== Login por CPF (público) ==============
+
+/** Resolve o e-mail interno do funcionário a partir do CPF, para o formulário de login. */
+export const resolveFuncionarioEmailByCpf = createServerFn({ method: "POST" })
+  .inputValidator((i) => z.object({ cpf: z.string().trim().min(11).max(20) }).parse(i))
+  .handler(async ({ data }) => {
+    const digits = data.cpf.replace(/\D+/g, "");
+    if (digits.length < 11) throw new Error("CPF inválido.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: emp, error } = await supabaseAdmin
+      .from("store_employees")
+      .select("email, status")
+      .eq("cpf", digits)
+      .eq("status", "ativo")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!emp) throw new Error("Funcionário não encontrado ou inativo.");
+    return { email: emp.email as string };
+  });
+
+/** Troca a senha do funcionário logado e conclui o onboarding. */
+export const trocarSenhaFuncionario = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ password: passwordSchema }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const upd = await supabaseAdmin.auth.admin.updateUserById(context.userId, { password: data.password });
+    if (upd.error) throw new Error(upd.error.message);
+    const { data: emp, error } = await context.supabase
+      .from("store_employees")
+      .update({ must_change_password: false, first_login_at: new Date().toISOString() })
+      .eq("user_id", context.userId)
+      .eq("status", "ativo")
+      .select("id, store_id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (emp) {
+      await writeAudit(emp.store_id, context.userId, "employee.password_changed", {
+        employeeId: emp.id,
+      });
+    }
+    return { ok: true };
+  });
