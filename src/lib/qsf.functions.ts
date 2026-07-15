@@ -1360,6 +1360,21 @@ export const validarVoucher = createServerFn({ method: "POST" })
       if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
       throw new Error("Voucher indisponível para entrega.");
     }
+    try {
+      const { logEmployeeAction } = await import("@/lib/team.functions");
+      await logEmployeeAction({
+        storeId: store.data.id,
+        actorUserId: context.userId,
+        action: "voucher.validado",
+        targetLabel: tx.data.voucher_code,
+        meta: {
+          transaction_id: tx.data.id,
+          tipo: tx.data.tipo,
+          pontos: Math.abs(Number(tx.data.pontos_delta || 0)),
+          cashback: Math.abs(Number(tx.data.cashback_delta || 0)),
+        },
+      });
+    } catch { /* ignore */ }
     return {
       ok: true,
       voucher: tx.data.voucher_code,
