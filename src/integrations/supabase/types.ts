@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          custo_pontos: number
+          descricao: string | null
+          foto_url: string | null
+          id: string
+          nome: string
+          store_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          custo_pontos: number
+          descricao?: string | null
+          foto_url?: string | null
+          id?: string
+          nome: string
+          store_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          custo_pontos?: number
+          descricao?: string | null
+          foto_url?: string | null
+          id?: string
+          nome?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           cpf: string | null
@@ -38,6 +86,279 @@ export type Database = {
         }
         Relationships: []
       }
+      store_clients: {
+        Row: {
+          cashback_saldo: number
+          created_at: string
+          id: string
+          last_notified_birthday: string | null
+          last_notified_expiry: string | null
+          last_notified_inactivity: string | null
+          last_purchase_at: string | null
+          nivel: Database["public"]["Enums"]["nivel_cliente"]
+          pending_registration: boolean
+          pontos: number
+          pontos_decaimento_last_at: string | null
+          referral_bonus_paid: boolean
+          referrer_user_id: string | null
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          cashback_saldo?: number
+          created_at?: string
+          id?: string
+          last_notified_birthday?: string | null
+          last_notified_expiry?: string | null
+          last_notified_inactivity?: string | null
+          last_purchase_at?: string | null
+          nivel?: Database["public"]["Enums"]["nivel_cliente"]
+          pending_registration?: boolean
+          pontos?: number
+          pontos_decaimento_last_at?: string | null
+          referral_bonus_paid?: boolean
+          referrer_user_id?: string | null
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          cashback_saldo?: number
+          created_at?: string
+          id?: string
+          last_notified_birthday?: string | null
+          last_notified_expiry?: string | null
+          last_notified_inactivity?: string | null
+          last_purchase_at?: string | null
+          nivel?: Database["public"]["Enums"]["nivel_cliente"]
+          pending_registration?: boolean
+          pontos?: number
+          pontos_decaimento_last_at?: string | null
+          referral_bonus_paid?: boolean
+          referrer_user_id?: string | null
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_clients_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_clients_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          activated_at: string | null
+          admin_notes: string | null
+          banner_mobile_fit: string
+          banner_mobile_position_x: number
+          banner_mobile_position_y: number
+          banner_mobile_zoom: number
+          banner_url: string | null
+          banner_url_mobile: string | null
+          bg_color_1: string | null
+          bg_color_2: string | null
+          bg_mode: string
+          bonus_indicado: number
+          bonus_indicador: number
+          brand_primary: string
+          brand_secondary: string
+          cancelled_at: string | null
+          cnpj: string | null
+          created_at: string
+          evolution_apikey: string | null
+          evolution_instance: string | null
+          evolution_url: string | null
+          id: string
+          indicacao_ativa: boolean
+          instagram_handle: string | null
+          instagram_instructions: string | null
+          instagram_min_days_live: number
+          instagram_points_per_post: number
+          instagram_program_active: boolean
+          logo_url: string | null
+          modalidade: Database["public"]["Enums"]["modalidade"]
+          mrr_amount: number
+          nome_fantasia: string
+          notif_birthday_bonus_points: number
+          notif_birthday_enabled: boolean
+          notif_birthday_template: string
+          notif_expiry_days: number
+          notif_expiry_enabled: boolean
+          notif_expiry_template: string
+          notif_expiry_warn_days: number
+          notif_inactivity_days: number
+          notif_inactivity_enabled: boolean
+          notif_inactivity_template: string
+          nps_ask_comment: boolean
+          nps_enabled: boolean
+          nps_template: string
+          owner_id: string
+          percentual_cashback: number
+          plan: string
+          pontos_decaimento_dias: number
+          pontos_decaimento_valor: number
+          pontos_expiracao_last_run_at: string | null
+          pontos_expiracao_modo: string
+          pontos_validade_dias: number
+          regra_pontos: number
+          setup_paid_at: string | null
+          slug: string
+          subscription_status: string
+          telefone: string | null
+          voucher_mostrar_expirados: boolean
+          voucher_validade_dias: number
+          voucher_visivel_apos_uso: boolean
+          webhook_last_at: string | null
+          webhook_secret: string
+          whatsapp_enabled: boolean
+          whatsapp_template_pontos: string
+        }
+        Insert: {
+          activated_at?: string | null
+          admin_notes?: string | null
+          banner_mobile_fit?: string
+          banner_mobile_position_x?: number
+          banner_mobile_position_y?: number
+          banner_mobile_zoom?: number
+          banner_url?: string | null
+          banner_url_mobile?: string | null
+          bg_color_1?: string | null
+          bg_color_2?: string | null
+          bg_mode?: string
+          bonus_indicado?: number
+          bonus_indicador?: number
+          brand_primary?: string
+          brand_secondary?: string
+          cancelled_at?: string | null
+          cnpj?: string | null
+          created_at?: string
+          evolution_apikey?: string | null
+          evolution_instance?: string | null
+          evolution_url?: string | null
+          id?: string
+          indicacao_ativa?: boolean
+          instagram_handle?: string | null
+          instagram_instructions?: string | null
+          instagram_min_days_live?: number
+          instagram_points_per_post?: number
+          instagram_program_active?: boolean
+          logo_url?: string | null
+          modalidade?: Database["public"]["Enums"]["modalidade"]
+          mrr_amount?: number
+          nome_fantasia: string
+          notif_birthday_bonus_points?: number
+          notif_birthday_enabled?: boolean
+          notif_birthday_template?: string
+          notif_expiry_days?: number
+          notif_expiry_enabled?: boolean
+          notif_expiry_template?: string
+          notif_expiry_warn_days?: number
+          notif_inactivity_days?: number
+          notif_inactivity_enabled?: boolean
+          notif_inactivity_template?: string
+          nps_ask_comment?: boolean
+          nps_enabled?: boolean
+          nps_template?: string
+          owner_id: string
+          percentual_cashback?: number
+          plan?: string
+          pontos_decaimento_dias?: number
+          pontos_decaimento_valor?: number
+          pontos_expiracao_last_run_at?: string | null
+          pontos_expiracao_modo?: string
+          pontos_validade_dias?: number
+          regra_pontos?: number
+          setup_paid_at?: string | null
+          slug: string
+          subscription_status?: string
+          telefone?: string | null
+          voucher_mostrar_expirados?: boolean
+          voucher_validade_dias?: number
+          voucher_visivel_apos_uso?: boolean
+          webhook_last_at?: string | null
+          webhook_secret?: string
+          whatsapp_enabled?: boolean
+          whatsapp_template_pontos?: string
+        }
+        Update: {
+          activated_at?: string | null
+          admin_notes?: string | null
+          banner_mobile_fit?: string
+          banner_mobile_position_x?: number
+          banner_mobile_position_y?: number
+          banner_mobile_zoom?: number
+          banner_url?: string | null
+          banner_url_mobile?: string | null
+          bg_color_1?: string | null
+          bg_color_2?: string | null
+          bg_mode?: string
+          bonus_indicado?: number
+          bonus_indicador?: number
+          brand_primary?: string
+          brand_secondary?: string
+          cancelled_at?: string | null
+          cnpj?: string | null
+          created_at?: string
+          evolution_apikey?: string | null
+          evolution_instance?: string | null
+          evolution_url?: string | null
+          id?: string
+          indicacao_ativa?: boolean
+          instagram_handle?: string | null
+          instagram_instructions?: string | null
+          instagram_min_days_live?: number
+          instagram_points_per_post?: number
+          instagram_program_active?: boolean
+          logo_url?: string | null
+          modalidade?: Database["public"]["Enums"]["modalidade"]
+          mrr_amount?: number
+          nome_fantasia?: string
+          notif_birthday_bonus_points?: number
+          notif_birthday_enabled?: boolean
+          notif_birthday_template?: string
+          notif_expiry_days?: number
+          notif_expiry_enabled?: boolean
+          notif_expiry_template?: string
+          notif_expiry_warn_days?: number
+          notif_inactivity_days?: number
+          notif_inactivity_enabled?: boolean
+          notif_inactivity_template?: string
+          nps_ask_comment?: boolean
+          nps_enabled?: boolean
+          nps_template?: string
+          owner_id?: string
+          percentual_cashback?: number
+          plan?: string
+          pontos_decaimento_dias?: number
+          pontos_decaimento_valor?: number
+          pontos_expiracao_last_run_at?: string | null
+          pontos_expiracao_modo?: string
+          pontos_validade_dias?: number
+          regra_pontos?: number
+          setup_paid_at?: string | null
+          slug?: string
+          subscription_status?: string
+          telefone?: string | null
+          voucher_mostrar_expirados?: boolean
+          voucher_validade_dias?: number
+          voucher_visivel_apos_uso?: boolean
+          webhook_last_at?: string | null
+          webhook_secret?: string
+          whatsapp_enabled?: boolean
+          whatsapp_template_pontos?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -58,7 +379,96 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      stores_public: {
+        Row: {
+          banner_mobile_fit: string | null
+          banner_mobile_position_x: number | null
+          banner_mobile_position_y: number | null
+          banner_mobile_zoom: number | null
+          banner_url: string | null
+          banner_url_mobile: string | null
+          bg_color_1: string | null
+          bg_color_2: string | null
+          bg_mode: string | null
+          bonus_indicado: number | null
+          bonus_indicador: number | null
+          brand_primary: string | null
+          brand_secondary: string | null
+          created_at: string | null
+          id: string | null
+          indicacao_ativa: boolean | null
+          instagram_handle: string | null
+          instagram_points_per_post: number | null
+          instagram_program_active: boolean | null
+          logo_url: string | null
+          modalidade: Database["public"]["Enums"]["modalidade"] | null
+          nome_fantasia: string | null
+          nps_enabled: boolean | null
+          percentual_cashback: number | null
+          regra_pontos: number | null
+          slug: string | null
+          whatsapp_enabled: boolean | null
+        }
+        Insert: {
+          banner_mobile_fit?: string | null
+          banner_mobile_position_x?: number | null
+          banner_mobile_position_y?: number | null
+          banner_mobile_zoom?: number | null
+          banner_url?: string | null
+          banner_url_mobile?: string | null
+          bg_color_1?: string | null
+          bg_color_2?: string | null
+          bg_mode?: string | null
+          bonus_indicado?: number | null
+          bonus_indicador?: number | null
+          brand_primary?: string | null
+          brand_secondary?: string | null
+          created_at?: string | null
+          id?: string | null
+          indicacao_ativa?: boolean | null
+          instagram_handle?: string | null
+          instagram_points_per_post?: number | null
+          instagram_program_active?: boolean | null
+          logo_url?: string | null
+          modalidade?: Database["public"]["Enums"]["modalidade"] | null
+          nome_fantasia?: string | null
+          nps_enabled?: boolean | null
+          percentual_cashback?: number | null
+          regra_pontos?: number | null
+          slug?: string | null
+          whatsapp_enabled?: boolean | null
+        }
+        Update: {
+          banner_mobile_fit?: string | null
+          banner_mobile_position_x?: number | null
+          banner_mobile_position_y?: number | null
+          banner_mobile_zoom?: number | null
+          banner_url?: string | null
+          banner_url_mobile?: string | null
+          bg_color_1?: string | null
+          bg_color_2?: string | null
+          bg_mode?: string | null
+          bonus_indicado?: number | null
+          bonus_indicador?: number | null
+          brand_primary?: string | null
+          brand_secondary?: string | null
+          created_at?: string | null
+          id?: string | null
+          indicacao_ativa?: boolean | null
+          instagram_handle?: string | null
+          instagram_points_per_post?: number | null
+          instagram_program_active?: boolean | null
+          logo_url?: string | null
+          modalidade?: Database["public"]["Enums"]["modalidade"] | null
+          nome_fantasia?: string | null
+          nps_enabled?: boolean | null
+          percentual_cashback?: number | null
+          regra_pontos?: number | null
+          slug?: string | null
+          whatsapp_enabled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -73,8 +483,17 @@ export type Database = {
       app_role: "lojista" | "cliente" | "admin"
       modalidade: "pontos" | "cashback" | "ambos"
       nivel_cliente: "bronze" | "prata" | "ouro"
-      transaction_status: "pendente" | "entregue"
-      transaction_tipo: "venda" | "resgate_produto" | "resgate_cashback"
+      transaction_status: "pendente" | "entregue" | "cancelado" | "expirado"
+      transaction_tipo:
+        | "venda"
+        | "resgate_produto"
+        | "resgate_cashback"
+        | "indicacao"
+        | "vale_presente"
+        | "nota_fiscal"
+        | "ajuste"
+        | "instagram_bonus"
+        | "expiracao"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -205,8 +624,18 @@ export const Constants = {
       app_role: ["lojista", "cliente", "admin"],
       modalidade: ["pontos", "cashback", "ambos"],
       nivel_cliente: ["bronze", "prata", "ouro"],
-      transaction_status: ["pendente", "entregue"],
-      transaction_tipo: ["venda", "resgate_produto", "resgate_cashback"],
+      transaction_status: ["pendente", "entregue", "cancelado", "expirado"],
+      transaction_tipo: [
+        "venda",
+        "resgate_produto",
+        "resgate_cashback",
+        "indicacao",
+        "vale_presente",
+        "nota_fiscal",
+        "ajuste",
+        "instagram_bonus",
+        "expiracao",
+      ],
     },
   },
 } as const
