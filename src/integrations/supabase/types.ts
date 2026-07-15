@@ -14,6 +14,514 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_id: string | null
+          target_label: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          client_user_id: string
+          created_at: string
+          enviado_em: string | null
+          erro: string | null
+          id: string
+          mensagem_render: string | null
+          status: string
+          telefone: string | null
+        }
+        Insert: {
+          campaign_id: string
+          client_user_id: string
+          created_at?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          mensagem_render?: string | null
+          status?: string
+          telefone?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          client_user_id?: string
+          created_at?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          mensagem_render?: string | null
+          status?: string
+          telefone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          agendada_para: string | null
+          created_at: string
+          enviado_em: string | null
+          id: string
+          mensagem: string
+          nome: string
+          segmento: string
+          segmento_param: string | null
+          status: string
+          store_id: string
+          total_destinatarios: number
+          total_enviados: number
+          total_falhas: number
+          updated_at: string
+        }
+        Insert: {
+          agendada_para?: string | null
+          created_at?: string
+          enviado_em?: string | null
+          id?: string
+          mensagem: string
+          nome: string
+          segmento?: string
+          segmento_param?: string | null
+          status?: string
+          store_id: string
+          total_destinatarios?: number
+          total_enviados?: number
+          total_falhas?: number
+          updated_at?: string
+        }
+        Update: {
+          agendada_para?: string | null
+          created_at?: string
+          enviado_em?: string | null
+          id?: string
+          mensagem?: string
+          nome?: string
+          segmento?: string
+          segmento_param?: string | null
+          status?: string
+          store_id?: string
+          total_destinatarios?: number
+          total_enviados?: number
+          total_falhas?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tags: {
+        Row: {
+          client_user_id: string
+          created_at: string
+          id: string
+          store_id: string
+          tag: string
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string
+          id?: string
+          store_id: string
+          tag: string
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          store_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tags_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tags_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fiscal_notes: {
+        Row: {
+          client_user_id: string
+          cnpj_extraido: string | null
+          created_at: string
+          id: string
+          image_hash: string
+          image_path: string
+          motivo_rejeicao: string | null
+          ocr_raw: Json | null
+          pontos_creditados: number | null
+          status: string
+          store_id: string
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          client_user_id: string
+          cnpj_extraido?: string | null
+          created_at?: string
+          id?: string
+          image_hash: string
+          image_path: string
+          motivo_rejeicao?: string | null
+          ocr_raw?: Json | null
+          pontos_creditados?: number | null
+          status?: string
+          store_id: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          client_user_id?: string
+          cnpj_extraido?: string | null
+          created_at?: string
+          id?: string
+          image_hash?: string
+          image_path?: string
+          motivo_rejeicao?: string | null
+          ocr_raw?: Json | null
+          pontos_creditados?: number | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_notes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_notes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_cards: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          pontos: number
+          redeemed_at: string | null
+          redeemed_by: string | null
+          store_id: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          pontos: number
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          store_id: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          pontos?: number
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_cards_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_cards_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_submissions: {
+        Row: {
+          client_note: string | null
+          client_user_id: string
+          created_at: string
+          id: string
+          points_awarded: number
+          post_url: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["instagram_submission_status"]
+          store_id: string
+          transaction_id: string | null
+          updated_at: string
+          verify_after: string | null
+        }
+        Insert: {
+          client_note?: string | null
+          client_user_id: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          post_url: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["instagram_submission_status"]
+          store_id: string
+          transaction_id?: string | null
+          updated_at?: string
+          verify_after?: string | null
+        }
+        Update: {
+          client_note?: string | null
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          post_url?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["instagram_submission_status"]
+          store_id?: string
+          transaction_id?: string | null
+          updated_at?: string
+          verify_after?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_submissions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_submissions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_submissions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_logs: {
+        Row: {
+          created_at: string
+          id: string
+          mensagem_erro: string | null
+          origem: string
+          payload_recebido: Json | null
+          status: string
+          store_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          origem: string
+          payload_recebido?: Json | null
+          status: string
+          store_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          origem?: string
+          payload_recebido?: Json | null
+          status?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_logs: {
+        Row: {
+          client_user_id: string
+          created_at: string
+          id: string
+          mensagem_erro: string | null
+          status: string
+          store_id: string
+          tipo: string
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          status: string
+          store_id: string
+          tipo: string
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          mensagem_erro?: string | null
+          status?: string
+          store_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_responses: {
+        Row: {
+          client_user_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          score: number
+          store_id: string
+          transaction_id: string
+        }
+        Insert: {
+          client_user_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score: number
+          store_id: string
+          transaction_id: string
+        }
+        Update: {
+          client_user_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score?: number
+          store_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_responses_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_responses_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_responses_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           ativo: boolean
@@ -64,6 +572,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          birthdate: string | null
           cpf: string | null
           created_at: string
           full_name: string | null
@@ -71,6 +580,7 @@ export type Database = {
           phone: string | null
         }
         Insert: {
+          birthdate?: string | null
           cpf?: string | null
           created_at?: string
           full_name?: string | null
@@ -78,6 +588,7 @@ export type Database = {
           phone?: string | null
         }
         Update: {
+          birthdate?: string | null
           cpf?: string | null
           created_at?: string
           full_name?: string | null
@@ -85,6 +596,126 @@ export type Database = {
           phone?: string | null
         }
         Relationships: []
+      }
+      promotions: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          data_fim: string | null
+          data_inicio: string | null
+          dias_semana: number[]
+          hora_fim: string
+          hora_inicio: string
+          id: string
+          multiplicador: number
+          nome: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          dias_semana?: number[]
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          multiplicador?: number
+          nome: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          dias_semana?: number[]
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          multiplicador?: number
+          nome?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raffles: {
+        Row: {
+          created_at: string
+          filtro_nivel_min: string | null
+          filtro_tag: string | null
+          ganhador_nome: string | null
+          ganhador_user_id: string | null
+          id: string
+          premio: string
+          sorted_at: string | null
+          status: string
+          store_id: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          filtro_nivel_min?: string | null
+          filtro_tag?: string | null
+          ganhador_nome?: string | null
+          ganhador_user_id?: string | null
+          id?: string
+          premio: string
+          sorted_at?: string | null
+          status?: string
+          store_id: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          filtro_nivel_min?: string | null
+          filtro_tag?: string | null
+          ganhador_nome?: string | null
+          ganhador_user_id?: string | null
+          id?: string
+          premio?: string
+          sorted_at?: string | null
+          status?: string
+          store_id?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raffles_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raffles_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       store_clients: {
         Row: {
@@ -151,6 +782,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_clients_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -359,6 +997,92 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          cashback_delta: number
+          client_user_id: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          id_venda_externa: string | null
+          origem: string | null
+          pontos_delta: number
+          product_id: string | null
+          redeemed_by: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          store_id: string
+          tipo: Database["public"]["Enums"]["transaction_tipo"]
+          valor: number
+          voucher_code: string | null
+          voucher_expires_at: string | null
+        }
+        Insert: {
+          cashback_delta?: number
+          client_user_id: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          id_venda_externa?: string | null
+          origem?: string | null
+          pontos_delta?: number
+          product_id?: string | null
+          redeemed_by?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          store_id: string
+          tipo: Database["public"]["Enums"]["transaction_tipo"]
+          valor?: number
+          voucher_code?: string | null
+          voucher_expires_at?: string | null
+        }
+        Update: {
+          cashback_delta?: number
+          client_user_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          id_venda_externa?: string | null
+          origem?: string | null
+          pontos_delta?: number
+          product_id?: string | null
+          redeemed_by?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          store_id?: string
+          tipo?: Database["public"]["Enums"]["transaction_tipo"]
+          valor?: number
+          voucher_code?: string | null
+          voucher_expires_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_client_user_id_profiles_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -471,6 +1195,7 @@ export type Database = {
       }
     }
     Functions: {
+      bootstrap_first_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -481,6 +1206,11 @@ export type Database = {
     }
     Enums: {
       app_role: "lojista" | "cliente" | "admin"
+      instagram_submission_status:
+        | "pendente"
+        | "aprovado"
+        | "rejeitado"
+        | "estornado"
       modalidade: "pontos" | "cashback" | "ambos"
       nivel_cliente: "bronze" | "prata" | "ouro"
       transaction_status: "pendente" | "entregue" | "cancelado" | "expirado"
@@ -622,6 +1352,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["lojista", "cliente", "admin"],
+      instagram_submission_status: [
+        "pendente",
+        "aprovado",
+        "rejeitado",
+        "estornado",
+      ],
       modalidade: ["pontos", "cashback", "ambos"],
       nivel_cliente: ["bronze", "prata", "ouro"],
       transaction_status: ["pendente", "entregue", "cancelado", "expirado"],
