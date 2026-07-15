@@ -114,8 +114,17 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
       HEAD: async () => new Response(null, { status: 200, headers: CORS }),
       POST: async ({ request, params }) => {
         const origem = String(params.origem).toLowerCase();
-        if (!["bling", "olist", "teste"].includes(origem)) {
-          return json({ error: "origem inválida (use bling|olist)" }, 404);
+        if (origem === "olist") {
+          return json(
+            {
+              error:
+                "Endpoint /api/public/webhook/olist descontinuado. Use OAuth2 V3 em /api/public/webhook/olist/v3 — conecte pelo painel do lojista.",
+            },
+            410,
+          );
+        }
+        if (!["bling", "teste"].includes(origem)) {
+          return json({ error: "origem inválida (use bling|teste)" }, 404);
         }
 
         const raw = await request.text();
