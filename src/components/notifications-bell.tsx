@@ -6,7 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { listarNotificacoesLojista, marcarNotificacoesLidas } from "@/lib/team.functions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 function iconFor(tipo: string) {
   if (tipo === "employee.login") return <LogIn className="h-4 w-4 text-sky-500" />;
@@ -33,9 +35,50 @@ export function NotificationsBell({ variant = "light" }: { variant?: "light" | "
   const { data } = useQuery({
     queryKey: ["merchant-notifications"],
     queryFn: () => listar(),
-    refetchInterval: 30_000,
-    staleTime: 15_000,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
+
+  const storeId: string | undefined = data?.storeId;
+
+  useEffect(() => {
+    if (!storeId) return;
+    const channel = supabase
+      .channel(`merchant-notifications-${storeId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "merchant_notifications",
+          filter: `store_id=eq.${storeId}`,
+        },
+        (payload: any) => {
+          qc.invalidateQueries({ queryKey: ["merchant-notifications"] });
+          const n = payload?.new;
+          if (n?.titulo) {
+            toast(n.titulo, { description: n.mensagem ?? undefined });
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "merchant_notifications",
+          filter: `store_id=eq.${storeId}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["merchant-notifications"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [storeId, qc]);
+
   const marcarMut = useMutation({
     mutationFn: (ids?: string[]) => marcar({ data: { ids } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["merchant-notifications"] }),
