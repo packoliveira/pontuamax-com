@@ -1805,13 +1805,6 @@ export const previewDestinatarios = createServerFn({ method: "POST" })
 // ============================================================
 // VALE-PRESENTE / GIFT CARDS
 // ============================================================
-function randomGiftCode(): string {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out = "";
-  for (let i = 0; i < 8; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
-  return out;
-}
-
 export const criarGiftCards = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -1891,12 +1884,6 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
 // ============================================================
 // NOTA FISCAL — OCR via Lovable AI Gateway
 // ============================================================
-async function sha256Hex(text: string): Promise<string> {
-  const buf = new TextEncoder().encode(text);
-  const hash = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
 export const submitNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
