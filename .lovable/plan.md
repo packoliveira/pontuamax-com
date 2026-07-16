@@ -1,33 +1,81 @@
-## O que você vai ter
+# Refatoração Estrutural — Plano em Ondas
 
-1. **Página de login dedicada** em `/funcionario/login` — CPF + senha, com marca da loja e link "esqueci minha senha" (avisa o lojista).
-2. **Onboarding pós-convite** — no 1º acesso o funcionário é obrigado a trocar a senha inicial antes de entrar no painel.
-3. **Dashboard inicial guiado** — banner de boas-vindas com os 3 próximos passos baseados nas permissões (identificar cliente → pontuar → validar voucher). Os cards já existentes continuam.
-4. **Wizard de operação diária** já coberto pelo fluxo atual em `/funcionario/pontuar` e `/funcionario/resgates` — apenas adiciono um atalho "Novo atendimento" no dashboard que abre o passo a passo.
-5. **Novos cargos disponíveis** para o lojista escolher ao cadastrar funcionário: além de Proprietário/Gerente/Funcionário, adiciono **Frente de Caixa** (permissões mínimas de operação) e **Sócio/Dono** (equivalente a Gerente com acesso a relatórios). Lojista continua podendo marcar/desmarcar permissões individuais por funcionário na tela `/lojista/equipe` (fluxo já existe).
+Objetivo: melhorar organização, reduzir duplicação e diminuir o tamanho de arquivos gigantes **sem** mudar comportamento visível. Vamos em ondas curtas e verificáveis, cada uma isolada — assim conseguimos parar/reverter caso algo quebre.
 
-## Detalhes técnicos
+## Diagnóstico dos pontos críticos
 
-### Banco (uma migration)
-- `team_roles`: inserir `caixa` (Frente de Caixa) e `socio` (Sócio) com `sort_order` adequado.
-- `team_role_permissions`: preencher padrões:
-  - `caixa`: `clientes.consultar`, `pontos.adicionar`, `vouchers.validar`, `resgates.produtos`.
-  - `socio`: mesmas de `gerente` + `relatorios.consultar` (se existir; caso contrário, todas exceto `equipe.gerenciar`).
-- `store_employees`: adicionar coluna `must_change_password boolean not null default true` e `first_login_at timestamptz`.
-- Na função `createEmployee` (server) marcar `must_change_password=true`; ao trocar senha, marcar `false` e setar `first_login_at`.
+Arquivos mais problemáticos hoje:
 
-### Rotas novas
-- `src/routes/funcionario.login.tsx` (ssr:false, pública): formulário com CPF + senha. Chama nova server fn `resolveFuncionarioEmailByCpf` que, sem exigir sessão, procura em `store_employees` (via `supabaseAdmin`) o email vinculado ao CPF **ativo** e retorna o email. Cliente faz `supabase.auth.signInWithPassword({ email, password })` e navega para `/funcionario`.
-- `src/routes/funcionario.trocar-senha.tsx`: formulário de nova senha (mín. 8). Server fn `trocarSenhaFuncionario` chama `supabase.auth.updateUser` do próprio usuário e marca `must_change_password=false`, grava `first_login_at`.
-- `src/routes/funcionario.tsx` (layout): após checar sessão + vínculo ativo, se `must_change_password` estiver `true` e a rota atual **não** for `/funcionario/trocar-senha`, redireciona para lá.
+| Arquivo | Linhas | Problema |
+|---|---|---|
+| `src/lib/qsf.functions.ts` | 2464 | Múltiplos domínios (auth cliente, vendas, resgates, gift cards, NPS, campanhas…) num único módulo |
+| `src/routes/lojista.configuracoes.tsx` | 1625 | Rota-monstro: dados da loja, Olist OAuth, webhook, WhatsApp, integrações |
+| `src/routes/$slug.tsx` | 1542 | Portal do cliente: hero, auth, extrato, resgates, gift card, tudo numa rota |
+| `src/routes/lojista.personalizacao.tsx` | 1160 | Preview + editor + contraste + import/export num só arquivo |
+| `src/routes/index.tsx` | 765 | Landing com muitas seções inline |
+| `src/routes/admin.index.tsx` | 717 | Painel admin com widgets diversos |
+| `src/routes/lojista.clientes.tsx` | 700 | Tabela + filtros + drawer detalhe |
+| `src/lib/team.functions.ts` | 622 | Notificações + roles + auditoria juntas |
 
-### UI
-- Login com card e marca PontuaMax (mesmo padrão visual do `/lojista/login`).
-- Banner de boas-vindas no dashboard só aparece se `first_login_at` for recente (< 24h).
-- Atalho "Novo atendimento" no dashboard leva direto para `/funcionario/pontuar`.
-- Botão "Copiar link" e "Acesso do vendedor" já existentes em `/lojista/equipe` continuam apontando para `/funcionario/login`.
+Além disso: imports desorganizados em rotas grandes, algumas funções puras (formatação de CPF, telefone, moeda) duplicadas entre rotas, e regras de negócio (níveis, cálculo de pontos) inline em componentes.
 
-### Escopo fora
-- Não altero o fluxo de resgates/vouchers já finalizado.
-- Não mudo permissões dos cargos `proprietario`/`gerente`/`funcionario` existentes.
-- Não altero autenticação do lojista.
+## Ondas propostas
+
+### Onda A — Utilitários compartilhados (baixo risco)
+- Criar `src/lib/format.ts`: `formatCpf`, `formatCnpj`, `formatTelefone`, `formatMoeda`, `formatData`, `timeAgo`.
+- Criar `src/lib/validators.ts`: `isCpfValido`, `sanitizeCpf`, `sanitizeTelefone`.
+- Substituir implementações inline nas rotas por imports desses helpers.
+
+### Onda B — Fatiar `qsf.functions.ts` em domínios
+Dividir por área mantendo os re-exports (barrel) para não quebrar imports existentes:
+```
+src/lib/qsf/
+  client-auth.functions.ts     (login/cadastro cliente, criarClienteViaCpf, reivindicarCadastroPendente)
+  vendas.functions.ts          (lançar venda, calcular pontos)
+  resgates.functions.ts        (resgatar produto/cashback, validar voucher)
+  gift-cards.functions.ts
+  nps.functions.ts
+  campanhas.functions.ts
+  shared.ts                    (níveis, cálculo de pontos, constantes)
+```
+`src/lib/qsf.functions.ts` vira apenas `export * from "./qsf/…"` — todos os call sites continuam funcionando.
+
+### Onda C — Fatiar `team.functions.ts`
+```
+src/lib/team/
+  notifications.functions.ts
+  roles.functions.ts
+  audit.functions.ts
+  employees.functions.ts
+```
+Mesmo padrão barrel.
+
+### Onda D — Componentizar rotas grandes
+- `$slug.tsx` → extrair `PortalHeader`, `PortalAuthCard`, `PortalPontosCard`, `PortalExtrato`, `PortalResgates` em `src/components/portal/`.
+- `lojista.configuracoes.tsx` → seções em `src/components/lojista/config/` (`DadosLojaSection`, `OlistSection`, `WebhookSection`, `WhatsAppSection`).
+- `lojista.personalizacao.tsx` → `PersonalizacaoPreview`, `PersonalizacaoColorForm`, `PersonalizacaoThemeIO` em `src/components/lojista/personalizacao/`.
+- `lojista.clientes.tsx` → `ClientesTable`, `ClienteDetailDrawer`, `ClientesFilters`.
+
+Rotas ficam como composição fina + `useQuery`/mutations.
+
+### Onda E — Padronização final
+- Ordenação de imports (Node → externos → aliases `@/` → relativos).
+- Remover `console.log` de debug remanescentes.
+- Unificar `toast` para sempre usar `sonner` (já é padrão; conferir se sobra algum `useToast`).
+- Padronizar nomes: PascalCase para componentes, camelCase para funções, kebab-case para nomes de arquivo novos.
+
+## Diretrizes de segurança da refatoração
+- Cada onda em um turno próprio, com typecheck automático entre elas.
+- Barrels preservam a API pública — nenhum import externo muda.
+- Zero alteração em SQL, RLS, edge/server-fn semântica, roteamento, textos e classes de UI.
+- Sem renomear função exportada usada por outra rota antes de fazer o barrel/aliased re-export.
+
+## Fora de escopo
+- Redesign visual, mudanças de UX, novas features.
+- Otimização de queries Supabase (fica para uma onda de performance separada).
+- Reescrever `src/routes/api/public/webhook/$origem.ts` (é orquestração externa; risco alto x ganho baixo agora).
+
+## Ordem sugerida
+A → B → C → D (uma rota por turno) → E.
+
+Confirma a ordem e eu começo pela **Onda A**? Se preferir focar em algo (ex.: só fatiar `$slug` ou só `qsf.functions.ts`), me diz.
