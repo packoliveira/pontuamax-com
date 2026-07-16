@@ -9,6 +9,7 @@ import { listarNotificacoesLojista, marcarNotificacoesLidas } from "@/lib/team.f
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { timeAgo } from "@/lib/qsf-shared";
 
 function iconFor(tipo: string) {
   if (tipo === "employee.login") return <LogIn className="h-4 w-4 text-sky-500" />;
@@ -16,14 +17,6 @@ function iconFor(tipo: string) {
   if (tipo === "resgate.confirmado") return <Gift className="h-4 w-4 text-violet-500" />;
   if (tipo === "voucher.cancelado") return <XCircle className="h-4 w-4 text-rose-500" />;
   return <Bell className="h-4 w-4 text-muted-foreground" />;
-}
-
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "agora";
-  if (diff < 3600) return `${Math.floor(diff / 60)}min`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-  return `${Math.floor(diff / 86400)}d`;
 }
 
 export function NotificationsBell({ variant = "light" }: { variant?: "light" | "dark" }) {
