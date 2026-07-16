@@ -144,6 +144,30 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+    let unsub: (() => void) | undefined;
+    // Lazy import to keep supabase client out of SSR bundle path.
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      if (cancelled) return;
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        // Ignore noisy events (TOKEN_REFRESHED ~hourly, INITIAL_SESSION on mount).
+        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+        router.invalidate();
+        // Do NOT refetch queries on SIGNED_OUT — protected queries would 401
+        // against the cleared session. Sign-out flows own their own teardown.
+        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      });
+      unsub = () => data.subscription.unsubscribe();
+    });
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
+  }, [queryClient, router]);
 
   return (
     <QueryClientProvider client={queryClient}>
