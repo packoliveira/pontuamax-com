@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Coins, Gift, Ticket, Star, Percent, BadgePercent, Sparkles } from "lucide-react";
 
 type IconKind = "coin" | "gift" | "ticket" | "star" | "percent" | "badge" | "real" | "spark";
@@ -45,6 +45,42 @@ function useIsMobile() {
     return () => mq.removeEventListener?.("change", on);
   }, []);
   return mobile;
+}
+
+/** Pause CSS animations when the element scrolls off-screen or the tab is hidden.
+ *  Cheap CPU/GPU savings on the login page and previews. */
+function usePauseWhenHidden(ref: React.RefObject<HTMLElement>) {
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const el = ref.current;
+    let onScreen = true;
+    let visible = !document.hidden;
+    const update = () => setPaused(!(onScreen && visible));
+
+    const onVis = () => {
+      visible = !document.hidden;
+      update();
+    };
+    document.addEventListener("visibilitychange", onVis);
+
+    let io: IntersectionObserver | undefined;
+    if (el && "IntersectionObserver" in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          onScreen = entries[0]?.isIntersecting ?? true;
+          update();
+        },
+        { threshold: 0 },
+      );
+      io.observe(el);
+    }
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      io?.disconnect();
+    };
+  }, [ref]);
+  return paused;
 }
 
 function rand(min: number, max: number) {
@@ -107,6 +143,8 @@ export function RewardRain({
 }) {
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const paused = usePauseWhenHidden(rootRef);
   const palette = colors && colors.length > 0 ? colors : DEFAULT_COLORS;
   const target = count ?? (mobile ? 10 : 22);
   const opMul = Math.max(0.1, Math.min(1, opacityOverride ?? 1));
@@ -130,6 +168,7 @@ export function RewardRain({
 
   return (
     <div
+      ref={rootRef}
       aria-hidden
       className="reward-rain-root"
       style={{
@@ -138,6 +177,7 @@ export function RewardRain({
         overflow: "hidden",
         pointerEvents: "none",
         zIndex: 0,
+        animationPlayState: paused ? "paused" : "running",
       }}
     >
       {particles.map((p) => (
@@ -149,6 +189,7 @@ export function RewardRain({
             left: `${p.left}%`,
             opacity: p.opacity,
             animation: `reward-rain-fall ${p.duration}s linear ${p.delay}s infinite`,
+            animationPlayState: paused ? "paused" : "running",
             transform: "translate3d(0,0,0)",
             willChange: "transform, opacity",
             // Dual shadow: dark halo + light halo → destaca em qualquer fundo
