@@ -1,19 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { myStoreQuery, integrationLogsQuery } from "@/lib/queries";
-import {
-  atualizarLoja,
-  rotacionarWebhookSecret,
-  testarWebhook,
-  salvarWhatsapp,
-  enviarWhatsappTeste,
-  conectarWhatsappQR,
-  statusWhatsapp,
-  desconectarWhatsapp,
-  salvarNotificacoes,
-  dispararNotificacoesAgora,
-} from "@/lib/qsf.functions";
+import { myStoreQuery } from "@/lib/queries";
+import { atualizarLoja } from "@/lib/qsf.functions";
 import type { Modalidade } from "@/lib/qsf-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,36 +10,36 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import {
-  Copy,
-  RefreshCw,
-  Send,
-  CheckCircle2,
-  XCircle,
-  MessageCircle,
-  QrCode,
-  Loader2,
-  Power,
-  Bell,
-  Cake,
-  Clock,
-  TimerReset,
-  Gift,
-  Star,
-  Instagram,
-} from "lucide-react";
-import { Hourglass } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
-import { Link as LinkIcon, Unplug } from "lucide-react";
 import {
   LivePreview,
   AssetUploader,
   ColorPresets,
   SuggestedBanners,
 } from "@/components/lojista/personalizacao-shared";
+
+// Below-the-fold cards ship in a separate chunk (~1200 lines) and load after first paint.
+const CardsModule = () => import("@/components/lojista/config-cards");
+const IntegracoesCard = lazy(() => CardsModule().then((m) => ({ default: m.IntegracoesCard })));
+const OlistOAuthCard = lazy(() => CardsModule().then((m) => ({ default: m.OlistOAuthCard })));
+const WhatsappCard = lazy(() => CardsModule().then((m) => ({ default: m.WhatsappCard })));
+const NotificacoesCard = lazy(() => CardsModule().then((m) => ({ default: m.NotificacoesCard })));
+const IndicacaoCard = lazy(() => CardsModule().then((m) => ({ default: m.IndicacaoCard })));
+const NpsCard = lazy(() => CardsModule().then((m) => ({ default: m.NpsCard })));
+const InstagramCard = lazy(() => CardsModule().then((m) => ({ default: m.InstagramCard })));
+const ValidadePontosCard = lazy(() =>
+  CardsModule().then((m) => ({ default: m.ValidadePontosCard })),
+);
+
+function CardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+      <div className="h-4 w-40 animate-pulse rounded bg-[#F1F5F9]" />
+      <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-[#F1F5F9]" />
+      <div className="mt-6 h-32 animate-pulse rounded-xl bg-[#F8FAFC]" />
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
