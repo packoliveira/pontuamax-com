@@ -1241,9 +1241,6 @@ export type Database = {
           cnpj: string | null
           created_at: string
           erp_provider: string | null
-          evolution_apikey: string | null
-          evolution_instance: string | null
-          evolution_url: string | null
           header_kicker_show: boolean
           header_kicker_size: string | null
           header_kicker_size_mobile: string | null
@@ -1296,7 +1293,6 @@ export type Database = {
           voucher_validade_dias: number
           voucher_visivel_apos_uso: boolean
           webhook_last_at: string | null
-          webhook_secret: string
           whatsapp_enabled: boolean
           whatsapp_template_pontos: string
         }
@@ -1325,9 +1321,6 @@ export type Database = {
           cnpj?: string | null
           created_at?: string
           erp_provider?: string | null
-          evolution_apikey?: string | null
-          evolution_instance?: string | null
-          evolution_url?: string | null
           header_kicker_show?: boolean
           header_kicker_size?: string | null
           header_kicker_size_mobile?: string | null
@@ -1380,7 +1373,6 @@ export type Database = {
           voucher_validade_dias?: number
           voucher_visivel_apos_uso?: boolean
           webhook_last_at?: string | null
-          webhook_secret?: string
           whatsapp_enabled?: boolean
           whatsapp_template_pontos?: string
         }
@@ -1409,9 +1401,6 @@ export type Database = {
           cnpj?: string | null
           created_at?: string
           erp_provider?: string | null
-          evolution_apikey?: string | null
-          evolution_instance?: string | null
-          evolution_url?: string | null
           header_kicker_show?: boolean
           header_kicker_size?: string | null
           header_kicker_size_mobile?: string | null
@@ -1464,7 +1453,6 @@ export type Database = {
           voucher_validade_dias?: number
           voucher_visivel_apos_uso?: boolean
           webhook_last_at?: string | null
-          webhook_secret?: string
           whatsapp_enabled?: boolean
           whatsapp_template_pontos?: string
         }
