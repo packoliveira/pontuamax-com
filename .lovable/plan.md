@@ -1,87 +1,89 @@
-# Plano de otimização profunda — PontuaMax
-
 ## Diagnóstico
 
-Rodei uma varredura completa sem alterar nada. Principais gargalos hoje:
+**Situação atual (o que já está bom, para o usuário saber):**
+- ✅ 0 findings em todos os scanners de segurança (Supabase, supply-chain, MCP, conectores)
+- ✅ RLS ativo em todas as **29 tabelas públicas**
+- ✅ Policies escopadas por `owner_id`/`store_id`/`auth.uid()` + sistema RBAC via `employee_has_permission()`
+- ✅ Segredos apenas em server (`SUPABASE_SERVICE_ROLE_KEY`, `OLIST_API_TOKEN`, `OAUTH_STATE_SECRET`)
+- ✅ Storage privado com policies escopadas por loja
+- ✅ Trigger `handle_new_user` cria profile no signup
+- ✅ Webhook Olist valida HMAC via `OAUTH_STATE_SECRET` + `webhook_secret` por loja
+- ✅ Client `supabase.auth` usa apenas publishable key
+- ✅ Todas `SECURITY DEFINER` functions têm `SET search_path = public`
 
-**1. Roteador com preload agressivo desligado**
-- `router.tsx` usa `defaultPreloadStaleTime: 0` (correto p/ React Query), mas **não define `defaultPreload`**. Sem `"intent"`, cada clique em `<Link>` faz waterfall completo (código do chunk → loader → query). Isso é o principal motivo da sensação de "delay entre rotas".
+## Falhas encontradas — em ordem de risco
 
-**2. Rotas gigantes (não fatiadas)**
-- `lojista.configuracoes.tsx` **2094 linhas**, `personalizacao.tsx` **1368**, `clientes.tsx` **844**, `equipe.tsx` **872**, `funcionario.clientes.tsx` **784**, `funcionario.pontuar.tsx` **603**, `index.tsx` (landing) **819**, `qsf.functions.ts` **2724**. Cada uma vira 1 chunk enorme carregado inteiro no primeiro clique.
-- Componentes usados só em modais (dialogs de edição, wizards) sobem no chunk principal da rota.
+### 🔴 ALTO
 
-**3. Queries Supabase sem `staleTime` nem chaves bem escopadas**
-- `myTransactionsAtStoreQuery`, `activeStoreProductsQuery`, `storeBySlugQuery` etc. usam `staleTime` padrão do template (SWR reprocessa a cada volta de rota). Painéis do lojista refazem lista de clientes/produtos toda vez que troca de aba.
-- Não há prefetch nas listas → detalhe (ex: cliente na lista → cliente aberto).
-- Vários `useQuery` em série no mesmo componente onde daria pra usar `useQueries` paralelo.
+**H1 — Escalação latente via `bootstrap_first_admin()`**  
+Qualquer usuário autenticado pode chamar. A função só concede admin se `user_roles` estiver vazio, mas isso é uma **backdoor**: um restore acidental, migração ruim, ou operador excluindo o admin master faz o próximo login virar admin. Deve ser revogado de `authenticated` (executa só via service_role no bootstrap inicial).
 
-**4. Realtime + subscriptions não instrumentados**
-- Poucas subs mas uma delas está fora de `useEffect` (risco de reconnect loop e conta Realtime).
+**H2 — Secrets sensíveis expostos ao owner autenticado**  
+`stores` tem 82 colunas — inclui `webhook_secret`, `evolution_apikey`, `olist_client_secret`, `olist_access_token`, `olist_refresh_token`. Policy `stores_owner_select` retorna **tudo** ao owner. Consequências:
+- Qualquer `SELECT *` do front carrega secrets pro browser (memória, DevTools, extensões)
+- Uma XSS futura vaza todas as credenciais de ERP/WhatsApp
+- Employees com role de admin veem tudo via join
+Solução: mover essas 9 colunas sensíveis para tabela apartada `store_secrets` acessível **só por service_role**, e substituir o acesso do front por uma server function `getStoreForOwner()` que projeta apenas colunas seguras.
 
-**5. Bundle / assets**
-- Nenhum asset em `src/assets/` (bom), mas `<link>` de fontes é feito por CSS `@import` em vez de `<link rel="preconnect"+preload>` no `__root`. Isso atrasa LCP.
-- `sonner` + `radix-*` + `lucide-react` no shell — `lucide` precisa de barrel-import controlado (já usa named import, ok), mas várias rotas re-importam mesmos ícones (não custa, é tree-shaken).
-- Sem `vite-imagetools` nem `<img loading="lazy" decoding="async">` nas listas de produtos/clientes.
+### 🟡 MÉDIO
 
-**6. Re-renderizações**
-- Muitos `onChange` em forms grandes com estado no topo → cada tecla re-renderiza todo o card (visível em `lojista.configuracoes.tsx` e `personalizacao.tsx`).
-- Listas grandes (clientes, transações) renderizam sem `key` estável em alguns pontos e sem `React.memo` nos rows.
+**M1 — `oauth_states` tem RLS ativo mas 0 policies** (linter warn)  
+Comportamento atual: nega tudo ao client. Correto em intenção, mas implícito. Fix: policy explícita `FOR ALL USING (false)` para tornar a intenção auditável.
 
-**7. CSS / animações**
-- `reward-rain` roda animação JS mesmo quando off-screen; falta `prefers-reduced-motion` real e `visibilitychange` pause.
-- Vários `backdrop-blur` + `shadow-2xl` empilhados no portal do cliente (compositing pesado em mobile).
+**M2 — Leaked password protection desabilitada** (Supabase Auth)  
+Requer clique no Dashboard do Supabase — te passo o link. Sem código.
 
-**8. SSR / hidratação**
-- Alguns componentes leem `window`/`localStorage` no corpo do render (não em `useEffect`) — causa mismatch e "flash" no primeiro paint.
+**M3 — FKs sem índice** — 17 colunas de foreign key sem suporte. Causa deletes/joins lentos e degrada em escala. Principais:
+- `products.store_id`, `store_clients.user_id`, `transactions.product_id`
+- `fiscal_notes.client_user_id`, `client_tags.client_user_id`, `notification_logs.client_user_id`
+- `gift_cards.redeemed_by`, `raffles.ganhador_user_id`
+- `store_employees.role_key`, `store_employees.created_by`
+- `store_employee_permissions.permission_key`, `team_role_permissions.permission_key`
+- `instagram_submissions.reviewed_by`, `instagram_submissions.transaction_id`
+- `employee_audit_logs.actor_user_id`, `oauth_states.store_id`
 
----
+### 🟢 BAIXO (revisado, sem ação necessária)
 
-## Priorização (impacto × risco)
+- `SECURITY DEFINER` warnings (9): todas legítimas — `has_role`, `is_store_owner`, `employee_has_permission`, `get_store_for_employee`, `resgatar_*_atomico`. Manter.
+- `products_public_select` com `TO anon`: intencional para catálogo público das lojas.
+- Zod validation nos server functions: verificado, coberto.
+- Input sanitization: shadcn Input + Zod cobrem forms; nenhum `dangerouslySetInnerHTML` em conteúdo de usuário.
 
-| # | Onda | Impacto | Risco | O que muda |
-|---|------|---------|-------|------------|
-| 1 | Router & Query defaults | 🔥🔥🔥 | baixo | 1 arquivo |
-| 2 | Prefetch + staleTime nas queries | 🔥🔥🔥 | baixo | `src/lib/queries.ts` + hooks |
-| 3 | Code-split de rotas grandes (dialogs → lazy) | 🔥🔥 | médio | 4-6 rotas |
-| 4 | Fontes/preconnect + `<img>` lazy + memo de rows | 🔥🔥 | baixo | `__root` + listas |
-| 5 | Animações/hidratação/mobile polish | 🔥 | baixo | `reward-rain`, portal |
+## Ondas de execução
 
----
+**Onda 1 — Corrigir H1, M1 e M3 (migração única, sem tocar código)**
+1. `REVOKE EXECUTE ON FUNCTION public.bootstrap_first_admin() FROM authenticated, anon, PUBLIC` (mantém para `service_role` apenas)
+2. `CREATE POLICY "oauth_states client deny" ON public.oauth_states FOR ALL TO authenticated, anon USING (false) WITH CHECK (false)`
+3. `CREATE INDEX` em cada uma das 17 FKs identificadas
 
-## Ondas
+**Onda 2 — H2: isolamento de secrets sensíveis (migração + código)**
+1. Migração:
+   - `CREATE TABLE public.store_secrets (store_id uuid PK REFERENCES stores, webhook_secret text, evolution_apikey text, evolution_url text, evolution_instance text, olist_client_id text, olist_client_secret text, olist_access_token text, olist_refresh_token text, olist_token_expires_at timestamptz)`
+   - `GRANT ALL ON public.store_secrets TO service_role` (sem grants para authenticated/anon)
+   - `ALTER TABLE store_secrets ENABLE ROW LEVEL SECURITY` (deny-all implícito)
+   - Copiar valores existentes de `stores` → `store_secrets`
+   - `ALTER TABLE stores DROP COLUMN` para as 9 colunas sensíveis
+2. Código:
+   - Todas as leituras/escritas dos secrets (em `olist.server.ts`, webhook handlers, `qsf.functions.ts`) já rodam via `supabaseAdmin` — só trocar a tabela alvo
+   - `myStoreQuery` no client já não seleciona essas colunas via `get_store_for_employee`; verificar chamadas diretas em `admin.*` e ajustar
+   - Nenhuma UI perde funcionalidade — secrets seguem editáveis pelo owner via server function
 
-### Onda 1 — Router & Query (aplicar imediato)
-- `router.tsx`: adicionar `defaultPreload: "intent"`, `defaultPreloadDelay: 40`, `defaultPendingMs: 200`, `defaultPendingMinMs: 300`, `defaultStructuralSharing: true`.
-- Novo `QueryClient` com `staleTime: 30_000`, `gcTime: 5*60_000`, `refetchOnWindowFocus: false` (mantendo `refetchOnReconnect: true`).
-- **Ganho esperado:** navegação praticamente instantânea entre rotas já visitadas, sem refetch a cada foco de janela.
+**Onda 3 — Verificação final**
+- Rerun linter + security scan
+- Typecheck + smoke test do webhook Olist
+- Confirmar que owner ainda edita credenciais via UI (server function atualiza `store_secrets`)
 
-### Onda 2 — Queries Supabase
-- Anotar `staleTime` por natureza do dado em `src/lib/queries.ts` (produtos: 60s; transações: 15s; loja: 5min; roles: 5min).
-- Adicionar helpers `prefetchClienteQuery`, `prefetchLojaBySlug` chamados em `onMouseEnter`/loader de listas.
-- Trocar `useQuery` em série por `useQueries` onde possível (portal do cliente, dashboard lojista).
-- Auditar `select('*')` → especificar colunas nas queries mais quentes (`store_clients`, `transactions`, `profiles`).
+## Fora do escopo (registrado para depois)
 
-### Onda 3 — Code-split cirúrgico
-- Extrair dialogs pesados (`EditClienteDialog`, `ImportarClientesDialog`, wizards de configuração) para `React.lazy` + `Suspense`.
-- Fatiar `lojista.configuracoes.tsx` (2k linhas) em subcomponentes por seção — só carrega quando a aba é aberta.
-- Mover `qsf.functions.ts` restante que não é `createServerFn` para `qsf-helpers.server.ts` (encolhe o chunk client).
+- Rate limiting nos endpoints públicos (`/api/public/webhook/olist`) — requer infra externa
+- Audit trail completo de mudanças em `stores` — feature adicional, não vulnerabilidade
 
-### Onda 4 — Assets/CSS
-- `<link rel="preconnect">` para Supabase e fontes no `__root.tsx`.
-- `<img loading="lazy" decoding="async" fetchpriority="low">` em todas as listas; `fetchpriority="high"` só na hero/logo do portal.
-- Remover `backdrop-blur` duplicado no portal, consolidar em 1 camada.
-- `content-visibility: auto` em cards fora da viewport (listas longas).
+## Impacto
 
-### Onda 5 — Animações, hidratação, mobile
-- `reward-rain`: pausar em `document.hidden` e usar `IntersectionObserver`; respeitar `prefers-reduced-motion` de verdade.
-- Migrar leituras de `localStorage` no corpo do render p/ `useEffect` (evita mismatch).
-- `React.memo` em `TxRowItem`, `ClienteRow`, `ProdutoRow`.
-- Ajustar sombra/blur pesados no mobile (`md:` prefix nas classes de blur).
+- **Zero regressão de UX** — todas as funcionalidades permanecem
+- **Superfície de ataque reduzida**: secrets de ERP fora do bundle do browser
+- **Backdoor de admin fechada**
+- **Deletes/joins mais rápidos** com os 17 índices
+- **Postura auditável**: policies explícitas em `oauth_states`
 
----
-
-## Como vou executar
-Vou aplicar **Onda 1 e 2 já** (baixo risco, impacto grande e mensurável). Depois pergunto se sigo direto para as ondas 3-5 (que mexem em mais arquivos) ou se você quer conferir antes.
-
-Sem quebrar nenhuma funcionalidade, sem mudar design.
+Aprovar Onda 1 já é vitória grande, baixo risco. Onda 2 é a mais impactante — requer aprovação separada porque mexe em schema em produção com dados existentes.
