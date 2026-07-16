@@ -108,7 +108,7 @@ export const listarNotificacoesLojista = createServerFn({ method: "GET" })
       .limit(50);
     if (error) throw new Error(error.message);
     const unread = (data ?? []).filter((n: any) => !n.read_at).length;
-    return { items: data ?? [], unread };
+    return { items: data ?? [], unread, storeId };
   });
 
 export const marcarNotificacoesLidas = createServerFn({ method: "POST" })
