@@ -2749,5 +2749,10 @@ export const getMyStoreFull = createServerFn({ method: "GET" })
     // so the merchant dashboard shape stays unchanged.
     const { getStoreSecrets } = await import("./store-secrets.server");
     const s = await getStoreSecrets(r.data.id);
-    return { ...r.data, ...s };
+    return { ...r.data, ...s } as typeof r.data & {
+      webhook_secret: string | null;
+      evolution_url: string | null;
+      evolution_apikey: string | null;
+      evolution_instance: string | null;
+    };
   });
