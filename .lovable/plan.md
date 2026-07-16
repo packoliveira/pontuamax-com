@@ -1,81 +1,87 @@
-# Refatoração Estrutural — Plano em Ondas
+# Plano de otimização profunda — PontuaMax
 
-Objetivo: melhorar organização, reduzir duplicação e diminuir o tamanho de arquivos gigantes **sem** mudar comportamento visível. Vamos em ondas curtas e verificáveis, cada uma isolada — assim conseguimos parar/reverter caso algo quebre.
+## Diagnóstico
 
-## Diagnóstico dos pontos críticos
+Rodei uma varredura completa sem alterar nada. Principais gargalos hoje:
 
-Arquivos mais problemáticos hoje:
+**1. Roteador com preload agressivo desligado**
+- `router.tsx` usa `defaultPreloadStaleTime: 0` (correto p/ React Query), mas **não define `defaultPreload`**. Sem `"intent"`, cada clique em `<Link>` faz waterfall completo (código do chunk → loader → query). Isso é o principal motivo da sensação de "delay entre rotas".
 
-| Arquivo | Linhas | Problema |
-|---|---|---|
-| `src/lib/qsf.functions.ts` | 2464 | Múltiplos domínios (auth cliente, vendas, resgates, gift cards, NPS, campanhas…) num único módulo |
-| `src/routes/lojista.configuracoes.tsx` | 1625 | Rota-monstro: dados da loja, Olist OAuth, webhook, WhatsApp, integrações |
-| `src/routes/$slug.tsx` | 1542 | Portal do cliente: hero, auth, extrato, resgates, gift card, tudo numa rota |
-| `src/routes/lojista.personalizacao.tsx` | 1160 | Preview + editor + contraste + import/export num só arquivo |
-| `src/routes/index.tsx` | 765 | Landing com muitas seções inline |
-| `src/routes/admin.index.tsx` | 717 | Painel admin com widgets diversos |
-| `src/routes/lojista.clientes.tsx` | 700 | Tabela + filtros + drawer detalhe |
-| `src/lib/team.functions.ts` | 622 | Notificações + roles + auditoria juntas |
+**2. Rotas gigantes (não fatiadas)**
+- `lojista.configuracoes.tsx` **2094 linhas**, `personalizacao.tsx` **1368**, `clientes.tsx` **844**, `equipe.tsx` **872**, `funcionario.clientes.tsx` **784**, `funcionario.pontuar.tsx` **603**, `index.tsx` (landing) **819**, `qsf.functions.ts` **2724**. Cada uma vira 1 chunk enorme carregado inteiro no primeiro clique.
+- Componentes usados só em modais (dialogs de edição, wizards) sobem no chunk principal da rota.
 
-Além disso: imports desorganizados em rotas grandes, algumas funções puras (formatação de CPF, telefone, moeda) duplicadas entre rotas, e regras de negócio (níveis, cálculo de pontos) inline em componentes.
+**3. Queries Supabase sem `staleTime` nem chaves bem escopadas**
+- `myTransactionsAtStoreQuery`, `activeStoreProductsQuery`, `storeBySlugQuery` etc. usam `staleTime` padrão do template (SWR reprocessa a cada volta de rota). Painéis do lojista refazem lista de clientes/produtos toda vez que troca de aba.
+- Não há prefetch nas listas → detalhe (ex: cliente na lista → cliente aberto).
+- Vários `useQuery` em série no mesmo componente onde daria pra usar `useQueries` paralelo.
 
-## Ondas propostas
+**4. Realtime + subscriptions não instrumentados**
+- Poucas subs mas uma delas está fora de `useEffect` (risco de reconnect loop e conta Realtime).
 
-### Onda A — Utilitários compartilhados (baixo risco)
-- Criar `src/lib/format.ts`: `formatCpf`, `formatCnpj`, `formatTelefone`, `formatMoeda`, `formatData`, `timeAgo`.
-- Criar `src/lib/validators.ts`: `isCpfValido`, `sanitizeCpf`, `sanitizeTelefone`.
-- Substituir implementações inline nas rotas por imports desses helpers.
+**5. Bundle / assets**
+- Nenhum asset em `src/assets/` (bom), mas `<link>` de fontes é feito por CSS `@import` em vez de `<link rel="preconnect"+preload>` no `__root`. Isso atrasa LCP.
+- `sonner` + `radix-*` + `lucide-react` no shell — `lucide` precisa de barrel-import controlado (já usa named import, ok), mas várias rotas re-importam mesmos ícones (não custa, é tree-shaken).
+- Sem `vite-imagetools` nem `<img loading="lazy" decoding="async">` nas listas de produtos/clientes.
 
-### Onda B — Fatiar `qsf.functions.ts` em domínios
-Dividir por área mantendo os re-exports (barrel) para não quebrar imports existentes:
-```
-src/lib/qsf/
-  client-auth.functions.ts     (login/cadastro cliente, criarClienteViaCpf, reivindicarCadastroPendente)
-  vendas.functions.ts          (lançar venda, calcular pontos)
-  resgates.functions.ts        (resgatar produto/cashback, validar voucher)
-  gift-cards.functions.ts
-  nps.functions.ts
-  campanhas.functions.ts
-  shared.ts                    (níveis, cálculo de pontos, constantes)
-```
-`src/lib/qsf.functions.ts` vira apenas `export * from "./qsf/…"` — todos os call sites continuam funcionando.
+**6. Re-renderizações**
+- Muitos `onChange` em forms grandes com estado no topo → cada tecla re-renderiza todo o card (visível em `lojista.configuracoes.tsx` e `personalizacao.tsx`).
+- Listas grandes (clientes, transações) renderizam sem `key` estável em alguns pontos e sem `React.memo` nos rows.
 
-### Onda C — Fatiar `team.functions.ts`
-```
-src/lib/team/
-  notifications.functions.ts
-  roles.functions.ts
-  audit.functions.ts
-  employees.functions.ts
-```
-Mesmo padrão barrel.
+**7. CSS / animações**
+- `reward-rain` roda animação JS mesmo quando off-screen; falta `prefers-reduced-motion` real e `visibilitychange` pause.
+- Vários `backdrop-blur` + `shadow-2xl` empilhados no portal do cliente (compositing pesado em mobile).
 
-### Onda D — Componentizar rotas grandes
-- `$slug.tsx` → extrair `PortalHeader`, `PortalAuthCard`, `PortalPontosCard`, `PortalExtrato`, `PortalResgates` em `src/components/portal/`.
-- `lojista.configuracoes.tsx` → seções em `src/components/lojista/config/` (`DadosLojaSection`, `OlistSection`, `WebhookSection`, `WhatsAppSection`).
-- `lojista.personalizacao.tsx` → `PersonalizacaoPreview`, `PersonalizacaoColorForm`, `PersonalizacaoThemeIO` em `src/components/lojista/personalizacao/`.
-- `lojista.clientes.tsx` → `ClientesTable`, `ClienteDetailDrawer`, `ClientesFilters`.
+**8. SSR / hidratação**
+- Alguns componentes leem `window`/`localStorage` no corpo do render (não em `useEffect`) — causa mismatch e "flash" no primeiro paint.
 
-Rotas ficam como composição fina + `useQuery`/mutations.
+---
 
-### Onda E — Padronização final
-- Ordenação de imports (Node → externos → aliases `@/` → relativos).
-- Remover `console.log` de debug remanescentes.
-- Unificar `toast` para sempre usar `sonner` (já é padrão; conferir se sobra algum `useToast`).
-- Padronizar nomes: PascalCase para componentes, camelCase para funções, kebab-case para nomes de arquivo novos.
+## Priorização (impacto × risco)
 
-## Diretrizes de segurança da refatoração
-- Cada onda em um turno próprio, com typecheck automático entre elas.
-- Barrels preservam a API pública — nenhum import externo muda.
-- Zero alteração em SQL, RLS, edge/server-fn semântica, roteamento, textos e classes de UI.
-- Sem renomear função exportada usada por outra rota antes de fazer o barrel/aliased re-export.
+| # | Onda | Impacto | Risco | O que muda |
+|---|------|---------|-------|------------|
+| 1 | Router & Query defaults | 🔥🔥🔥 | baixo | 1 arquivo |
+| 2 | Prefetch + staleTime nas queries | 🔥🔥🔥 | baixo | `src/lib/queries.ts` + hooks |
+| 3 | Code-split de rotas grandes (dialogs → lazy) | 🔥🔥 | médio | 4-6 rotas |
+| 4 | Fontes/preconnect + `<img>` lazy + memo de rows | 🔥🔥 | baixo | `__root` + listas |
+| 5 | Animações/hidratação/mobile polish | 🔥 | baixo | `reward-rain`, portal |
 
-## Fora de escopo
-- Redesign visual, mudanças de UX, novas features.
-- Otimização de queries Supabase (fica para uma onda de performance separada).
-- Reescrever `src/routes/api/public/webhook/$origem.ts` (é orquestração externa; risco alto x ganho baixo agora).
+---
 
-## Ordem sugerida
-A → B → C → D (uma rota por turno) → E.
+## Ondas
 
-Confirma a ordem e eu começo pela **Onda A**? Se preferir focar em algo (ex.: só fatiar `$slug` ou só `qsf.functions.ts`), me diz.
+### Onda 1 — Router & Query (aplicar imediato)
+- `router.tsx`: adicionar `defaultPreload: "intent"`, `defaultPreloadDelay: 40`, `defaultPendingMs: 200`, `defaultPendingMinMs: 300`, `defaultStructuralSharing: true`.
+- Novo `QueryClient` com `staleTime: 30_000`, `gcTime: 5*60_000`, `refetchOnWindowFocus: false` (mantendo `refetchOnReconnect: true`).
+- **Ganho esperado:** navegação praticamente instantânea entre rotas já visitadas, sem refetch a cada foco de janela.
+
+### Onda 2 — Queries Supabase
+- Anotar `staleTime` por natureza do dado em `src/lib/queries.ts` (produtos: 60s; transações: 15s; loja: 5min; roles: 5min).
+- Adicionar helpers `prefetchClienteQuery`, `prefetchLojaBySlug` chamados em `onMouseEnter`/loader de listas.
+- Trocar `useQuery` em série por `useQueries` onde possível (portal do cliente, dashboard lojista).
+- Auditar `select('*')` → especificar colunas nas queries mais quentes (`store_clients`, `transactions`, `profiles`).
+
+### Onda 3 — Code-split cirúrgico
+- Extrair dialogs pesados (`EditClienteDialog`, `ImportarClientesDialog`, wizards de configuração) para `React.lazy` + `Suspense`.
+- Fatiar `lojista.configuracoes.tsx` (2k linhas) em subcomponentes por seção — só carrega quando a aba é aberta.
+- Mover `qsf.functions.ts` restante que não é `createServerFn` para `qsf-helpers.server.ts` (encolhe o chunk client).
+
+### Onda 4 — Assets/CSS
+- `<link rel="preconnect">` para Supabase e fontes no `__root.tsx`.
+- `<img loading="lazy" decoding="async" fetchpriority="low">` em todas as listas; `fetchpriority="high"` só na hero/logo do portal.
+- Remover `backdrop-blur` duplicado no portal, consolidar em 1 camada.
+- `content-visibility: auto` em cards fora da viewport (listas longas).
+
+### Onda 5 — Animações, hidratação, mobile
+- `reward-rain`: pausar em `document.hidden` e usar `IntersectionObserver`; respeitar `prefers-reduced-motion` de verdade.
+- Migrar leituras de `localStorage` no corpo do render p/ `useEffect` (evita mismatch).
+- `React.memo` em `TxRowItem`, `ClienteRow`, `ProdutoRow`.
+- Ajustar sombra/blur pesados no mobile (`md:` prefix nas classes de blur).
+
+---
+
+## Como vou executar
+Vou aplicar **Onda 1 e 2 já** (baixo risco, impacto grande e mensurável). Depois pergunto se sigo direto para as ondas 3-5 (que mexem em mais arquivos) ou se você quer conferir antes.
+
+Sem quebrar nenhuma funcionalidade, sem mudar design.
