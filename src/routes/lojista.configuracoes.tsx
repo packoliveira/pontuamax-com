@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Coins, Wallet, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
   Copy,
@@ -31,7 +30,6 @@ import {
   CheckCircle2,
   XCircle,
   MessageCircle,
-  Upload,
   QrCode,
   Loader2,
   Power,
@@ -47,6 +45,12 @@ import { Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
 import { Link as LinkIcon, Unplug } from "lucide-react";
+import {
+  LivePreview,
+  AssetUploader,
+  ColorPresets,
+  SuggestedBanners,
+} from "@/components/lojista/personalizacao-shared";
 
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
