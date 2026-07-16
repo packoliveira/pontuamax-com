@@ -33,7 +33,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Store, DollarSign, TrendingUp, Users, Ban, CheckCircle2, Pause, Settings2, Search, UserPlus, TrendingDown, ShieldCheck, Trash2, KeyRound, ScrollText, Tags } from "lucide-react";
+import {
+  Store,
+  DollarSign,
+  TrendingUp,
+  Users,
+  Ban,
+  CheckCircle2,
+  Pause,
+  Settings2,
+  Search,
+  UserPlus,
+  TrendingDown,
+  ShieldCheck,
+  Trash2,
+  KeyRound,
+  ScrollText,
+  Tags,
+} from "lucide-react";
 import { Copy, ExternalLink, Link2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
@@ -69,7 +86,10 @@ const STATUS_LABEL: Record<StoreRow["subscription_status"], string> = {
   suspended: "Suspensa",
   cancelled: "Cancelada",
 };
-const STATUS_VARIANT: Record<StoreRow["subscription_status"], "default" | "secondary" | "outline" | "destructive"> = {
+const STATUS_VARIANT: Record<
+  StoreRow["subscription_status"],
+  "default" | "secondary" | "outline" | "destructive"
+> = {
   pending_payment: "secondary",
   active: "default",
   suspended: "outline",
@@ -82,12 +102,20 @@ function AdminDashboard() {
   const fetchStores = useServerFn(listAllStores);
   const bootstrap = useServerFn(bootstrapFirstAdmin);
 
-  const { data: adminCheck, isLoading: loadingAdmin, refetch: refetchAdmin } = useQuery({
+  const {
+    data: adminCheck,
+    isLoading: loadingAdmin,
+    refetch: refetchAdmin,
+  } = useQuery({
     queryKey: ["is-admin"],
     queryFn: () => checkAdmin(),
   });
 
-  const { data: stores, isLoading, error } = useQuery({
+  const {
+    data: stores,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["admin-stores"],
     queryFn: () => fetchStores() as Promise<StoreRow[]>,
     enabled: adminCheck?.isAdmin === true,
@@ -113,7 +141,8 @@ function AdminDashboard() {
     });
   }, [list, search, filter]);
 
-  if (loadingAdmin) return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
+  if (loadingAdmin)
+    return <div className="text-center py-12 text-muted-foreground">Carregando...</div>;
 
   if (!adminCheck?.isAdmin) {
     return (
@@ -124,7 +153,8 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Você não tem permissão de administrador. Se esta é uma instalação nova e ainda não existe nenhum admin, você pode se promover:
+              Você não tem permissão de administrador. Se esta é uma instalação nova e ainda não
+              existe nenhum admin, você pode se promover:
             </p>
             <Button
               className="w-full"
@@ -150,8 +180,12 @@ function AdminDashboard() {
     );
   }
 
-  const mrrTotal = list.filter((s) => s.subscription_status === "active").reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
-  const mrrPotencial = list.filter((s) => s.subscription_status === "pending_payment").reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
+  const mrrTotal = list
+    .filter((s) => s.subscription_status === "active")
+    .reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
+  const mrrPotencial = list
+    .filter((s) => s.subscription_status === "pending_payment")
+    .reduce((a, s) => a + Number(s.mrr_amount || 0), 0);
   const ativas = list.filter((s) => s.subscription_status === "active").length;
   const aguardando = list.filter((s) => s.subscription_status === "pending_payment").length;
   const suspensas = list.filter((s) => s.subscription_status === "suspended").length;
@@ -160,7 +194,9 @@ function AdminDashboard() {
   const now = new Date();
   const inicioMes = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const novasMes = list.filter((s) => new Date(s.created_at).getTime() >= inicioMes).length;
-  const churnMes = list.filter((s) => s.cancelled_at && new Date(s.cancelled_at).getTime() >= inicioMes).length;
+  const churnMes = list.filter(
+    (s) => s.cancelled_at && new Date(s.cancelled_at).getTime() >= inicioMes,
+  ).length;
   const arr = mrrTotal * 12;
   const ticketMedio = ativas > 0 ? mrrTotal / ativas : 0;
 
@@ -172,17 +208,51 @@ function AdminDashboard() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={<DollarSign className="h-5 w-5" />} label="MRR" value={`R$ ${mrrTotal.toFixed(2)}`} accent="text-green-600" />
-        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="ARR projetado" value={`R$ ${arr.toFixed(0)}`} accent="text-emerald-600" />
-        <StatCard icon={<DollarSign className="h-5 w-5" />} label="Ticket médio" value={`R$ ${ticketMedio.toFixed(2)}`} />
-        <StatCard icon={<DollarSign className="h-5 w-5" />} label="MRR potencial (aguard.)" value={`R$ ${mrrPotencial.toFixed(2)}`} accent="text-amber-600" />
+        <StatCard
+          icon={<DollarSign className="h-5 w-5" />}
+          label="MRR"
+          value={`R$ ${mrrTotal.toFixed(2)}`}
+          accent="text-green-600"
+        />
+        <StatCard
+          icon={<TrendingUp className="h-5 w-5" />}
+          label="ARR projetado"
+          value={`R$ ${arr.toFixed(0)}`}
+          accent="text-emerald-600"
+        />
+        <StatCard
+          icon={<DollarSign className="h-5 w-5" />}
+          label="Ticket médio"
+          value={`R$ ${ticketMedio.toFixed(2)}`}
+        />
+        <StatCard
+          icon={<DollarSign className="h-5 w-5" />}
+          label="MRR potencial (aguard.)"
+          value={`R$ ${mrrPotencial.toFixed(2)}`}
+          accent="text-amber-600"
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<Store className="h-5 w-5" />} label="Lojas totais" value={list.length} />
-        <StatCard icon={<CheckCircle2 className="h-5 w-5" />} label="Ativas" value={ativas} accent="text-green-600" />
-        <StatCard icon={<UserPlus className="h-5 w-5" />} label="Novas este mês" value={novasMes} accent="text-blue-600" />
-        <StatCard icon={<TrendingDown className="h-5 w-5" />} label="Churn este mês" value={churnMes} accent={churnMes > 0 ? "text-red-600" : undefined} />
+        <StatCard
+          icon={<CheckCircle2 className="h-5 w-5" />}
+          label="Ativas"
+          value={ativas}
+          accent="text-green-600"
+        />
+        <StatCard
+          icon={<UserPlus className="h-5 w-5" />}
+          label="Novas este mês"
+          value={novasMes}
+          accent="text-blue-600"
+        />
+        <StatCard
+          icon={<TrendingDown className="h-5 w-5" />}
+          label="Churn este mês"
+          value={churnMes}
+          accent={churnMes > 0 ? "text-red-600" : undefined}
+        />
       </div>
 
       <QuickLinksSection />
@@ -206,34 +276,61 @@ function AdminDashboard() {
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3">
-            <CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Lojas ({filtered.length}{filtered.length !== list.length ? ` de ${list.length}` : ""})</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="h-4 w-4" /> Lojas ({filtered.length}
+              {filtered.length !== list.length ? ` de ${list.length}` : ""})
+            </CardTitle>
             <div className="flex flex-col md:flex-row gap-2">
               <div className="relative flex-1">
                 <Search className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input className="pl-8" placeholder="Buscar por nome, slug, e-mail, telefone..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                <Input
+                  className="pl-8"
+                  placeholder="Buscar por nome, slug, e-mail, telefone..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
               <div className="flex flex-wrap gap-1">
-                {(["all","active","pending_payment","suspended","cancelled"] as const).map((k) => (
-                  <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>
-                    {k === "all" ? `Todas (${list.length})`
-                      : k === "active" ? `Ativas (${ativas})`
-                      : k === "pending_payment" ? `Aguard. (${aguardando})`
-                      : k === "suspended" ? `Susp. (${suspensas})`
-                      : `Canc. (${canceladas})`}
-                  </Button>
-                ))}
+                {(["all", "active", "pending_payment", "suspended", "cancelled"] as const).map(
+                  (k) => (
+                    <Button
+                      key={k}
+                      size="sm"
+                      variant={filter === k ? "default" : "outline"}
+                      onClick={() => setFilter(k)}
+                    >
+                      {k === "all"
+                        ? `Todas (${list.length})`
+                        : k === "active"
+                          ? `Ativas (${ativas})`
+                          : k === "pending_payment"
+                            ? `Aguard. (${aguardando})`
+                            : k === "suspended"
+                              ? `Susp. (${suspensas})`
+                              : `Canc. (${canceladas})`}
+                    </Button>
+                  ),
+                )}
               </div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {isLoading && <div className="p-6 text-center text-muted-foreground">Carregando lojas...</div>}
-          {error && <div className="p-6 text-center text-destructive">{(error as Error).message}</div>}
+          {isLoading && (
+            <div className="p-6 text-center text-muted-foreground">Carregando lojas...</div>
+          )}
+          {error && (
+            <div className="p-6 text-center text-destructive">{(error as Error).message}</div>
+          )}
           {!isLoading && list.length === 0 && (
-            <div className="p-8 text-center text-sm text-muted-foreground">Nenhuma loja cadastrada ainda.</div>
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              Nenhuma loja cadastrada ainda.
+            </div>
           )}
           {!isLoading && list.length > 0 && filtered.length === 0 && (
-            <div className="p-8 text-center text-sm text-muted-foreground">Nenhuma loja corresponde ao filtro.</div>
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              Nenhuma loja corresponde ao filtro.
+            </div>
           )}
           <div className="divide-y">
             {filtered.map((s) => (
@@ -241,20 +338,33 @@ function AdminDashboard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold truncate">{s.nome_fantasia}</span>
-                    <Badge variant={STATUS_VARIANT[s.subscription_status]}>{STATUS_LABEL[s.subscription_status]}</Badge>
-                    <Badge variant="outline" className="capitalize">{s.plan}</Badge>
-                    {s.setup_paid_at && <Badge variant="outline" className="text-green-700 border-green-300">Setup pago</Badge>}
+                    <Badge variant={STATUS_VARIANT[s.subscription_status]}>
+                      {STATUS_LABEL[s.subscription_status]}
+                    </Badge>
+                    <Badge variant="outline" className="capitalize">
+                      {s.plan}
+                    </Badge>
+                    {s.setup_paid_at && (
+                      <Badge variant="outline" className="text-green-700 border-green-300">
+                        Setup pago
+                      </Badge>
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1 truncate">
-                    /{s.slug} · {s.owner_name ?? "sem nome"} · {s.owner_email ?? "-"} · {s.owner_phone ?? s.telefone ?? "sem telefone"}
+                    /{s.slug} · {s.owner_name ?? "sem nome"} · {s.owner_email ?? "-"} ·{" "}
+                    {s.owner_phone ?? s.telefone ?? "sem telefone"}
                   </div>
                   {s.mrr_amount > 0 && (
-                    <div className="text-xs mt-0.5 text-green-700">R$ {Number(s.mrr_amount).toFixed(2)}/mês</div>
+                    <div className="text-xs mt-0.5 text-green-700">
+                      R$ {Number(s.mrr_amount).toFixed(2)}/mês
+                    </div>
                   )}
                   <div className="text-[11px] text-muted-foreground mt-0.5">
                     Criada em {new Date(s.created_at).toLocaleDateString("pt-BR")}
-                    {s.activated_at && ` · Ativada ${new Date(s.activated_at).toLocaleDateString("pt-BR")}`}
-                    {s.cancelled_at && ` · Cancelada ${new Date(s.cancelled_at).toLocaleDateString("pt-BR")}`}
+                    {s.activated_at &&
+                      ` · Ativada ${new Date(s.activated_at).toLocaleDateString("pt-BR")}`}
+                    {s.cancelled_at &&
+                      ` · Cancelada ${new Date(s.cancelled_at).toLocaleDateString("pt-BR")}`}
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -268,7 +378,11 @@ function AdminDashboard() {
         </CardContent>
       </Card>
 
-      <EditDialog store={editing} onClose={() => setEditing(null)} onSaved={() => qc.invalidateQueries({ queryKey: ["admin-stores"] })} />
+      <EditDialog
+        store={editing}
+        onClose={() => setEditing(null)}
+        onSaved={() => qc.invalidateQueries({ queryKey: ["admin-stores"] })}
+      />
 
       <AdminsSection />
       <ChangePasswordSection />
@@ -277,11 +391,24 @@ function AdminDashboard() {
   );
 }
 
-function StatCard({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string | number; accent?: string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  accent?: string;
+}) {
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">{icon}<span>{label}</span></div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          {icon}
+          <span>{label}</span>
+        </div>
         <div className={`mt-1 text-2xl font-bold ${accent ?? ""}`}>{value}</div>
       </CardContent>
     </Card>
@@ -317,7 +444,11 @@ function QuickLinksSection() {
       color: "text-purple-600",
       items: [
         { label: "Login Funcionário", path: "/funcionario/login", desc: "Vendedores da loja" },
-        { label: "Painel Funcionário", path: "/funcionario", desc: "Operação de caixa/atendimento" },
+        {
+          label: "Painel Funcionário",
+          path: "/funcionario",
+          desc: "Operação de caixa/atendimento",
+        },
       ],
     },
     {
@@ -355,12 +486,24 @@ function QuickLinksSection() {
                   <div key={it.path} className="rounded-md bg-muted/50 p-2 space-y-1">
                     <div className="text-xs font-medium">{it.label}</div>
                     <div className="text-[10px] text-muted-foreground leading-tight">{it.desc}</div>
-                    <code className="block text-[10px] break-all bg-background rounded px-1.5 py-1 border">{url}</code>
+                    <code className="block text-[10px] break-all bg-background rounded px-1.5 py-1 border">
+                      {url}
+                    </code>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] flex-1" onClick={() => copy(url)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-[10px] flex-1"
+                        onClick={() => copy(url)}
+                      >
                         <Copy className="h-3 w-3" /> Copiar
                       </Button>
-                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] flex-1" asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-[10px] flex-1"
+                        asChild
+                      >
                         <a href={it.path} target="_blank" rel="noreferrer">
                           <ExternalLink className="h-3 w-3" /> Abrir
                         </a>
@@ -386,7 +529,10 @@ function AdminsSection() {
 
   const { data: admins, isLoading } = useQuery({
     queryKey: ["admins-list"],
-    queryFn: () => fetchAdmins() as Promise<Array<{ user_id: string; email: string | null; full_name: string | null; is_me: boolean }>>,
+    queryFn: () =>
+      fetchAdmins() as Promise<
+        Array<{ user_id: string; email: string | null; full_name: string | null; is_me: boolean }>
+      >,
   });
 
   const add = useMutation({
@@ -442,18 +588,28 @@ function AdminsSection() {
         </p>
 
         <div className="divide-y rounded-md border">
-          {isLoading && <div className="p-4 text-sm text-muted-foreground text-center">Carregando...</div>}
+          {isLoading && (
+            <div className="p-4 text-sm text-muted-foreground text-center">Carregando...</div>
+          )}
           {!isLoading && (admins ?? []).length === 0 && (
-            <div className="p-4 text-sm text-muted-foreground text-center">Nenhum admin cadastrado.</div>
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              Nenhum admin cadastrado.
+            </div>
           )}
           {(admins ?? []).map((a) => (
             <div key={a.user_id} className="p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="font-medium truncate flex items-center gap-2">
                   {a.full_name ?? a.email ?? a.user_id}
-                  {a.is_me && <Badge variant="outline" className="text-[10px]">você</Badge>}
+                  {a.is_me && (
+                    <Badge variant="outline" className="text-[10px]">
+                      você
+                    </Badge>
+                  )}
                 </div>
-                <div className="text-xs text-muted-foreground truncate">{a.email ?? "sem email"}</div>
+                <div className="text-xs text-muted-foreground truncate">
+                  {a.email ?? "sem email"}
+                </div>
               </div>
               <Button
                 size="sm"
@@ -477,7 +633,15 @@ function AdminsSection() {
   );
 }
 
-function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClose: () => void; onSaved: () => void }) {
+function EditDialog({
+  store,
+  onClose,
+  onSaved,
+}: {
+  store: StoreRow | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const update = useServerFn(updateStoreSubscription);
   const [status, setStatus] = useState<StoreRow["subscription_status"]>("pending_payment");
   const [plan, setPlan] = useState<StoreRow["plan"]>("starter");
@@ -527,13 +691,20 @@ function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClo
           <div className="space-y-4">
             <div className="rounded-md bg-muted p-3 text-sm">
               <div className="font-semibold">{store.nome_fantasia}</div>
-              <div className="text-xs text-muted-foreground">/{store.slug} · {store.owner_email}</div>
+              <div className="text-xs text-muted-foreground">
+                /{store.slug} · {store.owner_email}
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Status da assinatura</Label>
-              <Select value={status} onValueChange={(v) => setStatus(v as StoreRow["subscription_status"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as StoreRow["subscription_status"])}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending_payment">Aguardando pagamento</SelectItem>
                   <SelectItem value="active">Ativa</SelectItem>
@@ -547,7 +718,9 @@ function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClo
               <div className="space-y-2">
                 <Label>Plano</Label>
                 <Select value={plan} onValueChange={(v) => setPlan(v as StoreRow["plan"])}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="starter">Starter</SelectItem>
                     <SelectItem value="pro">Pro</SelectItem>
@@ -557,32 +730,50 @@ function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClo
               </div>
               <div className="space-y-2">
                 <Label>Mensalidade (R$)</Label>
-                <Input type="number" step="0.01" value={mrr} onChange={(e) => setMrr(e.target.value)} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={mrr}
+                  onChange={(e) => setMrr(e.target.value)}
+                />
               </div>
             </div>
 
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={setupPago} onChange={(e) => setSetupPago(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={setupPago}
+                onChange={(e) => setSetupPago(e.target.checked)}
+              />
               Setup / implementação pago
             </label>
 
             <div className="space-y-2">
               <Label>Notas internas</Label>
-              <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Observações sobre este cliente" />
+              <Textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Observações sobre este cliente"
+              />
             </div>
 
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => { setStatus("suspended"); }}
+                onClick={() => {
+                  setStatus("suspended");
+                }}
               >
                 <Pause className="h-4 w-4" /> Suspender
               </Button>
               <Button
                 variant="destructive"
                 className="flex-1"
-                onClick={() => { setStatus("cancelled"); }}
+                onClick={() => {
+                  setStatus("cancelled");
+                }}
               >
                 <Ban className="h-4 w-4" /> Cancelar
               </Button>
@@ -590,7 +781,9 @@ function EditDialog({ store, onClose, onSaved }: { store: StoreRow | null; onClo
           </div>
         )}
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Fechar</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Fechar
+          </Button>
           <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
             {mutation.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
@@ -610,7 +803,9 @@ function ChangePasswordSection() {
     mutationFn: async () => change({ data: { current_password: cur, new_password: next } }),
     onSuccess: () => {
       toast.success("Senha alterada com sucesso.");
-      setCur(""); setNext(""); setConfirm("");
+      setCur("");
+      setNext("");
+      setConfirm("");
     },
     onError: (e) => toast.error((e as Error).message),
   });
@@ -627,22 +822,41 @@ function ChangePasswordSection() {
           className="grid gap-3 sm:grid-cols-3"
           onSubmit={(e) => {
             e.preventDefault();
-            if (next.length < 8) return toast.error("A nova senha precisa ter no mínimo 8 caracteres.");
+            if (next.length < 8)
+              return toast.error("A nova senha precisa ter no mínimo 8 caracteres.");
             if (next !== confirm) return toast.error("A confirmação não confere.");
             mut.mutate();
           }}
         >
           <div className="space-y-1">
             <Label>Senha atual</Label>
-            <Input type="password" value={cur} onChange={(e) => setCur(e.target.value)} required autoComplete="current-password" />
+            <Input
+              type="password"
+              value={cur}
+              onChange={(e) => setCur(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
           </div>
           <div className="space-y-1">
             <Label>Nova senha</Label>
-            <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} required autoComplete="new-password" />
+            <Input
+              type="password"
+              value={next}
+              onChange={(e) => setNext(e.target.value)}
+              required
+              autoComplete="new-password"
+            />
           </div>
           <div className="space-y-1">
             <Label>Confirmar nova</Label>
-            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required autoComplete="new-password" />
+            <Input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              autoComplete="new-password"
+            />
           </div>
           <div className="sm:col-span-3">
             <Button type="submit" disabled={mut.isPending}>
@@ -666,11 +880,20 @@ function AuditLogSection() {
   const fetchLogs = useServerFn(listAuditLogs);
   const { data, isLoading } = useQuery({
     queryKey: ["audit-logs"],
-    queryFn: () => fetchLogs() as Promise<Array<{
-      id: string; actor_id: string; actor_email: string | null; action: string;
-      target_type: string | null; target_id: string | null; target_label: string | null;
-      details: Record<string, unknown>; created_at: string;
-    }>>,
+    queryFn: () =>
+      fetchLogs() as Promise<
+        Array<{
+          id: string;
+          actor_id: string;
+          actor_email: string | null;
+          action: string;
+          target_type: string | null;
+          target_id: string | null;
+          target_label: string | null;
+          details: Record<string, unknown>;
+          created_at: string;
+        }>
+      >,
   });
 
   return (
@@ -681,15 +904,21 @@ function AuditLogSection() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {isLoading && <div className="p-6 text-center text-sm text-muted-foreground">Carregando...</div>}
+        {isLoading && (
+          <div className="p-6 text-center text-sm text-muted-foreground">Carregando...</div>
+        )}
         {!isLoading && (data ?? []).length === 0 && (
-          <div className="p-6 text-center text-sm text-muted-foreground">Nenhum evento registrado ainda.</div>
+          <div className="p-6 text-center text-sm text-muted-foreground">
+            Nenhum evento registrado ainda.
+          </div>
         )}
         <div className="divide-y max-h-[500px] overflow-y-auto">
           {(data ?? []).map((log) => (
             <div key={log.id} className="p-3 text-sm">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="text-[10px]">{ACTION_LABEL[log.action] ?? log.action}</Badge>
+                <Badge variant="outline" className="text-[10px]">
+                  {ACTION_LABEL[log.action] ?? log.action}
+                </Badge>
                 <span className="text-xs text-muted-foreground">
                   {new Date(log.created_at).toLocaleString("pt-BR")}
                 </span>

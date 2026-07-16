@@ -34,13 +34,7 @@ export function PontuaMaxMark({ className, size = 32 }: Props) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M11 8 v16"
-        fill="none"
-        stroke="#FFFFFF"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <path d="M11 8 v16" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }

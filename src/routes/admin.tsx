@@ -98,16 +98,16 @@ function AdminLayout() {
           <div className="flex items-center gap-1">
             <ThemeToggle className="text-slate-100 hover:bg-slate-800" />
             <Button
-            size="sm"
-            variant="ghost"
-            className="text-slate-100 hover:bg-slate-800"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = "/admin/login";
-            }}
-          >
-            <LogOut className="h-4 w-4" /> Sair
-          </Button>
+              size="sm"
+              variant="ghost"
+              className="text-slate-100 hover:bg-slate-800"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/admin/login";
+              }}
+            >
+              <LogOut className="h-4 w-4" /> Sair
+            </Button>
           </div>
         </div>
       </header>
@@ -127,12 +127,12 @@ function AccessDenied() {
         </div>
         <h1 className="text-2xl font-bold">Acesso negado</h1>
         <p className="text-sm text-muted-foreground">
-          Esta área é exclusiva do <strong>Administrador Master</strong> do PontuaMax.
-          Sua conta não tem essa permissão.
+          Esta área é exclusiva do <strong>Administrador Master</strong> do PontuaMax. Sua conta não
+          tem essa permissão.
         </p>
         <p className="text-xs text-muted-foreground">
-          Se você é lojista, use o painel do lojista. Se acredita que deveria ter
-          acesso, peça a um admin master que te adicione.
+          Se você é lojista, use o painel do lojista. Se acredita que deveria ter acesso, peça a um
+          admin master que te adicione.
         </p>
         <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
           <Button asChild variant="outline">

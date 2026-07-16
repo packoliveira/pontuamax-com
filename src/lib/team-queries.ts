@@ -24,7 +24,10 @@ export const employeePermsQuery = (employeeId: string | null) =>
   queryOptions({
     queryKey: ["team", "employee-perms", employeeId],
     enabled: !!employeeId,
-    queryFn: () => (employeeId ? getEmployeePermissions({ data: { employee_id: employeeId } }) : Promise.resolve([])),
+    queryFn: () =>
+      employeeId
+        ? getEmployeePermissions({ data: { employee_id: employeeId } })
+        : Promise.resolve([]),
   });
 
 export const teamAuditLogsQuery = () =>

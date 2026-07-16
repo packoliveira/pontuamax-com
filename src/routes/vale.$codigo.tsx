@@ -20,7 +20,9 @@ function Page() {
   const qc = useQueryClient();
   const { data: card, isLoading } = useQuery(giftCardByCodeQuery(codigo));
   const [uid, setUid] = useState<string | null>(null);
-  useEffect(() => { supabase.auth.getSession().then(({ data }) => setUid(data.session?.user.id ?? null)); }, []);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setUid(data.session?.user.id ?? null));
+  }, []);
 
   const { data: loja } = useQuery(publicStoreByIdQuery(card?.store_id));
 
@@ -34,14 +36,29 @@ function Page() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading) return <div className="min-h-dvh grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
-  if (!card) return <div className="min-h-dvh grid place-items-center p-6 text-center"><div><h1 className="text-2xl font-bold">Vale não encontrado</h1></div></div>;
+  if (isLoading)
+    return (
+      <div className="min-h-dvh grid place-items-center text-sm text-muted-foreground">
+        Carregando...
+      </div>
+    );
+  if (!card)
+    return (
+      <div className="min-h-dvh grid place-items-center p-6 text-center">
+        <div>
+          <h1 className="text-2xl font-bold">Vale não encontrado</h1>
+        </div>
+      </div>
+    );
 
   return (
     <div className="min-h-dvh bg-slate-50 grid place-items-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-2"><Ticket className="h-5 w-5 text-primary" /><CardTitle>Vale-presente</CardTitle></div>
+          <div className="flex items-center gap-2">
+            <Ticket className="h-5 w-5 text-primary" />
+            <CardTitle>Vale-presente</CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4 text-center">
           <p className="text-sm text-muted-foreground">{loja?.nome_fantasia ?? ""}</p>
@@ -51,14 +68,22 @@ function Page() {
           {card.redeemed_at ? (
             <p className="text-sm text-red-600">Este vale já foi resgatado.</p>
           ) : uid ? (
-            <Button className="w-full" disabled={resgatar.isPending} onClick={() => resgatar.mutate()}>
+            <Button
+              className="w-full"
+              disabled={resgatar.isPending}
+              onClick={() => resgatar.mutate()}
+            >
               {resgatar.isPending ? "Resgatando..." : "Resgatar agora"}
             </Button>
           ) : (
             <div className="space-y-2">
               <p className="text-sm">Entre na sua conta para resgatar:</p>
               {loja?.slug && (
-                <Link to="/$slug" params={{ slug: loja.slug }} className="text-primary underline text-sm">
+                <Link
+                  to="/$slug"
+                  params={{ slug: loja.slug }}
+                  className="text-primary underline text-sm"
+                >
                   Ir para {loja.nome_fantasia}
                 </Link>
               )}

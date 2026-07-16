@@ -52,19 +52,30 @@ function TrocarSenha() {
           </div>
           <CardTitle className="text-xl text-[#0F172A]">Defina sua nova senha</CardTitle>
           <CardDescription>
-            {nome ? `Olá, ${nome}! ` : ""}Antes de começar, escolha uma senha pessoal para o seu acesso.
+            {nome ? `Olá, ${nome}! ` : ""}Antes de começar, escolha uma senha pessoal para o seu
+            acesso.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="grid gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="s1">Nova senha</Label>
-              <PasswordInput id="s1" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="new-password" />
+              <PasswordInput
+                id="s1"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                autoComplete="new-password"
+              />
               <p className="text-xs text-[#64748B]">Mínimo 8 caracteres.</p>
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="s2">Confirme a senha</Label>
-              <PasswordInput id="s2" value={conf} onChange={(e) => setConf(e.target.value)} autoComplete="new-password" />
+              <PasswordInput
+                id="s2"
+                value={conf}
+                onChange={(e) => setConf(e.target.value)}
+                autoComplete="new-password"
+              />
             </div>
             {erro && (
               <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -72,10 +83,17 @@ function TrocarSenha() {
               </div>
             )}
             <Button
-              type="submit" disabled={mut.isPending}
+              type="submit"
+              disabled={mut.isPending}
               className="rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md hover:opacity-95"
             >
-              {mut.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Salvando…</> : "Salvar e entrar"}
+              {mut.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Salvando…
+                </>
+              ) : (
+                "Salvar e entrar"
+              )}
             </Button>
           </form>
         </CardContent>

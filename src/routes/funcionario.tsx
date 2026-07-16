@@ -1,4 +1,11 @@
-import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  Link,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmployeeContext } from "@/hooks/use-employee-context";
@@ -6,13 +13,28 @@ import { EMPLOYEE_MENU } from "@/lib/team-shared";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { LogOut, Menu, LayoutDashboard, Users, Coins, Gift, Ticket, History, User } from "lucide-react";
+import {
+  LogOut,
+  Menu,
+  LayoutDashboard,
+  Users,
+  Coins,
+  Gift,
+  Ticket,
+  History,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePanelTheme } from "@/hooks/use-panel-theme";
 
 const ICONS: Record<string, any> = {
-  dashboard: LayoutDashboard, clientes: Users, pontuacao: Coins,
-  resgates: Gift, vouchers: Ticket, historico: History, perfil: User,
+  dashboard: LayoutDashboard,
+  clientes: Users,
+  pontuacao: Coins,
+  resgates: Gift,
+  vouchers: Ticket,
+  historico: History,
+  perfil: User,
 };
 
 export const Route = createFileRoute("/funcionario")({
@@ -24,8 +46,11 @@ export const Route = createFileRoute("/funcionario")({
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/funcionario/login" });
     const { data: emp } = await supabase
-      .from("store_employees").select("id, status, must_change_password")
-      .eq("user_id", data.session.user.id).eq("status", "ativo").maybeSingle();
+      .from("store_employees")
+      .select("id, status, must_change_password")
+      .eq("user_id", data.session.user.id)
+      .eq("status", "ativo")
+      .maybeSingle();
     if (!emp) throw redirect({ to: "/funcionario/login" });
     if (emp.must_change_password && location.pathname !== "/funcionario/trocar-senha") {
       throw redirect({ to: "/funcionario/trocar-senha" });
@@ -68,7 +93,8 @@ function FuncionarioLayout() {
   const NavList = ({ onClick }: { onClick?: () => void }) => (
     <nav className="flex flex-col gap-0.5 p-3">
       {visible.map((item) => {
-        const active = item.to === "/funcionario" ? pathname === item.to : pathname.startsWith(item.to);
+        const active =
+          item.to === "/funcionario" ? pathname === item.to : pathname.startsWith(item.to);
         const Icon = ICONS[item.key] ?? LayoutDashboard;
         return (
           <Link
@@ -82,7 +108,12 @@ function FuncionarioLayout() {
                 : "text-white/70 hover:bg-white/5 hover:text-white hover:translate-x-0.5",
             )}
           >
-            <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[#14CBA8]" : "text-white/60 group-hover:text-white/90")} />
+            <Icon
+              className={cn(
+                "h-4 w-4 transition-colors",
+                active ? "text-[#14CBA8]" : "text-white/60 group-hover:text-white/90",
+              )}
+            />
             {item.label}
           </Link>
         );
@@ -94,9 +125,16 @@ function FuncionarioLayout() {
     <div className="flex min-h-screen bg-[#F8FAFC]">
       <aside className="hidden md:flex md:w-64 md:flex-col bg-[#0B132B] text-white">
         <Brand />
-        <div className="flex-1"><NavList /></div>
+        <div className="flex-1">
+          <NavList />
+        </div>
         <div className="p-3 border-t border-white/10">
-          <Button variant="ghost" size="sm" className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white" onClick={doLogout}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white"
+            onClick={doLogout}
+          >
             <LogOut className="h-4 w-4" /> Sair
           </Button>
         </div>
@@ -108,10 +146,25 @@ function FuncionarioLayout() {
             <PontuaMaxWordmark variant="light" size={16} />
           </div>
           <div className="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={doLogout} aria-label="Sair"><LogOut className="h-5 w-5" /></Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              onClick={doLogout}
+              aria-label="Sair"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
             <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild><Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Menu"><Menu className="h-5 w-5" /></Button></SheetTrigger>
-              <SheetContent side="left" className="p-0 w-[85vw] max-w-xs bg-[#0B132B] text-white border-r-0 overflow-y-auto">
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="p-0 w-[85vw] max-w-xs bg-[#0B132B] text-white border-r-0 overflow-y-auto"
+              >
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <Brand />
                 <NavList onClick={() => setOpen(false)} />

@@ -103,10 +103,7 @@ export const deletePlan = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const { error } = await context.supabase
-      .from("subscription_plans")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("subscription_plans").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

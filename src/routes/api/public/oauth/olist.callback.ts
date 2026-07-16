@@ -13,10 +13,7 @@ export const Route = createFileRoute("/api/public/oauth/olist/callback")({
         const errorParam = url.searchParams.get("error");
 
         const back = (msg: string, ok = false) => {
-          const origin =
-            process.env.PUBLIC_APP_ORIGIN ??
-            process.env.VITE_APP_ORIGIN ??
-            url.origin;
+          const origin = process.env.PUBLIC_APP_ORIGIN ?? process.env.VITE_APP_ORIGIN ?? url.origin;
           const target = new URL(`${origin}/lojista/configuracoes`);
           target.searchParams.set("olist", ok ? "connected" : "error");
           target.searchParams.set("msg", msg);
@@ -26,9 +23,8 @@ export const Route = createFileRoute("/api/public/oauth/olist/callback")({
         if (errorParam) return back(errorParam);
         if (!code || !state) return back("parâmetros ausentes");
 
-        const { verifyState, exchangeCodeForToken, olistRedirectUri } = await import(
-          "@/lib/olist.server"
-        );
+        const { verifyState, exchangeCodeForToken, olistRedirectUri } =
+          await import("@/lib/olist.server");
         const parsed = verifyState(state);
         if (!parsed) return back("state inválido");
 

@@ -29,7 +29,10 @@ const VAR_FALLBACKS: Record<string, string> = {
   link_nps: "",
 };
 
-function renderTemplate(tpl: string, vars: Record<string, string | number | null | undefined>): string {
+function renderTemplate(
+  tpl: string,
+  vars: Record<string, string | number | null | undefined>,
+): string {
   const rendered = tpl.replace(/\{(\w+)\}/g, (_, k: string) => {
     const raw = vars[k];
     const value = raw === undefined || raw === null ? "" : String(raw).trim();
@@ -84,7 +87,11 @@ export async function sendWhatsappRaw(opts: {
       await logIntegration(storeId, "erro", msg, { endpoint, number });
       return { ok: false, error: msg };
     }
-    await logIntegration(storeId, "sucesso", "mensagem enviada", { endpoint, number, preview: text.slice(0, 120) });
+    await logIntegration(storeId, "sucesso", "mensagem enviada", {
+      endpoint,
+      number,
+      preview: text.slice(0, 120),
+    });
     return { ok: true };
   } catch (e) {
     const msg = (e as Error).message ?? "erro desconhecido";
@@ -114,7 +121,9 @@ export async function notifyClient(params: {
     if (!loja.whatsapp_enabled) return;
     if (params.event === "nps_request" && !loja.nps_enabled) return;
     if (!loja.evolution_url || !loja.evolution_apikey || !loja.evolution_instance) {
-      await logIntegration(loja.id, "erro", "WhatsApp ativado mas Evolution API não configurada", { event: params.event });
+      await logIntegration(loja.id, "erro", "WhatsApp ativado mas Evolution API não configurada", {
+        event: params.event,
+      });
       return;
     }
 
@@ -125,7 +134,9 @@ export async function notifyClient(params: {
       .maybeSingle();
     const numero = formatBrazilPhone(profile?.phone);
     if (!numero) {
-      await logIntegration(loja.id, "erro", "cliente sem telefone válido", { user_id: params.clientUserId });
+      await logIntegration(loja.id, "erro", "cliente sem telefone válido", {
+        user_id: params.clientUserId,
+      });
       return;
     }
 
@@ -186,7 +197,9 @@ export async function notifyClient(params: {
   } catch (e) {
     // último recurso — não deixa vazar erro pro caller
     try {
-      await logIntegration(params.storeId, "erro", `notifyClient falhou: ${(e as Error).message}`, { event: params.event });
+      await logIntegration(params.storeId, "erro", `notifyClient falhou: ${(e as Error).message}`, {
+        event: params.event,
+      });
     } catch {
       /* noop */
     }

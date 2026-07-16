@@ -36,10 +36,17 @@ export const Route = createFileRoute("/api/public/hooks/expirar-vouchers")({
           const cashbackDevolver = -Number(t.cashback_delta || 0);
           if (link.data) {
             const novoPontos = Math.max(0, link.data.pontos + pontosDevolver);
-            const novoCashback = Math.max(0, +(Number(link.data.cashback_saldo) + cashbackDevolver).toFixed(2));
+            const novoCashback = Math.max(
+              0,
+              +(Number(link.data.cashback_saldo) + cashbackDevolver).toFixed(2),
+            );
             await supabaseAdmin
               .from("store_clients")
-              .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+              .update({
+                pontos: novoPontos,
+                cashback_saldo: novoCashback,
+                nivel: calcularNivel(novoPontos),
+              })
               .eq("id", link.data.id);
             refunded++;
           }

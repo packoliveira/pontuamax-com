@@ -4,16 +4,13 @@
 
 import { createHmac, timingSafeEqual, randomBytes } from "crypto";
 
-export const OLIST_OAUTH_BASE =
-  "https://accounts.tiny.com.br/realms/tiny/protocol/openid-connect";
+export const OLIST_OAUTH_BASE = "https://accounts.tiny.com.br/realms/tiny/protocol/openid-connect";
 export const OLIST_API_BASE = "https://api.tiny.com.br/public-api/v3";
 
 export function getPublicOrigin(request: Request): string {
   // Prefer explicit env, fallback to request URL origin (handles preview + prod).
   return (
-    process.env.PUBLIC_APP_ORIGIN ??
-    process.env.VITE_APP_ORIGIN ??
-    new URL(request.url).origin
+    process.env.PUBLIC_APP_ORIGIN ?? process.env.VITE_APP_ORIGIN ?? new URL(request.url).origin
   );
 }
 

@@ -58,13 +58,20 @@ function pick<T>(arr: T[]): T {
 function Icon({ kind, size, color }: { kind: IconKind; size: number; color: string }) {
   const common = { size, color, strokeWidth: 1.75 } as const;
   switch (kind) {
-    case "coin": return <Coins {...common} />;
-    case "gift": return <Gift {...common} />;
-    case "ticket": return <Ticket {...common} />;
-    case "star": return <Star {...common} fill={color} />;
-    case "percent": return <Percent {...common} />;
-    case "badge": return <BadgePercent {...common} />;
-    case "spark": return <Sparkles {...common} />;
+    case "coin":
+      return <Coins {...common} />;
+    case "gift":
+      return <Gift {...common} />;
+    case "ticket":
+      return <Ticket {...common} />;
+    case "star":
+      return <Star {...common} fill={color} />;
+    case "percent":
+      return <Percent {...common} />;
+    case "badge":
+      return <BadgePercent {...common} />;
+    case "spark":
+      return <Sparkles {...common} />;
     case "real":
       return (
         <span
@@ -105,14 +112,14 @@ export function RewardRain({
   const opMul = Math.max(0.1, Math.min(1, opacityOverride ?? 1));
 
   const particles = useMemo<Particle[]>(() => {
-      const n = reduced ? Math.max(6, Math.ceil(target * 0.65)) : target;
+    const n = reduced ? Math.max(6, Math.ceil(target * 0.65)) : target;
     return Array.from({ length: n }, (_, i) => ({
       id: i,
       kind: pick(KINDS),
       left: rand(0, 100),
       top: rand(6, 92),
       size: rand(mobile ? 14 : 18, mobile ? 26 : 34),
-        duration: reduced ? rand(18, 28) : rand(9, 16),
+      duration: reduced ? rand(18, 28) : rand(9, 16),
       delay: rand(-16, 0),
       drift: rand(-8, 8),
       rotate: rand(-45, 45),

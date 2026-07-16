@@ -31,7 +31,9 @@ function sleep(ms: number) {
 function todayInBrasilia(): { iso: string; mm: string; dd: string } {
   const fmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
-    year: "numeric", month: "2-digit", day: "2-digit",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
   const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
   return { iso: `${parts.year}-${parts.month}-${parts.day}`, mm: parts.month, dd: parts.day };
@@ -61,10 +63,14 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
           .eq("subscription_status", "active");
 
         const summary = { stores: 0, aniversario: 0, inatividade: 0, expiracao: 0, erros: 0 };
-        if (!stores) return new Response(JSON.stringify(summary), { headers: { "Content-Type": "application/json" } });
+        if (!stores)
+          return new Response(JSON.stringify(summary), {
+            headers: { "Content-Type": "application/json" },
+          });
 
         for (const store of stores as StoreRow[]) {
-          if (!store.evolution_url || !store.evolution_apikey || !store.evolution_instance) continue;
+          if (!store.evolution_url || !store.evolution_apikey || !store.evolution_instance)
+            continue;
           summary.stores += 1;
 
           const evo = {
@@ -75,19 +81,29 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
 
           const send = async (userId: string, text: string, tipo: string) => {
             const { data: prof } = await supabaseAdmin
-              .from("profiles").select("phone, full_name").eq("id", userId).maybeSingle();
+              .from("profiles")
+              .select("phone, full_name")
+              .eq("id", userId)
+              .maybeSingle();
             const number = formatBrazilPhone(prof?.phone);
             if (!number) {
               await supabaseAdmin.from("notification_logs").insert({
-                store_id: store.id, client_user_id: userId, tipo, status: "erro", mensagem_erro: "sem telefone",
+                store_id: store.id,
+                client_user_id: userId,
+                tipo,
+                status: "erro",
+                mensagem_erro: "sem telefone",
               });
               summary.erros += 1;
               return false;
             }
             const res = await sendWhatsappRaw({ storeId: store.id, ...evo, number, text });
             await supabaseAdmin.from("notification_logs").insert({
-              store_id: store.id, client_user_id: userId, tipo,
-              status: res.ok ? "enviado" : "erro", mensagem_erro: res.ok ? null : res.error ?? null,
+              store_id: store.id,
+              client_user_id: userId,
+              tipo,
+              status: res.ok ? "enviado" : "erro",
+              mensagem_erro: res.ok ? null : (res.error ?? null),
             });
             if (!res.ok) summary.erros += 1;
             await sleep(400);
@@ -103,27 +119,40 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
               .eq("store_id", store.id)
               .or(`last_notified_birthday.is.null,last_notified_birthday.lt.${today.iso}`);
             for (const c of clients ?? []) {
-              const p = c.profiles as unknown as { full_name: string | null; birthdate: string | null } | null;
+              const p = c.profiles as unknown as {
+                full_name: string | null;
+                birthdate: string | null;
+              } | null;
               if (!p?.birthdate) continue;
               if (p.birthdate.slice(5) !== monthDay) continue;
               const bonus = store.notif_birthday_bonus_points;
               const novoPontos = c.pontos + bonus;
               if (bonus > 0) {
                 await supabaseAdmin.from("transactions").insert({
-                  store_id: store.id, client_user_id: c.user_id, tipo: "venda",
-                  valor: 0, pontos_delta: bonus, cashback_delta: 0, status: "entregue",
+                  store_id: store.id,
+                  client_user_id: c.user_id,
+                  tipo: "venda",
+                  valor: 0,
+                  pontos_delta: bonus,
+                  cashback_delta: 0,
+                  status: "entregue",
                 });
-                await supabaseAdmin.from("store_clients")
+                await supabaseAdmin
+                  .from("store_clients")
                   .update({ pontos: novoPontos, nivel: calcularNivel(novoPontos) })
                   .eq("id", c.id);
               }
               const text = render(store.notif_birthday_template, {
-                nome: p.full_name ?? "cliente", loja: store.nome_fantasia,
-                bonus, pontos: novoPontos,
+                nome: p.full_name ?? "cliente",
+                loja: store.nome_fantasia,
+                bonus,
+                pontos: novoPontos,
               });
               const ok = await send(c.user_id, text, "aniversario");
-              await supabaseAdmin.from("store_clients")
-                .update({ last_notified_birthday: today.iso }).eq("id", c.id);
+              await supabaseAdmin
+                .from("store_clients")
+                .update({ last_notified_birthday: today.iso })
+                .eq("id", c.id);
               if (ok) summary.aniversario += 1;
             }
           }
@@ -135,21 +164,32 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
             const cutoffIso = cutoff.toISOString();
             const { data: clients } = await supabaseAdmin
               .from("store_clients")
-              .select("id, user_id, pontos, last_purchase_at, last_notified_inactivity, profiles:user_id(full_name)")
+              .select(
+                "id, user_id, pontos, last_purchase_at, last_notified_inactivity, profiles:user_id(full_name)",
+              )
               .eq("store_id", store.id)
               .not("last_purchase_at", "is", null)
               .lt("last_purchase_at", cutoffIso)
               .or(`last_notified_inactivity.is.null,last_notified_inactivity.lt.${today.iso}`);
             for (const c of clients ?? []) {
               // não reenviar se já avisamos após a última compra
-              if (c.last_notified_inactivity && c.last_purchase_at && c.last_notified_inactivity > c.last_purchase_at.slice(0, 10)) continue;
+              if (
+                c.last_notified_inactivity &&
+                c.last_purchase_at &&
+                c.last_notified_inactivity > c.last_purchase_at.slice(0, 10)
+              )
+                continue;
               const p = c.profiles as unknown as { full_name: string | null } | null;
               const text = render(store.notif_inactivity_template, {
-                nome: p?.full_name ?? "cliente", loja: store.nome_fantasia, pontos: c.pontos,
+                nome: p?.full_name ?? "cliente",
+                loja: store.nome_fantasia,
+                pontos: c.pontos,
               });
               const ok = await send(c.user_id, text, "inatividade");
-              await supabaseAdmin.from("store_clients")
-                .update({ last_notified_inactivity: today.iso }).eq("id", c.id);
+              await supabaseAdmin
+                .from("store_clients")
+                .update({ last_notified_inactivity: today.iso })
+                .eq("id", c.id);
               if (ok) summary.inatividade += 1;
             }
           }
@@ -159,14 +199,18 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
             // pontos expiram em (last_purchase_at + expiry_days). Avisa quando faltarem 'warn_days'.
             const warn = store.notif_expiry_warn_days;
             const targetPurchaseDate = new Date();
-            targetPurchaseDate.setUTCDate(targetPurchaseDate.getUTCDate() - (store.notif_expiry_days - warn));
+            targetPurchaseDate.setUTCDate(
+              targetPurchaseDate.getUTCDate() - (store.notif_expiry_days - warn),
+            );
             const upper = targetPurchaseDate.toISOString();
             const lowerDate = new Date(targetPurchaseDate);
             lowerDate.setUTCDate(lowerDate.getUTCDate() - 1);
             const lower = lowerDate.toISOString();
             const { data: clients } = await supabaseAdmin
               .from("store_clients")
-              .select("id, user_id, pontos, last_purchase_at, last_notified_expiry, profiles:user_id(full_name)")
+              .select(
+                "id, user_id, pontos, last_purchase_at, last_notified_expiry, profiles:user_id(full_name)",
+              )
               .eq("store_id", store.id)
               .gt("pontos", 0)
               .not("last_purchase_at", "is", null)
@@ -176,17 +220,24 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
             for (const c of clients ?? []) {
               const p = c.profiles as unknown as { full_name: string | null } | null;
               const text = render(store.notif_expiry_template, {
-                nome: p?.full_name ?? "cliente", loja: store.nome_fantasia, pontos: c.pontos, dias: warn,
+                nome: p?.full_name ?? "cliente",
+                loja: store.nome_fantasia,
+                pontos: c.pontos,
+                dias: warn,
               });
               const ok = await send(c.user_id, text, "expiracao");
-              await supabaseAdmin.from("store_clients")
-                .update({ last_notified_expiry: today.iso }).eq("id", c.id);
+              await supabaseAdmin
+                .from("store_clients")
+                .update({ last_notified_expiry: today.iso })
+                .eq("id", c.id);
               if (ok) summary.expiracao += 1;
             }
           }
         }
 
-        return new Response(JSON.stringify(summary), { headers: { "Content-Type": "application/json" } });
+        return new Response(JSON.stringify(summary), {
+          headers: { "Content-Type": "application/json" },
+        });
       },
     },
   },

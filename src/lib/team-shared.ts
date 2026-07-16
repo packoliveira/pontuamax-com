@@ -56,10 +56,35 @@ export const EMPLOYEE_MENU: {
   requires: string[]; // ANY-of
 }[] = [
   { key: "dashboard", label: "Dashboard", to: "/funcionario", requires: [] },
-  { key: "clientes", label: "Clientes", to: "/funcionario/clientes", requires: ["clientes.consultar"] },
-  { key: "pontuacao", label: "Pontuação", to: "/funcionario/pontuar", requires: ["pontos.adicionar"] },
-  { key: "resgates", label: "Resgates", to: "/funcionario/resgates", requires: ["resgates.produtos"] },
-  { key: "vouchers", label: "Vouchers", to: "/funcionario/vouchers", requires: ["vouchers.validar", "vouchers.criar"] },
-  { key: "historico", label: "Histórico", to: "/funcionario/historico", requires: ["historico.consultar"] },
+  {
+    key: "clientes",
+    label: "Clientes",
+    to: "/funcionario/clientes",
+    requires: ["clientes.consultar"],
+  },
+  {
+    key: "pontuacao",
+    label: "Pontuação",
+    to: "/funcionario/pontuar",
+    requires: ["pontos.adicionar"],
+  },
+  {
+    key: "resgates",
+    label: "Resgates",
+    to: "/funcionario/resgates",
+    requires: ["resgates.produtos"],
+  },
+  {
+    key: "vouchers",
+    label: "Vouchers",
+    to: "/funcionario/vouchers",
+    requires: ["vouchers.validar", "vouchers.criar"],
+  },
+  {
+    key: "historico",
+    label: "Histórico",
+    to: "/funcionario/historico",
+    requires: ["historico.consultar"],
+  },
   { key: "perfil", label: "Perfil", to: "/funcionario/perfil", requires: [] },
 ];

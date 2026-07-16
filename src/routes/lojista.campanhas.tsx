@@ -4,14 +4,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { myStoreQuery } from "@/lib/queries";
-import { criarCampanha, enviarCampanha, excluirCampanha, previewDestinatarios } from "@/lib/qsf.functions";
+import {
+  criarCampanha,
+  enviarCampanha,
+  excluirCampanha,
+  previewDestinatarios,
+} from "@/lib/qsf.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Send, Trash2, Users, Loader2, Clock } from "lucide-react";
 
@@ -42,14 +53,21 @@ function CampanhasPage() {
   const [segmento, setSegmento] = useState<(typeof SEG_OPTIONS)[number]["v"]>("todos");
   const [agendar, setAgendar] = useState(false);
   const [agendaLocal, setAgendaLocal] = useState<string>(""); // datetime-local value (fuso do navegador)
-  const [preview, setPreview] = useState<{ total: number; amostra: Array<{ nome: string | null; telefone: string | null }> } | null>(null);
+  const [preview, setPreview] = useState<{
+    total: number;
+    amostra: Array<{ nome: string | null; telefone: string | null }>;
+  } | null>(null);
 
   const listQuery = useQuery({
     queryKey: ["campaigns", loja?.id],
     enabled: !!loja?.id,
     queryFn: async () => {
       if (!loja?.id) return [];
-      const { data, error } = await supabase.from("campaigns").select("*").eq("store_id", loja.id).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("campaigns")
+        .select("*")
+        .eq("store_id", loja.id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -72,7 +90,8 @@ function CampanhasPage() {
       if (agendar && agendaLocal) {
         const d = new Date(agendaLocal);
         if (isNaN(d.getTime())) throw new Error("Data/hora inválida.");
-        if (d.getTime() <= Date.now() + 60_000) throw new Error("A data precisa ser pelo menos 1 minuto no futuro.");
+        if (d.getTime() <= Date.now() + 60_000)
+          throw new Error("A data precisa ser pelo menos 1 minuto no futuro.");
         agendada_para = d.toISOString();
       }
       return criarFn({ data: { nome, mensagem, segmento, agendada_para } });
@@ -117,28 +136,47 @@ function CampanhasPage() {
     <div className="space-y-6 max-w-5xl">
       <div>
         <h1 className="text-2xl font-semibold">Campanhas WhatsApp</h1>
-        <p className="text-sm text-muted-foreground">Envie mensagens em massa segmentadas para seus clientes.</p>
+        <p className="text-sm text-muted-foreground">
+          Envie mensagens em massa segmentadas para seus clientes.
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Nova campanha</CardTitle>
           <CardDescription>
-            Variáveis disponíveis: <code>{"{nome}"}</code>, <code>{"{pontos}"}</code>, <code>{"{nivel}"}</code>, <code>{"{loja}"}</code>
+            Variáveis disponíveis: <code>{"{nome}"}</code>, <code>{"{pontos}"}</code>,{" "}
+            <code>{"{nivel}"}</code>, <code>{"{loja}"}</code>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label>Nome interno</Label>
-              <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Promo dia dos pais" />
+              <Input
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Ex: Promo dia dos pais"
+              />
             </div>
             <div>
               <Label>Segmentação</Label>
-              <Select value={segmento} onValueChange={(v) => { setSegmento(v as typeof segmento); setPreview(null); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={segmento}
+                onValueChange={(v) => {
+                  setSegmento(v as typeof segmento);
+                  setPreview(null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {SEG_OPTIONS.map((s) => <SelectItem key={s.v} value={s.v}>{s.label}</SelectItem>)}
+                  {SEG_OPTIONS.map((s) => (
+                    <SelectItem key={s.v} value={s.v}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -172,15 +210,24 @@ function CampanhasPage() {
             )}
           </div>
           <div className="flex flex-wrap gap-2 items-center">
-            <Button variant="outline" onClick={() => previewMut.mutate()} disabled={previewMut.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => previewMut.mutate()}
+              disabled={previewMut.isPending}
+            >
               <Users className="h-4 w-4" /> Ver destinatários
             </Button>
-            <Button onClick={() => criarMut.mutate()} disabled={criarMut.isPending || !nome || !mensagem}>
+            <Button
+              onClick={() => criarMut.mutate()}
+              disabled={criarMut.isPending || !nome || !mensagem}
+            >
               {agendar ? "Agendar campanha" : "Criar campanha"}
             </Button>
             {preview && (
               <span className="text-sm text-muted-foreground">
-                {preview.total} cliente(s) receberão. {preview.amostra.length > 0 && `Ex: ${preview.amostra.map((a) => a.nome ?? a.telefone).join(", ")}`}
+                {preview.total} cliente(s) receberão.{" "}
+                {preview.amostra.length > 0 &&
+                  `Ex: ${preview.amostra.map((a) => a.nome ?? a.telefone).join(", ")}`}
               </span>
             )}
           </div>
@@ -211,28 +258,44 @@ function CampanhasPage() {
                   >
                     {c.status}
                   </Badge>
-                  <Badge variant="outline">{SEG_OPTIONS.find((s) => s.v === c.segmento)?.label ?? c.segmento}</Badge>
+                  <Badge variant="outline">
+                    {SEG_OPTIONS.find((s) => s.v === c.segmento)?.label ?? c.segmento}
+                  </Badge>
                   {c.status === "agendada" && c.agendada_para && (
                     <Badge variant="outline" className="text-blue-700 border-blue-300 gap-1">
-                      <Clock className="h-3 w-3" /> {new Date(c.agendada_para).toLocaleString("pt-BR")}
+                      <Clock className="h-3 w-3" />{" "}
+                      {new Date(c.agendada_para).toLocaleString("pt-BR")}
                     </Badge>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{c.mensagem}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {c.total_destinatarios} destinatários · {c.total_enviados} enviados · {c.total_falhas} falhas
+                  {c.total_destinatarios} destinatários · {c.total_enviados} enviados ·{" "}
+                  {c.total_falhas} falhas
                 </p>
               </div>
               <div className="flex gap-2">
                 {(c.status === "rascunho" || c.status === "agendada" || c.status === "falhou") && (
-                  <Button size="sm" onClick={() => enviarMut.mutate(c.id)} disabled={enviarMut.isPending}>
-                    {enviarMut.isPending && enviarMut.variables === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  <Button
+                    size="sm"
+                    onClick={() => enviarMut.mutate(c.id)}
+                    disabled={enviarMut.isPending}
+                  >
+                    {enviarMut.isPending && enviarMut.variables === c.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                     {c.status === "agendada" ? "Enviar agora" : "Enviar"}
                   </Button>
                 )}
-                <Button size="sm" variant="ghost" onClick={() => {
-                  if (confirm("Excluir esta campanha?")) excluirMut.mutate(c.id);
-                }}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (confirm("Excluir esta campanha?")) excluirMut.mutate(c.id);
+                  }}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

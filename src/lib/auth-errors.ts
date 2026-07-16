@@ -11,7 +11,10 @@ const MAP: Array<[RegExp, string]> = [
   [/password should be at least (\d+) characters/i, "A senha precisa ter no mínimo $1 caracteres."],
   [/password.*at least/i, "A senha precisa ter no mínimo 6 caracteres."],
   [/weak password/i, "Senha muito fraca. Use letras e números."],
-  [/rate limit|too many requests/i, "Muitas tentativas. Aguarde alguns segundos e tente novamente."],
+  [
+    /rate limit|too many requests/i,
+    "Muitas tentativas. Aguarde alguns segundos e tente novamente.",
+  ],
   [/network|failed to fetch/i, "Sem conexão com o servidor. Verifique sua internet."],
   [/email.*invalid|invalid.*email/i, "Email inválido."],
   [/user not found/i, "Conta não encontrada."],
@@ -53,19 +56,22 @@ export function validarEmail(email: string): string | null {
   const v = email.trim();
   if (!v) return "Informe seu email.";
   // Regex simples: algo@algo.algo — suficiente pra pegar erros óbvios de digitação.
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Email inválido. Confira se digitou correto (ex.: nome@empresa.com).";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
+    return "Email inválido. Confira se digitou correto (ex.: nome@empresa.com).";
   return null;
 }
 
 export function validarSenha(senha: string, min = 6): string | null {
   if (!senha) return "Informe sua senha.";
-  if (senha.length < min) return `A senha precisa ter no mínimo ${min} caracteres. Você digitou ${senha.length}.`;
+  if (senha.length < min)
+    return `A senha precisa ter no mínimo ${min} caracteres. Você digitou ${senha.length}.`;
   return null;
 }
 
 export function validarConfirmacaoSenha(senha: string, confirmacao: string): string | null {
   if (!confirmacao) return "Confirme sua senha.";
-  if (senha !== confirmacao) return "As senhas não coincidem. Digite a mesma senha nos dois campos.";
+  if (senha !== confirmacao)
+    return "As senhas não coincidem. Digite a mesma senha nos dois campos.";
   return null;
 }
 

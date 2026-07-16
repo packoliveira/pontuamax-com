@@ -13,8 +13,13 @@ export function getActiveMultiplier(
 ): number {
   const fmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", weekday: "short", hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    weekday: "short",
+    hour12: false,
   });
   const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
   const map: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
@@ -53,8 +58,11 @@ export function formatVoucherJaUsado(delivered_at: string | null | undefined): s
   }
   const d = new Date(delivered_at);
   const fmt = new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(d);
   return `Este voucher já foi utilizado em ${fmt}. Cada voucher só pode ser entregue uma vez.`;
 }
@@ -69,13 +77,20 @@ export function randomGiftCode(): string {
 export async function sha256Hex(text: string): Promise<string> {
   const buf = new TextEncoder().encode(text);
   const hash = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 // -------- Campanhas WhatsApp --------
 export type SegmentoTipo =
-  | "todos" | "bronze" | "prata" | "ouro"
-  | "inativos_30" | "inativos_60" | "inativos_90"
+  | "todos"
+  | "bronze"
+  | "prata"
+  | "ouro"
+  | "inativos_30"
+  | "inativos_60"
+  | "inativos_90"
   | "aniversariantes";
 
 export function renderMsg(tpl: string, vars: Record<string, string | number | null>): string {
@@ -88,7 +103,16 @@ export function renderMsg(tpl: string, vars: Record<string, string | number | nu
 export async function selecionarDestinatarios(
   storeId: string,
   segmento: SegmentoTipo,
-): Promise<Array<{ user_id: string; pontos: number; nivel: string; full_name: string | null; phone: string | null; birthdate: string | null }>> {
+): Promise<
+  Array<{
+    user_id: string;
+    pontos: number;
+    nivel: string;
+    full_name: string | null;
+    phone: string | null;
+    birthdate: string | null;
+  }>
+> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   let q = supabaseAdmin
     .from("store_clients")
@@ -99,17 +123,23 @@ export async function selecionarDestinatarios(
   }
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  let rows = (data ?? []).map((r) => {
-    const p = r.profiles as unknown as { full_name: string | null; phone: string | null; birthdate: string | null } | null;
-    return {
-      user_id: r.user_id,
-      pontos: r.pontos,
-      nivel: String(r.nivel),
-      full_name: p?.full_name ?? null,
-      phone: p?.phone ?? null,
-      birthdate: p?.birthdate ?? null,
-    };
-  }).filter((r) => !!r.phone);
+  let rows = (data ?? [])
+    .map((r) => {
+      const p = r.profiles as unknown as {
+        full_name: string | null;
+        phone: string | null;
+        birthdate: string | null;
+      } | null;
+      return {
+        user_id: r.user_id,
+        pontos: r.pontos,
+        nivel: String(r.nivel),
+        full_name: p?.full_name ?? null,
+        phone: p?.phone ?? null,
+        birthdate: p?.birthdate ?? null,
+      };
+    })
+    .filter((r) => !!r.phone);
 
   if (segmento.startsWith("inativos_")) {
     const dias = Number(segmento.split("_")[1]);
@@ -125,21 +155,35 @@ export async function selecionarDestinatarios(
   }
 
   if (segmento === "aniversariantes") {
-    const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", month: "2-digit" });
+    const fmt = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Sao_Paulo",
+      month: "2-digit",
+    });
     const mesAtual = fmt.format(new Date());
     rows = rows.filter((r) => r.birthdate && r.birthdate.slice(5, 7) === mesAtual);
   }
 
   // (usado, campo birthdate volta como opcional; ok manter na saída)
-  return rows as Array<{ user_id: string; pontos: number; nivel: string; full_name: string | null; phone: string | null; birthdate: string | null }>;
+  return rows as Array<{
+    user_id: string;
+    pontos: number;
+    nivel: string;
+    full_name: string | null;
+    phone: string | null;
+    birthdate: string | null;
+  }>;
 }
 
-export async function processarEnvioCampanha(campaignId: string): Promise<{ enviados: number; falhas: number; total: number }> {
+export async function processarEnvioCampanha(
+  campaignId: string,
+): Promise<{ enviados: number; falhas: number; total: number }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
   const camp = await supabaseAdmin
     .from("campaigns")
-    .select("*, stores:store_id(nome_fantasia, evolution_url, evolution_apikey, evolution_instance, whatsapp_enabled)")
+    .select(
+      "*, stores:store_id(nome_fantasia, evolution_url, evolution_apikey, evolution_instance, whatsapp_enabled)",
+    )
     .eq("id", campaignId)
     .maybeSingle();
   if (!camp.data) throw new Error("Campanha não encontrada.");
@@ -156,7 +200,10 @@ export async function processarEnvioCampanha(campaignId: string): Promise<{ envi
   }
 
   await supabaseAdmin.from("campaigns").update({ status: "enviando" }).eq("id", camp.data.id);
-  const destinatarios = await selecionarDestinatarios(camp.data.store_id, camp.data.segmento as SegmentoTipo);
+  const destinatarios = await selecionarDestinatarios(
+    camp.data.store_id,
+    camp.data.segmento as SegmentoTipo,
+  );
 
   let enviados = 0;
   let falhas = 0;
@@ -170,8 +217,12 @@ export async function processarEnvioCampanha(campaignId: string): Promise<{ envi
     });
     if (!numero) {
       await supabaseAdmin.from("campaign_recipients").insert({
-        campaign_id: camp.data.id, client_user_id: d.user_id, telefone: d.phone,
-        mensagem_render: texto, status: "falha", erro: "telefone inválido",
+        campaign_id: camp.data.id,
+        client_user_id: d.user_id,
+        telefone: d.phone,
+        mensagem_render: texto,
+        status: "falha",
+        erro: "telefone inválido",
       });
       falhas++;
       continue;
@@ -187,26 +238,37 @@ export async function processarEnvioCampanha(campaignId: string): Promise<{ envi
     if (res.ok) {
       enviados++;
       await supabaseAdmin.from("campaign_recipients").insert({
-        campaign_id: camp.data.id, client_user_id: d.user_id, telefone: numero,
-        mensagem_render: texto, status: "enviado", enviado_em: new Date().toISOString(),
+        campaign_id: camp.data.id,
+        client_user_id: d.user_id,
+        telefone: numero,
+        mensagem_render: texto,
+        status: "enviado",
+        enviado_em: new Date().toISOString(),
       });
     } else {
       falhas++;
       await supabaseAdmin.from("campaign_recipients").insert({
-        campaign_id: camp.data.id, client_user_id: d.user_id, telefone: numero,
-        mensagem_render: texto, status: "falha", erro: res.error ?? "erro",
+        campaign_id: camp.data.id,
+        client_user_id: d.user_id,
+        telefone: numero,
+        mensagem_render: texto,
+        status: "falha",
+        erro: res.error ?? "erro",
       });
     }
     await new Promise((r) => setTimeout(r, 400));
   }
 
-  await supabaseAdmin.from("campaigns").update({
-    status: "concluida",
-    total_enviados: enviados,
-    total_falhas: falhas,
-    total_destinatarios: destinatarios.length,
-    enviado_em: new Date().toISOString(),
-  }).eq("id", camp.data.id);
+  await supabaseAdmin
+    .from("campaigns")
+    .update({
+      status: "concluida",
+      total_enviados: enviados,
+      total_falhas: falhas,
+      total_destinatarios: destinatarios.length,
+      enviado_em: new Date().toISOString(),
+    })
+    .eq("id", camp.data.id);
 
   return { enviados, falhas, total: destinatarios.length };
 }

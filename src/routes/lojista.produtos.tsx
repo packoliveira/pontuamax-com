@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, PackageX, ImageIcon, Upload, X, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,8 +36,15 @@ function ProdutosPage() {
   const [editing, setEditing] = useState<Produto | null>(null);
 
   const salvar = useMutation({
-    mutationFn: (input: { id?: string; store_id: string; nome: string; descricao?: string | null; custo_pontos: number; ativo: boolean; foto_url?: string | null }) =>
-      salvarProduto({ data: input }),
+    mutationFn: (input: {
+      id?: string;
+      store_id: string;
+      nome: string;
+      descricao?: string | null;
+      custo_pontos: number;
+      ativo: boolean;
+      foto_url?: string | null;
+    }) => salvarProduto({ data: input }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["products", loja?.id] }),
   });
   const remover = useMutation({
@@ -55,18 +68,34 @@ function ProdutosPage() {
     );
   }
 
-  const openNew = () => { setEditing(null); setOpen(true); };
-  const openEdit = (p: Produto) => { setEditing(p); setOpen(true); };
+  const openNew = () => {
+    setEditing(null);
+    setOpen(true);
+  };
+  const openEdit = (p: Produto) => {
+    setEditing(p);
+    setOpen(true);
+  };
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Catálogo</div>
-          <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Produtos para resgate</h1>
-          <p className="mt-1 text-sm text-[#64748B]">Produtos que seus clientes trocam por pontos.</p>
+          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+            Catálogo
+          </div>
+          <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">
+            Produtos para resgate
+          </h1>
+          <p className="mt-1 text-sm text-[#64748B]">
+            Produtos que seus clientes trocam por pontos.
+          </p>
         </div>
-        <Button onClick={openNew} size="lg" className="shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]">
+        <Button
+          onClick={openNew}
+          size="lg"
+          className="shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+        >
           <Plus className="h-4 w-4" /> Novo produto
         </Button>
       </div>
@@ -80,7 +109,10 @@ function ProdutosPage() {
           <p className="mt-1 text-sm text-[#64748B]">
             Adicione seu primeiro produto para que os clientes possam resgatar com pontos.
           </p>
-          <Button onClick={openNew} className="mt-5 rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8]">
+          <Button
+            onClick={openNew}
+            className="mt-5 rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+          >
             <Plus className="h-4 w-4" /> Criar produto
           </Button>
         </div>
@@ -111,7 +143,9 @@ function ProdutosPage() {
                       : "bg-[#F1F5F9] text-[#64748B] ring-1 ring-inset ring-[#E5E7EB]")
                   }
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full ${p.ativo ? "bg-[#22C55E]" : "bg-[#94A3B8]"}`} />
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${p.ativo ? "bg-[#22C55E]" : "bg-[#94A3B8]"}`}
+                  />
                   {p.ativo ? "Ativo" : "Inativo"}
                 </span>
               </div>
@@ -141,7 +175,9 @@ function ProdutosPage() {
                     size="sm"
                     variant="outline"
                     className="rounded-xl border-[#E5E7EB] text-[#EF4444] hover:border-[#EF4444]/40 hover:bg-[#EF4444]/5"
-                    onClick={() => remover.mutate(p.id, { onSuccess: () => toast.success("Removido") })}
+                    onClick={() =>
+                      remover.mutate(p.id, { onSuccess: () => toast.success("Removido") })
+                    }
                     aria-label="Remover produto"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -162,7 +198,10 @@ function ProdutosPage() {
           salvar.mutate(
             { id: editing?.id, store_id: loja.id, ...data },
             {
-              onSuccess: () => { toast.success(editing ? "Atualizado" : "Criado"); setOpen(false); },
+              onSuccess: () => {
+                toast.success(editing ? "Atualizado" : "Criado");
+                setOpen(false);
+              },
               onError: (e) => toast.error((e as Error).message),
             },
           );
@@ -172,12 +211,24 @@ function ProdutosPage() {
   );
 }
 
-function ProdutoDialog({ open, onOpenChange, editing, storeId, onSave }: {
+function ProdutoDialog({
+  open,
+  onOpenChange,
+  editing,
+  storeId,
+  onSave,
+}: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: Produto | null;
   storeId: string;
-  onSave: (data: { nome: string; descricao: string | null; custo_pontos: number; ativo: boolean; foto_url: string | null }) => void;
+  onSave: (data: {
+    nome: string;
+    descricao: string | null;
+    custo_pontos: number;
+    ativo: boolean;
+    foto_url: string | null;
+  }) => void;
 }) {
   const [nome, setNome] = useState(editing?.nome ?? "");
   const [descricao, setDescricao] = useState(editing?.descricao ?? "");
@@ -193,13 +244,15 @@ function ProdutoDialog({ open, onOpenChange, editing, storeId, onSave }: {
       const ext = (file.name.split(".").pop() || "png").toLowerCase();
       const path = `${storeId}/${Date.now()}.${ext}`;
       const up = await supabase.storage.from("product-images").upload(path, file, {
-        upsert: true, contentType: file.type || undefined,
+        upsert: true,
+        contentType: file.type || undefined,
       });
       if (up.error) throw up.error;
       const signed = await supabase.storage
         .from("product-images")
         .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (signed.error || !signed.data?.signedUrl) throw signed.error ?? new Error("Falha ao gerar URL");
+      if (signed.error || !signed.data?.signedUrl)
+        throw signed.error ?? new Error("Falha ao gerar URL");
       setFotoUrl(signed.data.signedUrl);
       toast.success("Imagem enviada");
     } catch (e) {
@@ -213,7 +266,9 @@ function ProdutoDialog({ open, onOpenChange, editing, storeId, onSave }: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent key={key}>
-        <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
             <Label>Imagem</Label>
@@ -230,26 +285,63 @@ function ProdutoDialog({ open, onOpenChange, editing, storeId, onSave }: {
                   <Upload className="h-3.5 w-3.5" />
                   {uploading ? "Enviando..." : fotoUrl ? "Trocar imagem" : "Enviar imagem"}
                   <input
-                    type="file" accept="image/*" className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFile(f);
+                    }}
                   />
                 </label>
                 {fotoUrl && (
-                  <button type="button" onClick={() => setFotoUrl(null)}
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive">
+                  <button
+                    type="button"
+                    onClick={() => setFotoUrl(null)}
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
+                  >
                     <X className="h-3 w-3" /> Remover imagem
                   </button>
                 )}
               </div>
             </div>
           </div>
-          <div><Label>Nome</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-          <div><Label>Descrição</Label><Textarea value={descricao ?? ""} onChange={(e) => setDescricao(e.target.value)} rows={2} /></div>
-          <div><Label>Custo em pontos</Label><Input type="number" value={pontos} onChange={(e) => setPontos(e.target.value)} /></div>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} /> Ativo</label>
+          <div>
+            <Label>Nome</Label>
+            <Input value={nome} onChange={(e) => setNome(e.target.value)} />
+          </div>
+          <div>
+            <Label>Descrição</Label>
+            <Textarea
+              value={descricao ?? ""}
+              onChange={(e) => setDescricao(e.target.value)}
+              rows={2}
+            />
+          </div>
+          <div>
+            <Label>Custo em pontos</Label>
+            <Input type="number" value={pontos} onChange={(e) => setPontos(e.target.value)} />
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} />{" "}
+            Ativo
+          </label>
         </div>
         <DialogFooter>
-          <Button disabled={uploading} onClick={() => onSave({ nome, descricao: descricao || null, custo_pontos: parseInt(pontos || "0"), ativo, foto_url: fotoUrl })}>Salvar</Button>
+          <Button
+            disabled={uploading}
+            onClick={() =>
+              onSave({
+                nome,
+                descricao: descricao || null,
+                custo_pontos: parseInt(pontos || "0"),
+                ativo,
+                foto_url: fotoUrl,
+              })
+            }
+          >
+            Salvar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

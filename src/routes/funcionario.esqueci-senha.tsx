@@ -53,7 +53,8 @@ function EsqueciSenha() {
             </div>
             <CardTitle className="text-xl text-[#0F172A]">Recuperar acesso</CardTitle>
             <CardDescription className="text-[#64748B]">
-              Informe seu CPF e telefone cadastrados. Seu gerente será avisado para redefinir sua senha.
+              Informe seu CPF e telefone cadastrados. Seu gerente será avisado para redefinir sua
+              senha.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -63,34 +64,63 @@ function EsqueciSenha() {
                   <CheckCircle2 className="h-6 w-6" />
                 </div>
                 <div className="text-sm text-[#0F172A]">
-                  Solicitação enviada. Se os dados conferirem, seu gerente receberá o pedido em <strong>Equipe → Trilha de auditoria</strong> e poderá gerar uma nova senha temporária para você.
+                  Solicitação enviada. Se os dados conferirem, seu gerente receberá o pedido em{" "}
+                  <strong>Equipe → Trilha de auditoria</strong> e poderá gerar uma nova senha
+                  temporária para você.
                 </div>
-                <Link to="/funcionario/login" className="inline-block text-sm text-[#2563EB] hover:underline">Voltar ao login</Link>
+                <Link
+                  to="/funcionario/login"
+                  className="inline-block text-sm text-[#2563EB] hover:underline"
+                >
+                  Voltar ao login
+                </Link>
               </div>
             ) : (
               <form onSubmit={submit} className="grid gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="cpf">CPF</Label>
-                  <Input id="cpf" inputMode="numeric" value={cpf}
+                  <Input
+                    id="cpf"
+                    inputMode="numeric"
+                    value={cpf}
                     onChange={(e) => setCpf(formatCPF(e.target.value))}
-                    placeholder="000.000.000-00" maxLength={14} />
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                  />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="phone">Telefone (com DDD)</Label>
-                  <Input id="phone" inputMode="tel" value={phone}
-                    onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" maxLength={20} />
+                  <Input
+                    id="phone"
+                    inputMode="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="(00) 00000-0000"
+                    maxLength={20}
+                  />
                 </div>
                 {erro && (
                   <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                     <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /> {erro}
                   </div>
                 )}
-                <Button type="submit" disabled={loading}
-                  className="mt-1 rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md hover:opacity-95">
-                  {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Enviando…</> : "Enviar solicitação"}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-1 rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md hover:opacity-95"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Enviando…
+                    </>
+                  ) : (
+                    "Enviar solicitação"
+                  )}
                 </Button>
                 <div className="mt-2 text-center text-xs">
-                  <Link to="/funcionario/login" className="text-[#2563EB] hover:underline">Voltar ao login</Link>
+                  <Link to="/funcionario/login" className="text-[#2563EB] hover:underline">
+                    Voltar ao login
+                  </Link>
                 </div>
               </form>
             )}

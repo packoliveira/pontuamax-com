@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Instagram, Check, X, RotateCcw, ExternalLink } from "lucide-react";
 import { myStoreQuery } from "@/lib/queries";
 import {
@@ -60,21 +66,36 @@ function InstagramPage() {
     mutationFn: (s: Sub) => {
       const raw = pointsOverride[s.id];
       const n = raw ? parseInt(raw, 10) : undefined;
-      return approveInstagramSubmission({ data: { id: s.id, ...(n && n > 0 ? { pontos_override: n } : {}) } });
+      return approveInstagramSubmission({
+        data: { id: s.id, ...(n && n > 0 ? { pontos_override: n } : {}) },
+      });
     },
-    onSuccess: (r) => { toast.success(`Aprovado (+${r.pontos} pts)`); invalidate(); },
+    onSuccess: (r) => {
+      toast.success(`Aprovado (+${r.pontos} pts)`);
+      invalidate();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const reject = useMutation({
     mutationFn: () => rejectInstagramSubmission({ data: { id: rejectFor!.id, reason } }),
-    onSuccess: () => { toast.success("Submissão rejeitada"); setRejectFor(null); setReason(""); invalidate(); },
+    onSuccess: () => {
+      toast.success("Submissão rejeitada");
+      setRejectFor(null);
+      setReason("");
+      invalidate();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const revoke = useMutation({
     mutationFn: () => revokeInstagramSubmission({ data: { id: revokeFor!.id, reason } }),
-    onSuccess: () => { toast.success("Pontos estornados"); setRevokeFor(null); setReason(""); invalidate(); },
+    onSuccess: () => {
+      toast.success("Pontos estornados");
+      setRevokeFor(null);
+      setReason("");
+      invalidate();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
@@ -86,25 +107,45 @@ function InstagramPage() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Instagram className="h-6 w-6" /> Posts do Instagram</h1>
-          <p className="text-sm text-muted-foreground">Aprove os posts em que seus clientes marcam <span className="font-semibold">@{loja.instagram_handle || "sua_loja"}</span> e credite pontos.</p>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Instagram className="h-6 w-6" /> Posts do Instagram
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Aprove os posts em que seus clientes marcam{" "}
+            <span className="font-semibold">@{loja.instagram_handle || "sua_loja"}</span> e credite
+            pontos.
+          </p>
         </div>
       </div>
 
       {!active && (
         <Card className="border-dashed">
           <CardContent className="pt-6 text-sm">
-            <p>O programa está <strong>desativado</strong>. Ative em <a href="/lojista/configuracoes" className="underline">Configurações</a> para começar a receber submissões.</p>
+            <p>
+              O programa está <strong>desativado</strong>. Ative em{" "}
+              <a href="/lojista/configuracoes" className="underline">
+                Configurações
+              </a>{" "}
+              para começar a receber submissões.
+            </p>
           </CardContent>
         </Card>
       )}
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Status)}>
         <TabsList className="w-full">
-          <TabsTrigger value="pendente" className="flex-1">Pendentes</TabsTrigger>
-          <TabsTrigger value="aprovado" className="flex-1">Aprovados</TabsTrigger>
-          <TabsTrigger value="rejeitado" className="flex-1">Rejeitados</TabsTrigger>
-          <TabsTrigger value="estornado" className="flex-1">Estornados</TabsTrigger>
+          <TabsTrigger value="pendente" className="flex-1">
+            Pendentes
+          </TabsTrigger>
+          <TabsTrigger value="aprovado" className="flex-1">
+            Aprovados
+          </TabsTrigger>
+          <TabsTrigger value="rejeitado" className="flex-1">
+            Rejeitados
+          </TabsTrigger>
+          <TabsTrigger value="estornado" className="flex-1">
+            Estornados
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab} className="mt-4 space-y-3">
@@ -120,25 +161,34 @@ function InstagramPage() {
                     <div>
                       <div className="font-medium">{s.profiles?.full_name ?? "Cliente"}</div>
                       <div className="text-xs text-muted-foreground">
-                        {s.profiles?.phone ?? "—"} · enviado em {new Date(s.created_at).toLocaleString("pt-BR")}
+                        {s.profiles?.phone ?? "—"} · enviado em{" "}
+                        {new Date(s.created_at).toLocaleString("pt-BR")}
                       </div>
                     </div>
                     <a
-                      href={s.post_url} target="_blank" rel="noopener noreferrer"
+                      href={s.post_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-sm inline-flex items-center gap-1 text-primary hover:underline"
                     >
                       Abrir post <ExternalLink className="h-3.5 w-3.5" />
                     </a>
                   </div>
-                  <div className="text-xs text-muted-foreground break-all font-mono">{s.post_url}</div>
+                  <div className="text-xs text-muted-foreground break-all font-mono">
+                    {s.post_url}
+                  </div>
 
                   {s.status === "pendente" && s.verify_after && (
                     <div className="text-xs text-muted-foreground">
-                      Verificar novamente após: {new Date(s.verify_after).toLocaleDateString("pt-BR")}
+                      Verificar novamente após:{" "}
+                      {new Date(s.verify_after).toLocaleDateString("pt-BR")}
                     </div>
                   )}
                   {s.status === "aprovado" && (
-                    <div className="text-xs">✅ +{s.points_awarded} pts · em {s.reviewed_at ? new Date(s.reviewed_at).toLocaleString("pt-BR") : ""}</div>
+                    <div className="text-xs">
+                      ✅ +{s.points_awarded} pts · em{" "}
+                      {s.reviewed_at ? new Date(s.reviewed_at).toLocaleString("pt-BR") : ""}
+                    </div>
                   )}
                   {s.status === "rejeitado" && s.rejection_reason && (
                     <div className="text-xs text-destructive">Motivo: {s.rejection_reason}</div>
@@ -152,23 +202,44 @@ function InstagramPage() {
                       <div className="w-32">
                         <Label className="text-xs">Pontos</Label>
                         <Input
-                          type="number" min={1}
+                          type="number"
+                          min={1}
                           placeholder={String(loja.instagram_points_per_post)}
                           value={pointsOverride[s.id] ?? ""}
-                          onChange={(e) => setPointsOverride((p) => ({ ...p, [s.id]: e.target.value }))}
+                          onChange={(e) =>
+                            setPointsOverride((p) => ({ ...p, [s.id]: e.target.value }))
+                          }
                         />
                       </div>
-                      <Button size="sm" disabled={approve.isPending} onClick={() => approve.mutate(s)}>
+                      <Button
+                        size="sm"
+                        disabled={approve.isPending}
+                        onClick={() => approve.mutate(s)}
+                      >
                         <Check className="h-4 w-4" /> Aprovar
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => { setRejectFor(s); setReason(""); }}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setRejectFor(s);
+                          setReason("");
+                        }}
+                      >
                         <X className="h-4 w-4" /> Rejeitar
                       </Button>
                     </div>
                   )}
                   {s.status === "aprovado" && (
                     <div className="pt-2">
-                      <Button size="sm" variant="outline" onClick={() => { setRevokeFor(s); setReason(""); }}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setRevokeFor(s);
+                          setReason("");
+                        }}
+                      >
                         <RotateCcw className="h-4 w-4" /> Estornar (post sumiu)
                       </Button>
                     </div>
@@ -182,26 +253,55 @@ function InstagramPage() {
 
       <Dialog open={!!rejectFor} onOpenChange={(v) => !v && setRejectFor(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Rejeitar submissão</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Rejeitar submissão</DialogTitle>
+          </DialogHeader>
           <p className="text-sm text-muted-foreground">O cliente vai ver esse motivo.</p>
-          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Ex: post não menciona nossa loja, perfil privado, foto irrelevante..." />
+          <Textarea
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Ex: post não menciona nossa loja, perfil privado, foto irrelevante..."
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectFor(null)}>Cancelar</Button>
-            <Button onClick={() => reject.mutate()} disabled={reason.trim().length < 3 || reject.isPending}>Rejeitar</Button>
+            <Button variant="outline" onClick={() => setRejectFor(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => reject.mutate()}
+              disabled={reason.trim().length < 3 || reject.isPending}
+            >
+              Rejeitar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!revokeFor} onOpenChange={(v) => !v && setRevokeFor(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Estornar pontos</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Estornar pontos</DialogTitle>
+          </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Vai remover <strong>{revokeFor?.points_awarded ?? 0} pts</strong> do saldo do cliente e registrar o motivo.
+            Vai remover <strong>{revokeFor?.points_awarded ?? 0} pts</strong> do saldo do cliente e
+            registrar o motivo.
           </p>
-          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Ex: post apagado antes dos 7 dias, perfil trocado para privado..." />
+          <Textarea
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Ex: post apagado antes dos 7 dias, perfil trocado para privado..."
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRevokeFor(null)}>Cancelar</Button>
-            <Button onClick={() => revoke.mutate()} disabled={reason.trim().length < 3 || revoke.isPending}>Estornar</Button>
+            <Button variant="outline" onClick={() => setRevokeFor(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => revoke.mutate()}
+              disabled={reason.trim().length < 3 || revoke.isPending}
+            >
+              Estornar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
