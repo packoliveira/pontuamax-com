@@ -1476,19 +1476,6 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-function formatVoucherJaUsado(delivered_at: string | null | undefined): string {
-  if (!delivered_at) {
-    return "Este voucher já foi utilizado anteriormente. Cada voucher só pode ser entregue uma vez.";
-  }
-  const d = new Date(delivered_at);
-  const fmt = new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  }).format(d);
-  return `Este voucher já foi utilizado em ${fmt}. Cada voucher só pode ser entregue uma vez.`;
-}
-
-
 // -------- Produtos CRUD (lojista) --------
 export const salvarProduto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
