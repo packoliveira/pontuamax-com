@@ -78,3 +78,32 @@ export function isValidCPF(cpf: string): boolean {
   const d2 = calc(d.slice(0, 10), 11);
   return d1 === Number(d[9]) && d2 === Number(d[10]);
 }
+
+export function formatPhone(v: string) {
+  const d = onlyDigits(v ?? "").slice(0, 11);
+  if (d.length <= 10) {
+    return d.replace(/(\d{2})(\d{4})(\d{0,4}).*/, (_, a, b, c) =>
+      c ? `(${a}) ${b}-${c}` : b ? `(${a}) ${b}` : a ? `(${a}` : "",
+    );
+  }
+  return d.replace(/(\d{2})(\d{5})(\d{0,4}).*/, (_, a, b, c) =>
+    c ? `(${a}) ${b}-${c}` : `(${a}) ${b}`,
+  );
+}
+
+export function formatCNPJ(v: string) {
+  const d = onlyDigits(v ?? "").slice(0, 14);
+  return d
+    .replace(/(\d{2})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+}
+
+export function timeAgo(iso: string) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return "agora";
+  if (diff < 3600) return `${Math.floor(diff / 60)}min`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  return `${Math.floor(diff / 86400)}d`;
+}
