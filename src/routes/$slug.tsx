@@ -21,7 +21,6 @@ import {
 } from "@/lib/qsf.functions";
 import {
   formatBRL,
-  formatDate,
   calcularNivel,
   progressoNivel,
   cpfToEmail,
@@ -60,19 +59,13 @@ import {
   Share2,
   Gift,
   FileText,
-  ArrowUpRight,
-  ArrowDownRight,
-  Sparkles,
-  Instagram,
-  Check,
-  X,
-  Clock,
   Package,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Receipt, CheckCircle2, AlertTriangle, Printer } from "lucide-react";
-import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
 import { RewardRain } from "@/components/reward-rain";
+import { HistoricoSection } from "@/components/portal/HistoricoSection";
+import { InstagramCard, MeusPostsInstagram } from "@/components/portal/InstagramSection";
+import { VouchersSection } from "@/components/portal/VouchersSection";
 
 const REF_KEY = "qsf_referrer_phone";
 function getStoredReferrer(): string | null {
