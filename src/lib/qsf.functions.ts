@@ -2,6 +2,21 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { calcularNivel, cpfToEmail, gerarVoucher, isValidCPF } from "./qsf-shared";
+import {
+  getActiveMultiplier,
+  promoSchema,
+  formatVoucherJaUsado,
+  randomGiftCode,
+  sha256Hex,
+  renderMsg as _renderMsg,
+  selecionarDestinatarios,
+  processarEnvioCampanha,
+} from "./qsf-helpers.server";
+
+// re-export para o cron `/api/public/hooks/campanhas-agendadas`
+export { processarEnvioCampanha as _processarEnvioCampanhaInternal };
+// evita "unused import" (renderMsg é usado apenas dentro do helper server)
+void _renderMsg;
 
 // -------- LOJISTA: sincronizar clientes órfãos --------
 // Reprocessa cadastros da página pública: para toda transação/nota fiscal desta
@@ -41,42 +56,6 @@ export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
     return { criados, ja_vinculados: linked.size, total: linked.size + criados };
   });
 
-
-// -------- Promoções: multiplicador ativo agora --------
-function getActiveMultiplier(
-  promos: Array<{
-    multiplicador: number | string;
-    dias_semana: number[];
-    hora_inicio: string;
-    hora_fim: string;
-    data_inicio: string | null;
-    data_fim: string | null;
-  }>,
-): number {
-  // Hora de Brasília
-  const fmt = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", weekday: "short", hour12: false,
-  });
-  const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
-  const map: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-  const dow = map[parts.weekday] ?? 0;
-  const date = `${parts.year}-${parts.month}-${parts.day}`;
-  const hm = `${parts.hour}:${parts.minute}`;
-  let mult = 1;
-  for (const p of promos) {
-    if (!p.dias_semana.includes(dow)) continue;
-    if (p.data_inicio && date < p.data_inicio) continue;
-    if (p.data_fim && date > p.data_fim) continue;
-    const hi = p.hora_inicio.slice(0, 5);
-    const hf = p.hora_fim.slice(0, 5);
-    if (hm < hi || hm > hf) continue;
-    const m = Number(p.multiplicador);
-    if (m > mult) mult = m;
-  }
-  return mult;
-}
 
 // -------- LOJISTA: create store after signup --------
 export const criarLoja = createServerFn({ method: "POST" })
