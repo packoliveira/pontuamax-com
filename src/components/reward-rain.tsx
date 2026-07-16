@@ -49,7 +49,7 @@ function useIsMobile() {
 
 /** Pause CSS animations when the element scrolls off-screen or the tab is hidden.
  *  Cheap CPU/GPU savings on the login page and previews. */
-function usePauseWhenHidden(ref: React.RefObject<HTMLElement>) {
+function usePauseWhenHidden(ref: React.RefObject<HTMLElement | null>) {
   const [paused, setPaused] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
