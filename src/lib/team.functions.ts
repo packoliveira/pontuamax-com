@@ -17,8 +17,6 @@ import {
 
 // Re-export para consumidores externos (importados dinamicamente por qsf.functions.ts)
 export { logEmployeeAction, notifyMerchant, resolveActorLabel };
-// silencia lint — usados dentro dos handlers abaixo
-void getOwnedStoreId; void writeAudit;
 
 // ============== Notificações do lojista (API) ==============
 
