@@ -52,7 +52,7 @@ export function IntegracoesCard({
 }: {
   storeId: string;
   slug: string;
-  secret: string;
+  secret: string | null;
   lastAt: string | null;
 }) {
   const qc = useQueryClient();
