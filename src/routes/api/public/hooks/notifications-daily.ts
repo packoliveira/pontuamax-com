@@ -5,9 +5,6 @@ type StoreRow = {
   slug: string;
   nome_fantasia: string;
   whatsapp_enabled: boolean;
-  evolution_url: string | null;
-  evolution_apikey: string | null;
-  evolution_instance: string | null;
   notif_birthday_enabled: boolean;
   notif_birthday_bonus_points: number;
   notif_birthday_template: string;
@@ -57,7 +54,7 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
         const { data: stores } = await supabaseAdmin
           .from("stores")
           .select(
-            "id, slug, nome_fantasia, whatsapp_enabled, evolution_url, evolution_apikey, evolution_instance, notif_birthday_enabled, notif_birthday_bonus_points, notif_birthday_template, notif_inactivity_enabled, notif_inactivity_days, notif_inactivity_template, notif_expiry_enabled, notif_expiry_days, notif_expiry_warn_days, notif_expiry_template",
+            "id, slug, nome_fantasia, whatsapp_enabled, notif_birthday_enabled, notif_birthday_bonus_points, notif_birthday_template, notif_inactivity_enabled, notif_inactivity_days, notif_inactivity_template, notif_expiry_enabled, notif_expiry_days, notif_expiry_warn_days, notif_expiry_template",
           )
           .eq("whatsapp_enabled", true)
           .eq("subscription_status", "active");
@@ -68,15 +65,18 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
             headers: { "Content-Type": "application/json" },
           });
 
+        const { getStoreSecrets } = await import("@/lib/store-secrets.server");
+
         for (const store of stores as StoreRow[]) {
-          if (!store.evolution_url || !store.evolution_apikey || !store.evolution_instance)
+          const s = await getStoreSecrets(store.id);
+          if (!s.evolution_url || !s.evolution_apikey || !s.evolution_instance)
             continue;
           summary.stores += 1;
 
           const evo = {
-            url: store.evolution_url,
-            apikey: store.evolution_apikey,
-            instance: store.evolution_instance,
+            url: s.evolution_url,
+            apikey: s.evolution_apikey,
+            instance: s.evolution_instance,
           };
 
           const send = async (userId: string, text: string, tipo: string) => {
