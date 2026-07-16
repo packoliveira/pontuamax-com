@@ -12,7 +12,9 @@ export const Route = createFileRoute("/api/public/nps/submit")({
     handlers: {
       POST: async ({ request }) => {
         let body: unknown;
-        try { body = await request.json(); } catch {
+        try {
+          body = await request.json();
+        } catch {
           return new Response("Bad JSON", { status: 400 });
         }
         const parsed = bodySchema.safeParse(body);
@@ -29,9 +31,12 @@ export const Route = createFileRoute("/api/public/nps/submit")({
         }
 
         const existing = await supabaseAdmin
-          .from("nps_responses").select("id")
-          .eq("transaction_id", tx.data.id).maybeSingle();
-        if (existing.data) return Response.json({ error: "Você já respondeu esta pesquisa." }, { status: 409 });
+          .from("nps_responses")
+          .select("id")
+          .eq("transaction_id", tx.data.id)
+          .maybeSingle();
+        if (existing.data)
+          return Response.json({ error: "Você já respondeu esta pesquisa." }, { status: 409 });
 
         const { error } = await supabaseAdmin.from("nps_responses").insert({
           store_id: tx.data.store_id,

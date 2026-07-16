@@ -49,12 +49,7 @@ function extractOlistPayload(p: Record<string, unknown>): {
     "";
 
   const idVenda = String(
-    p.id_venda_externa ??
-      root.id ??
-      root.numero ??
-      root.numero_pedido ??
-      root.codigo ??
-      "",
+    p.id_venda_externa ?? root.id ?? root.numero ?? root.numero_pedido ?? root.codigo ?? "",
   ).trim();
 
   const valorRaw =
@@ -66,24 +61,23 @@ function extractOlistPayload(p: Record<string, unknown>): {
     root.totalPedido ??
     root.valorTotal ??
     0;
-  const valor = typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
+  const valor =
+    typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
 
   const cpfRaw = String(
-    p.cpf_cliente ??
-      cliente.cpfCnpj ??
-      cliente.cpf_cnpj ??
-      cliente.documento ??
-      cliente.cpf ??
-      "",
+    p.cpf_cliente ?? cliente.cpfCnpj ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
   );
   const cpf = cpfRaw.replace(/\D/g, "");
 
   const telRaw = String(p.telefone_cliente ?? fonePrincipal ?? "");
   const telefone = telRaw.replace(/\D/g, "");
 
-  const nome = String(p.nome_cliente ?? cliente.nome ?? cliente.razao_social ?? "").trim() || "Cliente";
+  const nome =
+    String(p.nome_cliente ?? cliente.nome ?? cliente.razao_social ?? "").trim() || "Cliente";
 
-  const tipoEvento = String(p.tipo ?? p.event ?? p.evento ?? "").trim().toLowerCase();
+  const tipoEvento = String(p.tipo ?? p.event ?? p.evento ?? "")
+    .trim()
+    .toLowerCase();
 
   return { idVenda, valor, cpf, telefone, nome, tipoEvento };
 }
@@ -145,9 +139,13 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         // Locate store by uuid or slug
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeHeader);
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          storeHeader,
+        );
         const q = supabaseAdmin.from("stores").select("*");
-        const storeRes = await (isUuid ? q.eq("id", storeHeader) : q.eq("slug", storeHeader)).maybeSingle();
+        const storeRes = await (
+          isUuid ? q.eq("id", storeHeader) : q.eq("slug", storeHeader)
+        ).maybeSingle();
         const loja = storeRes.data;
         if (!loja) return json({ error: "loja não encontrada" }, 404);
 
@@ -165,7 +163,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
             mensagem_erro: status === "erro" ? message : null,
           });
           if (status === "sucesso") {
-            await supabaseAdmin.from("stores").update({ webhook_last_at: new Date().toISOString() }).eq("id", loja.id);
+            await supabaseAdmin
+              .from("stores")
+              .update({ webhook_last_at: new Date().toISOString() })
+              .eq("id", loja.id);
           }
           return json({ status, message, ...extra }, httpStatus);
         };
@@ -180,10 +181,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        let { idVenda, valor, cpf, telefone, nome, tipoEvento } =
-          extractOlistPayload(payload);
+        let { idVenda, valor, cpf, telefone, nome, tipoEvento } = extractOlistPayload(payload);
 
-        if (!idVenda) return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
+        if (!idVenda)
+          return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
 
         // Se a Olist mandou só notificação (sem valor total), tenta buscar
         // o pedido completo via API Tiny/Olist usando OLIST_API_TOKEN.
@@ -201,9 +202,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
                 };
               };
               const pedido =
-                dataJson.retorno?.pedido ??
-                dataJson.retorno?.registros?.[0]?.pedido ??
-                null;
+                dataJson.retorno?.pedido ?? dataJson.retorno?.registros?.[0]?.pedido ?? null;
               if (pedido) {
                 const full = extractOlistPayload({ pedido });
                 if (Number.isFinite(full.valor) && full.valor > 0) valor = full.valor;
@@ -234,7 +233,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           .eq("store_id", loja.id)
           .eq("id_venda_externa", idVenda)
           .maybeSingle();
-        if (dup.data) return logAndRespond("sucesso", "venda já processada (idempotente)", 200, { duplicated: true });
+        if (dup.data)
+          return logAndRespond("sucesso", "venda já processada (idempotente)", 200, {
+            duplicated: true,
+          });
 
         // Busca cliente: 1º por CPF (mais confiável), depois por telefone.
         let clientProfile: { id: string } | null = null;
@@ -244,7 +246,11 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           if (p.data) clientProfile = p.data;
         }
         if (!clientProfile && telefone) {
-          const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
+          const p = await supabaseAdmin
+            .from("profiles")
+            .select("id")
+            .eq("phone", telefone)
+            .maybeSingle();
           if (p.data) clientProfile = p.data;
         }
         if (!clientProfile) {
@@ -259,25 +265,31 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           const password = randomBytes(24).toString("hex");
           const created = await supabaseAdmin.auth.admin.createUser({
             email,
-              password,
+            password,
             email_confirm: true,
-              user_metadata: { full_name: nome, phone: telefone || null, cpf: cpf || null },
+            user_metadata: { full_name: nome, phone: telefone || null, cpf: cpf || null },
           });
           if (created.error || !created.data.user) {
-            return logAndRespond("erro", `falha criando cliente: ${created.error?.message ?? "?"}`, 500);
+            return logAndRespond(
+              "erro",
+              `falha criando cliente: ${created.error?.message ?? "?"}`,
+              500,
+            );
           }
           clientProfile = { id: created.data.user.id };
           clientJustCreated = true;
           await supabaseAdmin.from("profiles").upsert({
             id: clientProfile.id,
             full_name: nome,
-              phone: telefone || null,
+            phone: telefone || null,
             cpf: cpf || null,
           });
-          await supabaseAdmin.from("user_roles").upsert(
-            { user_id: clientProfile.id, role: "cliente" as const },
-            { onConflict: "user_id,role" },
-          );
+          await supabaseAdmin
+            .from("user_roles")
+            .upsert(
+              { user_id: clientProfile.id, role: "cliente" as const },
+              { onConflict: "user_id,role" },
+            );
         }
 
         // Vincula à loja (upsert)
@@ -336,7 +348,9 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         if (tx.error) {
           // race → duplicate
           if (tx.error.code === "23505") {
-            return logAndRespond("sucesso", "venda já processada (idempotente)", 200, { duplicated: true });
+            return logAndRespond("sucesso", "venda já processada (idempotente)", 200, {
+              duplicated: true,
+            });
           }
           return logAndRespond("erro", tx.error.message, 500);
         }

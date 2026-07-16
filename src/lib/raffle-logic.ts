@@ -38,9 +38,7 @@ export function elegiveisSorteio(
     .map((c) => c.user_id);
   if (!filters.filtro_tag) return base;
   const tagged = new Set(
-    tags
-      .filter((t) => t.tag === filters.filtro_tag)
-      .map((t) => t.client_user_id),
+    tags.filter((t) => t.tag === filters.filtro_tag).map((t) => t.client_user_id),
   );
   return base.filter((u) => tagged.has(u));
 }

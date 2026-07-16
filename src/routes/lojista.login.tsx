@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { traduzirErroAuth, isCredenciaisInvalidas, validarEmail, validarSenha } from "@/lib/auth-errors";
+import {
+  traduzirErroAuth,
+  isCredenciaisInvalidas,
+  validarEmail,
+  validarSenha,
+} from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Store, AlertCircle } from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
@@ -56,7 +61,9 @@ function Login() {
         toast.info(msg);
         sessionStorage.removeItem("auth_flash");
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     supabase.auth.getSession().then(({ data }) => {
       setSessionEmail(data.session?.user.email ?? null);
     });
@@ -65,7 +72,9 @@ function Login() {
   const goCriarLoja = (prefillEmail?: string | null) => {
     try {
       if (prefillEmail) sessionStorage.setItem("onboarding_prefill_email", prefillEmail);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     navigate({ to: "/lojista/onboarding" });
   };
 
@@ -138,7 +147,12 @@ function Login() {
       {/* Lado esquerdo — ilustração abstrata com degradê da marca */}
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12 text-white bg-[#0B132B]">
         {/* Blobs em degradê roxo → azul → verde-água */}
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <svg
+          className="absolute inset-0 h-full w-full"
+          viewBox="0 0 600 800"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
           <defs>
             <linearGradient id="pm-blob-a" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#6D28D9" />
@@ -158,11 +172,53 @@ function Login() {
           <circle cx="120" cy="180" r="260" fill="url(#pm-blob-c)" />
           <circle cx="520" cy="640" r="300" fill="url(#pm-blob-b)" />
           <g opacity="0.85">
-            <rect x="380" y="120" width="180" height="180" rx="40" fill="url(#pm-blob-a)" transform="rotate(18 470 210)" opacity="0.35" />
-            <rect x="60" y="480" width="220" height="220" rx="60" fill="url(#pm-blob-a)" transform="rotate(-14 170 590)" opacity="0.3" />
-            <circle cx="480" cy="360" r="70" fill="none" stroke="url(#pm-blob-a)" strokeWidth="2" opacity="0.5" />
-            <circle cx="280" cy="260" r="120" fill="none" stroke="url(#pm-blob-a)" strokeWidth="2" opacity="0.4" />
-            <circle cx="200" cy="720" r="90" fill="none" stroke="url(#pm-blob-a)" strokeWidth="2" opacity="0.35" />
+            <rect
+              x="380"
+              y="120"
+              width="180"
+              height="180"
+              rx="40"
+              fill="url(#pm-blob-a)"
+              transform="rotate(18 470 210)"
+              opacity="0.35"
+            />
+            <rect
+              x="60"
+              y="480"
+              width="220"
+              height="220"
+              rx="60"
+              fill="url(#pm-blob-a)"
+              transform="rotate(-14 170 590)"
+              opacity="0.3"
+            />
+            <circle
+              cx="480"
+              cy="360"
+              r="70"
+              fill="none"
+              stroke="url(#pm-blob-a)"
+              strokeWidth="2"
+              opacity="0.5"
+            />
+            <circle
+              cx="280"
+              cy="260"
+              r="120"
+              fill="none"
+              stroke="url(#pm-blob-a)"
+              strokeWidth="2"
+              opacity="0.4"
+            />
+            <circle
+              cx="200"
+              cy="720"
+              r="90"
+              fill="none"
+              stroke="url(#pm-blob-a)"
+              strokeWidth="2"
+              opacity="0.35"
+            />
           </g>
           {/* Grid sutil */}
           <g stroke="#FFFFFF" strokeOpacity="0.04" strokeWidth="1">
@@ -215,90 +271,105 @@ function Login() {
             <CardTitle className="mt-2 text-2xl">Bem-vindo de volta</CardTitle>
             <CardDescription>Entre no painel do lojista PontuaMax</CardDescription>
           </CardHeader>
-        <CardContent>
-          {sessionEmail && (
-            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-2">
-              <p>
-                Você está conectado como <strong>{sessionEmail}</strong>, mas essa conta ainda não tem loja.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-8"
-                  onClick={() => goCriarLoja(sessionEmail)}
-                >
-                  <Store className="h-3.5 w-3.5" /> Criar minha loja com esta conta
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="h-8"
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    setSessionEmail(null);
-                    setErrorMsg(null);
-                    setErrorKind(null);
-                  }}
-                >
-                  Sair desta conta
-                </Button>
+          <CardContent>
+            {sessionEmail && (
+              <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-2">
+                <p>
+                  Você está conectado como <strong>{sessionEmail}</strong>, mas essa conta ainda não
+                  tem loja.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-8"
+                    onClick={() => goCriarLoja(sessionEmail)}
+                  >
+                    <Store className="h-3.5 w-3.5" /> Criar minha loja com esta conta
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-8"
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      setSessionEmail(null);
+                      setErrorMsg(null);
+                      setErrorKind(null);
+                    }}
+                  >
+                    Sair desta conta
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-          {errorMsg && errorKind !== "store" && (
-            <div className="mb-4 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-          <form onSubmit={submit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); if (erroEmail) setErroEmail(null); }}
-                required
-                autoComplete="email"
-                className={erroEmail ? "border-destructive" : undefined}
-              />
-              {erroEmail && <p className="text-xs text-destructive">{erroEmail}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="senha">Senha</Label>
-              <PasswordInput
-                id="senha"
-                value={senha}
-                onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }}
-                required
-                autoComplete="current-password"
-                className={erroSenha ? "border-destructive" : undefined}
-              />
-              {erroSenha && <p className="text-xs text-destructive">{erroSenha}</p>}
-            </div>
-            <Button
-              type="submit"
-              className="w-full rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm transition-all duration-200"
-              disabled={loading}
-            >
-              {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verificando credenciais e loja...</>) : "Entrar"}
-            </Button>
-            <button
-              type="button"
-              onClick={() => setForgotOpen(true)}
-              className="block mx-auto text-xs text-muted-foreground hover:text-foreground underline"
-            >
-              Esqueci minha senha
-            </button>
-            <p className="text-xs text-center text-muted-foreground">
-              Ainda não tem loja?{" "}
-              <Link to="/lojista/onboarding" className="underline text-[#2563EB]">Criar minha loja</Link>
-            </p>
-          </form>
-        </CardContent>
+            )}
+            {errorMsg && errorKind !== "store" && (
+              <div className="mb-4 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+            <form onSubmit={submit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (erroEmail) setErroEmail(null);
+                  }}
+                  required
+                  autoComplete="email"
+                  className={erroEmail ? "border-destructive" : undefined}
+                />
+                {erroEmail && <p className="text-xs text-destructive">{erroEmail}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="senha">Senha</Label>
+                <PasswordInput
+                  id="senha"
+                  value={senha}
+                  onChange={(e) => {
+                    setSenha(e.target.value);
+                    if (erroSenha) setErroSenha(null);
+                  }}
+                  required
+                  autoComplete="current-password"
+                  className={erroSenha ? "border-destructive" : undefined}
+                />
+                {erroSenha && <p className="text-xs text-destructive">{erroSenha}</p>}
+              </div>
+              <Button
+                type="submit"
+                className="w-full rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm transition-all duration-200"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Verificando credenciais e loja...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setForgotOpen(true)}
+                className="block mx-auto text-xs text-muted-foreground hover:text-foreground underline"
+              >
+                Esqueci minha senha
+              </button>
+              <p className="text-xs text-center text-muted-foreground">
+                Ainda não tem loja?{" "}
+                <Link to="/lojista/onboarding" className="underline text-[#2563EB]">
+                  Criar minha loja
+                </Link>
+              </p>
+            </form>
+          </CardContent>
         </Card>
         <EsqueciSenhaDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} />
       </div>

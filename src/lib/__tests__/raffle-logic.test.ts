@@ -42,9 +42,12 @@ describe("nivelPermitido", () => {
 
 describe("elegiveisSorteio", () => {
   it("sem filtros, devolve todos os clientes", () => {
-    expect(elegiveisSorteio(clients, tags, {}).sort()).toEqual(
-      ["u-bronze-1", "u-bronze-2", "u-ouro-1", "u-prata-1"],
-    );
+    expect(elegiveisSorteio(clients, tags, {}).sort()).toEqual([
+      "u-bronze-1",
+      "u-bronze-2",
+      "u-ouro-1",
+      "u-prata-1",
+    ]);
   });
   it("filtra por nível mínimo prata", () => {
     const out = elegiveisSorteio(clients, tags, { filtro_nivel_min: "prata" });

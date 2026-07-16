@@ -34,9 +34,17 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PontuaMax | Programa de Fidelidade para Empresas" },
-      { name: "description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
+      {
+        name: "description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
       { property: "og:title", content: "PontuaMax | Programa de Fidelidade para Empresas" },
-      { property: "og:description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
+      {
+        property: "og:description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
     ],
   }),
   component: Index,
@@ -51,7 +59,9 @@ function Index() {
           <PontuaMaxWordmark variant="light" size={18} />
         </div>
         <Link to="/lojista/login">
-          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">Entrar como lojista</Button>
+          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">
+            Entrar como lojista
+          </Button>
         </Link>
       </header>
 
@@ -71,11 +81,15 @@ function Index() {
               .
             </h1>
             <p className="mt-5 text-base sm:text-lg text-[#64748B] md:text-xl [text-wrap:pretty]">
-              Programa de fidelidade com pontos, cashback e campanhas para aumentar a recorrência dos seus clientes e vender mais todos os meses.
+              Programa de fidelidade com pontos, cashback e campanhas para aumentar a recorrência
+              dos seus clientes e vender mais todos os meses.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
               <Link to="/lojista/onboarding">
-                <Button size="lg" className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto"
+                >
                   <Store className="h-4 w-4" /> Criar minha loja gratuitamente
                 </Button>
               </Link>
@@ -148,7 +162,10 @@ function Index() {
 
         <div className="mt-16 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link to="/lojista/onboarding">
-            <Button size="lg" className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto">
+            <Button
+              size="lg"
+              className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto"
+            >
               Criar minha loja grátis <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -162,7 +179,15 @@ function Index() {
   );
 }
 
-function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+function FeatureCard({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) {
   return (
     <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition duration-200 hover:shadow-md hover:-translate-y-0.5">
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563EB] text-white">
@@ -298,8 +323,7 @@ function AppScreen1({ active }: { active: boolean }) {
       <div
         className="relative mt-4 overflow-hidden rounded-3xl p-5 text-white shadow-xl"
         style={{
-          background:
-            "linear-gradient(135deg, #6D28D9 0%, #2563EB 55%, #14CBA8 100%)",
+          background: "linear-gradient(135deg, #6D28D9 0%, #2563EB 55%, #14CBA8 100%)",
         }}
       >
         <div
@@ -339,8 +363,7 @@ function AppScreen1({ active }: { active: boolean }) {
               className="h-full rounded-full shadow-[0_0_10px_rgba(255,255,255,0.6)]"
               style={{
                 width: "72%",
-                background:
-                  "linear-gradient(90deg, #ffffff 0%, #E0F2FE 40%, #14CBA8 100%)",
+                background: "linear-gradient(90deg, #ffffff 0%, #E0F2FE 40%, #14CBA8 100%)",
               }}
             />
           </div>
@@ -372,7 +395,9 @@ function AppScreen1({ active }: { active: boolean }) {
             <Flame className="h-3.5 w-3.5" />
           </div>
           <div>
-            <div className="text-[9px] font-semibold uppercase tracking-wider text-[#92400E]">Streak</div>
+            <div className="text-[9px] font-semibold uppercase tracking-wider text-[#92400E]">
+              Streak
+            </div>
             <div className="text-sm font-bold text-[#78350F]">7 dias 🔥</div>
           </div>
         </div>
@@ -387,7 +412,12 @@ function AppScreen1({ active }: { active: boolean }) {
         <div className="mt-2 space-y-2">
           {[
             { i: <Coins className="h-3 w-3" />, t: "Compra em loja", v: "+180 pts", c: "#22C55E" },
-            { i: <Gift className="h-3 w-3" />, t: "Voucher resgatado", v: "-500 pts", c: "#6D28D9" },
+            {
+              i: <Gift className="h-3 w-3" />,
+              t: "Voucher resgatado",
+              v: "-500 pts",
+              c: "#6D28D9",
+            },
           ].map((x, i) => (
             <div key={i} className="flex items-center gap-2">
               <div
@@ -459,9 +489,7 @@ function AppScreen2({ active }: { active: boolean }) {
           <span
             key={f}
             className={`whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-semibold ${
-              i === 0
-                ? "bg-[#0F172A] text-white"
-                : "bg-white text-[#64748B] ring-1 ring-[#E2E8F0]"
+              i === 0 ? "bg-[#0F172A] text-white" : "bg-white text-[#64748B] ring-1 ring-[#E2E8F0]"
             }`}
           >
             {f}
@@ -477,12 +505,7 @@ function AppScreen2({ active }: { active: boolean }) {
             className="group overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5"
           >
             <div className="relative h-24 w-full overflow-hidden bg-[#F1F5F9]">
-              <img
-                src={p.img}
-                alt={p.name}
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
+              <img src={p.img} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
               <span className="absolute left-1.5 top-1.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[8px] font-bold text-[#0F172A] backdrop-blur">
                 {p.tag}
               </span>
@@ -491,7 +514,10 @@ function AppScreen2({ active }: { active: boolean }) {
               <div className="truncate text-[10px] font-semibold text-[#0F172A]">{p.name}</div>
               <div className="mt-0.5 flex items-center gap-1 text-[9px] text-[#64748B]">
                 <Coins className="h-2.5 w-2.5 text-[#F59E0B]" />
-                <span className="font-semibold text-[#0F172A]">{p.pts.toLocaleString("pt-BR")}</span> pts
+                <span className="font-semibold text-[#0F172A]">
+                  {p.pts.toLocaleString("pt-BR")}
+                </span>{" "}
+                pts
               </div>
               <button
                 className="mt-1.5 w-full rounded-lg py-1 text-[9px] font-bold text-white shadow-sm"
@@ -520,8 +546,7 @@ function AppScreen3({ active }: { active: boolean }) {
       <div
         className="relative mt-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg"
         style={{
-          background:
-            "linear-gradient(135deg, #F59E0B 0%, #EF4444 55%, #6D28D9 100%)",
+          background: "linear-gradient(135deg, #F59E0B 0%, #EF4444 55%, #6D28D9 100%)",
         }}
       >
         <div className="flex items-center justify-between">
@@ -545,10 +570,14 @@ function AppScreen3({ active }: { active: boolean }) {
         </div>
         <div className="flex-1 p-2.5">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold text-[#0F172A]">R$ 25 OFF na próxima compra</div>
+            <div className="text-[10px] font-semibold text-[#0F172A]">
+              R$ 25 OFF na próxima compra
+            </div>
             <Percent className="h-3 w-3 text-[#2563EB]" />
           </div>
-          <div className="mt-0.5 text-[9px] text-[#64748B]">Válido até 30/nov · código FIDELI25</div>
+          <div className="mt-0.5 text-[9px] text-[#64748B]">
+            Válido até 30/nov · código FIDELI25
+          </div>
         </div>
       </div>
 
@@ -569,15 +598,16 @@ function AppScreen3({ active }: { active: boolean }) {
                 <div
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-white"
                   style={{
-                    background:
-                      "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)",
+                    background: "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)",
                   }}
                 >
                   <ShoppingBag className="h-3 w-3" />
                 </div>
                 <div>
                   <div className="text-[10px] font-semibold text-[#0F172A]">{x.loja}</div>
-                  <div className="text-[9px] text-[#64748B]">{x.d} · {x.v}</div>
+                  <div className="text-[9px] text-[#64748B]">
+                    {x.d} · {x.v}
+                  </div>
                 </div>
               </div>
               <span className="rounded-full bg-[#22C55E]/10 px-2 py-0.5 text-[9px] font-bold text-[#15803D]">
@@ -597,9 +627,15 @@ function AppScreen3({ active }: { active: boolean }) {
           <div className="text-[11px] font-semibold">Benefícios Prata</div>
         </div>
         <ul className="mt-2 space-y-1 text-[10px] text-white/85">
-          <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-[#14CBA8]" /> 1.5× pontos em compras</li>
-          <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-[#14CBA8]" /> Vouchers exclusivos</li>
-          <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-[#14CBA8]" /> Acesso antecipado a promos</li>
+          <li className="flex items-center gap-1.5">
+            <Check className="h-3 w-3 text-[#14CBA8]" /> 1.5× pontos em compras
+          </li>
+          <li className="flex items-center gap-1.5">
+            <Check className="h-3 w-3 text-[#14CBA8]" /> Vouchers exclusivos
+          </li>
+          <li className="flex items-center gap-1.5">
+            <Check className="h-3 w-3 text-[#14CBA8]" /> Acesso antecipado a promos
+          </li>
         </ul>
       </div>
     </ScreenWrapper>
@@ -628,15 +664,12 @@ function BottomNav({ active }: { active: number }) {
             <div key={it.label} className="flex flex-1 flex-col items-center gap-0.5">
               <div
                 className={`flex h-8 w-10 items-center justify-center rounded-xl transition-all duration-300 ${
-                  isActive
-                    ? "text-white shadow-md"
-                    : "text-[#64748B]"
+                  isActive ? "text-white shadow-md" : "text-[#64748B]"
                 }`}
                 style={
                   isActive
                     ? {
-                        background:
-                          "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)",
+                        background: "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)",
                       }
                     : undefined
                 }
@@ -687,7 +720,10 @@ function DashboardMockup() {
               <Users className="h-3.5 w-3.5" /> Dashboard
             </div>
             {["Lançar venda", "Clientes", "Produtos", "Resgates", "Configurações"].map((l) => (
-              <div key={l} className="flex items-center gap-2 rounded-md px-2.5 py-2 text-[#0F172A]/70 hover:bg-slate-50">
+              <div
+                key={l}
+                className="flex items-center gap-2 rounded-md px-2.5 py-2 text-[#0F172A]/70 hover:bg-slate-50"
+              >
                 <div className="h-3.5 w-3.5 rounded bg-[#0F172A]/10" /> {l}
               </div>
             ))}
@@ -699,7 +735,9 @@ function DashboardMockup() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-bold text-[#0F172A]">Olá, Loja Exemplo</h3>
-              <div className="text-xs text-[#64748B]">Sua página: <span className="font-mono">pontuamax.com.br/loja-exemplo</span></div>
+              <div className="text-xs text-[#64748B]">
+                Sua página: <span className="font-mono">pontuamax.com.br/loja-exemplo</span>
+              </div>
             </div>
             <div className="rounded-md bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-white">
               Lançar venda →
@@ -708,9 +746,22 @@ function DashboardMockup() {
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <MetricCard icon={<Users className="h-3.5 w-3.5" />} label="Clientes" value="284" />
-            <MetricCard icon={<Coins className="h-3.5 w-3.5" />} label="Pontos no mês" value="12.480" />
-            <MetricCard icon={<Wallet className="h-3.5 w-3.5" />} label="Cashback do mês" value="R$ 1.230" />
-            <MetricCard icon={<Gift className="h-3.5 w-3.5" />} label="Resgates pendentes" value="7" highlight />
+            <MetricCard
+              icon={<Coins className="h-3.5 w-3.5" />}
+              label="Pontos no mês"
+              value="12.480"
+            />
+            <MetricCard
+              icon={<Wallet className="h-3.5 w-3.5" />}
+              label="Cashback do mês"
+              value="R$ 1.230"
+            />
+            <MetricCard
+              icon={<Gift className="h-3.5 w-3.5" />}
+              label="Resgates pendentes"
+              value="7"
+              highlight
+            />
           </div>
 
           <div className="rounded-xl border border-slate-100 bg-white p-4">
@@ -758,7 +809,9 @@ function MetricCard({
       <div className="mt-1.5 flex items-center gap-2">
         <div className="text-lg font-bold text-[#0F172A]">{value}</div>
         {highlight && (
-          <span className="rounded bg-[#14CBA8] px-1.5 py-0.5 text-[9px] font-bold text-[#0F172A]">novo</span>
+          <span className="rounded bg-[#14CBA8] px-1.5 py-0.5 text-[9px] font-bold text-[#0F172A]">
+            novo
+          </span>
         )}
       </div>
     </div>

@@ -19,17 +19,56 @@ import {
   resgatarCashback,
   criarClienteViaCpf,
 } from "@/lib/qsf.functions";
-import { formatBRL, formatDate, calcularNivel, progressoNivel, cpfToEmail, formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
+import {
+  formatBRL,
+  formatDate,
+  calcularNivel,
+  progressoNivel,
+  cpfToEmail,
+  formatCPF,
+  isValidCPF,
+  onlyDigits,
+} from "@/lib/qsf-shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { traduzirErroAuth, isCredenciaisInvalidas, isUsuarioJaCadastrado, validarCPF, validarSenha, validarConfirmacaoSenha } from "@/lib/auth-errors";
+import {
+  traduzirErroAuth,
+  isCredenciaisInvalidas,
+  isUsuarioJaCadastrado,
+  validarCPF,
+  validarSenha,
+  validarConfirmacaoSenha,
+} from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Coins, Wallet, LogOut, Trophy, Ticket, Share2, Gift, FileText, ArrowUpRight, ArrowDownRight, Sparkles, Instagram, Check, X, Clock, Package } from "lucide-react";
+import {
+  Coins,
+  Wallet,
+  LogOut,
+  Trophy,
+  Ticket,
+  Share2,
+  Gift,
+  FileText,
+  ArrowUpRight,
+  ArrowDownRight,
+  Sparkles,
+  Instagram,
+  Check,
+  X,
+  Clock,
+  Package,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Receipt, CheckCircle2, AlertTriangle, Printer } from "lucide-react";
 import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
@@ -44,7 +83,9 @@ function getStoredReferrer(): string | null {
       if (d.length >= 8) localStorage.setItem(REF_KEY, d);
     }
     return localStorage.getItem(REF_KEY);
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 type Loja = StorePublic;
@@ -87,7 +128,10 @@ function ClientePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center" style={{ backgroundColor: bg.base }}>
+      <div
+        className="min-h-dvh flex items-center justify-center"
+        style={{ backgroundColor: bg.base }}
+      >
         <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
           <div className="h-8 w-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
           Carregando...
@@ -98,25 +142,31 @@ function ClientePage() {
 
   if (!loja) {
     return (
-      <div className="min-h-dvh flex items-center justify-center p-6 text-center" style={{ backgroundColor: bg.base }}>
+      <div
+        className="min-h-dvh flex items-center justify-center p-6 text-center"
+        style={{ backgroundColor: bg.base }}
+      >
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: bg.text }}>Loja não encontrada</h1>
-          <p className="text-sm opacity-70 mt-2" style={{ color: bg.text }}>Verifique o endereço com o lojista.</p>
+          <h1 className="text-2xl font-bold" style={{ color: bg.text }}>
+            Loja não encontrada
+          </h1>
+          <p className="text-sm opacity-70 mt-2" style={{ color: bg.text }}>
+            Verifique o endereço com o lojista.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={style}
-      className="min-h-dvh relative overflow-hidden"
-    >
+    <div style={style} className="min-h-dvh relative overflow-hidden">
       {/* Aura de fundo derivada das cores da marca — bem sutil, fica atrás de tudo */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[520px]"
-        style={{ background: `radial-gradient(ellipse at top, color-mix(in oklab, ${bg.accent} 22%, transparent), transparent 60%)` }}
+        style={{
+          background: `radial-gradient(ellipse at top, color-mix(in oklab, ${bg.accent} 22%, transparent), transparent 60%)`,
+        }}
       />
       <div
         aria-hidden
@@ -160,7 +210,11 @@ function isLightColor(hex: string): boolean {
   const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!m) return false;
   let h = m[1];
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
@@ -203,7 +257,10 @@ function ClienteFlow({ loja }: { loja: Loja }) {
       let uid: string | null = null;
       for (let i = 0; i < 20; i++) {
         const { data } = await supabase.auth.getSession();
-        if (data.session?.user.id) { uid = data.session.user.id; break; }
+        if (data.session?.user.id) {
+          uid = data.session.user.id;
+          break;
+        }
         await new Promise((r) => setTimeout(r, 100));
       }
       // 2) Força o estado local (não depende só do listener)
@@ -282,9 +339,7 @@ function BannerHero({ loja }: { loja: Loja }) {
       <div className="max-w-2xl mx-auto px-4 pt-4">
         <div className="relative animate-in fade-in zoom-in-95 duration-500">
           {mobile && (
-            <div
-              className="w-full aspect-[2/1] sm:hidden"
-            >
+            <div className="w-full aspect-[2/1] sm:hidden">
               <img
                 src={mobile}
                 alt={`Banner ${loja.nome_fantasia}`}
@@ -318,19 +373,27 @@ function OwnerPreviewBanner() {
     <div className="max-w-2xl mx-auto p-4 -mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <Card className="border-indigo-500/20 bg-[#141432]/70 backdrop-blur-xl">
         <CardHeader>
-          <CardTitle className="text-base text-slate-100">Você está vendo sua loja como visitante</CardTitle>
+          <CardTitle className="text-base text-slate-100">
+            Você está vendo sua loja como visitante
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-slate-400">
           <p>
-            Esta é a página pública que seus clientes acessam. Como você está logado
-            como dono da loja, nada é criado nem vinculado ao clicar aqui.
+            Esta é a página pública que seus clientes acessam. Como você está logado como dono da
+            loja, nada é criado nem vinculado ao clicar aqui.
           </p>
           <p>
-            Para testar como cliente, saia da sua conta de lojista (canto superior direito)
-            ou abra este link em uma janela anônima.
+            Para testar como cliente, saia da sua conta de lojista (canto superior direito) ou abra
+            este link em uma janela anônima.
           </p>
           <Link to="/lojista">
-            <Button variant="outline" size="sm" className="border-indigo-500/30 bg-transparent text-slate-200 hover:bg-indigo-500/10 hover:text-white">Voltar ao painel</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-indigo-500/30 bg-transparent text-slate-200 hover:bg-indigo-500/10 hover:text-white"
+            >
+              Voltar ao painel
+            </Button>
           </Link>
         </CardContent>
       </Card>
@@ -421,7 +484,12 @@ function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
   );
 }
 
-function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
+function Auth({
+  loja,
+  onAuthenticated,
+  onAuthStart,
+  onAuthError,
+}: {
   loja: Loja;
   onAuthenticated: () => Promise<void>;
   onAuthStart?: () => void;
@@ -451,11 +519,16 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAviso(null);
-    setErroCpf(null); setErroNome(null); setErroPhone(null); setErroSenha(null); setErroSenha2(null);
+    setErroCpf(null);
+    setErroNome(null);
+    setErroPhone(null);
+    setErroSenha(null);
+    setErroSenha2(null);
     const cpfDigits = onlyDigits(cpf);
     const eC = validarCPF(cpfDigits);
     // valida também pelo algoritmo local pra manter compatibilidade
-    const eCpfExtra = !eC && !isValidCPF(cpfDigits) ? "CPF inválido. Confira os números digitados." : null;
+    const eCpfExtra =
+      !eC && !isValidCPF(cpfDigits) ? "CPF inválido. Confira os números digitados." : null;
     const eS = validarSenha(senha);
     let eN: string | null = null;
     let eP: string | null = null;
@@ -464,7 +537,8 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
       if (!nome.trim()) eN = "Informe seu nome.";
       const phoneDigits = onlyDigits(phone);
       if (!phoneDigits) eP = "Informe seu telefone com DDD.";
-      else if (phoneDigits.length < 10) eP = `Telefone incompleto — precisa ter DDD + número (mín. 10 dígitos). Você digitou ${phoneDigits.length}.`;
+      else if (phoneDigits.length < 10)
+        eP = `Telefone incompleto — precisa ter DDD + número (mín. 10 dígitos). Você digitou ${phoneDigits.length}.`;
       eS2 = validarConfirmacaoSenha(senha, senha2);
     }
     if (eC || eCpfExtra || eS || eN || eP || eS2) {
@@ -499,23 +573,39 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
         // If session not returned (email confirm), sign in
         const { data: s2 } = await supabase.auth.getSession();
         if (!s2.session) {
-          const { error: liErr } = await supabase.auth.signInWithPassword({ email, password: senha });
+          const { error: liErr } = await supabase.auth.signInWithPassword({
+            email,
+            password: senha,
+          });
           if (liErr) throw liErr;
         }
-        try { sessionStorage.setItem(`justSignedUp:${loja.id}`, "1"); } catch { /* ignore */ }
+        try {
+          sessionStorage.setItem(`justSignedUp:${loja.id}`, "1");
+        } catch {
+          /* ignore */
+        }
         await vincularClienteALoja({ data: { store_id: loja.id } });
         toast.success(`Bem-vindo(a), ${nome}!`);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
         if (error) {
-          const prepared = await prepararLoginClientePorCpf({ data: { store_id: loja.id, cpf: cpfDigits, senha } });
+          const prepared = await prepararLoginClientePorCpf({
+            data: { store_id: loja.id, cpf: cpfDigits, senha },
+          });
           if (!prepared.normalized) throw error;
-          const { error: retryError } = await supabase.auth.signInWithPassword({ email, password: senha });
+          const { error: retryError } = await supabase.auth.signInWithPassword({
+            email,
+            password: senha,
+          });
           if (retryError) throw retryError;
         }
         // Ensure link exists (marca como "acabou de entrar" para evitar sign-out
         // se a query my-link demorar 1 tick para refletir o vínculo)
-        try { sessionStorage.setItem(`justSignedUp:${loja.id}`, "1"); } catch { /* ignore */ }
+        try {
+          sessionStorage.setItem(`justSignedUp:${loja.id}`, "1");
+        } catch {
+          /* ignore */
+        }
         await vincularClienteALoja({ data: { store_id: loja.id } });
         toast.success("Bem-vindo(a) de volta!");
       }
@@ -526,7 +616,9 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
       if (mode === "signup" && isUsuarioJaCadastrado(err)) {
         switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
       } else if (mode === "login" && isCredenciaisInvalidas(err)) {
-        setAviso("CPF ou senha incorretos. Confira os dois campos. Se a loja cadastrou você, sua senha inicial é o CPF com apenas números.");
+        setAviso(
+          "CPF ou senha incorretos. Confira os dois campos. Se a loja cadastrou você, sua senha inicial é o CPF com apenas números.",
+        );
       } else {
         toast.error(traduzirErroAuth(err));
       }
@@ -541,7 +633,9 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
         <div
           aria-hidden
           className="absolute -inset-0.5 rounded-[2rem] opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
-          style={{ background: `linear-gradient(135deg, color-mix(in oklab, ${loja.brand_primary} 40%, transparent), color-mix(in oklab, ${loja.brand_secondary} 20%, transparent), color-mix(in oklab, ${loja.brand_primary} 40%, transparent))` }}
+          style={{
+            background: `linear-gradient(135deg, color-mix(in oklab, ${loja.brand_primary} 40%, transparent), color-mix(in oklab, ${loja.brand_secondary} 20%, transparent), color-mix(in oklab, ${loja.brand_primary} 40%, transparent))`,
+          }}
         />
         <Card
           className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl rounded-[2rem] border"
@@ -554,115 +648,152 @@ function Auth({ loja, onAuthenticated, onAuthStart, onAuthError }: {
             >
               {mode === "signup" ? "Novo por aqui" : "Bem-vindo(a) de volta"}
             </div>
-            <CardTitle className="text-slate-100 text-xl">{mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}</CardTitle>
+            <CardTitle className="text-slate-100 text-xl">
+              {mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={submit} className="space-y-4">
-            {aviso && (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 animate-in fade-in slide-in-from-top-1 duration-300">
-                {aviso}
-              </div>
-            )}
-            <div className="space-y-1.5">
-              <Label className="text-slate-300 text-xs font-medium">CPF <span className="text-rose-400">*</span></Label>
-              <Input
-                value={cpf}
-                onChange={(e) => { setCpf(formatCPF(e.target.value)); if (erroCpf) setErroCpf(null); }}
-                placeholder="000.000.000-00"
-                inputMode="numeric"
-                autoComplete="username"
-                required
-                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-              />
-              {erroCpf && <p className="text-[11px] text-rose-400">{erroCpf}</p>}
-            </div>
-            {mode === "signup" && (
-              <>
-                <div className="space-y-1.5">
-                  <Label className="text-slate-300 text-xs font-medium">Nome <span className="text-rose-400">*</span></Label>
-                  <Input
-                    value={nome}
-                    onChange={(e) => { setNome(e.target.value); if (erroNome) setErroNome(null); }}
-                    placeholder="Como quer ser chamado"
-                    required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                  />
-                  {erroNome && <p className="text-[11px] text-rose-400">{erroNome}</p>}
+              {aviso && (
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 animate-in fade-in slide-in-from-top-1 duration-300">
+                  {aviso}
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-slate-300 text-xs font-medium">Telefone <span className="text-rose-400">*</span></Label>
-                  <Input
-                    value={phone}
-                    onChange={(e) => { setPhone(e.target.value); if (erroPhone) setErroPhone(null); }}
-                    placeholder="(11) 98765-4321"
-                    inputMode="tel"
-                    required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                  />
-                  {erroPhone && <p className="text-[11px] text-rose-400">{erroPhone}</p>}
-                </div>
-              </>
-            )}
-            <div className="space-y-1.5">
-              <Label className="text-slate-300 text-xs font-medium">Senha <span className="text-rose-400">*</span></Label>
-              <PasswordInput
-                value={senha}
-                onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }}
-                placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                required
-                className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-              />
-              {erroSenha && <p className="text-[11px] text-rose-400">{erroSenha}</p>}
-            </div>
-            {mode === "signup" && (
+              )}
               <div className="space-y-1.5">
-                <Label className="text-slate-300 text-xs font-medium">Confirmar senha <span className="text-rose-400">*</span></Label>
-                <PasswordInput
-                  value={senha2}
-                  onChange={(e) => { setSenha2(e.target.value); if (erroSenha2) setErroSenha2(null); }}
-                  placeholder="Repita a senha"
-                  autoComplete="new-password"
+                <Label className="text-slate-300 text-xs font-medium">
+                  CPF <span className="text-rose-400">*</span>
+                </Label>
+                <Input
+                  value={cpf}
+                  onChange={(e) => {
+                    setCpf(formatCPF(e.target.value));
+                    if (erroCpf) setErroCpf(null);
+                  }}
+                  placeholder="000.000.000-00"
+                  inputMode="numeric"
+                  autoComplete="username"
                   required
-                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
                 />
-                {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
-                  <p className="mt-1 text-[11px] text-rose-400">{erroSenha2 ?? "As senhas não coincidem"}</p>
-                )}
+                {erroCpf && <p className="text-[11px] text-rose-400">{erroCpf}</p>}
               </div>
-            )}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 rounded-full text-white font-semibold transition-all active:scale-[0.98] hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
-              style={{
-                background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                boxShadow: `0 10px 25px -8px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
-              }}
-            >
-              {loading ? (
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                  Entrando...
-                </span>
-              ) : mode === "signup" ? "Criar conta" : "Entrar"}
-            </Button>
-            <button
-              type="button"
-              onClick={() => { setAviso(null); setSenha2(""); setMode(mode === "login" ? "signup" : "login"); }}
-              className="text-xs text-center w-full transition-colors font-medium py-1 hover:opacity-80"
-              style={{ color: `color-mix(in oklab, ${loja.brand_primary} 70%, #cbd5e1)` }}
-            >
-              {mode === "login" ? "Ainda não tenho conta →" : "← Já tenho conta, entrar"}
-            </button>
-            {mode === "login" && (
-              <p className="text-[11px] text-center text-slate-500 leading-relaxed">
-                Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
-              </p>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+              {mode === "signup" && (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs font-medium">
+                      Nome <span className="text-rose-400">*</span>
+                    </Label>
+                    <Input
+                      value={nome}
+                      onChange={(e) => {
+                        setNome(e.target.value);
+                        if (erroNome) setErroNome(null);
+                      }}
+                      placeholder="Como quer ser chamado"
+                      required
+                      className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                    />
+                    {erroNome && <p className="text-[11px] text-rose-400">{erroNome}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs font-medium">
+                      Telefone <span className="text-rose-400">*</span>
+                    </Label>
+                    <Input
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (erroPhone) setErroPhone(null);
+                      }}
+                      placeholder="(11) 98765-4321"
+                      inputMode="tel"
+                      required
+                      className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                    />
+                    {erroPhone && <p className="text-[11px] text-rose-400">{erroPhone}</p>}
+                  </div>
+                </>
+              )}
+              <div className="space-y-1.5">
+                <Label className="text-slate-300 text-xs font-medium">
+                  Senha <span className="text-rose-400">*</span>
+                </Label>
+                <PasswordInput
+                  value={senha}
+                  onChange={(e) => {
+                    setSenha(e.target.value);
+                    if (erroSenha) setErroSenha(null);
+                  }}
+                  placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  required
+                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                />
+                {erroSenha && <p className="text-[11px] text-rose-400">{erroSenha}</p>}
+              </div>
+              {mode === "signup" && (
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs font-medium">
+                    Confirmar senha <span className="text-rose-400">*</span>
+                  </Label>
+                  <PasswordInput
+                    value={senha2}
+                    onChange={(e) => {
+                      setSenha2(e.target.value);
+                      if (erroSenha2) setErroSenha2(null);
+                    }}
+                    placeholder="Repita a senha"
+                    autoComplete="new-password"
+                    required
+                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
+                  />
+                  {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
+                    <p className="mt-1 text-[11px] text-rose-400">
+                      {erroSenha2 ?? "As senhas não coincidem"}
+                    </p>
+                  )}
+                </div>
+              )}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 rounded-full text-white font-semibold transition-all active:scale-[0.98] hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                  boxShadow: `0 10px 25px -8px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
+                }}
+              >
+                {loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    Entrando...
+                  </span>
+                ) : mode === "signup" ? (
+                  "Criar conta"
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAviso(null);
+                  setSenha2("");
+                  setMode(mode === "login" ? "signup" : "login");
+                }}
+                className="text-xs text-center w-full transition-colors font-medium py-1 hover:opacity-80"
+                style={{ color: `color-mix(in oklab, ${loja.brand_primary} 70%, #cbd5e1)` }}
+              >
+                {mode === "login" ? "Ainda não tenho conta →" : "← Já tenho conta, entrar"}
+              </button>
+              {mode === "login" && (
+                <p className="text-[11px] text-center text-slate-500 leading-relaxed">
+                  Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
+                </p>
+              )}
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -683,8 +814,16 @@ function VincularStore({ loja }: { loja: Loja }) {
         const link = await vincularClienteALoja({
           data: { store_id: loja.id, referrer_phone: getStoredReferrer() },
         });
-        try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
-        try { sessionStorage.removeItem(`justSignedUp:${loja.id}`); } catch { /* ignore */ }
+        try {
+          localStorage.removeItem(REF_KEY);
+        } catch {
+          /* ignore */
+        }
+        try {
+          sessionStorage.removeItem(`justSignedUp:${loja.id}`);
+        } catch {
+          /* ignore */
+        }
         if (!link || link.store_id !== loja.id) {
           throw new Error("Não foi possível confirmar seu cadastro nesta loja.");
         }
@@ -753,14 +892,23 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
   };
 
   const resgatarP = useMutation({
-    mutationFn: (product_id: string) => resgatarProduto({ data: { store_id: loja.id, product_id } }),
-    onSuccess: (r) => { setVoucher(r.voucher); invalidate(); },
+    mutationFn: (product_id: string) =>
+      resgatarProduto({ data: { store_id: loja.id, product_id } }),
+    onSuccess: (r) => {
+      setVoucher(r.voucher);
+      invalidate();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const resgatarC = useMutation({
     mutationFn: (valor: number) => resgatarCashback({ data: { store_id: loja.id, valor } }),
-    onSuccess: (r) => { setVoucher(r.voucher); setCashbackModal(false); setCashbackValor(""); invalidate(); },
+    onSuccess: (r) => {
+      setVoucher(r.voucher);
+      setCashbackModal(false);
+      setCashbackValor("");
+      invalidate();
+    },
     onError: (e) => toast.error((e as Error).message),
   });
 
@@ -768,25 +916,35 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
     const v = parseFloat(cashbackValor.replace(",", "."));
     if (!v || v <= 0) return toast.error("Valor inválido");
     const saldo = Number(link.cashback_saldo);
-    if (v > saldo) return toast.error(`Cashback insuficiente. Saldo disponível: ${formatBRL(saldo)}.`);
+    if (v > saldo)
+      return toast.error(`Cashback insuficiente. Saldo disponível: ${formatBRL(saldo)}.`);
     resgatarC.mutate(+v.toFixed(2));
   };
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="pt-2">
-        <div className="text-xs uppercase tracking-[0.2em] text-indigo-300/70 font-semibold">Olá,</div>
+        <div className="text-xs uppercase tracking-[0.2em] text-indigo-300/70 font-semibold">
+          Olá,
+        </div>
         <div className="text-2xl font-bold text-white mt-0.5">{nome}</div>
       </div>
 
       <div className={`grid gap-4 ${inclP && inclC ? "sm:grid-cols-2" : ""}`}>
         {inclP && (
           <Card className="overflow-hidden border-indigo-500/25 bg-[#141432] qsf-glow relative">
-            <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div
+              aria-hidden
+              className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl"
+            />
             <div className="relative p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                  <Coins className="h-3.5 w-3.5" style={{ color: loja.brand_accent_points || "#818cf8" }} /> Seus pontos
+                  <Coins
+                    className="h-3.5 w-3.5"
+                    style={{ color: loja.brand_accent_points || "#818cf8" }}
+                  />{" "}
+                  Seus pontos
                 </div>
                 <div
                   className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 rounded-full px-2 py-0.5 border"
@@ -799,9 +957,17 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                   <Trophy className="h-3 w-3" /> {nivel}
                 </div>
               </div>
-              <div className="text-5xl font-bold mt-3 tabular-nums tracking-tight" style={{ color: loja.text_on_dark || "#ffffff" }}>
+              <div
+                className="text-5xl font-bold mt-3 tabular-nums tracking-tight"
+                style={{ color: loja.text_on_dark || "#ffffff" }}
+              >
                 {link.pontos.toLocaleString("pt-BR")}
-                <span className="text-base font-semibold ml-2" style={{ color: loja.brand_accent_points || "#818cf8" }}>pts</span>
+                <span
+                  className="text-base font-semibold ml-2"
+                  style={{ color: loja.brand_accent_points || "#818cf8" }}
+                >
+                  pts
+                </span>
               </div>
               {loja.pontos_expiracao_modo === "validade" && (
                 <div className="text-[11px] mt-2 text-slate-500">
@@ -810,13 +976,16 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
               )}
               {loja.pontos_expiracao_modo === "decaimento" && (
                 <div className="text-[11px] mt-2 text-slate-500">
-                  Você perde {loja.pontos_decaimento_valor} pts a cada {loja.pontos_decaimento_dias} dias
+                  Você perde {loja.pontos_decaimento_valor} pts a cada {loja.pontos_decaimento_dias}{" "}
+                  dias
                 </div>
               )}
               {prog.proximo && (
                 <div className="mt-5">
                   <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-400">Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span></span>
+                    <span className="text-slate-400">
+                      Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span>
+                    </span>
                     <span className="text-indigo-300 font-semibold">{Math.round(prog.pct)}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-[#0a0a1a] border border-white/5 overflow-hidden">
@@ -836,12 +1005,22 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
         )}
         {inclC && (
           <Card className="overflow-hidden border-emerald-500/25 bg-[#0d1a1a] relative">
-            <div aria-hidden className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl" />
+            <div
+              aria-hidden
+              className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl"
+            />
             <div className="relative p-5">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                <Wallet className="h-3.5 w-3.5" style={{ color: loja.brand_accent_cashback || "#34d399" }} /> Seu cashback
+                <Wallet
+                  className="h-3.5 w-3.5"
+                  style={{ color: loja.brand_accent_cashback || "#34d399" }}
+                />{" "}
+                Seu cashback
               </div>
-              <div className="text-4xl font-bold mt-3 tabular-nums tracking-tight" style={{ color: loja.brand_price || loja.text_on_dark || "#ffffff" }}>
+              <div
+                className="text-4xl font-bold mt-3 tabular-nums tracking-tight"
+                style={{ color: loja.brand_price || loja.text_on_dark || "#ffffff" }}
+              >
                 {formatBRL(Number(link.cashback_saldo))}
               </div>
               <Button
@@ -872,7 +1051,10 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
             {produtos.map((p) => {
               const podeResgatar = link.pontos >= p.custo_pontos;
               return (
-                <Card key={p.id} className={`border-indigo-500/20 bg-[#141432] transition-all hover:border-indigo-400/40 hover:-translate-y-0.5 ${podeResgatar ? "hover:shadow-lg hover:shadow-indigo-500/10" : "opacity-70"}`}>
+                <Card
+                  key={p.id}
+                  className={`border-indigo-500/20 bg-[#141432] transition-all hover:border-indigo-400/40 hover:-translate-y-0.5 ${podeResgatar ? "hover:shadow-lg hover:shadow-indigo-500/10" : "opacity-70"}`}
+                >
                   <CardContent className="p-3 space-y-2">
                     <div className="aspect-video w-full overflow-hidden rounded-md bg-[#0a0a1a] border border-indigo-500/10 flex items-center justify-center">
                       {p.foto_url ? (
@@ -884,21 +1066,32 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                     <div className="font-medium text-sm text-slate-100">{p.nome}</div>
                     <div className="text-xs text-slate-400 line-clamp-2">{p.descricao}</div>
                     <div className="flex items-center justify-between pt-1">
-                      <span className="font-bold text-sm" style={{ color: loja.brand_accent_points || "#a5b4fc" }}>{p.custo_pontos} pts</span>
+                      <span
+                        className="font-bold text-sm"
+                        style={{ color: loja.brand_accent_points || "#a5b4fc" }}
+                      >
+                        {p.custo_pontos} pts
+                      </span>
                       <Button
                         size="sm"
                         disabled={!podeResgatar || resgatarP.isPending}
                         onClick={() => resgatarP.mutate(p.id)}
-                        className={podeResgatar
-                          ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
-                          : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"}
-                        style={podeResgatar ? {
-                          background: loja.brand_cta
-                            ? loja.brand_cta
-                            : `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                          boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_cta || loja.brand_primary} 60%, transparent)`,
-                          color: loja.text_on_dark || "#ffffff",
-                        } : undefined}
+                        className={
+                          podeResgatar
+                            ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
+                            : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"
+                        }
+                        style={
+                          podeResgatar
+                            ? {
+                                background: loja.brand_cta
+                                  ? loja.brand_cta
+                                  : `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
+                                boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_cta || loja.brand_primary} 60%, transparent)`,
+                                color: loja.text_on_dark || "#ffffff",
+                              }
+                            : undefined
+                        }
                       >
                         {podeResgatar ? "Resgatar" : "Faltam pontos"}
                       </Button>
@@ -912,20 +1105,21 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
       )}
 
       {loja.indicacao_ativa && meuTelefone && (
-        <IndicacaoCard loja={loja} telefone={meuTelefone} bonusIndicado={loja.bonus_indicado} bonusIndicador={loja.bonus_indicador} />
+        <IndicacaoCard
+          loja={loja}
+          telefone={meuTelefone}
+          bonusIndicado={loja.bonus_indicado}
+          bonusIndicador={loja.bonus_indicador}
+        />
       )}
 
       <HistoricoSection txs={txs} inclP={inclP} inclC={inclC} />
 
       <VouchersSection loja={loja} txs={txs} nome={nome} telefone={meuTelefone} />
 
-      {loja.instagram_program_active && loja.instagram_handle && (
-        <InstagramCard loja={loja} />
-      )}
+      {loja.instagram_program_active && loja.instagram_handle && <InstagramCard loja={loja} />}
 
-      {loja.instagram_program_active && (
-        <MeusPostsInstagram loja={loja} />
-      )}
+      {loja.instagram_program_active && <MeusPostsInstagram loja={loja} />}
 
       <section>
         <Link
@@ -940,7 +1134,11 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
 
       <Dialog open={!!voucher} onOpenChange={(v) => !v && setVoucher(null)}>
         <DialogContent className="text-center">
-          <DialogHeader><DialogTitle className="flex items-center justify-center gap-2"><Ticket className="h-5 w-5" /> Seu voucher</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-center gap-2">
+              <Ticket className="h-5 w-5" /> Seu voucher
+            </DialogTitle>
+          </DialogHeader>
           <p className="text-sm text-muted-foreground">Apresente este código no caixa:</p>
           <div
             key={voucher ?? "empty"}
@@ -949,19 +1147,39 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           >
             {voucher}
           </div>
-          <p className="text-xs text-muted-foreground">Válido por alguns dias — você também pode conferir em "Meus vouchers" abaixo.</p>
+          <p className="text-xs text-muted-foreground">
+            Válido por alguns dias — você também pode conferir em "Meus vouchers" abaixo.
+          </p>
         </DialogContent>
       </Dialog>
 
       <Dialog open={cashbackModal} onOpenChange={setCashbackModal}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Usar cashback</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Você tem <strong>{formatBRL(Number(link.cashback_saldo))}</strong> disponível.</p>
+          <DialogHeader>
+            <DialogTitle>Usar cashback</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Você tem <strong>{formatBRL(Number(link.cashback_saldo))}</strong> disponível.
+          </p>
           <div>
             <Label>Quanto usar (R$)</Label>
-            <Input type="number" step="0.01" min="0" max={Number(link.cashback_saldo)} value={cashbackValor} onChange={(e) => setCashbackValor(e.target.value)} />
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              max={Number(link.cashback_saldo)}
+              value={cashbackValor}
+              onChange={(e) => setCashbackValor(e.target.value)}
+            />
           </div>
-          <Button onClick={usarCashback} disabled={resgatarC.isPending} className="text-white" style={{ backgroundColor: "var(--brand-secondary)" }}>Gerar voucher</Button>
+          <Button
+            onClick={usarCashback}
+            disabled={resgatarC.isPending}
+            className="text-white"
+            style={{ backgroundColor: "var(--brand-secondary)" }}
+          >
+            Gerar voucher
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
@@ -969,13 +1187,26 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
 }
 
 function IndicacaoCard({
-  loja, telefone, bonusIndicado, bonusIndicador,
-}: { loja: Loja; telefone: string; bonusIndicado: number; bonusIndicador: number }) {
+  loja,
+  telefone,
+  bonusIndicado,
+  bonusIndicador,
+}: {
+  loja: Loja;
+  telefone: string;
+  bonusIndicado: number;
+  bonusIndicador: number;
+}) {
   const link = `${window.location.origin}/${loja.slug}?indicou=${telefone}`;
   const msg = `Oi! 👋 Sou cliente da ${loja.nome_fantasia} e quero te indicar. Cadastre-se pelo meu link e ganhe ${bonusIndicado} pontos na sua 1ª compra: ${link}`;
   const share = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: loja.nome_fantasia, text: msg, url: link }); return; } catch { /* fallback */ }
+      try {
+        await navigator.share({ title: loja.nome_fantasia, text: msg, url: link });
+        return;
+      } catch {
+        /* fallback */
+      }
     }
     await navigator.clipboard.writeText(link);
     toast.success("Link copiado!");
@@ -986,20 +1217,34 @@ function IndicacaoCard({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base"><Gift className="h-4 w-4" /> Indique amigos e ganhe pontos</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Gift className="h-4 w-4" /> Indique amigos e ganhe pontos
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Seu amigo ganha <strong>{bonusIndicado} pts</strong> na 1ª compra.
-          Você ganha <strong>{bonusIndicador} pts</strong> quando ele comprar.
+          Seu amigo ganha <strong>{bonusIndicado} pts</strong> na 1ª compra. Você ganha{" "}
+          <strong>{bonusIndicador} pts</strong> quando ele comprar.
         </p>
         <div className="flex gap-2">
-          <Input readOnly value={link} className="text-xs" onFocus={(e) => e.currentTarget.select()} />
-          <Button size="sm" onClick={share} style={{ backgroundColor: "var(--brand-primary)" }} className="text-white">
+          <Input
+            readOnly
+            value={link}
+            className="text-xs"
+            onFocus={(e) => e.currentTarget.select()}
+          />
+          <Button
+            size="sm"
+            onClick={share}
+            style={{ backgroundColor: "var(--brand-primary)" }}
+            className="text-white"
+          >
             <Share2 className="h-4 w-4" />
           </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={whats} className="w-full">Enviar por WhatsApp</Button>
+        <Button variant="outline" size="sm" onClick={whats} className="w-full">
+          Enviar por WhatsApp
+        </Button>
       </CardContent>
     </Card>
   );
@@ -1018,33 +1263,50 @@ type TxRow = {
 
 function describeTx(t: TxRow) {
   const prd = t.products?.nome;
-  const ajusteMotivo = t.tipo === "ajuste" && t.origem?.startsWith("ajuste_manual:")
-    ? t.origem.slice("ajuste_manual:".length)
-    : null;
+  const ajusteMotivo =
+    t.tipo === "ajuste" && t.origem?.startsWith("ajuste_manual:")
+      ? t.origem.slice("ajuste_manual:".length)
+      : null;
   switch (t.tipo) {
-    case "venda": return "Compra na loja";
-    case "resgate_produto": return `Resgate: ${prd ?? "produto"}`;
-    case "resgate_cashback": return "Voucher de cashback";
-    case "vale_presente": return "Vale-presente";
-    case "nota_fiscal": return "Nota fiscal aprovada";
-    case "indicacao": return "Bônus de indicação";
-    case "expiracao": return t.origem?.startsWith("expiracao_decaimento")
-      ? "Decaimento periódico de pontos"
-      : "Pontos expirados";
-    case "ajuste": return ajusteMotivo
-      ? `Ajuste da loja: ${ajusteMotivo}`
-      : (t.pontos_delta >= 0 ? "Ajuste da loja (crédito)" : "Ajuste da loja (estorno)");
-    default: return "Movimentação";
+    case "venda":
+      return "Compra na loja";
+    case "resgate_produto":
+      return `Resgate: ${prd ?? "produto"}`;
+    case "resgate_cashback":
+      return "Voucher de cashback";
+    case "vale_presente":
+      return "Vale-presente";
+    case "nota_fiscal":
+      return "Nota fiscal aprovada";
+    case "indicacao":
+      return "Bônus de indicação";
+    case "expiracao":
+      return t.origem?.startsWith("expiracao_decaimento")
+        ? "Decaimento periódico de pontos"
+        : "Pontos expirados";
+    case "ajuste":
+      return ajusteMotivo
+        ? `Ajuste da loja: ${ajusteMotivo}`
+        : t.pontos_delta >= 0
+          ? "Ajuste da loja (crédito)"
+          : "Ajuste da loja (estorno)";
+    default:
+      return "Movimentação";
   }
 }
 
 function formatDateTime(iso: string) {
   try {
     return new Date(iso).toLocaleString("pt-BR", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-  } catch { return formatDate(iso); }
+  } catch {
+    return formatDate(iso);
+  }
 }
 
 function TxRowItem({ t }: { t: TxRow }) {
@@ -1052,7 +1314,9 @@ function TxRowItem({ t }: { t: TxRow }) {
   return (
     <div className="flex items-start justify-between gap-3 p-3 text-sm hover:bg-indigo-500/5 transition-colors">
       <div className="flex items-start gap-2 min-w-0">
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCredit ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}
+        >
           {isCredit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
         </div>
         <div className="min-w-0">
@@ -1065,13 +1329,25 @@ function TxRowItem({ t }: { t: TxRow }) {
       </div>
       <div className="text-right text-xs shrink-0">
         {t.pontos_delta ? (
-          <div className={t.pontos_delta > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
-            {t.pontos_delta > 0 ? "+" : ""}{t.pontos_delta} pts
+          <div
+            className={
+              t.pontos_delta > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"
+            }
+          >
+            {t.pontos_delta > 0 ? "+" : ""}
+            {t.pontos_delta} pts
           </div>
         ) : null}
         {Number(t.cashback_delta) ? (
-          <div className={Number(t.cashback_delta) > 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold"}>
-            {Number(t.cashback_delta) > 0 ? "+" : ""}{formatBRL(Number(t.cashback_delta))}
+          <div
+            className={
+              Number(t.cashback_delta) > 0
+                ? "text-emerald-400 font-semibold"
+                : "text-rose-400 font-semibold"
+            }
+          >
+            {Number(t.cashback_delta) > 0 ? "+" : ""}
+            {formatBRL(Number(t.cashback_delta))}
           </div>
         ) : null}
       </div>
@@ -1079,11 +1355,20 @@ function TxRowItem({ t }: { t: TxRow }) {
   );
 }
 
-function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolean; inclC: boolean }) {
+function HistoricoSection({
+  txs,
+  inclP,
+  inclC,
+}: {
+  txs: unknown[];
+  inclP: boolean;
+  inclC: boolean;
+}) {
   const list = txs as TxRow[];
   const ganhos = list.filter((t) => t.pontos_delta > 0 || Number(t.cashback_delta) > 0);
-  const resgates = list.filter((t) =>
-    t.tipo === "resgate_produto" || t.tipo === "resgate_cashback" || t.tipo === "vale_presente"
+  const resgates = list.filter(
+    (t) =>
+      t.tipo === "resgate_produto" || t.tipo === "resgate_cashback" || t.tipo === "vale_presente",
   );
   const ajustes = list.filter((t) => t.tipo === "ajuste");
 
@@ -1091,9 +1376,11 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
     <Card className="border-indigo-500/15 bg-[#141432]/60">
       <CardContent className="p-0">
         <div className="divide-y divide-indigo-500/10">
-          {arr.length === 0
-            ? <div className="p-6 text-center text-sm text-slate-500">Sem movimentações</div>
-            : arr.map((t) => <TxRowItem key={t.id} t={t} />)}
+          {arr.length === 0 ? (
+            <div className="p-6 text-center text-sm text-slate-500">Sem movimentações</div>
+          ) : (
+            arr.map((t) => <TxRowItem key={t.id} t={t} />)
+          )}
         </div>
       </CardContent>
     </Card>
@@ -1108,15 +1395,33 @@ function HistoricoSection({ txs, inclP, inclC }: { txs: unknown[]; inclP: boolea
       </div>
       <Tabs defaultValue="todos">
         <TabsList className="w-full">
-          <TabsTrigger value="todos" className="flex-1">Tudo</TabsTrigger>
-          {(inclP || inclC) && <TabsTrigger value="ganhos" className="flex-1">Ganhos</TabsTrigger>}
-          <TabsTrigger value="resgates" className="flex-1">Resgates</TabsTrigger>
-          <TabsTrigger value="ajustes" className="flex-1">Ajustes</TabsTrigger>
+          <TabsTrigger value="todos" className="flex-1">
+            Tudo
+          </TabsTrigger>
+          {(inclP || inclC) && (
+            <TabsTrigger value="ganhos" className="flex-1">
+              Ganhos
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="resgates" className="flex-1">
+            Resgates
+          </TabsTrigger>
+          <TabsTrigger value="ajustes" className="flex-1">
+            Ajustes
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="todos" className="mt-3">{renderList(list)}</TabsContent>
-        <TabsContent value="ganhos" className="mt-3">{renderList(ganhos)}</TabsContent>
-        <TabsContent value="resgates" className="mt-3">{renderList(resgates)}</TabsContent>
-        <TabsContent value="ajustes" className="mt-3">{renderList(ajustes)}</TabsContent>
+        <TabsContent value="todos" className="mt-3">
+          {renderList(list)}
+        </TabsContent>
+        <TabsContent value="ganhos" className="mt-3">
+          {renderList(ganhos)}
+        </TabsContent>
+        <TabsContent value="resgates" className="mt-3">
+          {renderList(resgates)}
+        </TabsContent>
+        <TabsContent value="ajustes" className="mt-3">
+          {renderList(ajustes)}
+        </TabsContent>
       </Tabs>
     </section>
   );
@@ -1127,10 +1432,14 @@ function InstagramCard({ loja }: { loja: Loja }) {
   const [url, setUrl] = useState("");
   const [nota, setNota] = useState("");
   const enviar = useMutation({
-    mutationFn: () => submitInstagramPost({ data: { store_id: loja.id, post_url: url.trim(), client_note: nota.trim() || null } }),
+    mutationFn: () =>
+      submitInstagramPost({
+        data: { store_id: loja.id, post_url: url.trim(), client_note: nota.trim() || null },
+      }),
     onSuccess: () => {
       toast.success("Post enviado! A loja vai revisar em breve.");
-      setUrl(""); setNota("");
+      setUrl("");
+      setNota("");
       qc.invalidateQueries({ queryKey: ["my-ig-subs", loja.id] });
     },
     onError: (e) => toast.error((e as Error).message),
@@ -1143,10 +1452,17 @@ function InstagramCard({ loja }: { loja: Loja }) {
   return (
     <section>
       <Card className="overflow-hidden">
-        <div className="p-5 text-white" style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%)" }}>
-          <div className="flex items-center gap-2 text-sm opacity-95"><Instagram className="h-4 w-4" /> Poste no Instagram e ganhe pontos</div>
+        <div
+          className="p-5 text-white"
+          style={{ background: "linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%)" }}
+        >
+          <div className="flex items-center gap-2 text-sm opacity-95">
+            <Instagram className="h-4 w-4" /> Poste no Instagram e ganhe pontos
+          </div>
           <div className="text-3xl font-bold mt-2">+{pts} pts por post</div>
-          <div className="text-sm opacity-95 mt-1">Marque <strong>@{handle}</strong> no post e envie o link aqui.</div>
+          <div className="text-sm opacity-95 mt-1">
+            Marque <strong>@{handle}</strong> no post e envie o link aqui.
+          </div>
         </div>
         <CardContent className="pt-4 space-y-3">
           <details className="text-sm">
@@ -1158,13 +1474,18 @@ function InstagramCard({ loja }: { loja: Loja }) {
           <div>
             <Label className="text-xs">Link do seu post no Instagram</Label>
             <Input
-              value={url} onChange={(e) => setUrl(e.target.value)}
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="https://www.instagram.com/p/XXXXXXX/"
             />
           </div>
           <div>
             <Label className="text-xs">Observação (opcional)</Label>
-            <Input value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Alguma info extra pra loja" />
+            <Input
+              value={nota}
+              onChange={(e) => setNota(e.target.value)}
+              placeholder="Alguma info extra pra loja"
+            />
           </div>
           <Button
             onClick={() => enviar.mutate()}
@@ -1205,7 +1526,9 @@ function MeusPostsInstagram({ loja }: { loja: Loja }) {
     }
     return (
       <div className="space-y-2">
-        {arr.map((s) => <PostSubmissionRow key={s.id} s={s} />)}
+        {arr.map((s) => (
+          <PostSubmissionRow key={s.id} s={s} />
+        ))}
       </div>
     );
   };
@@ -1218,7 +1541,7 @@ function MeusPostsInstagram({ loja }: { loja: Loja }) {
         <span className="text-xs text-slate-500">acompanhe o status</span>
       </div>
 
-      {(aprovados.length > 0) && (
+      {aprovados.length > 0 && (
         <Card className="mb-3">
           <CardContent className="p-4 flex items-center justify-between gap-3">
             <div>
@@ -1226,7 +1549,9 @@ function MeusPostsInstagram({ loja }: { loja: Loja }) {
               <div className="text-lg font-bold">
                 {totalPts > 0 && <span className="text-green-700">+{totalPts} pts</span>}
                 {totalPts > 0 && totalCb > 0 && <span className="text-muted-foreground"> · </span>}
-                {totalCb > 0 && <span className="text-green-700">+{formatBRL(totalCb)} cashback</span>}
+                {totalCb > 0 && (
+                  <span className="text-green-700">+{formatBRL(totalCb)} cashback</span>
+                )}
               </div>
             </div>
             <div className="text-xs text-right text-muted-foreground">
@@ -1239,17 +1564,35 @@ function MeusPostsInstagram({ loja }: { loja: Loja }) {
 
       <Tabs defaultValue="todos">
         <TabsList className="w-full">
-          <TabsTrigger value="todos" className="flex-1">Todos ({subs.length})</TabsTrigger>
-          <TabsTrigger value="pendentes" className="flex-1">Em análise ({pendentes.length})</TabsTrigger>
-          <TabsTrigger value="aprovados" className="flex-1">Aprovados ({aprovados.length})</TabsTrigger>
-          <TabsTrigger value="rejeitados" className="flex-1">Rejeitados ({rejeitados.length})</TabsTrigger>
+          <TabsTrigger value="todos" className="flex-1">
+            Todos ({subs.length})
+          </TabsTrigger>
+          <TabsTrigger value="pendentes" className="flex-1">
+            Em análise ({pendentes.length})
+          </TabsTrigger>
+          <TabsTrigger value="aprovados" className="flex-1">
+            Aprovados ({aprovados.length})
+          </TabsTrigger>
+          <TabsTrigger value="rejeitados" className="flex-1">
+            Rejeitados ({rejeitados.length})
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="todos" className="mt-3">
-          {isLoading ? <div className="text-center text-sm text-muted-foreground p-4">Carregando...</div> : renderList(subs)}
+          {isLoading ? (
+            <div className="text-center text-sm text-muted-foreground p-4">Carregando...</div>
+          ) : (
+            renderList(subs)
+          )}
         </TabsContent>
-        <TabsContent value="pendentes" className="mt-3">{renderList(pendentes)}</TabsContent>
-        <TabsContent value="aprovados" className="mt-3">{renderList(aprovados)}</TabsContent>
-        <TabsContent value="rejeitados" className="mt-3">{renderList(rejeitados)}</TabsContent>
+        <TabsContent value="pendentes" className="mt-3">
+          {renderList(pendentes)}
+        </TabsContent>
+        <TabsContent value="aprovados" className="mt-3">
+          {renderList(aprovados)}
+        </TabsContent>
+        <TabsContent value="rejeitados" className="mt-3">
+          {renderList(rejeitados)}
+        </TabsContent>
       </Tabs>
     </section>
   );
@@ -1288,7 +1631,9 @@ function PostSubmissionRow({ s }: { s: IgSub }) {
           <span>Enviado em {formatDateTime(s.created_at)}</span>
           {s.reviewed_at && <span>Revisado em {formatDateTime(s.reviewed_at)}</span>}
           {s.status === "pendente" && s.verify_after && (
-            <span>Verificação a partir de {new Date(s.verify_after).toLocaleDateString("pt-BR")}</span>
+            <span>
+              Verificação a partir de {new Date(s.verify_after).toLocaleDateString("pt-BR")}
+            </span>
           )}
         </div>
         {s.status === "aprovado" && (s.points_awarded > 0 || cb > 0) && (
@@ -1314,13 +1659,29 @@ function PostSubmissionRow({ s }: { s: IgSub }) {
 
 function StatusBadge({ status }: { status: string }) {
   if (status === "pendente")
-    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-[11px]"><Clock className="h-3 w-3" /> Em análise</span>;
+    return (
+      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-800 px-2 py-0.5 text-[11px]">
+        <Clock className="h-3 w-3" /> Em análise
+      </span>
+    );
   if (status === "aprovado")
-    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-[11px]"><Check className="h-3 w-3" /> Aprovado</span>;
+    return (
+      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-[11px]">
+        <Check className="h-3 w-3" /> Aprovado
+      </span>
+    );
   if (status === "rejeitado")
-    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px]"><X className="h-3 w-3" /> Rejeitado</span>;
+    return (
+      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px]">
+        <X className="h-3 w-3" /> Rejeitado
+      </span>
+    );
   if (status === "estornado")
-    return <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px]"><X className="h-3 w-3" /> Estornado</span>;
+    return (
+      <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[11px]">
+        <X className="h-3 w-3" /> Estornado
+      </span>
+    );
   return null;
 }
 
@@ -1332,8 +1693,16 @@ type VoucherTx = TxRow & {
 };
 
 function VouchersSection({
-  loja, txs, nome, telefone,
-}: { loja: Loja; txs: unknown[]; nome: string; telefone: string | null }) {
+  loja,
+  txs,
+  nome,
+  telefone,
+}: {
+  loja: Loja;
+  txs: unknown[];
+  nome: string;
+  telefone: string | null;
+}) {
   const mostrarUsados = loja.voucher_visivel_apos_uso ?? false;
   const mostrarExpirados = loja.voucher_mostrar_expirados ?? true;
   const list = (txs as VoucherTx[])
@@ -1360,9 +1729,7 @@ function VouchersSection({
           {arr.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">Nenhum voucher aqui</div>
           ) : (
-            arr.map((t) => (
-              <VoucherRow key={t.id} t={t} onOpen={() => setSelected(t)} />
-            ))
+            arr.map((t) => <VoucherRow key={t.id} t={t} onOpen={() => setSelected(t)} />)
           )}
         </div>
       </CardContent>
@@ -1378,38 +1745,70 @@ function VouchersSection({
       </div>
       <Tabs defaultValue="todos">
         <TabsList className="w-full">
-          <TabsTrigger value="todos" className="flex-1">Todos ({list.length})</TabsTrigger>
-          <TabsTrigger value="pendentes" className="flex-1">Pendentes ({pendentes.length})</TabsTrigger>
+          <TabsTrigger value="todos" className="flex-1">
+            Todos ({list.length})
+          </TabsTrigger>
+          <TabsTrigger value="pendentes" className="flex-1">
+            Pendentes ({pendentes.length})
+          </TabsTrigger>
           {utilizados.length > 0 && (
-            <TabsTrigger value="utilizados" className="flex-1">Utilizados ({utilizados.length})</TabsTrigger>
+            <TabsTrigger value="utilizados" className="flex-1">
+              Utilizados ({utilizados.length})
+            </TabsTrigger>
           )}
           {expirados.length > 0 && (
-            <TabsTrigger value="expirados" className="flex-1">Expirados ({expirados.length})</TabsTrigger>
+            <TabsTrigger value="expirados" className="flex-1">
+              Expirados ({expirados.length})
+            </TabsTrigger>
           )}
           {cancelados.length > 0 && (
-            <TabsTrigger value="cancelados" className="flex-1">Cancelados ({cancelados.length})</TabsTrigger>
+            <TabsTrigger value="cancelados" className="flex-1">
+              Cancelados ({cancelados.length})
+            </TabsTrigger>
           )}
         </TabsList>
-        <TabsContent value="todos" className="mt-3">{renderList(list)}</TabsContent>
-        <TabsContent value="pendentes" className="mt-3">{renderList(pendentes)}</TabsContent>
-        <TabsContent value="utilizados" className="mt-3">{renderList(utilizados)}</TabsContent>
-        <TabsContent value="expirados" className="mt-3">{renderList(expirados)}</TabsContent>
-        <TabsContent value="cancelados" className="mt-3">{renderList(cancelados)}</TabsContent>
+        <TabsContent value="todos" className="mt-3">
+          {renderList(list)}
+        </TabsContent>
+        <TabsContent value="pendentes" className="mt-3">
+          {renderList(pendentes)}
+        </TabsContent>
+        <TabsContent value="utilizados" className="mt-3">
+          {renderList(utilizados)}
+        </TabsContent>
+        <TabsContent value="expirados" className="mt-3">
+          {renderList(expirados)}
+        </TabsContent>
+        <TabsContent value="cancelados" className="mt-3">
+          {renderList(cancelados)}
+        </TabsContent>
       </Tabs>
 
-      <Dialog open={!!selected} onOpenChange={(o) => { if (!o) setSelected(null); }}>
+      <Dialog
+        open={!!selected}
+        onOpenChange={(o) => {
+          if (!o) setSelected(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selected?.status === "entregue" ? (
-                <><CheckCircle2 className="h-5 w-5 text-green-600" /> Comprovante de resgate</>
+                <>
+                  <CheckCircle2 className="h-5 w-5 text-green-600" /> Comprovante de resgate
+                </>
               ) : (
-                <><Ticket className="h-5 w-5" /> Detalhes do voucher</>
+                <>
+                  <Ticket className="h-5 w-5" /> Detalhes do voucher
+                </>
               )}
             </DialogTitle>
           </DialogHeader>
           {selected && (
-            <div id="voucher-print" className="space-y-3 text-sm border rounded-md p-4 bg-background">
+            <div
+              id="voucher-print"
+              className="space-y-3 text-sm border rounded-md p-4 bg-background"
+            >
               <div className="text-center">
                 <div className="font-bold text-base">{loja.nome_fantasia}</div>
                 <div className="text-xs text-muted-foreground">
@@ -1427,24 +1826,32 @@ function VouchersSection({
               <div className="border-t pt-2 grid grid-cols-[110px_1fr] gap-y-1">
                 <span className="text-muted-foreground">Cliente</span>
                 <span className="font-medium">{nome}</span>
-                {telefone && (<>
-                  <span className="text-muted-foreground">Telefone</span>
-                  <span>{telefone}</span>
-                </>)}
+                {telefone && (
+                  <>
+                    <span className="text-muted-foreground">Telefone</span>
+                    <span>{telefone}</span>
+                  </>
+                )}
                 <span className="text-muted-foreground">Gerado em</span>
                 <span>{formatDateTime(selected.created_at)}</span>
-                {selected.status === "entregue" && selected.delivered_at && (<>
-                  <span className="text-muted-foreground">Entregue em</span>
-                  <span>{formatDateTime(selected.delivered_at)}</span>
-                </>)}
-                {selected.status === "pendente" && selected.voucher_expires_at && (<>
-                  <span className="text-muted-foreground">Válido até</span>
-                  <span>{formatDateTime(selected.voucher_expires_at)}</span>
-                </>)}
-                {selected.status === "expirado" && selected.voucher_expires_at && (<>
-                  <span className="text-muted-foreground">Expirou em</span>
-                  <span>{formatDateTime(selected.voucher_expires_at)}</span>
-                </>)}
+                {selected.status === "entregue" && selected.delivered_at && (
+                  <>
+                    <span className="text-muted-foreground">Entregue em</span>
+                    <span>{formatDateTime(selected.delivered_at)}</span>
+                  </>
+                )}
+                {selected.status === "pendente" && selected.voucher_expires_at && (
+                  <>
+                    <span className="text-muted-foreground">Válido até</span>
+                    <span>{formatDateTime(selected.voucher_expires_at)}</span>
+                  </>
+                )}
+                {selected.status === "expirado" && selected.voucher_expires_at && (
+                  <>
+                    <span className="text-muted-foreground">Expirou em</span>
+                    <span>{formatDateTime(selected.voucher_expires_at)}</span>
+                  </>
+                )}
               </div>
               <div className="border-t pt-2">
                 {selected.tipo === "resgate_produto" && (
@@ -1462,7 +1869,9 @@ function VouchersSection({
                 {selected.tipo === "resgate_cashback" && (
                   <div className="flex justify-between">
                     <span>Cashback aplicado</span>
-                    <span className="font-medium">{formatBRL(Math.abs(Number(selected.cashback_delta)))}</span>
+                    <span className="font-medium">
+                      {formatBRL(Math.abs(Number(selected.cashback_delta)))}
+                    </span>
                   </div>
                 )}
               </div>
@@ -1516,7 +1925,9 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
             <span className="text-green-700">Utilizado em {formatDateTime(t.delivered_at)}</span>
           )}
           {status === "expirado" && t.voucher_expires_at && (
-            <span className="text-orange-700">Expirou em {formatDateTime(t.voucher_expires_at)}</span>
+            <span className="text-orange-700">
+              Expirou em {formatDateTime(t.voucher_expires_at)}
+            </span>
           )}
         </div>
       </div>
@@ -1532,12 +1943,28 @@ function VoucherRow({ t, onOpen }: { t: VoucherTx; onOpen: () => void }) {
 
 function VoucherStatusBadge({ status }: { status: string }) {
   if (status === "pendente")
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white"><Clock className="h-3 w-3 mr-1" /> Pendente</Badge>;
+    return (
+      <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">
+        <Clock className="h-3 w-3 mr-1" /> Pendente
+      </Badge>
+    );
   if (status === "entregue")
-    return <Badge className="bg-blue-600 hover:bg-blue-600 text-white"><CheckCircle2 className="h-3 w-3 mr-1" /> Utilizado</Badge>;
+    return (
+      <Badge className="bg-blue-600 hover:bg-blue-600 text-white">
+        <CheckCircle2 className="h-3 w-3 mr-1" /> Utilizado
+      </Badge>
+    );
   if (status === "expirado")
-    return <Badge className="bg-orange-500 hover:bg-orange-500 text-white"><AlertTriangle className="h-3 w-3 mr-1" /> Expirado</Badge>;
+    return (
+      <Badge className="bg-orange-500 hover:bg-orange-500 text-white">
+        <AlertTriangle className="h-3 w-3 mr-1" /> Expirado
+      </Badge>
+    );
   if (status === "cancelado")
-    return <Badge className="bg-red-600 hover:bg-red-600 text-white"><X className="h-3 w-3 mr-1" /> Cancelado</Badge>;
+    return (
+      <Badge className="bg-red-600 hover:bg-red-600 text-white">
+        <X className="h-3 w-3 mr-1" /> Cancelado
+      </Badge>
+    );
   return <Badge variant="secondary">{status}</Badge>;
 }

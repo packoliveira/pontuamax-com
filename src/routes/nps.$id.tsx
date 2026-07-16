@@ -58,7 +58,11 @@ function NpsPage() {
   }
 
   const colorFor = (n: number) =>
-    n <= 6 ? "bg-red-500 hover:bg-red-600" : n <= 8 ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-600 hover:bg-green-700";
+    n <= 6
+      ? "bg-red-500 hover:bg-red-600"
+      : n <= 8
+        ? "bg-yellow-500 hover:bg-yellow-600"
+        : "bg-green-600 hover:bg-green-700";
 
   return (
     <div className="min-h-dvh bg-slate-50 flex items-center justify-center p-4">
@@ -88,7 +92,12 @@ function NpsPage() {
           </div>
           <div>
             <label className="text-sm font-medium">Quer contar mais? (opcional)</label>
-            <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="O que fez diferença?" rows={3} />
+            <Textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="O que fez diferença?"
+              rows={3}
+            />
           </div>
           <Button onClick={submit} disabled={loading || score === null} className="w-full">
             {loading ? "Enviando..." : "Enviar avaliação"}

@@ -14,7 +14,8 @@ export const Route = createFileRoute("/api/public/widget/$slug")({
           .maybeSingle();
         if (!loja) {
           return new Response("// Loja não encontrada", {
-            status: 404, headers: { "Content-Type": "application/javascript; charset=utf-8" },
+            status: 404,
+            headers: { "Content-Type": "application/javascript; charset=utf-8" },
           });
         }
         const target = `${origin}/${loja.slug}`;

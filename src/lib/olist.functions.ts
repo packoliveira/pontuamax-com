@@ -18,9 +18,8 @@ export const iniciarConexaoOlist = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ storeId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await ensureOwner(context, data.storeId);
-    const { newNonce, signState, buildAuthorizeUrl, olistRedirectUri } = await import(
-      "@/lib/olist.server"
-    );
+    const { newNonce, signState, buildAuthorizeUrl, olistRedirectUri } =
+      await import("@/lib/olist.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const nonce = newNonce();
     const state = signState({ storeId: data.storeId, nonce });
@@ -32,9 +31,7 @@ export const iniciarConexaoOlist = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     // A rota do TSS não expõe Request aqui; usamos origin do próprio app via env.
     const origin =
-      process.env.PUBLIC_APP_ORIGIN ??
-      process.env.VITE_APP_ORIGIN ??
-      "https://pontuamax.com";
+      process.env.PUBLIC_APP_ORIGIN ?? process.env.VITE_APP_ORIGIN ?? "https://pontuamax.com";
     const redirectUri = `${origin}/api/public/oauth/olist/callback`;
     return { url: buildAuthorizeUrl(state, redirectUri) };
   });
@@ -68,9 +65,6 @@ export const desconectarOlist = createServerFn({ method: "POST" })
       .eq("store_id", data.storeId)
       .eq("provider", "olist_v3");
     if (error) throw new Error(error.message);
-    await supabaseAdmin
-      .from("stores")
-      .update({ erp_provider: null })
-      .eq("id", data.storeId);
+    await supabaseAdmin.from("stores").update({ erp_provider: null }).eq("id", data.storeId);
     return { ok: true };
   });

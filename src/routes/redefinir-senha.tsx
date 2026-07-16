@@ -108,11 +108,25 @@ function Page() {
 
           {ready && !validSession && (
             <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive space-y-2">
-              <div className="flex items-center gap-2 font-medium"><AlertCircle className="h-4 w-4" /> Link inválido ou expirado</div>
+              <div className="flex items-center gap-2 font-medium">
+                <AlertCircle className="h-4 w-4" /> Link inválido ou expirado
+              </div>
               <p>Peça um novo link em "Esqueci minha senha".</p>
               <div className="flex gap-2 pt-1">
-                <Button size="sm" variant="outline" onClick={() => navigate({ to: "/lojista/login" })}>Login lojista</Button>
-                <Button size="sm" variant="outline" onClick={() => navigate({ to: "/admin/login" })}>Login admin</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate({ to: "/lojista/login" })}
+                >
+                  Login lojista
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate({ to: "/admin/login" })}
+                >
+                  Login admin
+                </Button>
               </div>
             </div>
           )}
@@ -128,12 +142,26 @@ function Page() {
             <form onSubmit={submit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="nova">Nova senha</Label>
-                <PasswordInput id="nova" value={senha} onChange={(e) => setSenha(e.target.value)} required autoComplete="new-password" minLength={8} />
+                <PasswordInput
+                  id="nova"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  minLength={8}
+                />
                 <p className="text-[11px] text-muted-foreground">Mínimo 8 caracteres.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="conf">Confirmar nova senha</Label>
-                <PasswordInput id="conf" value={confirma} onChange={(e) => setConfirma(e.target.value)} required autoComplete="new-password" minLength={8} />
+                <PasswordInput
+                  id="conf"
+                  value={confirma}
+                  onChange={(e) => setConfirma(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                  minLength={8}
+                />
               </div>
               {erro && (
                 <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
@@ -142,7 +170,13 @@ function Page() {
                 </div>
               )}
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Salvando...</>) : "Redefinir senha"}
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Salvando...
+                  </>
+                ) : (
+                  "Redefinir senha"
+                )}
               </Button>
             </form>
           )}

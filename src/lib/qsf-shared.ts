@@ -18,7 +18,12 @@ export function progressoNivel(pontos: number) {
   if (nivel === "bronze")
     return { atual: pontos, alvo: 101, proximo: "prata" as const, pct: (pontos / 101) * 100 };
   if (nivel === "prata")
-    return { atual: pontos - 101, alvo: 200, proximo: "ouro" as const, pct: ((pontos - 101) / 200) * 100 };
+    return {
+      atual: pontos - 101,
+      alvo: 200,
+      proximo: "ouro" as const,
+      pct: ((pontos - 101) / 200) * 100,
+    };
   return { atual: pontos, alvo: pontos, proximo: null, pct: 100 };
 }
 

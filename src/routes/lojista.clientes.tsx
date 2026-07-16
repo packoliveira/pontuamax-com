@@ -2,17 +2,56 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeClientsQuery, clientTagsQuery } from "@/lib/queries";
-import { atualizarAniversarioCliente, addClientTag, removeClientTag, cadastrarClientePorTelefone, atualizarClienteInfo, ajustarPontosCliente, sincronizarClientesDaLoja, excluirClienteDaLoja } from "@/lib/qsf.functions";
-import { formatBRL, formatDate, formatCPF, formatPhone, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
+import {
+  atualizarAniversarioCliente,
+  addClientTag,
+  removeClientTag,
+  cadastrarClientePorTelefone,
+  atualizarClienteInfo,
+  ajustarPontosCliente,
+  sincronizarClientesDaLoja,
+  excluirClienteDaLoja,
+} from "@/lib/qsf.functions";
+import {
+  formatBRL,
+  formatDate,
+  formatCPF,
+  formatPhone,
+  isValidCPF,
+  onlyDigits,
+} from "@/lib/qsf-shared";
 import { NivelBadge } from "@/components/nivel-badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Cake, X, Plus, UserPlus, Pencil, Coins, Minus, RefreshCw, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Search,
+  Cake,
+  X,
+  Plus,
+  UserPlus,
+  Pencil,
+  Coins,
+  Minus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/lojista/clientes")({
@@ -51,7 +90,12 @@ function SyncClientsButton({ storeId }: { storeId: string }) {
   );
 }
 
-type ClienteProfile = { full_name: string | null; phone: string | null; cpf: string | null; birthdate: string | null };
+type ClienteProfile = {
+  full_name: string | null;
+  phone: string | null;
+  cpf: string | null;
+  birthdate: string | null;
+};
 
 function ClientesPage() {
   const qc = useQueryClient();
@@ -66,8 +110,20 @@ function ClientesPage() {
   const [tagInput, setTagInput] = useState<Record<string, string>>({});
   const [openNew, setOpenNew] = useState(false);
   const [novo, setNovo] = useState({ nome: "", phone: "", cpf: "" });
-  const [editInfo, setEditInfo] = useState<{ user_id: string; full_name: string; phone: string; cpf: string } | null>(null);
-  const [pontosDlg, setPontosDlg] = useState<{ user_id: string; nome: string; saldo: number; delta: string; motivo: string; op: "add" | "estorno" } | null>(null);
+  const [editInfo, setEditInfo] = useState<{
+    user_id: string;
+    full_name: string;
+    phone: string;
+    cpf: string;
+  } | null>(null);
+  const [pontosDlg, setPontosDlg] = useState<{
+    user_id: string;
+    nome: string;
+    saldo: number;
+    delta: string;
+    motivo: string;
+    op: "add" | "estorno";
+  } | null>(null);
   const [excluirDlg, setExcluirDlg] = useState<{ user_id: string; nome: string } | null>(null);
 
   const criar = useMutation({
@@ -143,7 +199,9 @@ function ClientesPage() {
   const excluir = useMutation({
     mutationFn: () => {
       if (!excluirDlg) throw new Error("Sem cliente selecionado.");
-      return excluirClienteDaLoja({ data: { store_id: loja!.id, client_user_id: excluirDlg.user_id } });
+      return excluirClienteDaLoja({
+        data: { store_id: loja!.id, client_user_id: excluirDlg.user_id },
+      });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["store-clients", loja?.id] });
@@ -155,7 +213,8 @@ function ClientesPage() {
   });
 
   const addTag = useMutation({
-    mutationFn: (v: { user_id: string; tag: string }) => addClientTag({ data: { store_id: loja!.id, client_user_id: v.user_id, tag: v.tag } }),
+    mutationFn: (v: { user_id: string; tag: string }) =>
+      addClientTag({ data: { store_id: loja!.id, client_user_id: v.user_id, tag: v.tag } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["client-tags"] }),
     onError: (e) => toast.error((e as Error).message),
   });
@@ -194,8 +253,7 @@ function ClientesPage() {
     if (filtroCampo === "telefone") return digits.length > 0 && tel.includes(digits);
     if (filtroCampo === "cpf") return digits.length > 0 && cpf.includes(digits);
     return (
-      nome.includes(s) ||
-      (digits.length > 0 && (tel.includes(digits) || cpf.includes(digits)))
+      nome.includes(s) || (digits.length > 0 && (tel.includes(digits) || cpf.includes(digits)))
     );
   });
   const inclP = loja.modalidade !== "cashback";
@@ -206,7 +264,9 @@ function ClientesPage() {
     <div className="space-y-8">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Relacionamento</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+            Relacionamento
+          </div>
           <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Clientes</h1>
           <p className="mt-1 text-sm text-[#64748B]">
             {filtered.length} de {clientes.length} cliente(s)
@@ -241,10 +301,13 @@ function ClientesPage() {
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
           <Input
             placeholder={
-              filtroCampo === "nome" ? "Buscar por nome" :
-              filtroCampo === "telefone" ? "Buscar por telefone (só dígitos)" :
-              filtroCampo === "cpf" ? "Buscar por CPF (só dígitos)" :
-              "Buscar por nome, telefone ou CPF"
+              filtroCampo === "nome"
+                ? "Buscar por nome"
+                : filtroCampo === "telefone"
+                  ? "Buscar por telefone (só dígitos)"
+                  : filtroCampo === "cpf"
+                    ? "Buscar por CPF (só dígitos)"
+                    : "Buscar por nome, telefone ou CPF"
             }
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -289,7 +352,12 @@ function ClientesPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => { setQ(""); setFiltroCampo("todos"); setFiltroNivel("todos"); setFiltroStatus("todos"); }}
+            onClick={() => {
+              setQ("");
+              setFiltroCampo("todos");
+              setFiltroNivel("todos");
+              setFiltroStatus("todos");
+            }}
             className="rounded-xl text-[#2563EB] hover:bg-[#2563EB]/5"
           >
             Limpar
@@ -322,79 +390,141 @@ function ClientesPage() {
                       {initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="truncate font-semibold text-[#0F172A]">{nome}</span>
-                      {c.pending_registration && (
-                        <Badge
-                          variant="secondary"
-                          className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200"
-                          title="Cliente criado por venda automática (PDV/site). Ainda não completou o próprio cadastro."
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="truncate font-semibold text-[#0F172A]">{nome}</span>
+                        {c.pending_registration && (
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200"
+                            title="Cliente criado por venda automática (PDV/site). Ainda não completou o próprio cadastro."
+                          >
+                            Cadastro pendente
+                          </Badge>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 rounded-md px-2 text-xs text-[#2563EB] hover:bg-[#2563EB]/5"
+                          onClick={() =>
+                            setEditInfo({
+                              user_id: c.user_id,
+                              full_name: p?.full_name ?? "",
+                              phone: formatPhone(p?.phone ?? ""),
+                              cpf: formatCPF(p?.cpf ?? ""),
+                            })
+                          }
                         >
-                          Cadastro pendente
-                        </Badge>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 rounded-md px-2 text-xs text-[#2563EB] hover:bg-[#2563EB]/5"
-                        onClick={() =>
-                          setEditInfo({
-                            user_id: c.user_id,
-                            full_name: p?.full_name ?? "",
-                            phone: formatPhone(p?.phone ?? ""),
-                            cpf: formatCPF(p?.cpf ?? ""),
-                          })
-                        }
-                      >
-                        <Pencil className="h-3 w-3" /> editar
-                      </Button>
-                    </div>
-                    <div className="mt-0.5 text-xs text-[#64748B]">
-                      {p?.phone ? <>Tel: {formatPhone(p.phone)}</> : <>Sem telefone</>}
-                      {" · "}
-                      {p?.cpf ? <>CPF: {formatCPF(p.cpf)}</> : <>Sem CPF</>}
-                    </div>
-                    <div className="text-xs text-[#94A3B8]">Cadastrado: {formatDate(c.created_at)}</div>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-[#64748B]">
-                      <Cake className="h-3 w-3" />
-                      {isEditing ? (
-                        <>
-                          <Input type="date" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} className="h-7 w-40 rounded-lg border-[#E5E7EB]" />
-                          <Button size="sm" className="h-7 rounded-lg bg-[#2563EB] px-2 text-white hover:bg-[#1D4ED8]" onClick={() => salvarBirth.mutate({ user_id: c.user_id, birthdate: editing.value || null })}>Salvar</Button>
-                          <Button size="sm" variant="ghost" className="h-7 rounded-lg px-2" onClick={() => setEditing(null)}>Cancelar</Button>
-                        </>
-                      ) : (
-                        <>
-                          {p?.birthdate ? new Date(p.birthdate + "T00:00").toLocaleDateString("pt-BR") : "sem aniversário"}
-                          <button className="font-medium text-[#2563EB] hover:underline" onClick={() => setEditing({ userId: c.user_id, value: p?.birthdate ?? "" })}>editar</button>
-                        </>
-                      )}
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                      {tags.filter((t) => t.client_user_id === c.user_id).map((t) => (
-                        <Badge key={t.id} variant="outline" className="gap-1 rounded-full border-[#E5E7EB] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-medium text-[#0F172A]">
-                          #{t.tag}
-                          <button onClick={() => rmTag.mutate(t.id)} className="text-[#94A3B8] hover:text-[#EF4444]"><X className="h-3 w-3" /></button>
-                        </Badge>
-                      ))}
-                      <div className="flex items-center gap-1">
-                        <Input value={tagInput[c.user_id] ?? ""} onChange={(e) => setTagInput((s) => ({ ...s, [c.user_id]: e.target.value }))}
-                          placeholder="nova tag" className="h-7 w-28 rounded-lg border-[#E5E7EB] text-xs" />
-                        <Button size="sm" variant="ghost" className="h-7 rounded-lg px-1.5 text-[#2563EB] hover:bg-[#2563EB]/5" disabled={!(tagInput[c.user_id] ?? "").trim()}
-                          onClick={() => { addTag.mutate({ user_id: c.user_id, tag: tagInput[c.user_id] }); setTagInput((s) => ({ ...s, [c.user_id]: "" })); }}>
-                          <Plus className="h-3 w-3" />
+                          <Pencil className="h-3 w-3" /> editar
                         </Button>
                       </div>
-                    </div>
+                      <div className="mt-0.5 text-xs text-[#64748B]">
+                        {p?.phone ? <>Tel: {formatPhone(p.phone)}</> : <>Sem telefone</>}
+                        {" · "}
+                        {p?.cpf ? <>CPF: {formatCPF(p.cpf)}</> : <>Sem CPF</>}
+                      </div>
+                      <div className="text-xs text-[#94A3B8]">
+                        Cadastrado: {formatDate(c.created_at)}
+                      </div>
+                      <div className="mt-1 flex items-center gap-2 text-xs text-[#64748B]">
+                        <Cake className="h-3 w-3" />
+                        {isEditing ? (
+                          <>
+                            <Input
+                              type="date"
+                              value={editing.value}
+                              onChange={(e) => setEditing({ ...editing, value: e.target.value })}
+                              className="h-7 w-40 rounded-lg border-[#E5E7EB]"
+                            />
+                            <Button
+                              size="sm"
+                              className="h-7 rounded-lg bg-[#2563EB] px-2 text-white hover:bg-[#1D4ED8]"
+                              onClick={() =>
+                                salvarBirth.mutate({
+                                  user_id: c.user_id,
+                                  birthdate: editing.value || null,
+                                })
+                              }
+                            >
+                              Salvar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 rounded-lg px-2"
+                              onClick={() => setEditing(null)}
+                            >
+                              Cancelar
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            {p?.birthdate
+                              ? new Date(p.birthdate + "T00:00").toLocaleDateString("pt-BR")
+                              : "sem aniversário"}
+                            <button
+                              className="font-medium text-[#2563EB] hover:underline"
+                              onClick={() =>
+                                setEditing({ userId: c.user_id, value: p?.birthdate ?? "" })
+                              }
+                            >
+                              editar
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                        {tags
+                          .filter((t) => t.client_user_id === c.user_id)
+                          .map((t) => (
+                            <Badge
+                              key={t.id}
+                              variant="outline"
+                              className="gap-1 rounded-full border-[#E5E7EB] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-medium text-[#0F172A]"
+                            >
+                              #{t.tag}
+                              <button
+                                onClick={() => rmTag.mutate(t.id)}
+                                className="text-[#94A3B8] hover:text-[#EF4444]"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        <div className="flex items-center gap-1">
+                          <Input
+                            value={tagInput[c.user_id] ?? ""}
+                            onChange={(e) =>
+                              setTagInput((s) => ({ ...s, [c.user_id]: e.target.value }))
+                            }
+                            placeholder="nova tag"
+                            className="h-7 w-28 rounded-lg border-[#E5E7EB] text-xs"
+                          />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 rounded-lg px-1.5 text-[#2563EB] hover:bg-[#2563EB]/5"
+                            disabled={!(tagInput[c.user_id] ?? "").trim()}
+                            onClick={() => {
+                              addTag.mutate({ user_id: c.user_id, tag: tagInput[c.user_id] });
+                              setTagInput((s) => ({ ...s, [c.user_id]: "" }));
+                            }}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2 text-sm">
                     {inclP && (
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="text-[10px] font-medium uppercase tracking-wider text-[#64748B]">Saldo</div>
+                          <div className="text-[10px] font-medium uppercase tracking-wider text-[#64748B]">
+                            Saldo
+                          </div>
                           <div className="text-lg font-bold text-[#0F172A]">
-                            {c.pontos.toLocaleString("pt-BR")} <span className="text-xs font-normal text-[#64748B]">pts</span>
+                            {c.pontos.toLocaleString("pt-BR")}{" "}
+                            <span className="text-xs font-normal text-[#64748B]">pts</span>
                           </div>
                         </div>
                         <NivelBadge pontos={c.pontos} nivel={c.nivel} />
@@ -411,7 +541,16 @@ function ClientesPage() {
                           size="sm"
                           variant="outline"
                           className="h-8 rounded-lg border-[#E5E7EB] px-2.5 text-xs text-[#0F172A] hover:bg-[#F1F5F9]"
-                          onClick={() => setPontosDlg({ user_id: c.user_id, nome: p?.full_name ?? "—", saldo: c.pontos, delta: "", motivo: "", op: "add" })}
+                          onClick={() =>
+                            setPontosDlg({
+                              user_id: c.user_id,
+                              nome: p?.full_name ?? "—",
+                              saldo: c.pontos,
+                              delta: "",
+                              motivo: "",
+                              op: "add",
+                            })
+                          }
                         >
                           <Plus className="h-3 w-3" /> Pontos
                         </Button>
@@ -420,7 +559,16 @@ function ClientesPage() {
                           variant="outline"
                           className="h-8 rounded-lg border-[#E5E7EB] px-2.5 text-xs text-[#0F172A] hover:bg-[#F1F5F9]"
                           disabled={c.pontos <= 0}
-                          onClick={() => setPontosDlg({ user_id: c.user_id, nome: p?.full_name ?? "—", saldo: c.pontos, delta: "", motivo: "", op: "estorno" })}
+                          onClick={() =>
+                            setPontosDlg({
+                              user_id: c.user_id,
+                              nome: p?.full_name ?? "—",
+                              saldo: c.pontos,
+                              delta: "",
+                              motivo: "",
+                              op: "estorno",
+                            })
+                          }
                         >
                           <Minus className="h-3 w-3" /> Estornar
                         </Button>
@@ -430,7 +578,9 @@ function ClientesPage() {
                       size="sm"
                       variant="ghost"
                       className="h-7 rounded-lg px-2 text-xs text-[#EF4444] hover:bg-[#EF4444]/5 hover:text-[#EF4444]"
-                      onClick={() => setExcluirDlg({ user_id: c.user_id, nome: p?.full_name ?? "—" })}
+                      onClick={() =>
+                        setExcluirDlg({ user_id: c.user_id, nome: p?.full_name ?? "—" })
+                      }
                     >
                       <Trash2 className="h-3 w-3" /> Excluir
                     </Button>
@@ -458,25 +608,45 @@ function ClientesPage() {
           <div className="space-y-3">
             <div>
               <Label htmlFor="novo-nome">Nome</Label>
-              <Input id="novo-nome" value={novo.nome} onChange={(e) => setNovo((s) => ({ ...s, nome: e.target.value }))} placeholder="Nome do cliente" />
+              <Input
+                id="novo-nome"
+                value={novo.nome}
+                onChange={(e) => setNovo((s) => ({ ...s, nome: e.target.value }))}
+                placeholder="Nome do cliente"
+              />
             </div>
             <div>
               <Label htmlFor="novo-tel">Telefone (com DDD)</Label>
-              <Input id="novo-tel" value={novo.phone} onChange={(e) => setNovo((s) => ({ ...s, phone: formatPhone(e.target.value) }))} placeholder="(11) 99999-9999" inputMode="tel" />
+              <Input
+                id="novo-tel"
+                value={novo.phone}
+                onChange={(e) => setNovo((s) => ({ ...s, phone: formatPhone(e.target.value) }))}
+                placeholder="(11) 99999-9999"
+                inputMode="tel"
+              />
             </div>
             <div>
               <Label htmlFor="novo-cpf">CPF (obrigatório)</Label>
-              <Input id="novo-cpf" value={novo.cpf} onChange={(e) => setNovo((s) => ({ ...s, cpf: formatCPF(e.target.value) }))} placeholder="000.000.000-00" inputMode="numeric" />
+              <Input
+                id="novo-cpf"
+                value={novo.cpf}
+                onChange={(e) => setNovo((s) => ({ ...s, cpf: formatCPF(e.target.value) }))}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+              />
               {novo.cpf.trim() && !isValidCPF(novo.cpf) && (
                 <p className="mt-1 text-xs text-red-600">CPF inválido</p>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              O cliente entra sempre pelo CPF. A senha inicial é o próprio CPF (só números) e pode ser alterada depois na página pública da loja.
+              O cliente entra sempre pelo CPF. A senha inicial é o próprio CPF (só números) e pode
+              ser alterada depois na página pública da loja.
             </p>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpenNew(false)}>Cancelar</Button>
+            <Button variant="ghost" onClick={() => setOpenNew(false)}>
+              Cancelar
+            </Button>
             <Button
               onClick={() => criar.mutate()}
               disabled={
@@ -500,32 +670,49 @@ function ClientesPage() {
           </DialogHeader>
           {editInfo && (
             <div className="space-y-3">
-              {inclP && (() => {
-                const c = clientes.find((x) => x.user_id === editInfo.user_id);
-                if (!c) return null;
-                return (
-                  <div className="flex items-center justify-between rounded-md border bg-muted/40 p-3">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Saldo</div>
-                      <div className="text-lg font-bold">
-                        {c.pontos} <span className="text-xs font-normal text-muted-foreground">pts</span>
+              {inclP &&
+                (() => {
+                  const c = clientes.find((x) => x.user_id === editInfo.user_id);
+                  if (!c) return null;
+                  return (
+                    <div className="flex items-center justify-between rounded-md border bg-muted/40 p-3">
+                      <div>
+                        <div className="text-xs text-muted-foreground">Saldo</div>
+                        <div className="text-lg font-bold">
+                          {c.pontos}{" "}
+                          <span className="text-xs font-normal text-muted-foreground">pts</span>
+                        </div>
                       </div>
+                      <NivelBadge pontos={c.pontos} nivel={c.nivel} />
                     </div>
-                    <NivelBadge pontos={c.pontos} nivel={c.nivel} />
-                  </div>
-                );
-              })()}
+                  );
+                })()}
               <div>
                 <Label htmlFor="edit-nome">Nome</Label>
-                <Input id="edit-nome" value={editInfo.full_name} onChange={(e) => setEditInfo({ ...editInfo, full_name: e.target.value })} />
+                <Input
+                  id="edit-nome"
+                  value={editInfo.full_name}
+                  onChange={(e) => setEditInfo({ ...editInfo, full_name: e.target.value })}
+                />
               </div>
               <div>
                 <Label htmlFor="edit-tel">Telefone (com DDD)</Label>
-                <Input id="edit-tel" value={editInfo.phone} onChange={(e) => setEditInfo({ ...editInfo, phone: formatPhone(e.target.value) })} inputMode="tel" />
+                <Input
+                  id="edit-tel"
+                  value={editInfo.phone}
+                  onChange={(e) => setEditInfo({ ...editInfo, phone: formatPhone(e.target.value) })}
+                  inputMode="tel"
+                />
               </div>
               <div>
                 <Label htmlFor="edit-cpf">CPF (obrigatório)</Label>
-                <Input id="edit-cpf" value={editInfo.cpf} onChange={(e) => setEditInfo({ ...editInfo, cpf: formatCPF(e.target.value) })} inputMode="numeric" placeholder="000.000.000-00" />
+                <Input
+                  id="edit-cpf"
+                  value={editInfo.cpf}
+                  onChange={(e) => setEditInfo({ ...editInfo, cpf: formatCPF(e.target.value) })}
+                  inputMode="numeric"
+                  placeholder="000.000.000-00"
+                />
                 {editInfo.cpf.trim() && !isValidCPF(editInfo.cpf) && (
                   <p className="mt-1 text-xs text-red-600">CPF inválido</p>
                 )}
@@ -533,7 +720,9 @@ function ClientesPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditInfo(null)}>Cancelar</Button>
+            <Button variant="ghost" onClick={() => setEditInfo(null)}>
+              Cancelar
+            </Button>
             <Button
               onClick={() => salvarInfo.mutate()}
               disabled={
@@ -554,14 +743,17 @@ function ClientesPage() {
       <Dialog open={!!pontosDlg} onOpenChange={(o) => !o && setPontosDlg(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{pontosDlg?.op === "add" ? "Adicionar pontos" : "Estornar pontos"}</DialogTitle>
+            <DialogTitle>
+              {pontosDlg?.op === "add" ? "Adicionar pontos" : "Estornar pontos"}
+            </DialogTitle>
           </DialogHeader>
           {pontosDlg && (
             <div className="space-y-3">
               <div className="rounded-md bg-muted p-3 text-sm">
                 <div className="font-medium">{pontosDlg.nome}</div>
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Coins className="h-3 w-3" /> Saldo atual: <span className="font-semibold text-foreground">{pontosDlg.saldo} pts</span>
+                  <Coins className="h-3 w-3" /> Saldo atual:{" "}
+                  <span className="font-semibold text-foreground">{pontosDlg.saldo} pts</span>
                 </div>
               </div>
               <div>
@@ -576,17 +768,26 @@ function ClientesPage() {
                   placeholder="Ex.: 100"
                 />
                 {pontosDlg.op === "estorno" && Number(pontosDlg.delta) > pontosDlg.saldo && (
-                  <p className="mt-1 text-xs text-red-600">Não pode estornar mais que o saldo atual.</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    Não pode estornar mais que o saldo atual.
+                  </p>
                 )}
               </div>
               <div>
                 <Label htmlFor="pts-motivo">Motivo (opcional)</Label>
-                <Input id="pts-motivo" value={pontosDlg.motivo} onChange={(e) => setPontosDlg({ ...pontosDlg, motivo: e.target.value })} placeholder="Ex.: correção de venda #123" />
+                <Input
+                  id="pts-motivo"
+                  value={pontosDlg.motivo}
+                  onChange={(e) => setPontosDlg({ ...pontosDlg, motivo: e.target.value })}
+                  placeholder="Ex.: correção de venda #123"
+                />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setPontosDlg(null)}>Cancelar</Button>
+            <Button variant="ghost" onClick={() => setPontosDlg(null)}>
+              Cancelar
+            </Button>
             <Button
               onClick={() => ajustarPts.mutate()}
               disabled={
@@ -596,7 +797,11 @@ function ClientesPage() {
                 (pontosDlg.op === "estorno" && Number(pontosDlg.delta) > pontosDlg.saldo)
               }
             >
-              {ajustarPts.isPending ? "Salvando..." : pontosDlg?.op === "add" ? "Adicionar" : "Estornar"}
+              {ajustarPts.isPending
+                ? "Salvando..."
+                : pontosDlg?.op === "add"
+                  ? "Adicionar"
+                  : "Estornar"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -614,12 +819,16 @@ function ClientesPage() {
                 Tem certeza que deseja remover <strong>{excluirDlg.nome}</strong> da sua loja?
               </p>
               <p className="text-xs text-muted-foreground">
-                O saldo de pontos, cashback e as tags desta loja serão apagados. O histórico de vendas continua no relatório. O cliente pode se cadastrar novamente pela página pública.
+                O saldo de pontos, cashback e as tags desta loja serão apagados. O histórico de
+                vendas continua no relatório. O cliente pode se cadastrar novamente pela página
+                pública.
               </p>
             </div>
           )}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setExcluirDlg(null)}>Cancelar</Button>
+            <Button variant="ghost" onClick={() => setExcluirDlg(null)}>
+              Cancelar
+            </Button>
             <Button
               variant="destructive"
               onClick={() => excluir.mutate()}

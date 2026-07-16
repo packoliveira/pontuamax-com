@@ -3,7 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function ensureAdmin(ctx: { supabase: any; userId: string }) {
-  const { data, error } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  const { data, error } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Acesso negado");
 }
@@ -21,7 +24,9 @@ async function writeAudit(params: {
   try {
     const { data } = await supabaseAdmin.auth.admin.getUserById(params.actorId);
     actorEmail = data?.user?.email ?? null;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   await supabaseAdmin.from("admin_audit_logs").insert({
     actor_id: params.actorId,
     actor_email: actorEmail,
@@ -44,7 +49,10 @@ export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
 export const isCurrentUserAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const { data, error } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     if (error) throw new Error(error.message);
     return { isAdmin: data === true };
   });
@@ -56,13 +64,18 @@ export const listAllStores = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("stores")
-      .select("id, slug, nome_fantasia, telefone, owner_id, subscription_status, plan, mrr_amount, setup_paid_at, activated_at, cancelled_at, admin_notes, created_at")
+      .select(
+        "id, slug, nome_fantasia, telefone, owner_id, subscription_status, plan, mrr_amount, setup_paid_at, activated_at, cancelled_at, admin_notes, created_at",
+      )
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const ownerIds = Array.from(new Set((data ?? []).map((s) => s.owner_id)));
     let owners: Record<string, { full_name: string | null; phone: string | null }> = {};
     if (ownerIds.length) {
-      const { data: profs } = await supabaseAdmin.from("profiles").select("id, full_name, phone").in("id", ownerIds);
+      const { data: profs } = await supabaseAdmin
+        .from("profiles")
+        .select("id, full_name, phone")
+        .in("id", ownerIds);
       for (const p of profs ?? []) owners[p.id] = { full_name: p.full_name, phone: p.phone };
     }
     // emails
@@ -85,7 +98,9 @@ export const updateStoreSubscription = createServerFn({ method: "POST" })
     z
       .object({
         store_id: z.string().uuid(),
-        subscription_status: z.enum(["pending_payment", "active", "suspended", "cancelled"]).optional(),
+        subscription_status: z
+          .enum(["pending_payment", "active", "suspended", "cancelled"])
+          .optional(),
         plan: z.enum(["starter", "pro", "premium"]).optional(),
         mrr_amount: z.number().min(0).max(100000).optional(),
         setup_paid: z.boolean().optional(),
@@ -112,12 +127,16 @@ export const updateStoreSubscription = createServerFn({ method: "POST" })
     }
     if (data.plan !== undefined) patch.plan = data.plan;
     if (data.mrr_amount !== undefined) patch.mrr_amount = data.mrr_amount;
-    if (data.setup_paid !== undefined) patch.setup_paid_at = data.setup_paid ? new Date().toISOString() : null;
+    if (data.setup_paid !== undefined)
+      patch.setup_paid_at = data.setup_paid ? new Date().toISOString() : null;
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
     const { error } = await supabaseAdmin.from("stores").update(patch).eq("id", data.store_id);
     if (error) throw new Error(error.message);
     const { data: storeInfo } = await supabaseAdmin
-      .from("stores").select("nome_fantasia").eq("id", data.store_id).maybeSingle();
+      .from("stores")
+      .select("nome_fantasia")
+      .eq("id", data.store_id)
+      .maybeSingle();
     await writeAudit({
       actorId: context.userId,
       action: "store.subscription_updated",
@@ -134,7 +153,9 @@ export const getMyStoreSubscription = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("stores")
-      .select("id, slug, nome_fantasia, subscription_status, plan, mrr_amount, setup_paid_at, activated_at")
+      .select(
+        "id, slug, nome_fantasia, subscription_status, plan, mrr_amount, setup_paid_at, activated_at",
+      )
       .eq("owner_id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -156,7 +177,12 @@ export const listAdmins = createServerFn({ method: "GET" })
       ? await supabaseAdmin.from("profiles").select("id, full_name").in("id", ids)
       : { data: [] as { id: string; full_name: string | null }[] };
     const profMap = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
-    const rows: { user_id: string; email: string | null; full_name: string | null; is_me: boolean }[] = [];
+    const rows: {
+      user_id: string;
+      email: string | null;
+      full_name: string | null;
+      is_me: boolean;
+    }[] = [];
     for (const uid of ids) {
       const { data: u } = await supabaseAdmin.auth.admin.getUserById(uid);
       rows.push({
@@ -181,7 +207,10 @@ export const addAdminByEmail = createServerFn({ method: "POST" })
     let page = 1;
     // até 10 páginas de 200 usuários (2000). suficiente pra este projeto.
     while (page <= 10 && !targetId) {
-      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage: 200,
+      });
       if (error) throw new Error(error.message);
       const found = list?.users?.find((u) => (u.email ?? "").toLowerCase() === emailLower);
       if (found) targetId = found.id;
@@ -229,7 +258,9 @@ export const removeAdmin = createServerFn({ method: "POST" })
     try {
       const { data: u } = await supabaseAdmin.auth.admin.getUserById(data.user_id);
       targetEmail = u?.user?.email ?? null;
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     await writeAudit({
       actorId: context.userId,
       action: "admin.removed",
@@ -248,7 +279,9 @@ export const listAuditLogs = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("admin_audit_logs")
-      .select("id, actor_id, actor_email, action, target_type, target_id, target_label, details, created_at")
+      .select(
+        "id, actor_id, actor_email, action, target_type, target_id, target_label, details, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
@@ -268,16 +301,16 @@ export const changeMyPassword = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: userInfo, error: uErr } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    const { data: userInfo, error: uErr } = await supabaseAdmin.auth.admin.getUserById(
+      context.userId,
+    );
     if (uErr || !userInfo?.user?.email) throw new Error("Não foi possível localizar sua conta.");
     const email = userInfo.user.email;
     // Verifica senha atual usando client publishable, sem persistir sessão
     const { createClient } = await import("@supabase/supabase-js");
-    const checker = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false, storage: undefined } },
-    );
+    const checker = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+    });
     const { error: signErr } = await checker.auth.signInWithPassword({
       email,
       password: data.current_password,

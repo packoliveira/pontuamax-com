@@ -106,8 +106,7 @@ function AdminPlanos() {
       qc.invalidateQueries({ queryKey: ["admin", "plans"] });
       setOpen(false);
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "Erro ao salvar plano"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Erro ao salvar plano"),
   });
 
   const deleteMut = useMutation({
@@ -116,8 +115,7 @@ function AdminPlanos() {
       toast.success("Plano removido");
       qc.invalidateQueries({ queryKey: ["admin", "plans"] });
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "Erro ao remover plano"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Erro ao remover plano"),
   });
 
   const openNew = () => {
@@ -168,9 +166,7 @@ function AdminPlanos() {
             <CardContent className="space-y-3 text-sm">
               <div>
                 <div className="text-2xl font-bold">
-                  {p.preco_mensal > 0
-                    ? `R$ ${p.preco_mensal.toFixed(2)}`
-                    : "Sob consulta"}
+                  {p.preco_mensal > 0 ? `R$ ${p.preco_mensal.toFixed(2)}` : "Sob consulta"}
                   <span className="text-xs font-normal text-muted-foreground">/mês</span>
                 </div>
                 {p.preco_anual > 0 && (
@@ -254,9 +250,7 @@ function AdminPlanos() {
                   type="number"
                   step="0.01"
                   value={draft.preco_mensal}
-                  onChange={(e) =>
-                    setDraft({ ...draft, preco_mensal: Number(e.target.value) })
-                  }
+                  onChange={(e) => setDraft({ ...draft, preco_mensal: Number(e.target.value) })}
                 />
               </div>
               <div className="space-y-1.5">
@@ -265,9 +259,7 @@ function AdminPlanos() {
                   type="number"
                   step="0.01"
                   value={draft.preco_anual}
-                  onChange={(e) =>
-                    setDraft({ ...draft, preco_anual: Number(e.target.value) })
-                  }
+                  onChange={(e) => setDraft({ ...draft, preco_anual: Number(e.target.value) })}
                 />
               </div>
               <div className="space-y-1.5">
@@ -276,9 +268,7 @@ function AdminPlanos() {
                   type="number"
                   step="0.01"
                   value={draft.setup_fee}
-                  onChange={(e) =>
-                    setDraft({ ...draft, setup_fee: Number(e.target.value) })
-                  }
+                  onChange={(e) => setDraft({ ...draft, setup_fee: Number(e.target.value) })}
                 />
               </div>
             </div>
@@ -304,8 +294,7 @@ function AdminPlanos() {
                   onChange={(e) =>
                     setDraft({
                       ...draft,
-                      max_funcionarios:
-                        e.target.value === "" ? null : Number(e.target.value),
+                      max_funcionarios: e.target.value === "" ? null : Number(e.target.value),
                     })
                   }
                 />
@@ -329,10 +318,7 @@ function AdminPlanos() {
               <Label>Recursos incluídos</Label>
               <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
                 {FEATURE_KEYS.map((f) => (
-                  <label
-                    key={f.key}
-                    className="flex items-center justify-between gap-2 text-sm"
-                  >
+                  <label key={f.key} className="flex items-center justify-between gap-2 text-sm">
                     <span>{f.label}</span>
                     <Switch
                       checked={Boolean(draft[f.key])}

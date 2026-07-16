@@ -1,6 +1,28 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ShoppingCart, Users, Package, Gift, Settings, LogOut, Menu, Megaphone, Zap, Ticket, FileText, Trophy, Code, ExternalLink, Copy, Check, Star, Instagram, UserCog, Palette } from "lucide-react";
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Users,
+  Package,
+  Gift,
+  Settings,
+  LogOut,
+  Menu,
+  Megaphone,
+  Zap,
+  Ticket,
+  FileText,
+  Trophy,
+  Code,
+  ExternalLink,
+  Copy,
+  Check,
+  Star,
+  Instagram,
+  UserCog,
+  Palette,
+} from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -70,10 +92,22 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
           >
             /{loja.slug}
           </a>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white" onClick={copyLink} title="Copiar link">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white"
+            onClick={copyLink}
+            title="Copiar link"
+          >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white" asChild title="Abrir">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white"
+            asChild
+            title="Abrir"
+          >
             <a href={`/${loja.slug}`} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
@@ -106,7 +140,12 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
                 : "text-white/70 hover:bg-white/5 hover:text-white hover:translate-x-0.5",
             )}
           >
-            <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[#14CBA8]" : "text-white/60 group-hover:text-white/90")} />
+            <Icon
+              className={cn(
+                "h-4 w-4 transition-colors",
+                active ? "text-[#14CBA8]" : "text-white/60 group-hover:text-white/90",
+              )}
+            />
             {item.label}
           </Link>
         );
@@ -119,7 +158,9 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
       <PontuaMaxMark size={32} />
       <div className="min-w-0">
         <PontuaMaxWordmark variant="dark" size={15} />
-        <div className="text-xs text-white/50 truncate max-w-[140px]">{loja?.nome_fantasia ?? "—"}</div>
+        <div className="text-xs text-white/50 truncate max-w-[140px]">
+          {loja?.nome_fantasia ?? "—"}
+        </div>
       </div>
     </div>
   );
@@ -129,9 +170,16 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex md:w-64 md:flex-col bg-[#0B132B] text-white">
         <Brand />
         <PublicLinkCard />
-        <div className="flex-1"><NavList /></div>
+        <div className="flex-1">
+          <NavList />
+        </div>
         <div className="p-3 border-t border-white/10 flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="flex-1 justify-start text-white/80 hover:bg-white/10 hover:text-white" onClick={doLogout}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 justify-start text-white/80 hover:bg-white/10 hover:text-white"
+            onClick={doLogout}
+          >
             <LogOut className="h-4 w-4" /> Sair
           </Button>
           <NotificationsBell variant="dark" />
@@ -147,30 +195,50 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-0.5">
             <NotificationsBell />
             <ThemeToggle />
-            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={doLogout} title="Sair" aria-label="Sair">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              onClick={doLogout}
+              title="Sair"
+              aria-label="Sair"
+            >
               <LogOut className="h-5 w-5" />
             </Button>
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Abrir menu">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-[85vw] max-w-xs bg-[#0B132B] text-white border-r-0 overflow-y-auto">
-              <SheetTitle className="sr-only">Menu</SheetTitle>
-              <Brand />
-              <PublicLinkCard />
-              <NavList onClick={() => setOpen(false)} />
-              <div className="p-3 border-t border-white/10">
-                <Button variant="ghost" size="sm" className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white" onClick={() => { setOpen(false); doLogout(); }}>
-                  <LogOut className="h-4 w-4" /> Sair
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Abrir menu">
+                  <Menu className="h-5 w-5" />
                 </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="p-0 w-[85vw] max-w-xs bg-[#0B132B] text-white border-r-0 overflow-y-auto"
+              >
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <Brand />
+                <PublicLinkCard />
+                <NavList onClick={() => setOpen(false)} />
+                <div className="p-3 border-t border-white/10">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white"
+                    onClick={() => {
+                      setOpen(false);
+                      doLogout();
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" /> Sair
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </header>
-        <main key={pathname} className="flex-1 p-3 sm:p-4 md:p-8 min-w-0 animate-panel-in">{children}</main>
+        <main key={pathname} className="flex-1 p-3 sm:p-4 md:p-8 min-w-0 animate-panel-in">
+          {children}
+        </main>
       </div>
     </div>
   );

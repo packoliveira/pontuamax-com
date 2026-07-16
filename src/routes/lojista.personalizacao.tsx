@@ -48,7 +48,12 @@ const DEFAULT_TITLE_SIZE: "sm" | "md" | "lg" | "xl" | "2xl" = "md";
 const DEFAULT_TITLE_WEIGHT: "normal" | "semibold" | "bold" | "black" = "bold";
 const DEFAULT_KICKER_SIZE: "xs" | "sm" | "md" = "sm";
 
-const BG_PRESETS: Array<{ label: string; mode: "dark" | "light" | "custom"; c1: string; c2: string }> = [
+const BG_PRESETS: Array<{
+  label: string;
+  mode: "dark" | "light" | "custom";
+  c1: string;
+  c2: string;
+}> = [
   { label: "Midnight (padrão)", mode: "dark", c1: "#0B1020", c2: "#1e1b4b" },
   { label: "Claro suave", mode: "light", c1: "#f8fafc", c2: "#e2e8f0" },
   { label: "Grafite", mode: "custom", c1: "#111827", c2: "#1f2937" },
@@ -59,7 +64,11 @@ function hexLuminance(hex: string): number {
   const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!m) return 0;
   let h = m[1];
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
@@ -71,7 +80,11 @@ function relLuminance(hex: string): number {
   const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!m) return 0;
   let h = m[1];
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const toLin = (v: number) => {
     const s = v / 255;
     return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
@@ -127,7 +140,9 @@ function PersonalizacaoPage() {
   const [kickerText, setKickerText] = useState(DEFAULT_KICKER_TEXT);
   const [kickerShow, setKickerShow] = useState(true);
   const [titleSize, setTitleSize] = useState<"sm" | "md" | "lg" | "xl" | "2xl">(DEFAULT_TITLE_SIZE);
-  const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(DEFAULT_TITLE_WEIGHT);
+  const [titleWeight, setTitleWeight] = useState<"normal" | "semibold" | "bold" | "black">(
+    DEFAULT_TITLE_WEIGHT,
+  );
   const [kickerSize, setKickerSize] = useState<"xs" | "sm" | "md">(DEFAULT_KICKER_SIZE);
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
   const [rewardRain, setRewardRain] = useState(false);
@@ -158,7 +173,9 @@ function PersonalizacaoPage() {
       setMobilePosX(loja.banner_mobile_position_x ?? DEFAULT_POS);
       setMobilePosY(loja.banner_mobile_position_y ?? DEFAULT_POS);
       setMobileZoom(loja.banner_mobile_zoom ?? DEFAULT_ZOOM);
-      setBgMode(((loja as { bg_mode?: string }).bg_mode as "dark" | "light" | "custom") ?? DEFAULT_BG_MODE);
+      setBgMode(
+        ((loja as { bg_mode?: string }).bg_mode as "dark" | "light" | "custom") ?? DEFAULT_BG_MODE,
+      );
       setBgColor1((loja as { bg_color_1?: string | null }).bg_color_1 ?? DEFAULT_BG1);
       setBgColor2((loja as { bg_color_2?: string | null }).bg_color_2 ?? DEFAULT_BG2);
       const raw = loja as Record<string, unknown>;
@@ -170,9 +187,14 @@ function PersonalizacaoPage() {
       setTextOnDark((raw.text_on_dark as string) || DEFAULT_TEXT_ON_DARK);
       setKickerText((raw.header_kicker_text as string) ?? DEFAULT_KICKER_TEXT);
       setKickerShow((raw.header_kicker_show as boolean) ?? true);
-      setTitleSize(((raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE));
-      setTitleWeight(((raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ?? DEFAULT_TITLE_WEIGHT));
-      setKickerSize(((raw.header_kicker_size as "xs" | "sm" | "md") ?? DEFAULT_KICKER_SIZE));
+      setTitleSize(
+        (raw.header_title_size as "sm" | "md" | "lg" | "xl" | "2xl") ?? DEFAULT_TITLE_SIZE,
+      );
+      setTitleWeight(
+        (raw.header_title_weight as "normal" | "semibold" | "bold" | "black") ??
+          DEFAULT_TITLE_WEIGHT,
+      );
+      setKickerSize((raw.header_kicker_size as "xs" | "sm" | "md") ?? DEFAULT_KICKER_SIZE);
       setRewardRain(Boolean(raw.reward_rain_enabled));
       const rc = raw.reward_rain_colors as string[] | null | undefined;
       setRainColors(Array.isArray(rc) && rc.length > 0 ? rc : DEFAULT_RAIN_COLORS);
@@ -338,7 +360,7 @@ function PersonalizacaoPage() {
       const b = (k: string, fb: boolean) => (typeof t[k] === "boolean" ? (t[k] as boolean) : fb);
       setCor1(s("brand_primary", cor1));
       setCor2(s("brand_secondary", cor2));
-      setBgMode((s("bg_mode", bgMode) as "dark" | "light" | "custom"));
+      setBgMode(s("bg_mode", bgMode) as "dark" | "light" | "custom");
       setBgColor1(s("bg_color_1", bgColor1));
       setBgColor2(s("bg_color_2", bgColor2));
       setAccentPoints(s("brand_accent_points", accentPoints));
@@ -377,11 +399,22 @@ function PersonalizacaoPage() {
   return (
     <div className="space-y-8 max-w-5xl">
       <div className="space-y-1">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">Aparência</div>
-        <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">Personalização da loja</h1>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">
+          Aparência
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">
+          Personalização da loja
+        </h1>
         <p className="text-sm text-[#64748B]">
           Ajuste o logo, banners e cores da sua marca — tudo o que o cliente vê na página pública.
-          <a href={`/${loja.slug}`} target="_blank" rel="noreferrer" className="ml-1 underline text-[#2563EB]">Ver como o cliente vê →</a>
+          <a
+            href={`/${loja.slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-1 underline text-[#2563EB]"
+          >
+            Ver como o cliente vê →
+          </a>
         </p>
       </div>
 
@@ -392,7 +425,11 @@ function PersonalizacaoPage() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base text-[#0F172A]">Logo e banners</CardTitle>
               <ResetButton
-                onReset={() => { setLogo(""); setBanner(""); setBannerMobile(""); }}
+                onReset={() => {
+                  setLogo("");
+                  setBanner("");
+                  setBannerMobile("");
+                }}
                 disabled={!logo && !banner && !bannerMobile}
               />
             </CardHeader>
@@ -436,8 +473,12 @@ function PersonalizacaoPage() {
                 <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-[#0F172A]">Encaixe do banner celular</div>
-                      <div className="text-xs text-[#64748B]">Como sua imagem se encaixa na tela do celular.</div>
+                      <div className="text-sm font-semibold text-[#0F172A]">
+                        Encaixe do banner celular
+                      </div>
+                      <div className="text-xs text-[#64748B]">
+                        Como sua imagem se encaixa na tela do celular.
+                      </div>
                     </div>
                     <ResetButton
                       onReset={() => {
@@ -458,25 +499,33 @@ function PersonalizacaoPage() {
                     >
                       <label
                         className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
-                          mobileFit === "cover" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                          mobileFit === "cover"
+                            ? "border-[#2563EB] bg-[#EFF6FF]"
+                            : "border-[#E5E7EB] bg-white"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <RadioGroupItem value="cover" />
                           <span className="font-semibold text-[#0F172A]">Preencher</span>
                         </div>
-                        <span className="mt-1 text-[#64748B]">Ocupa todo o espaço, pode cortar bordas.</span>
+                        <span className="mt-1 text-[#64748B]">
+                          Ocupa todo o espaço, pode cortar bordas.
+                        </span>
                       </label>
                       <label
                         className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
-                          mobileFit === "contain" ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                          mobileFit === "contain"
+                            ? "border-[#2563EB] bg-[#EFF6FF]"
+                            : "border-[#E5E7EB] bg-white"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <RadioGroupItem value="contain" />
                           <span className="font-semibold text-[#0F172A]">Mostrar tudo</span>
                         </div>
-                        <span className="mt-1 text-[#64748B]">Mostra a imagem inteira, com margens.</span>
+                        <span className="mt-1 text-[#64748B]">
+                          Mostra a imagem inteira, com margens.
+                        </span>
                       </label>
                     </RadioGroup>
                   </div>
@@ -525,15 +574,23 @@ function PersonalizacaoPage() {
                         disabled={mobileFit === "contain"}
                       />
                       {mobileFit === "contain" && (
-                        <p className="mt-1 text-[11px] text-[#94A3B8]">Zoom só se aplica no modo Preencher.</p>
+                        <p className="mt-1 text-[11px] text-[#94A3B8]">
+                          Zoom só se aplica no modo Preencher.
+                        </p>
                       )}
                     </div>
                   </div>
                 </div>
               )}
-              <SuggestedBanners onPick={(url) => { setBanner(url); setBannerMobile(url); }} />
+              <SuggestedBanners
+                onPick={(url) => {
+                  setBanner(url);
+                  setBannerMobile(url);
+                }}
+              />
               <p className="text-xs text-[#64748B]">
-                Ao clicar em Salvar, os arquivos removidos ou substituídos são apagados do armazenamento.
+                Ao clicar em Salvar, os arquivos removidos ou substituídos são apagados do
+                armazenamento.
               </p>
             </CardContent>
           </Card>
@@ -542,28 +599,49 @@ function PersonalizacaoPage() {
             <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base text-[#0F172A]">Cores da marca</CardTitle>
-              <ResetButton onReset={() => { setCor1(DEFAULT_COR1); setCor2(DEFAULT_COR2); }} />
+              <ResetButton
+                onReset={() => {
+                  setCor1(DEFAULT_COR1);
+                  setCor2(DEFAULT_COR2);
+                }}
+              />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Cor primária</Label>
                   <div className="flex gap-2">
-                    <Input type="color" value={cor1} onChange={(e) => setCor1(e.target.value)} className="w-16 h-10 p-1" />
+                    <Input
+                      type="color"
+                      value={cor1}
+                      onChange={(e) => setCor1(e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
                     <Input value={cor1} onChange={(e) => setCor1(e.target.value)} />
                   </div>
                 </div>
                 <div>
                   <Label>Cor secundária</Label>
                   <div className="flex gap-2">
-                    <Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" />
+                    <Input
+                      type="color"
+                      value={cor2}
+                      onChange={(e) => setCor2(e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
                     <Input value={cor2} onChange={(e) => setCor2(e.target.value)} />
                   </div>
                 </div>
               </div>
-              <ColorPresets onPick={(a, b) => { setCor1(a); setCor2(b); }} />
+              <ColorPresets
+                onPick={(a, b) => {
+                  setCor1(a);
+                  setCor2(b);
+                }}
+              />
               <p className="text-xs text-[#64748B]">
-                As cores pintam a aura de fundo, o logo, a barra de progresso e o botão de resgate na página do cliente.
+                As cores pintam a aura de fundo, o logo, a barra de progresso e o botão de resgate
+                na página do cliente.
               </p>
             </CardContent>
           </Card>
@@ -589,14 +667,52 @@ function PersonalizacaoPage() {
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {([
-                  { label: "Saldo de pontos", val: accentPoints, set: setAccentPoints, def: DEFAULT_ACCENT_POINTS, hint: "Cor do ícone e do 'pts'" },
-                  { label: "Saldo de cashback", val: accentCashback, set: setAccentCashback, def: DEFAULT_ACCENT_CASHBACK, hint: "Ícone e botão de cashback" },
-                  { label: "Botão Resgatar (CTA)", val: brandCta, set: setBrandCta, def: "", hint: "Vazio = gradiente das cores da marca" },
-                  { label: "Selo VIP / nível", val: brandVip, set: setBrandVip, def: DEFAULT_VIP, hint: "Chip do nível (Bronze/Prata/Ouro)" },
-                  { label: "Preço / valor R$", val: brandPrice, set: setBrandPrice, def: DEFAULT_PRICE, hint: "Realce em valores monetários" },
-                  { label: "Texto sobre fundo escuro", val: textOnDark, set: setTextOnDark, def: DEFAULT_TEXT_ON_DARK, hint: "Nome da loja, saldos, títulos" },
-                ] as const).map((c) => (
+                {(
+                  [
+                    {
+                      label: "Saldo de pontos",
+                      val: accentPoints,
+                      set: setAccentPoints,
+                      def: DEFAULT_ACCENT_POINTS,
+                      hint: "Cor do ícone e do 'pts'",
+                    },
+                    {
+                      label: "Saldo de cashback",
+                      val: accentCashback,
+                      set: setAccentCashback,
+                      def: DEFAULT_ACCENT_CASHBACK,
+                      hint: "Ícone e botão de cashback",
+                    },
+                    {
+                      label: "Botão Resgatar (CTA)",
+                      val: brandCta,
+                      set: setBrandCta,
+                      def: "",
+                      hint: "Vazio = gradiente das cores da marca",
+                    },
+                    {
+                      label: "Selo VIP / nível",
+                      val: brandVip,
+                      set: setBrandVip,
+                      def: DEFAULT_VIP,
+                      hint: "Chip do nível (Bronze/Prata/Ouro)",
+                    },
+                    {
+                      label: "Preço / valor R$",
+                      val: brandPrice,
+                      set: setBrandPrice,
+                      def: DEFAULT_PRICE,
+                      hint: "Realce em valores monetários",
+                    },
+                    {
+                      label: "Texto sobre fundo escuro",
+                      val: textOnDark,
+                      set: setTextOnDark,
+                      def: DEFAULT_TEXT_ON_DARK,
+                      hint: "Nome da loja, saldos, títulos",
+                    },
+                  ] as const
+                ).map((c) => (
                   <div key={c.label} className="space-y-1">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">{c.label}</Label>
@@ -638,14 +754,20 @@ function PersonalizacaoPage() {
               )}
 
               <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
-                <div className="text-sm font-semibold text-[#0F172A]">Cabeçalho da página do cliente</div>
+                <div className="text-sm font-semibold text-[#0F172A]">
+                  Cabeçalho da página do cliente
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">Texto acima do nome</Label>
                       {kickerText !== DEFAULT_KICKER_TEXT && (
-                        <button type="button" onClick={() => setKickerText(DEFAULT_KICKER_TEXT)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setKickerText(DEFAULT_KICKER_TEXT)}
+                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                        >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
                       )}
@@ -669,7 +791,11 @@ function PersonalizacaoPage() {
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">Tamanho do nome da loja</Label>
                       {titleSize !== DEFAULT_TITLE_SIZE && (
-                        <button type="button" onClick={() => setTitleSize(DEFAULT_TITLE_SIZE)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setTitleSize(DEFAULT_TITLE_SIZE)}
+                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                        >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
                       )}
@@ -690,7 +816,11 @@ function PersonalizacaoPage() {
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">Peso do nome da loja</Label>
                       {titleWeight !== DEFAULT_TITLE_WEIGHT && (
-                        <button type="button" onClick={() => setTitleWeight(DEFAULT_TITLE_WEIGHT)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setTitleWeight(DEFAULT_TITLE_WEIGHT)}
+                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                        >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
                       )}
@@ -710,7 +840,11 @@ function PersonalizacaoPage() {
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">Tamanho do texto acima (kicker)</Label>
                       {kickerSize !== DEFAULT_KICKER_SIZE && (
-                        <button type="button" onClick={() => setKickerSize(DEFAULT_KICKER_SIZE)} className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setKickerSize(DEFAULT_KICKER_SIZE)}
+                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                        >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
                       )}
@@ -751,45 +885,64 @@ function PersonalizacaoPage() {
                     className="mx-auto transition-all"
                     style={{ maxWidth: previewDevice === "mobile" ? 320 : "100%" }}
                   >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-11 w-11 rounded-xl flex items-center justify-center font-bold text-white"
-                      style={{ background: `linear-gradient(135deg, ${cor1}, ${cor2})` }}
-                    >
-                      {(loja.nome_fantasia || "L").charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      {kickerShow && (
-                        <div
-                          className="uppercase tracking-[0.2em] font-semibold"
-                          style={{
-                            color: `color-mix(in oklab, ${cor1} 60%, #cbd5e1)`,
-                            fontSize: { xs: "9px", sm: "10px", md: "12px" }[kickerSize],
-                          }}
-                        >
-                          {kickerText || "Fidelidade"}
-                        </div>
-                      )}
+                    <div className="flex items-center gap-3">
                       <div
-                        className={`leading-tight truncate ${
-                          previewDevice === "mobile"
-                            ? { sm: "text-sm", md: "text-base", lg: "text-lg", xl: "text-xl", "2xl": "text-2xl" }[titleSize]
-                            : { sm: "text-sm", md: "text-lg", lg: "text-xl", xl: "text-2xl", "2xl": "text-3xl" }[titleSize]
-                        } ${
-                          { normal: "font-normal", semibold: "font-semibold", bold: "font-bold", black: "font-black" }[titleWeight]
-                        }`}
-                        style={{ color: textOnDark || "#ffffff" }}
+                        className="h-11 w-11 rounded-xl flex items-center justify-center font-bold text-white"
+                        style={{ background: `linear-gradient(135deg, ${cor1}, ${cor2})` }}
                       >
-                        {loja.nome_fantasia}
+                        {(loja.nome_fantasia || "L").charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        {kickerShow && (
+                          <div
+                            className="uppercase tracking-[0.2em] font-semibold"
+                            style={{
+                              color: `color-mix(in oklab, ${cor1} 60%, #cbd5e1)`,
+                              fontSize: { xs: "9px", sm: "10px", md: "12px" }[kickerSize],
+                            }}
+                          >
+                            {kickerText || "Fidelidade"}
+                          </div>
+                        )}
+                        <div
+                          className={`leading-tight truncate ${
+                            previewDevice === "mobile"
+                              ? {
+                                  sm: "text-sm",
+                                  md: "text-base",
+                                  lg: "text-lg",
+                                  xl: "text-xl",
+                                  "2xl": "text-2xl",
+                                }[titleSize]
+                              : {
+                                  sm: "text-sm",
+                                  md: "text-lg",
+                                  lg: "text-xl",
+                                  xl: "text-2xl",
+                                  "2xl": "text-3xl",
+                                }[titleSize]
+                          } ${
+                            {
+                              normal: "font-normal",
+                              semibold: "font-semibold",
+                              bold: "font-bold",
+                              black: "font-black",
+                            }[titleWeight]
+                          }`}
+                          style={{ color: textOnDark || "#ffffff" }}
+                        >
+                          {loja.nome_fantasia}
+                        </div>
                       </div>
                     </div>
-                  </div>
                   </div>
                 </div>
 
                 {/* Prévia ao vivo da página de pontos */}
                 <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
-                  <div className="text-sm font-semibold text-[#0F172A]">Prévia — página de pontos</div>
+                  <div className="text-sm font-semibold text-[#0F172A]">
+                    Prévia — página de pontos
+                  </div>
                   <div
                     className="mx-auto rounded-2xl p-4 space-y-3 transition-all"
                     style={{
@@ -804,11 +957,20 @@ function PersonalizacaoPage() {
                   >
                     <div className="grid grid-cols-2 gap-3">
                       <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                        <div className="flex items-center gap-1 text-[10px]" style={{ color: textOnDark, opacity: 0.7 }}>
+                        <div
+                          className="flex items-center gap-1 text-[10px]"
+                          style={{ color: textOnDark, opacity: 0.7 }}
+                        >
                           <Coins className="h-3 w-3" style={{ color: accentPoints }} /> Seus pontos
                         </div>
-                        <div className="mt-1 text-2xl font-bold tabular-nums" style={{ color: textOnDark }}>
-                          1.240 <span className="text-xs font-semibold" style={{ color: accentPoints }}>pts</span>
+                        <div
+                          className="mt-1 text-2xl font-bold tabular-nums"
+                          style={{ color: textOnDark }}
+                        >
+                          1.240{" "}
+                          <span className="text-xs font-semibold" style={{ color: accentPoints }}>
+                            pts
+                          </span>
                         </div>
                         <div
                           className="mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold border"
@@ -822,10 +984,17 @@ function PersonalizacaoPage() {
                         </div>
                       </div>
                       <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-                        <div className="flex items-center gap-1 text-[10px]" style={{ color: textOnDark, opacity: 0.7 }}>
-                          <Wallet className="h-3 w-3" style={{ color: accentCashback }} /> Seu cashback
+                        <div
+                          className="flex items-center gap-1 text-[10px]"
+                          style={{ color: textOnDark, opacity: 0.7 }}
+                        >
+                          <Wallet className="h-3 w-3" style={{ color: accentCashback }} /> Seu
+                          cashback
                         </div>
-                        <div className="mt-1 text-2xl font-bold tabular-nums" style={{ color: brandPrice || textOnDark }}>
+                        <div
+                          className="mt-1 text-2xl font-bold tabular-nums"
+                          style={{ color: brandPrice || textOnDark }}
+                        >
                           R$ 47,90
                         </div>
                         <div
@@ -856,7 +1025,8 @@ function PersonalizacaoPage() {
               </div>
 
               <p className="text-xs text-[#64748B]">
-                Essas cores aparecem na página que seus clientes veem — saldo de pontos, cashback, botão de resgatar, selo VIP, preços em R$ e o cabeçalho com o nome da sua loja.
+                Essas cores aparecem na página que seus clientes veem — saldo de pontos, cashback,
+                botão de resgatar, selo VIP, preços em R$ e o cabeçalho com o nome da sua loja.
               </p>
             </CardContent>
           </Card>
@@ -866,7 +1036,11 @@ function PersonalizacaoPage() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base text-[#0F172A]">Fundo da página do cliente</CardTitle>
               <ResetButton
-                onReset={() => { setBgMode(DEFAULT_BG_MODE); setBgColor1(DEFAULT_BG1); setBgColor2(DEFAULT_BG2); }}
+                onReset={() => {
+                  setBgMode(DEFAULT_BG_MODE);
+                  setBgColor1(DEFAULT_BG1);
+                  setBgColor2(DEFAULT_BG2);
+                }}
               />
             </CardHeader>
             <CardContent className="space-y-4">
@@ -885,7 +1059,9 @@ function PersonalizacaoPage() {
                     <label
                       key={opt.v}
                       className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
-                        bgMode === opt.v ? "border-[#2563EB] bg-[#EFF6FF]" : "border-[#E5E7EB] bg-white"
+                        bgMode === opt.v
+                          ? "border-[#2563EB] bg-[#EFF6FF]"
+                          : "border-[#E5E7EB] bg-white"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -903,14 +1079,24 @@ function PersonalizacaoPage() {
                   <div>
                     <Label>Cor de fundo principal</Label>
                     <div className="flex gap-2">
-                      <Input type="color" value={bgColor1} onChange={(e) => setBgColor1(e.target.value)} className="w-16 h-10 p-1" />
+                      <Input
+                        type="color"
+                        value={bgColor1}
+                        onChange={(e) => setBgColor1(e.target.value)}
+                        className="w-16 h-10 p-1"
+                      />
                       <Input value={bgColor1} onChange={(e) => setBgColor1(e.target.value)} />
                     </div>
                   </div>
                   <div>
                     <Label>Cor de fundo secundária</Label>
                     <div className="flex gap-2">
-                      <Input type="color" value={bgColor2} onChange={(e) => setBgColor2(e.target.value)} className="w-16 h-10 p-1" />
+                      <Input
+                        type="color"
+                        value={bgColor2}
+                        onChange={(e) => setBgColor2(e.target.value)}
+                        className="w-16 h-10 p-1"
+                      />
                       <Input value={bgColor2} onChange={(e) => setBgColor2(e.target.value)} />
                     </div>
                   </div>
@@ -924,10 +1110,17 @@ function PersonalizacaoPage() {
                     <button
                       key={p.label}
                       type="button"
-                      onClick={() => { setBgMode(p.mode); setBgColor1(p.c1); setBgColor2(p.c2); }}
+                      onClick={() => {
+                        setBgMode(p.mode);
+                        setBgColor1(p.c1);
+                        setBgColor2(p.c2);
+                      }}
                       className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-xs hover:border-[#2563EB]"
                     >
-                      <span className="h-4 w-8 rounded" style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})` }} />
+                      <span
+                        className="h-4 w-8 rounded"
+                        style={{ background: `linear-gradient(135deg, ${p.c1}, ${p.c2})` }}
+                      />
                       {p.label}
                     </button>
                   ))}
@@ -952,8 +1145,8 @@ function PersonalizacaoPage() {
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-[#0F172A]">Chuva de Recompensas</div>
                   <p className="mt-1 text-xs text-[#64748B]">
-                    Exibe moedas, cashback, cupons e símbolos de premiação caindo suavemente
-                    no fundo da página de login dos clientes.
+                    Exibe moedas, cashback, cupons e símbolos de premiação caindo suavemente no
+                    fundo da página de login dos clientes.
                   </p>
                   <div className="mt-3">
                     <Button
@@ -980,7 +1173,9 @@ function PersonalizacaoPage() {
                 <div className="space-y-4 rounded-xl border border-[#E5E7EB] bg-white p-4">
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-[#0F172A]">Cores dos ícones</Label>
+                      <Label className="text-xs font-semibold text-[#0F172A]">
+                        Cores dos ícones
+                      </Label>
                       <button
                         type="button"
                         onClick={() => setRainColors(DEFAULT_RAIN_COLORS)}
@@ -1033,7 +1228,9 @@ function PersonalizacaoPage() {
 
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-[#0F172A]">Opacidade dos ícones</Label>
+                      <Label className="text-xs font-semibold text-[#0F172A]">
+                        Opacidade dos ícones
+                      </Label>
                       <span className="text-[11px] font-medium tabular-nums text-[#64748B]">
                         {Math.round(rainOpacity * 100)}%
                       </span>
@@ -1072,7 +1269,8 @@ function PersonalizacaoPage() {
                   <div
                     className="rounded-2xl border px-6 py-5 text-center backdrop-blur-sm"
                     style={{
-                      background: bgMode === "light" ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.55)",
+                      background:
+                        bgMode === "light" ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.55)",
                       borderColor: `color-mix(in oklab, ${cor1} 40%, transparent)`,
                       color: bgMode === "light" ? "#0F172A" : "#FFFFFF",
                       zIndex: 1,
@@ -1084,13 +1282,19 @@ function PersonalizacaoPage() {
                 </div>
               </div>
               <p className="text-xs text-[#64748B]">
-                Os elementos caem em baixa opacidade e ignoram cliques — não atrapalham o formulário de login.
+                Os elementos caem em baixa opacidade e ignoram cliques — não atrapalham o formulário
+                de login.
               </p>
             </DialogContent>
           </Dialog>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg" className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200">
+            <Button
+              onClick={() => salvar.mutate()}
+              disabled={salvar.isPending}
+              size="lg"
+              className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200"
+            >
               {salvar.isPending ? "Salvando..." : "Salvar personalização"}
             </Button>
             <Button
@@ -1133,7 +1337,9 @@ function PersonalizacaoPage() {
         </div>
 
         <div className="lg:sticky lg:top-8 lg:self-start">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">Prévia ao vivo</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">
+            Prévia ao vivo
+          </div>
           <LivePreview
             nome={loja.nome_fantasia}
             logo={logo}
@@ -1152,7 +1358,8 @@ function PersonalizacaoPage() {
             bgColor2={bgColor2}
           />
           <p className="mt-2 text-[11px] text-[#64748B]">
-            Atualiza em tempo real. A área tracejada mostra a "zona segura" — mantenha logo e textos dentro dela para não cortar em celulares pequenos.
+            Atualiza em tempo real. A área tracejada mostra a "zona segura" — mantenha logo e textos
+            dentro dela para não cortar em celulares pequenos.
           </p>
         </div>
       </div>

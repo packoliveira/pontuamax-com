@@ -11,13 +11,18 @@ export async function getOwnedStoreId(ctx: { supabase: any; userId: string }): P
   return data.id as string;
 }
 
-export async function writeAudit(storeId: string, actorId: string, action: string, opts?: {
-  employeeId?: string | null;
-  targetLabel?: string | null;
-  meta?: Record<string, unknown>;
-  ip?: string | null;
-  userAgent?: string | null;
-}) {
+export async function writeAudit(
+  storeId: string,
+  actorId: string,
+  action: string,
+  opts?: {
+    employeeId?: string | null;
+    targetLabel?: string | null;
+    meta?: Record<string, unknown>;
+    ip?: string | null;
+    userAgent?: string | null;
+  },
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin.from("employee_audit_logs").insert({
     store_id: storeId,
@@ -88,7 +93,9 @@ export async function resolveActorLabel(userId: string, storeId: string): Promis
       .eq("store_id", storeId)
       .maybeSingle();
     if (data) return data.nome || data.email || null;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 

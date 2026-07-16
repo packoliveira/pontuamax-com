@@ -9,7 +9,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ShieldAlert, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { traduzirErroAuth, validarEmail, validarSenha, isCredenciaisInvalidas } from "@/lib/auth-errors";
+import {
+  traduzirErroAuth,
+  validarEmail,
+  validarSenha,
+  isCredenciaisInvalidas,
+} from "@/lib/auth-errors";
 import { EsqueciSenhaDialog } from "@/components/esqueci-senha-dialog";
 
 export const Route = createFileRoute("/admin/login")({
@@ -18,10 +23,7 @@ export const Route = createFileRoute("/admin/login")({
     const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
     if (!uid) return; // não logado: mostra a tela de login normalmente
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", uid);
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     const isAdmin = (roles ?? []).some((r) => r.role === "admin");
     if (isAdmin) throw redirect({ to: "/admin" });
     // Logado mas não é admin → bloqueia ANTES de qualquer signOut e redireciona.
@@ -30,7 +32,9 @@ export const Route = createFileRoute("/admin/login")({
         "auth_flash",
         "Esta área é exclusiva do admin master. Use o login do lojista.",
       );
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     throw redirect({ to: "/lojista/login" });
   },
   component: AdminLogin,
@@ -126,12 +130,17 @@ function AdminLogin() {
           <CardContent>
             <form onSubmit={submit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="admin-email" className="text-slate-200">Email</Label>
+                <Label htmlFor="admin-email" className="text-slate-200">
+                  Email
+                </Label>
                 <Input
                   id="admin-email"
                   type="email"
                   value={email}
-                  onChange={(e) => { setEmail(e.target.value); if (erroEmail) setErroEmail(null); }}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (erroEmail) setErroEmail(null);
+                  }}
                   required
                   autoComplete="email"
                   className={`bg-slate-800 text-slate-100 placeholder:text-slate-500 ${erroEmail ? "border-red-500" : "border-slate-700"}`}
@@ -139,11 +148,16 @@ function AdminLogin() {
                 {erroEmail && <p className="text-xs text-red-400">{erroEmail}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="admin-senha" className="text-slate-200">Senha</Label>
+                <Label htmlFor="admin-senha" className="text-slate-200">
+                  Senha
+                </Label>
                 <PasswordInput
                   id="admin-senha"
                   value={senha}
-                  onChange={(e) => { setSenha(e.target.value); if (erroSenha) setErroSenha(null); }}
+                  onChange={(e) => {
+                    setSenha(e.target.value);
+                    if (erroSenha) setErroSenha(null);
+                  }}
                   required
                   autoComplete="current-password"
                   className={`bg-slate-800 text-slate-100 placeholder:text-slate-500 ${erroSenha ? "border-red-500" : "border-slate-700"}`}
@@ -171,7 +185,8 @@ function AdminLogin() {
               </button>
               {showBootstrap && (
                 <p className="text-[11px] text-center text-slate-400">
-                  Se este é o primeiro admin do sistema, o acesso é liberado automaticamente após o login.
+                  Se este é o primeiro admin do sistema, o acesso é liberado automaticamente após o
+                  login.
                 </p>
               )}
             </form>
@@ -179,10 +194,17 @@ function AdminLogin() {
         </Card>
         <p className="text-center text-xs text-slate-500">
           É lojista?{" "}
-          <a href="/lojista/login" className="underline hover:text-slate-300">Ir para o login do lojista</a>
+          <a href="/lojista/login" className="underline hover:text-slate-300">
+            Ir para o login do lojista
+          </a>
         </p>
       </div>
-      <EsqueciSenhaDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} darkTheme />
+      <EsqueciSenhaDialog
+        open={forgotOpen}
+        onOpenChange={setForgotOpen}
+        defaultEmail={email}
+        darkTheme
+      />
     </div>
   );
 }

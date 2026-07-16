@@ -17,7 +17,11 @@ const WHATSAPP_SUPORTE = "5511999999999"; // ajuste com seu número
 function Aguardando() {
   const navigate = useNavigate();
   const fetchSub = useServerFn(getMyStoreSubscription);
-  const { data: store, isLoading, refetch } = useQuery({
+  const {
+    data: store,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["my-store-sub"],
     queryFn: () => fetchSub(),
     refetchInterval: 15_000,
@@ -33,8 +37,8 @@ function Aguardando() {
     status === "suspended"
       ? "Sua loja está suspensa"
       : status === "cancelled"
-      ? "Sua loja foi cancelada"
-      : "Aguardando liberação";
+        ? "Sua loja foi cancelada"
+        : "Aguardando liberação";
 
   const mensagemWa = encodeURIComponent(
     `Olá! Sou ${store?.nome_fantasia ?? "novo lojista"} e quero liberar meu acesso à plataforma de fidelidade.`,
@@ -51,12 +55,24 @@ function Aguardando() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border bg-muted/40 p-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Loja</span><span className="font-medium">{store?.nome_fantasia ?? "-"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Plano</span><span className="font-medium capitalize">{store?.plan ?? "starter"}</span></div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Loja</span>
+              <span className="font-medium">{store?.nome_fantasia ?? "-"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Plano</span>
+              <span className="font-medium capitalize">{store?.plan ?? "starter"}</span>
+            </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Setup</span>
               <span className="font-medium flex items-center gap-1">
-                {store?.setup_paid_at ? (<><CheckCircle2 className="h-4 w-4 text-green-600" /> Pago</>) : "Pendente"}
+                {store?.setup_paid_at ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-green-600" /> Pago
+                  </>
+                ) : (
+                  "Pendente"
+                )}
               </span>
             </div>
           </div>
@@ -65,8 +81,8 @@ function Aguardando() {
             {status === "pending_payment"
               ? "Assim que confirmarmos o pagamento da implementação, seu acesso será liberado."
               : status === "suspended"
-              ? "Sua assinatura está suspensa. Regularize para reativar."
-              : "Fale conosco se quiser reabrir sua loja."}
+                ? "Sua assinatura está suspensa. Regularize para reativar."
+                : "Fale conosco se quiser reabrir sua loja."}
           </p>
 
           <a
@@ -81,7 +97,9 @@ function Aguardando() {
           </a>
 
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => refetch()}>Já paguei, atualizar</Button>
+            <Button variant="outline" className="flex-1" onClick={() => refetch()}>
+              Já paguei, atualizar
+            </Button>
             <Button
               variant="ghost"
               onClick={async () => {

@@ -24,7 +24,25 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Coins, Wallet, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, CheckCircle2, XCircle, MessageCircle, Upload, QrCode, Loader2, Power, Bell, Cake, Clock, TimerReset, Gift, Star, Instagram } from "lucide-react";
+import {
+  Copy,
+  RefreshCw,
+  Send,
+  CheckCircle2,
+  XCircle,
+  MessageCircle,
+  Upload,
+  QrCode,
+  Loader2,
+  Power,
+  Bell,
+  Cake,
+  Clock,
+  TimerReset,
+  Gift,
+  Star,
+  Instagram,
+} from "lucide-react";
 import { Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
@@ -78,8 +96,8 @@ function ConfigPage() {
           nome_fantasia: nome,
           telefone: telefone || null,
           logo_url: logo || null,
-        banner_url: banner || null,
-        banner_url_mobile: bannerMobile || null,
+          banner_url: banner || null,
+          banner_url_mobile: bannerMobile || null,
           brand_primary: cor1,
           brand_secondary: cor2,
           modalidade,
@@ -105,103 +123,226 @@ function ConfigPage() {
   return (
     <div className="space-y-8 max-w-5xl">
       <div className="space-y-1">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">Ajustes</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">
+          Ajustes
+        </div>
         <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">Configurações</h1>
-        <p className="text-sm text-[#64748B]">Personalize a página do cliente, regras de recompensa e integrações</p>
+        <p className="text-sm text-[#64748B]">
+          Personalize a página do cliente, regras de recompensa e integrações
+        </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Dados da loja</CardTitle></CardHeader><CardContent className="space-y-3">
-            <div><Label>Nome fantasia</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-            <div><Label>Telefone</Label><Input value={telefone} onChange={(e) => setTelefone(e.target.value)} /></div>
-          </CardContent></Card>
-
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Identidade visual</CardTitle></CardHeader><CardContent className="space-y-4">
-            <AssetUploader
-              storeId={loja.id}
-              kind="logo"
-              label="Logo da loja"
-              hint="Recomendado: 512 × 512 px (quadrado), PNG com fundo transparente. Até 2 MB."
-              value={logo}
-              onChange={setLogo}
-            />
-            <AssetUploader
-              storeId={loja.id}
-              kind="banner"
-              label="Banner (desktop)"
-              hint="Recomendado: 1920 × 480 px. JPG ou PNG até 5 MB."
-              value={banner}
-              onChange={setBanner}
-              aspect="banner"
-            />
-            <AssetUploader
-              storeId={loja.id}
-              kind="banner-mobile"
-              label="Banner (celular)"
-              hint="Recomendado: 1200 × 600 px (proporção 2:1, horizontal). JPG ou PNG até 5 MB."
-              value={bannerMobile}
-              onChange={setBannerMobile}
-              aspect="banner-mobile"
-            />
-            <SuggestedBanners onPick={(url) => { setBanner(url); setBannerMobile(url); }} />
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Cor primária</Label><div className="flex gap-2"><Input type="color" value={cor1} onChange={(e) => setCor1(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor1} onChange={(e) => setCor1(e.target.value)} /></div></div>
-              <div><Label>Cor secundária</Label><div className="flex gap-2"><Input type="color" value={cor2} onChange={(e) => setCor2(e.target.value)} className="w-16 h-10 p-1" /><Input value={cor2} onChange={(e) => setCor2(e.target.value)} /></div></div>
-            </div>
-            <ColorPresets onPick={(a, b) => { setCor1(a); setCor2(b); }} />
-            <p className="text-xs text-[#64748B]">
-              As cores da sua marca pintam a aura de fundo, o logo, a barra de progresso e o botão de resgate na página do cliente.
-              <a href={`/${loja.slug}`} target="_blank" rel="noreferrer" className="ml-1 underline text-[#2563EB]">Ver como o cliente vê →</a>
-            </p>
-          </CardContent></Card>
-
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden"><div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" /><CardHeader><CardTitle className="text-base text-[#0F172A]">Modalidade de recompensa</CardTitle></CardHeader><CardContent className="space-y-4">
-            <RadioGroup value={modalidade} onValueChange={(v) => setModalidade(v as Modalidade)}>
-              {(["pontos", "cashback", "ambos"] as const).map((m) => (
-                <div key={m} className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] px-3 py-2 hover:bg-[#F8FAFC] transition-colors duration-200">
-                  <RadioGroupItem value={m} id={m} />
-                  <Label htmlFor={m} className="capitalize text-[#0F172A] cursor-pointer">{m}</Label>
-                </div>
-              ))}
-            </RadioGroup>
-            {inclP && (
-              <div><Label>Pontos por R$1 gasto</Label><Input type="number" step="0.1" value={regraP} onChange={(e) => setRegraP(e.target.value)} /></div>
-            )}
-            {inclC && (
-              <div><Label>% de cashback</Label><Input type="number" step="0.1" value={pctC} onChange={(e) => setPctC(e.target.value)} /></div>
-            )}
-            <div>
-              <Label>Validade do voucher de resgate (dias)</Label>
-              <Input type="number" min="1" max="365" value={validadeVoucher} onChange={(e) => setValidadeVoucher(e.target.value)} />
-              <p className="text-xs text-[#64748B] mt-1">Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso incentiva o cliente a voltar na loja logo.</p>
-            </div>
-            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
-              <div className="text-sm font-semibold text-[#0F172A]">Visibilidade dos vouchers para o cliente</div>
-              <div className="flex items-start justify-between gap-3">
-                <div className="text-xs text-[#64748B]">
-                  <div className="font-medium text-[#0F172A] text-sm">Manter voucher visível após utilização</div>
-                  Se ligado, o cliente continua vendo o voucher como "Utilizado" na lista dele. Se desligado (padrão), o voucher some assim que você confirma a entrega.
-                </div>
-                <Switch checked={voucherVisivelAposUso} onCheckedChange={setVoucherVisivelAposUso} />
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
+            <CardHeader>
+              <CardTitle className="text-base text-[#0F172A]">Dados da loja</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label>Nome fantasia</Label>
+                <Input value={nome} onChange={(e) => setNome(e.target.value)} />
               </div>
-              <div className="flex items-start justify-between gap-3">
-                <div className="text-xs text-[#64748B]">
-                  <div className="font-medium text-[#0F172A] text-sm">Mostrar vouchers expirados no histórico</div>
-                  Se ligado (padrão), o cliente vê os vouchers expirados como aviso. Desligue para escondê-los.
-                </div>
-                <Switch checked={voucherMostrarExpirados} onCheckedChange={setVoucherMostrarExpirados} />
+              <div>
+                <Label>Telefone</Label>
+                <Input value={telefone} onChange={(e) => setTelefone(e.target.value)} />
               </div>
-            </div>
-            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 text-xs text-[#64748B]">
-              Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente com base nos pontos.
-            </div>
-          </CardContent></Card>
+            </CardContent>
+          </Card>
 
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} size="lg" className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200">
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
+            <CardHeader>
+              <CardTitle className="text-base text-[#0F172A]">Identidade visual</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <AssetUploader
+                storeId={loja.id}
+                kind="logo"
+                label="Logo da loja"
+                hint="Recomendado: 512 × 512 px (quadrado), PNG com fundo transparente. Até 2 MB."
+                value={logo}
+                onChange={setLogo}
+              />
+              <AssetUploader
+                storeId={loja.id}
+                kind="banner"
+                label="Banner (desktop)"
+                hint="Recomendado: 1920 × 480 px. JPG ou PNG até 5 MB."
+                value={banner}
+                onChange={setBanner}
+                aspect="banner"
+              />
+              <AssetUploader
+                storeId={loja.id}
+                kind="banner-mobile"
+                label="Banner (celular)"
+                hint="Recomendado: 1200 × 600 px (proporção 2:1, horizontal). JPG ou PNG até 5 MB."
+                value={bannerMobile}
+                onChange={setBannerMobile}
+                aspect="banner-mobile"
+              />
+              <SuggestedBanners
+                onPick={(url) => {
+                  setBanner(url);
+                  setBannerMobile(url);
+                }}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Cor primária</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={cor1}
+                      onChange={(e) => setCor1(e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input value={cor1} onChange={(e) => setCor1(e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <Label>Cor secundária</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={cor2}
+                      onChange={(e) => setCor2(e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input value={cor2} onChange={(e) => setCor2(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+              <ColorPresets
+                onPick={(a, b) => {
+                  setCor1(a);
+                  setCor2(b);
+                }}
+              />
+              <p className="text-xs text-[#64748B]">
+                As cores da sua marca pintam a aura de fundo, o logo, a barra de progresso e o botão
+                de resgate na página do cliente.
+                <a
+                  href={`/${loja.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ml-1 underline text-[#2563EB]"
+                >
+                  Ver como o cliente vê →
+                </a>
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
+            <CardHeader>
+              <CardTitle className="text-base text-[#0F172A]">Modalidade de recompensa</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <RadioGroup value={modalidade} onValueChange={(v) => setModalidade(v as Modalidade)}>
+                {(["pontos", "cashback", "ambos"] as const).map((m) => (
+                  <div
+                    key={m}
+                    className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] px-3 py-2 hover:bg-[#F8FAFC] transition-colors duration-200"
+                  >
+                    <RadioGroupItem value={m} id={m} />
+                    <Label htmlFor={m} className="capitalize text-[#0F172A] cursor-pointer">
+                      {m}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+              {inclP && (
+                <div>
+                  <Label>Pontos por R$1 gasto</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={regraP}
+                    onChange={(e) => setRegraP(e.target.value)}
+                  />
+                </div>
+              )}
+              {inclC && (
+                <div>
+                  <Label>% de cashback</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={pctC}
+                    onChange={(e) => setPctC(e.target.value)}
+                  />
+                </div>
+              )}
+              <div>
+                <Label>Validade do voucher de resgate (dias)</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={validadeVoucher}
+                  onChange={(e) => setValidadeVoucher(e.target.value)}
+                />
+                <p className="text-xs text-[#64748B] mt-1">
+                  Após esse prazo o voucher expira e os pontos/cashback voltam pro cliente. Isso
+                  incentiva o cliente a voltar na loja logo.
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
+                <div className="text-sm font-semibold text-[#0F172A]">
+                  Visibilidade dos vouchers para o cliente
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-xs text-[#64748B]">
+                    <div className="font-medium text-[#0F172A] text-sm">
+                      Manter voucher visível após utilização
+                    </div>
+                    Se ligado, o cliente continua vendo o voucher como "Utilizado" na lista dele. Se
+                    desligado (padrão), o voucher some assim que você confirma a entrega.
+                  </div>
+                  <Switch
+                    checked={voucherVisivelAposUso}
+                    onCheckedChange={setVoucherVisivelAposUso}
+                  />
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-xs text-[#64748B]">
+                    <div className="font-medium text-[#0F172A] text-sm">
+                      Mostrar vouchers expirados no histórico
+                    </div>
+                    Se ligado (padrão), o cliente vê os vouchers expirados como aviso. Desligue para
+                    escondê-los.
+                  </div>
+                  <Switch
+                    checked={voucherMostrarExpirados}
+                    onCheckedChange={setVoucherMostrarExpirados}
+                  />
+                </div>
+              </div>
+              <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 text-xs text-[#64748B]">
+                Níveis Bronze (0-100), Prata (101-300), Ouro (301+) são aplicados automaticamente
+                com base nos pontos.
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button
+            onClick={() => salvar.mutate()}
+            disabled={salvar.isPending}
+            size="lg"
+            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200"
+          >
             {salvar.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
 
-          <IntegracoesCard storeId={loja.id} slug={loja.slug} secret={loja.webhook_secret} lastAt={loja.webhook_last_at} />
+          <IntegracoesCard
+            storeId={loja.id}
+            slug={loja.slug}
+            secret={loja.webhook_secret}
+            lastAt={loja.webhook_last_at}
+          />
           <OlistOAuthCard storeId={loja.id} />
           <WhatsappCard loja={loja} />
           <NotificacoesCard loja={loja} />
@@ -211,7 +352,9 @@ function ConfigPage() {
           <ValidadePontosCard loja={loja} />
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">Prévia ao vivo</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">
+            Prévia ao vivo
+          </div>
           <LivePreview
             nome={nome}
             logo={logo}
@@ -242,18 +385,19 @@ function IntegracoesCard({
   lastAt: string | null;
 }) {
   const qc = useQueryClient();
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://pontuamax-com.lovable.app";
-  const webhookOrigin = origin.includes("localhost") || origin.includes("id-preview--")
-    ? "https://pontuamax-com.lovable.app"
-    : origin;
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://pontuamax-com.lovable.app";
+  const webhookOrigin =
+    origin.includes("localhost") || origin.includes("id-preview--")
+      ? "https://pontuamax-com.lovable.app"
+      : origin;
   const query = `store=${encodeURIComponent(slug)}&secret=${encodeURIComponent(secret)}`;
   const urlBling = `${webhookOrigin}/api/public/webhook/bling?${query}`;
   const urlOlist = `${webhookOrigin}/api/public/webhook/olist?${query}`;
   const headerUrlBling = `${webhookOrigin}/api/public/webhook/bling`;
   const headerUrlOlist = `${webhookOrigin}/api/public/webhook/olist`;
 
-  const conectada =
-    !!lastAt && Date.now() - new Date(lastAt).getTime() < 30 * 24 * 60 * 60 * 1000;
+  const conectada = !!lastAt && Date.now() - new Date(lastAt).getTime() < 30 * 24 * 60 * 60 * 1000;
 
   const { data: logs } = useQuery(integrationLogsQuery(storeId));
 
@@ -298,15 +442,21 @@ function IntegracoesCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-[#64748B]">
-          Configure a URL completa abaixo no painel do Bling ou Olist. Cada venda enviada será lançada automaticamente
-          no PontuaMax, creditando pontos/cashback para o cliente sem precisar digitar em <em>Lançar Venda</em>.
+          Configure a URL completa abaixo no painel do Bling ou Olist. Cada venda enviada será
+          lançada automaticamente no PontuaMax, creditando pontos/cashback para o cliente sem
+          precisar digitar em <em>Lançar Venda</em>.
         </p>
 
         <div>
           <Label>URL completa do webhook (Bling)</Label>
           <div className="flex gap-2">
             <Input readOnly value={urlBling} className="font-mono text-xs" />
-            <Button type="button" variant="outline" size="icon" onClick={() => copy(urlBling, "URL")}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => copy(urlBling, "URL")}
+            >
               <Copy className="h-4 w-4" />
             </Button>
           </div>
@@ -315,7 +465,12 @@ function IntegracoesCard({
           <Label>URL completa do webhook (Olist)</Label>
           <div className="flex gap-2">
             <Input readOnly value={urlOlist} className="font-mono text-xs" />
-            <Button type="button" variant="outline" size="icon" onClick={() => copy(urlOlist, "URL")}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => copy(urlOlist, "URL")}
+            >
               <Copy className="h-4 w-4" />
             </Button>
           </div>
@@ -335,14 +490,22 @@ function IntegracoesCard({
           <Label>Chave secreta</Label>
           <div className="flex gap-2">
             <Input readOnly value={secret} className="font-mono text-xs" />
-            <Button type="button" variant="outline" size="icon" onClick={() => copy(secret, "Segredo")}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => copy(secret, "Segredo")}
+            >
               <Copy className="h-4 w-4" />
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => {
-                if (confirm("Gerar novo segredo? A chave atual deixará de funcionar imediatamente.")) rotate.mutate();
+                if (
+                  confirm("Gerar novo segredo? A chave atual deixará de funcionar imediatamente.")
+                )
+                  rotate.mutate();
               }}
               disabled={rotate.isPending}
             >
@@ -351,13 +514,22 @@ function IntegracoesCard({
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Para Olist/Tiny, use a URL completa acima. Se a integração permitir headers, use <code>{headerUrlOlist}</code> ou <code>{headerUrlBling}</code> com <code>x-qsf-store</code> e <code>x-qsf-secret</code>. Payload esperado:
-            <code className="ml-1">{`{ id_venda_externa, valor, telefone_cliente, nome_cliente? }`}</code>.
+            Para Olist/Tiny, use a URL completa acima. Se a integração permitir headers, use{" "}
+            <code>{headerUrlOlist}</code> ou <code>{headerUrlBling}</code> com{" "}
+            <code>x-qsf-store</code> e <code>x-qsf-secret</code>. Payload esperado:
+            <code className="ml-1">{`{ id_venda_externa, valor, telefone_cliente, nome_cliente? }`}</code>
+            .
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button type="button" variant="secondary" onClick={() => test.mutate()} disabled={test.isPending} className="rounded-xl">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => test.mutate()}
+            disabled={test.isPending}
+            className="rounded-xl"
+          >
             <Send className="h-4 w-4 mr-1" />
             {test.isPending ? "Enviando..." : "Testar integração"}
           </Button>
@@ -445,7 +617,7 @@ export function LivePreview({
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
   const isDesktop = device === "desktop";
-  const bannerSrc = isDesktop ? (banner || bannerMobile) : (bannerMobile || banner);
+  const bannerSrc = isDesktop ? banner || bannerMobile : bannerMobile || banner;
   const gradient = `linear-gradient(135deg, ${cor1}, ${cor2})`;
   const glow = `0 12px 40px -12px ${cor1}80`;
   const zoom = isDesktop ? 1 : mobileZoom / 100;
@@ -453,9 +625,8 @@ export function LivePreview({
   const posX = isDesktop ? 50 : mobilePositionX;
   const posY = isDesktop ? 50 : mobilePositionY;
   const bgBase =
-    bgMode === "light" ? "#f8fafc" : bgMode === "custom" ? (bgColor1 || "#0B1020") : "#0B1020";
-  const bgAccent =
-    bgMode === "custom" ? (bgColor2 || cor1) : bgMode === "light" ? cor1 : cor1;
+    bgMode === "light" ? "#f8fafc" : bgMode === "custom" ? bgColor1 || "#0B1020" : "#0B1020";
+  const bgAccent = bgMode === "custom" ? bgColor2 || cor1 : bgMode === "light" ? cor1 : cor1;
   const isLightBg = bgMode === "light" || (bgMode === "custom" && isLightHex(bgBase));
   const textPrimary = isLightBg ? "#0f172a" : "#ffffff";
   const textMuted = isLightBg ? "rgba(15,23,42,0.65)" : "rgba(255,255,255,0.7)";
@@ -479,116 +650,140 @@ export function LivePreview({
           🖥️ Desktop
         </button>
       </div>
-    <div
-      className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
-      style={{
-        background: `radial-gradient(120% 80% at 0% 0%, ${bgAccent}22, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${cor2}22, transparent 60%), ${bgBase}`,
-      }}
-    >
-      <div className="h-1" style={{ background: gradient }} />
-      {bannerSrc ? (
-        <div
-          className={`w-full overflow-hidden relative ${isDesktop ? "aspect-[4/1]" : "aspect-[2/1]"}`}
-          style={{
-            background: fit === "contain" ? `color-mix(in oklab, ${cor1} 15%, ${bgBase})` : undefined,
-          }}
-        >
-          <img
-            src={bannerSrc}
-            alt=""
-            className="w-full h-full"
+      <div
+        className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
+        style={{
+          background: `radial-gradient(120% 80% at 0% 0%, ${bgAccent}22, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${cor2}22, transparent 60%), ${bgBase}`,
+        }}
+      >
+        <div className="h-1" style={{ background: gradient }} />
+        {bannerSrc ? (
+          <div
+            className={`w-full overflow-hidden relative ${isDesktop ? "aspect-[4/1]" : "aspect-[2/1]"}`}
             style={{
-              objectFit: fit,
-              objectPosition: `${posX}% ${posY}%`,
-              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-              transformOrigin: `${posX}% ${posY}%`,
+              background:
+                fit === "contain" ? `color-mix(in oklab, ${cor1} 15%, ${bgBase})` : undefined,
             }}
+          >
+            <img
+              src={bannerSrc}
+              alt=""
+              className="w-full h-full"
+              style={{
+                objectFit: fit,
+                objectPosition: `${posX}% ${posY}%`,
+                transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+                transformOrigin: `${posX}% ${posY}%`,
+              }}
+            />
+            {showSafeArea && bannerMobile && !isDesktop && (
+              <div className="pointer-events-none absolute inset-0">
+                {/* Zona segura: retângulo central 70% x 70% — conteúdo aqui não corta em nenhum celular */}
+                <div
+                  className="absolute rounded-md border-2 border-dashed"
+                  style={{
+                    left: "15%",
+                    right: "15%",
+                    top: "15%",
+                    bottom: "15%",
+                    borderColor: "rgba(255,255,255,0.85)",
+                    boxShadow: "0 0 0 9999px rgba(0,0,0,0.15) inset",
+                  }}
+                />
+                <div className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                  Área segura
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div
+            className={`w-full ${isDesktop ? "aspect-[4/1]" : "aspect-[2/1]"}`}
+            style={{ background: gradient, opacity: 0.85 }}
           />
-          {showSafeArea && bannerMobile && !isDesktop && (
-            <div className="pointer-events-none absolute inset-0">
-              {/* Zona segura: retângulo central 70% x 70% — conteúdo aqui não corta em nenhum celular */}
+        )}
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            {logo ? (
+              <img
+                src={logo}
+                alt=""
+                className="h-10 w-10 rounded-xl object-contain p-1 ring-1"
+                style={{ boxShadow: glow, borderColor: cor1, background: chipBg }}
+              />
+            ) : (
               <div
-                className="absolute rounded-md border-2 border-dashed"
+                className="h-10 w-10 rounded-xl flex items-center justify-center text-white font-bold"
+                style={{ background: gradient, boxShadow: glow }}
+              >
+                {(nome || "L").charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="text-sm font-semibold truncate" style={{ color: textPrimary }}>
+                {nome || "Sua loja"}
+              </div>
+              <div className="text-[10px] uppercase tracking-wider" style={{ color: textMuted }}>
+                Programa fidelidade
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="rounded-xl p-3 space-y-2"
+            style={{ background: chipBg, border: `1px solid ${chipBorder}` }}
+          >
+            <div
+              className="flex items-center justify-between text-[11px]"
+              style={{ color: textMuted }}
+            >
+              <span>Nível Prata</span>
+              <span>240 / 300 pts</span>
+            </div>
+            <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: chipBg }}>
+              <div
+                className="h-full rounded-full transition-all"
                 style={{
-                  left: "15%",
-                  right: "15%",
-                  top: "15%",
-                  bottom: "15%",
-                  borderColor: "rgba(255,255,255,0.85)",
-                  boxShadow: "0 0 0 9999px rgba(0,0,0,0.15) inset",
+                  width: "80%",
+                  background: gradient,
+                  boxShadow: `0 0 12px ${cor1}99`,
                 }}
               />
-              <div className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-                Área segura
+            </div>
+          </div>
+
+          {inclP && (
+            <div
+              className="flex items-center gap-2 rounded-lg p-2"
+              style={{ background: `${cor1}22` }}
+            >
+              <Coins className="h-4 w-4" style={{ color: cor1 }} />
+              <div className="text-xs" style={{ color: textPrimary }}>
+                <strong>240</strong> pontos
               </div>
             </div>
           )}
-        </div>
-      ) : (
-        <div className={`w-full ${isDesktop ? "aspect-[4/1]" : "aspect-[2/1]"}`} style={{ background: gradient, opacity: 0.85 }} />
-      )}
-      <div className="p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          {logo ? (
-            <img
-              src={logo}
-              alt=""
-              className="h-10 w-10 rounded-xl object-contain p-1 ring-1"
-              style={{ boxShadow: glow, borderColor: cor1, background: chipBg }}
-            />
-          ) : (
+          {inclC && (
             <div
-              className="h-10 w-10 rounded-xl flex items-center justify-center text-white font-bold"
-              style={{ background: gradient, boxShadow: glow }}
+              className="flex items-center gap-2 rounded-lg p-2"
+              style={{ background: `${cor2}22` }}
             >
-              {(nome || "L").charAt(0).toUpperCase()}
+              <Wallet className="h-4 w-4" style={{ color: cor2 }} />
+              <div className="text-xs" style={{ color: textPrimary }}>
+                <strong>R$ 32,50</strong> de cashback
+              </div>
             </div>
           )}
-          <div>
-            <div className="text-sm font-semibold truncate" style={{ color: textPrimary }}>{nome || "Sua loja"}</div>
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: textMuted }}>Programa fidelidade</div>
-          </div>
+
+          <button
+            type="button"
+            className="w-full py-2 rounded-xl text-sm font-semibold text-white inline-flex items-center justify-center gap-1"
+            style={{ background: gradient, boxShadow: glow }}
+          >
+            <Sparkles className="h-4 w-4" />
+            Resgatar recompensa
+          </button>
         </div>
-
-        <div className="rounded-xl p-3 space-y-2" style={{ background: chipBg, border: `1px solid ${chipBorder}` }}>
-          <div className="flex items-center justify-between text-[11px]" style={{ color: textMuted }}>
-            <span>Nível Prata</span>
-            <span>240 / 300 pts</span>
-          </div>
-          <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: chipBg }}>
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: "80%",
-                background: gradient,
-                boxShadow: `0 0 12px ${cor1}99`,
-              }}
-            />
-          </div>
-        </div>
-
-        {inclP && (
-          <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: `${cor1}22` }}>
-            <Coins className="h-4 w-4" style={{ color: cor1 }} />
-            <div className="text-xs" style={{ color: textPrimary }}><strong>240</strong> pontos</div>
-          </div>
-        )}
-        {inclC && (
-          <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: `${cor2}22` }}>
-            <Wallet className="h-4 w-4" style={{ color: cor2 }} />
-            <div className="text-xs" style={{ color: textPrimary }}><strong>R$ 32,50</strong> de cashback</div>
-          </div>
-        )}
-
-        <button
-          type="button"
-          className="w-full py-2 rounded-xl text-sm font-semibold text-white inline-flex items-center justify-center gap-1"
-          style={{ background: gradient, boxShadow: glow }}
-        >
-          <Sparkles className="h-4 w-4" />
-          Resgatar recompensa
-        </button>
-      </div>
       </div>
     </div>
   );
@@ -598,7 +793,11 @@ function isLightHex(hex: string): boolean {
   const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!m) return false;
   let h = m[1];
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
@@ -653,39 +852,73 @@ function InstagramCard({ loja }: { loja: IgLoja }) {
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Instagram className="h-4 w-4" /></span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
+            <Instagram className="h-4 w-4" />
+          </span>
           Poste no Instagram e ganhe pontos
-          <span className="ml-auto"><Switch checked={on} onCheckedChange={setOn} /></span>
+          <span className="ml-auto">
+            <Switch checked={on} onCheckedChange={setOn} />
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-[#64748B]">
-          Quando ativo, os clientes enviam o link do post do Instagram pela página de vocês e você aprova em
-          {" "}<a href="/lojista/instagram" className="text-[#2563EB] hover:underline">Posts do Instagram</a> para creditar os pontos.
+          Quando ativo, os clientes enviam o link do post do Instagram pela página de vocês e você
+          aprova em{" "}
+          <a href="/lojista/instagram" className="text-[#2563EB] hover:underline">
+            Posts do Instagram
+          </a>{" "}
+          para creditar os pontos.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label>@ do Instagram da loja</Label>
-            <Input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="sua_loja" disabled={!on} />
+            <Input
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              placeholder="sua_loja"
+              disabled={!on}
+            />
           </div>
           <div>
             <Label>Pontos por post aprovado</Label>
-            <Input type="number" min={1} value={pontos} onChange={(e) => setPontos(e.target.value)} disabled={!on} />
+            <Input
+              type="number"
+              min={1}
+              value={pontos}
+              onChange={(e) => setPontos(e.target.value)}
+              disabled={!on}
+            />
           </div>
           <div>
             <Label>Post deve ficar no ar (dias)</Label>
-            <Input type="number" min={0} value={dias} onChange={(e) => setDias(e.target.value)} disabled={!on} />
-            <p className="text-[10px] text-muted-foreground mt-1">Se o cliente apagar antes disso, você pode estornar os pontos.</p>
+            <Input
+              type="number"
+              min={0}
+              value={dias}
+              onChange={(e) => setDias(e.target.value)}
+              disabled={!on}
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Se o cliente apagar antes disso, você pode estornar os pontos.
+            </p>
           </div>
         </div>
         <div>
           <Label>Instruções para o cliente</Label>
           <Textarea
-            rows={4} value={instrucoes} onChange={(e) => setInstrucoes(e.target.value)} disabled={!on}
+            rows={4}
+            value={instrucoes}
+            onChange={(e) => setInstrucoes(e.target.value)}
+            disabled={!on}
             placeholder={`Ex:\n1. Poste uma foto ou reel usando nossos produtos\n2. Marque @${handle || "sua_loja"} na foto\n3. Use a #suahashtag\n4. Perfil precisa estar público`}
           />
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
+        <Button
+          onClick={() => salvar.mutate()}
+          disabled={salvar.isPending}
+          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+        >
           {salvar.isPending ? "Salvando..." : "Salvar configurações"}
         </Button>
       </CardContent>
@@ -704,7 +937,9 @@ type ValidadeLoja = {
 
 function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   const qc = useQueryClient();
-  const [modo, setModo] = useState<"nenhum" | "validade" | "decaimento">((loja.pontos_expiracao_modo as never) ?? "nenhum");
+  const [modo, setModo] = useState<"nenhum" | "validade" | "decaimento">(
+    (loja.pontos_expiracao_modo as never) ?? "nenhum",
+  );
   const [validadeDias, setValidadeDias] = useState(String(loja.pontos_validade_dias ?? 365));
   const [decaiDias, setDecaiDias] = useState(String(loja.pontos_decaimento_dias ?? 30));
   const [decaiValor, setDecaiValor] = useState(String(loja.pontos_decaimento_valor ?? 10));
@@ -738,13 +973,16 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Hourglass className="h-4 w-4" /></span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
+            <Hourglass className="h-4 w-4" />
+          </span>
           Validade dos pontos
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-[#64748B]">
-          Defina se e como os pontos dos clientes expiram. A execução é automática (todo dia) e cria uma movimentação de "expiração" no histórico.
+          Defina se e como os pontos dos clientes expiram. A execução é automática (todo dia) e cria
+          uma movimentação de "expiração" no histórico.
         </p>
 
         <RadioGroup value={modo} onValueChange={(v) => setModo(v as never)} className="space-y-2">
@@ -759,10 +997,18 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
             <RadioGroupItem value="validade" id="mp-validade" className="mt-0.5" />
             <div className="flex-1">
               <div className="text-sm font-medium text-[#0F172A]">Validade por data</div>
-              <div className="text-xs text-[#64748B]">Cada ponto ganho expira depois de N dias.</div>
+              <div className="text-xs text-[#64748B]">
+                Cada ponto ganho expira depois de N dias.
+              </div>
               {modo === "validade" && (
                 <div className="mt-2 flex items-center gap-2">
-                  <Input type="number" min={1} className="w-28" value={validadeDias} onChange={(e) => setValidadeDias(e.target.value)} />
+                  <Input
+                    type="number"
+                    min={1}
+                    className="w-28"
+                    value={validadeDias}
+                    onChange={(e) => setValidadeDias(e.target.value)}
+                  />
                   <span className="text-xs text-[#64748B]">dias de validade</span>
                 </div>
               )}
@@ -777,11 +1023,21 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-xs">Pontos a remover</Label>
-                    <Input type="number" min={1} value={decaiValor} onChange={(e) => setDecaiValor(e.target.value)} />
+                    <Input
+                      type="number"
+                      min={1}
+                      value={decaiValor}
+                      onChange={(e) => setDecaiValor(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label className="text-xs">A cada (dias)</Label>
-                    <Input type="number" min={1} value={decaiDias} onChange={(e) => setDecaiDias(e.target.value)} />
+                    <Input
+                      type="number"
+                      min={1}
+                      value={decaiDias}
+                      onChange={(e) => setDecaiDias(e.target.value)}
+                    />
                   </div>
                 </div>
               )}
@@ -795,7 +1051,11 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
           </p>
         )}
 
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
+        <Button
+          onClick={() => salvar.mutate()}
+          disabled={salvar.isPending}
+          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+        >
           {salvar.isPending ? "Salvando..." : "Salvar validade"}
         </Button>
       </CardContent>
@@ -803,7 +1063,17 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   );
 }
 
-function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_ativa: boolean; bonus_indicador: number; bonus_indicado: number } }) {
+function IndicacaoCard({
+  loja,
+}: {
+  loja: {
+    id: string;
+    slug: string;
+    indicacao_ativa: boolean;
+    bonus_indicador: number;
+    bonus_indicado: number;
+  };
+}) {
   const qc = useQueryClient();
   const [ativa, setAtiva] = useState(loja.indicacao_ativa);
   const [bIndicador, setBIndicador] = useState(String(loja.bonus_indicador));
@@ -828,19 +1098,23 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
     },
     onError: (e) => toast.error((e as Error).message),
   });
-  const link = typeof window !== "undefined" ? `${window.location.origin}/${loja.slug}?indicou=TELEFONE` : "";
+  const link =
+    typeof window !== "undefined" ? `${window.location.origin}/${loja.slug}?indicou=TELEFONE` : "";
   return (
     <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Gift className="h-4 w-4" /></span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
+            <Gift className="h-4 w-4" />
+          </span>
           Indicação amigo → amigo
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-[#64748B]">
-          Cada cliente ganha um link único (com o telefone dele) para compartilhar. Quando o amigo se cadastrar por esse link e fizer a 1ª compra, os dois recebem pontos.
+          Cada cliente ganha um link único (com o telefone dele) para compartilhar. Quando o amigo
+          se cadastrar por esse link e fizer a 1ª compra, os dois recebem pontos.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={ativa} onCheckedChange={setAtiva} />
@@ -849,17 +1123,33 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label>Bônus para o indicador (pts)</Label>
-            <Input type="number" min={0} value={bIndicador} onChange={(e) => setBIndicador(e.target.value)} disabled={!ativa} />
+            <Input
+              type="number"
+              min={0}
+              value={bIndicador}
+              onChange={(e) => setBIndicador(e.target.value)}
+              disabled={!ativa}
+            />
           </div>
           <div>
             <Label>Bônus para o indicado (pts)</Label>
-            <Input type="number" min={0} value={bIndicado} onChange={(e) => setBIndicado(e.target.value)} disabled={!ativa} />
+            <Input
+              type="number"
+              min={0}
+              value={bIndicado}
+              onChange={(e) => setBIndicado(e.target.value)}
+              disabled={!ativa}
+            />
           </div>
         </div>
         <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-xs text-[#64748B] break-all">
           Formato do link: <code className="text-[#0F172A]">{link}</code>
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
+        <Button
+          onClick={() => salvar.mutate()}
+          disabled={salvar.isPending}
+          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+        >
           {salvar.isPending ? "Salvando..." : "Salvar indicação"}
         </Button>
       </CardContent>
@@ -867,7 +1157,11 @@ function IndicacaoCard({ loja }: { loja: { id: string; slug: string; indicacao_a
   );
 }
 
-function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_comment: boolean; nps_template: string } }) {
+function NpsCard({
+  loja,
+}: {
+  loja: { id: string; nps_enabled: boolean; nps_ask_comment: boolean; nps_template: string };
+}) {
   const qc = useQueryClient();
   const [on, setOn] = useState(loja.nps_enabled);
   const [askC, setAskC] = useState(loja.nps_ask_comment);
@@ -878,7 +1172,8 @@ function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_c
     setTpl(loja.nps_template);
   }, [loja]);
   const salvar = useMutation({
-    mutationFn: () => atualizarLoja({ data: { nps_enabled: on, nps_ask_comment: askC, nps_template: tpl } }),
+    mutationFn: () =>
+      atualizarLoja({ data: { nps_enabled: on, nps_ask_comment: askC, nps_template: tpl } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-store"] });
       toast.success("NPS salvo");
@@ -890,13 +1185,16 @@ function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_c
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Star className="h-4 w-4" /></span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
+            <Star className="h-4 w-4" />
+          </span>
           Pesquisa de satisfação (NPS)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-[#64748B]">
-          Após cada venda lançada, o cliente recebe um link no WhatsApp para dar uma nota de 0 a 10. Requer WhatsApp ativo.
+          Após cada venda lançada, o cliente recebe um link no WhatsApp para dar uma nota de 0 a 10.
+          Requer WhatsApp ativo.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={on} onCheckedChange={setOn} />
@@ -910,10 +1208,15 @@ function NpsCard({ loja }: { loja: { id: string; nps_enabled: boolean; nps_ask_c
           <Label>Mensagem enviada</Label>
           <Textarea rows={4} value={tpl} onChange={(e) => setTpl(e.target.value)} disabled={!on} />
           <p className="text-[11px] text-[#64748B] mt-1">
-            Variáveis: <code>{"{nome_cliente}"}</code>, <code>{"{nome_loja}"}</code>, <code>{"{link_nps}"}</code>
+            Variáveis: <code>{"{nome_cliente}"}</code>, <code>{"{nome_loja}"}</code>,{" "}
+            <code>{"{link_nps}"}</code>
           </p>
         </div>
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
+        <Button
+          onClick={() => salvar.mutate()}
+          disabled={salvar.isPending}
+          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+        >
           {salvar.isPending ? "Salvando..." : "Salvar NPS"}
         </Button>
       </CardContent>
@@ -962,7 +1265,11 @@ export function AssetUploader({
       return;
     }
     // Validação de dimensões para o banner do celular (proporção 2:1, ~1200x600)
-    if (kind === "banner-mobile" && file.type.startsWith("image/") && file.type !== "image/svg+xml") {
+    if (
+      kind === "banner-mobile" &&
+      file.type.startsWith("image/") &&
+      file.type !== "image/svg+xml"
+    ) {
       try {
         const dims = await readImageDimensions(file);
         const ratio = dims.width / dims.height;
@@ -971,9 +1278,7 @@ export function AssetUploader({
         const tooSmall = dims.width < 900 || dims.height < 450;
         const problems: string[] = [];
         if (ratioOff > 0.1) {
-          problems.push(
-            `proporção ${ratio.toFixed(2)}:1 (recomendado 2:1)`,
-          );
+          problems.push(`proporção ${ratio.toFixed(2)}:1 (recomendado 2:1)`);
         }
         if (tooSmall) {
           problems.push(`${dims.width}×${dims.height}px (mínimo 1200×600)`);
@@ -999,8 +1304,11 @@ export function AssetUploader({
         contentType: file.type || undefined,
       });
       if (up.error) throw up.error;
-      const signed = await supabase.storage.from("store-assets").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (signed.error || !signed.data?.signedUrl) throw signed.error ?? new Error("Falha ao gerar URL");
+      const signed = await supabase.storage
+        .from("store-assets")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signed.error || !signed.data?.signedUrl)
+        throw signed.error ?? new Error("Falha ao gerar URL");
       onChange(signed.data.signedUrl);
       toast.success("Imagem enviada — não esqueça de salvar as alterações.");
     } catch (e) {
@@ -1024,7 +1332,9 @@ export function AssetUploader({
         {value ? (
           <img src={value} alt={label} className={`${previewClass} rounded-md border`} />
         ) : (
-          <div className={`${previewClass} rounded-md border border-dashed flex items-center justify-center text-xs text-muted-foreground`}>
+          <div
+            className={`${previewClass} rounded-md border border-dashed flex items-center justify-center text-xs text-muted-foreground`}
+          >
             sem imagem
           </div>
         )}
@@ -1042,7 +1352,11 @@ export function AssetUploader({
             />
             <Button type="button" variant="outline" size="sm" asChild>
               <span>
-                {uploading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
+                {uploading ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Upload className="h-3 w-3 mr-1" />
+                )}
                 {uploading ? "Enviando..." : value ? "Trocar imagem" : "Enviar imagem"}
               </span>
             </Button>
@@ -1096,34 +1410,64 @@ export function ColorPresets({ onPick }: { onPick: (a: string, b: string) => voi
 }
 
 const SUGGESTED_BANNERS: { label: string; url: string }[] = [
-  { label: "Café", url: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1920&h=560&q=80" },
-  { label: "Restaurante", url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&h=560&q=80" },
-  { label: "Varejo", url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1920&h=560&q=80" },
-  { label: "Beleza", url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1920&h=560&q=80" },
-  { label: "Fitness", url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&h=560&q=80" },
-  { label: "Abstrato", url: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920&h=560&q=80" },
+  {
+    label: "Café",
+    url: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1920&h=560&q=80",
+  },
+  {
+    label: "Restaurante",
+    url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&h=560&q=80",
+  },
+  {
+    label: "Varejo",
+    url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1920&h=560&q=80",
+  },
+  {
+    label: "Beleza",
+    url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1920&h=560&q=80",
+  },
+  {
+    label: "Fitness",
+    url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&h=560&q=80",
+  },
+  {
+    label: "Abstrato",
+    url: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920&h=560&q=80",
+  },
 ];
 
 export function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) {
   return (
     <div className="space-y-2">
-      <Label className="text-xs uppercase tracking-wide text-[#64748B]">Ou escolha um banner sugerido</Label>
+      <Label className="text-xs uppercase tracking-wide text-[#64748B]">
+        Ou escolha um banner sugerido
+      </Label>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {SUGGESTED_BANNERS.map((b) => (
           <button
             key={b.url}
             type="button"
-            onClick={() => { onPick(b.url); toast.success(`Banner "${b.label}" aplicado — salve para publicar.`); }}
+            onClick={() => {
+              onPick(b.url);
+              toast.success(`Banner "${b.label}" aplicado — salve para publicar.`);
+            }}
             className="group relative rounded-lg overflow-hidden border border-[#E5E7EB] hover:border-[#2563EB] hover:shadow-md transition-all"
           >
-            <img src={b.url} alt={b.label} loading="lazy" className="w-full h-16 object-cover group-hover:scale-105 transition-transform duration-300" />
+            <img
+              src={b.url}
+              alt={b.label}
+              loading="lazy"
+              className="w-full h-16 object-cover group-hover:scale-105 transition-transform duration-300"
+            />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-1">
               <span className="text-[10px] font-medium text-white">{b.label}</span>
             </div>
           </button>
         ))}
       </div>
-      <p className="text-[11px] text-[#64748B]">Aplica em desktop e celular. Você pode substituir por uma imagem própria a qualquer momento.</p>
+      <p className="text-[11px] text-[#64748B]">
+        Aplica em desktop e celular. Você pode substituir por uma imagem própria a qualquer momento.
+      </p>
     </div>
   );
 }
@@ -1194,18 +1538,37 @@ function WhatsappQRConnect({ storeId }: { storeId: string }) {
         <div className="flex items-center gap-2">
           <QrCode className="h-4 w-4 text-[#2563EB]" />
           <span className="text-sm font-medium text-[#0F172A]">Conexão WhatsApp</span>
-          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}
+          >
             {badge.text}
           </span>
         </div>
         {state === "open" ? (
-          <Button type="button" variant="outline" size="sm" onClick={desconectar} disabled={loading} className="rounded-xl border-[#E5E7EB]">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={desconectar}
+            disabled={loading}
+            className="rounded-xl border-[#E5E7EB]"
+          >
             <Power className="h-3 w-3 mr-1" />
             Desconectar
           </Button>
         ) : (
-          <Button type="button" size="sm" onClick={conectar} disabled={loading} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
-            {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <QrCode className="h-3 w-3 mr-1" />}
+          <Button
+            type="button"
+            size="sm"
+            onClick={conectar}
+            disabled={loading}
+            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          >
+            {loading ? (
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+            ) : (
+              <QrCode className="h-3 w-3 mr-1" />
+            )}
             Gerar QR Code
           </Button>
         )}
@@ -1218,12 +1581,14 @@ function WhatsappQRConnect({ storeId }: { storeId: string }) {
             className="w-56 h-56 border border-[#E5E7EB] rounded-xl bg-white p-2"
           />
           <p className="text-xs text-[#64748B] text-center max-w-xs">
-            Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> → <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
+            Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> →{" "}
+            <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
           </p>
         </div>
       )}
       <p className="text-xs text-[#64748B]">
-        Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até você desconectar ou o WhatsApp derrubar a sessão.
+        Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até
+        você desconectar ou o WhatsApp derrubar a sessão.
       </p>
     </div>
   );
@@ -1306,14 +1671,18 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><MessageCircle className="h-4 w-4" /></span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
+            <MessageCircle className="h-4 w-4" />
+          </span>
           WhatsApp (Evolution API)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
           <div>
-            <div className="text-sm font-medium text-[#0F172A]">Envio automático de "pontos ganhos"</div>
+            <div className="text-sm font-medium text-[#0F172A]">
+              Envio automático de "pontos ganhos"
+            </div>
             <div className="text-xs text-[#64748B]">
               Dispara toda vez que o cliente ganha pontos (manual ou via Bling/Olist).
             </div>
@@ -1324,18 +1693,32 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
         <div className="grid gap-3 md:grid-cols-2">
           <div>
             <Label>URL da instância Evolution</Label>
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://evolution.seu-dominio.com" />
+            <Input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://evolution.seu-dominio.com"
+            />
           </div>
           <div>
             <Label>Nome da instância</Label>
-            <Input value={instance} onChange={(e) => setInstance(e.target.value)} placeholder="minha-loja" />
+            <Input
+              value={instance}
+              onChange={(e) => setInstance(e.target.value)}
+              placeholder="minha-loja"
+            />
           </div>
         </div>
         <div>
           <Label>API Key (header apikey)</Label>
-          <Input type="password" value={apikey} onChange={(e) => setApikey(e.target.value)} placeholder="••••••••" />
+          <Input
+            type="password"
+            value={apikey}
+            onChange={(e) => setApikey(e.target.value)}
+            placeholder="••••••••"
+          />
           <p className="text-xs text-[#64748B] mt-1">
-            A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente final.
+            A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente
+            final.
           </p>
         </div>
 
@@ -1343,7 +1726,12 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
 
         <div>
           <Label>Template da mensagem "pontos ganhos"</Label>
-          <Textarea rows={7} value={template} onChange={(e) => setTemplate(e.target.value)} className="font-mono text-xs" />
+          <Textarea
+            rows={7}
+            value={template}
+            onChange={(e) => setTemplate(e.target.value)}
+            className="font-mono text-xs"
+          />
           <div className="mt-2 flex flex-wrap gap-1">
             {vars.map((v) => (
               <button
@@ -1358,7 +1746,11 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
           </div>
         </div>
 
-        <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
+        <Button
+          onClick={() => salvar.mutate()}
+          disabled={salvar.isPending}
+          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+        >
           {salvar.isPending ? "Salvando..." : "Salvar WhatsApp"}
         </Button>
 
@@ -1382,7 +1774,8 @@ function WhatsappCard({ loja }: { loja: LojaRow }) {
             </Button>
           </div>
           <p className="text-xs text-[#64748B]">
-            Prefixo 55 é adicionado automaticamente. Sucessos e erros aparecem em "Últimos 20 eventos" acima.
+            Prefixo 55 é adicionado automaticamente. Sucessos e erros aparecem em "Últimos 20
+            eventos" acima.
           </p>
         </div>
       </CardContent>
@@ -1452,7 +1845,9 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
     mutationFn: () => dispararNotificacoesAgora({}),
     onSuccess: (r: unknown) => {
       const s = r as { aniversario: number; inatividade: number; expiracao: number; erros: number };
-      toast.success(`Enviadas: 🎂${s.aniversario} · 💤${s.inatividade} · ⏳${s.expiracao} · ⚠️${s.erros} erros`);
+      toast.success(
+        `Enviadas: 🎂${s.aniversario} · 💤${s.inatividade} · ⏳${s.expiracao} · ⚠️${s.erros} erros`,
+      );
     },
     onError: (e) => toast.error((e as Error).message),
   });
@@ -1462,79 +1857,143 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white"><Bell className="h-4 w-4" /></span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
+            <Bell className="h-4 w-4" />
+          </span>
           Notificações automáticas
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-xs text-[#64748B]">
-          Cron diário (09:00 Brasília) envia estas mensagens via WhatsApp. Requer WhatsApp ativado e Evolution API conectada acima.
+          Cron diário (09:00 Brasília) envia estas mensagens via WhatsApp. Requer WhatsApp ativado e
+          Evolution API conectada acima.
         </p>
 
         {/* Aniversário */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><Cake className="h-4 w-4 text-[#EC4899]" /> Aniversário</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]">
+              <Cake className="h-4 w-4 text-[#EC4899]" /> Aniversário
+            </div>
             <Switch checked={bDayOn} onCheckedChange={setBDayOn} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Bônus em pontos</Label>
-              <Input type="number" min={0} value={bDayBonus} onChange={(e) => setBDayBonus(e.target.value)} disabled={!bDayOn} />
+              <Input
+                type="number"
+                min={0}
+                value={bDayBonus}
+                onChange={(e) => setBDayBonus(e.target.value)}
+                disabled={!bDayOn}
+              />
             </div>
           </div>
           <div>
             <Label>Mensagem</Label>
-            <Textarea rows={3} value={bDayTpl} onChange={(e) => setBDayTpl(e.target.value)} disabled={!bDayOn} />
-            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}</p>
+            <Textarea
+              rows={3}
+              value={bDayTpl}
+              onChange={(e) => setBDayTpl(e.target.value)}
+              disabled={!bDayOn}
+            />
+            <p className="text-[10px] text-[#64748B] mt-1">
+              Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}
+            </p>
           </div>
         </div>
 
         {/* Inatividade */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><Clock className="h-4 w-4 text-[#F59E0B]" /> Cliente sumido</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]">
+              <Clock className="h-4 w-4 text-[#F59E0B]" /> Cliente sumido
+            </div>
             <Switch checked={inatOn} onCheckedChange={setInatOn} />
           </div>
           <div>
             <Label>Enviar após quantos dias sem comprar</Label>
-            <Input type="number" min={1} value={inatDias} onChange={(e) => setInatDias(e.target.value)} disabled={!inatOn} />
+            <Input
+              type="number"
+              min={1}
+              value={inatDias}
+              onChange={(e) => setInatDias(e.target.value)}
+              disabled={!inatOn}
+            />
           </div>
           <div>
             <Label>Mensagem</Label>
-            <Textarea rows={3} value={inatTpl} onChange={(e) => setInatTpl(e.target.value)} disabled={!inatOn} />
-            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}</p>
+            <Textarea
+              rows={3}
+              value={inatTpl}
+              onChange={(e) => setInatTpl(e.target.value)}
+              disabled={!inatOn}
+            />
+            <p className="text-[10px] text-[#64748B] mt-1">
+              Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}
+            </p>
           </div>
         </div>
 
         {/* Expiração */}
         <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]"><TimerReset className="h-4 w-4 text-[#EF4444]" /> Pontos a expirar</div>
+            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]">
+              <TimerReset className="h-4 w-4 text-[#EF4444]" /> Pontos a expirar
+            </div>
             <Switch checked={expOn} onCheckedChange={setExpOn} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Pontos expiram em (dias)</Label>
-              <Input type="number" min={1} value={expDias} onChange={(e) => setExpDias(e.target.value)} disabled={!expOn} />
+              <Input
+                type="number"
+                min={1}
+                value={expDias}
+                onChange={(e) => setExpDias(e.target.value)}
+                disabled={!expOn}
+              />
             </div>
             <div>
               <Label>Avisar quantos dias antes</Label>
-              <Input type="number" min={1} value={expWarn} onChange={(e) => setExpWarn(e.target.value)} disabled={!expOn} />
+              <Input
+                type="number"
+                min={1}
+                value={expWarn}
+                onChange={(e) => setExpWarn(e.target.value)}
+                disabled={!expOn}
+              />
             </div>
           </div>
           <div>
             <Label>Mensagem</Label>
-            <Textarea rows={3} value={expTpl} onChange={(e) => setExpTpl(e.target.value)} disabled={!expOn} />
-            <p className="text-[10px] text-[#64748B] mt-1">Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}</p>
+            <Textarea
+              rows={3}
+              value={expTpl}
+              onChange={(e) => setExpTpl(e.target.value)}
+              disabled={!expOn}
+            />
+            <p className="text-[10px] text-[#64748B] mt-1">
+              Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}
+            </p>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={() => salvar.mutate()} disabled={salvar.isPending} className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
+          <Button
+            onClick={() => salvar.mutate()}
+            disabled={salvar.isPending}
+            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          >
             {salvar.isPending ? "Salvando..." : "Salvar notificações"}
           </Button>
-          <Button type="button" variant="secondary" onClick={() => disparar.mutate()} disabled={disparar.isPending} className="rounded-xl">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => disparar.mutate()}
+            disabled={disparar.isPending}
+            className="rounded-xl"
+          >
             <Send className="h-4 w-4 mr-1" />
             {disparar.isPending ? "Disparando..." : "Disparar agora (teste)"}
           </Button>
@@ -1587,15 +2046,25 @@ function OlistOAuthCard({ storeId }: { storeId: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-[#64748B]">
-          Conexão oficial via OAuth2. As vendas são recebidas por webhook assinado e
-          consultadas em tempo real pela API V3 do Olist — sem colar URL nem segredo.
+          Conexão oficial via OAuth2. As vendas são recebidas por webhook assinado e consultadas em
+          tempo real pela API V3 do Olist — sem colar URL nem segredo.
         </p>
         {conectado ? (
           <>
             <div className="text-xs text-[#334155] space-y-1">
-              <div><b>Conta Olist:</b> {status?.account_id ?? "—"}</div>
-              <div><b>Renovado em:</b> {status?.last_refresh_at ? new Date(status.last_refresh_at).toLocaleString("pt-BR") : "—"}</div>
-              <div><b>Expira em:</b> {status?.expires_at ? new Date(status.expires_at).toLocaleString("pt-BR") : "—"}</div>
+              <div>
+                <b>Conta Olist:</b> {status?.account_id ?? "—"}
+              </div>
+              <div>
+                <b>Renovado em:</b>{" "}
+                {status?.last_refresh_at
+                  ? new Date(status.last_refresh_at).toLocaleString("pt-BR")
+                  : "—"}
+              </div>
+              <div>
+                <b>Expira em:</b>{" "}
+                {status?.expires_at ? new Date(status.expires_at).toLocaleString("pt-BR") : "—"}
+              </div>
             </div>
             <Button
               type="button"

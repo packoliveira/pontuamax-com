@@ -41,8 +41,10 @@ export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
 
     const linked = new Set((links.data ?? []).map((r) => r.user_id));
     const candidates = new Set<string>();
-    for (const r of tx.data ?? []) if (r.client_user_id && !linked.has(r.client_user_id)) candidates.add(r.client_user_id);
-    for (const r of notas.data ?? []) if (r.client_user_id && !linked.has(r.client_user_id)) candidates.add(r.client_user_id);
+    for (const r of tx.data ?? [])
+      if (r.client_user_id && !linked.has(r.client_user_id)) candidates.add(r.client_user_id);
+    for (const r of notas.data ?? [])
+      if (r.client_user_id && !linked.has(r.client_user_id)) candidates.add(r.client_user_id);
 
     let criados = 0;
     if (candidates.size > 0) {
@@ -55,7 +57,6 @@ export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
     }
     return { criados, ja_vinculados: linked.size, total: linked.size + criados };
   });
-
 
 // -------- LOJISTA: create store after signup --------
 export const criarLoja = createServerFn({ method: "POST" })
@@ -78,9 +79,17 @@ export const criarLoja = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const existing = await supabaseAdmin.from("stores").select("id").eq("slug", data.slug).maybeSingle();
+    const existing = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("slug", data.slug)
+      .maybeSingle();
     if (existing.data) throw new Error("Este slug já está em uso, escolha outro.");
-    const ownerCheck = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const ownerCheck = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (ownerCheck.data) throw new Error("Este usuário já possui uma loja.");
     const { data: loja, error } = await supabaseAdmin
       .from("stores")
@@ -88,7 +97,9 @@ export const criarLoja = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    await supabaseAdmin.from("user_roles").upsert({ user_id: context.userId, role: "lojista" }, { onConflict: "user_id,role" });
+    await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: context.userId, role: "lojista" }, { onConflict: "user_id,role" });
     return loja;
   });
 
@@ -154,7 +165,10 @@ export const atualizarLoja = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("stores").update(data).eq("owner_id", context.userId);
+    const { error } = await context.supabase
+      .from("stores")
+      .update(data)
+      .eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -163,14 +177,18 @@ export const atualizarLoja = createServerFn({ method: "POST" })
 export const vincularClienteALoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      store_id: z.string().uuid(),
-      referrer_phone: z.string().max(20).optional().nullable(),
-    }).parse(input),
+    z
+      .object({
+        store_id: z.string().uuid(),
+        referrer_phone: z.string().max(20).optional().nullable(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("user_roles").upsert({ user_id: context.userId, role: "cliente" }, { onConflict: "user_id,role" });
+    await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: context.userId, role: "cliente" }, { onConflict: "user_id,role" });
 
     // Helper: registra tentativa/resultado do vínculo no integration_logs
     // para o lojista conseguir auditar cadastros vindos da página pública.
@@ -209,7 +227,10 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     // e removemos o perfil pendente. Isso evita duplicatas visíveis no
     // painel do lojista com o mesmo CPF.
     const meuProfile = await supabaseAdmin
-      .from("profiles").select("id, cpf").eq("id", context.userId).maybeSingle();
+      .from("profiles")
+      .select("id, cpf")
+      .eq("id", context.userId)
+      .maybeSingle();
     const cpfMeu = (meuProfile.data?.cpf ?? "").replace(/\D/g, "");
     if (cpfMeu && cpfMeu.length === 11) {
       const pendentes = await supabaseAdmin
@@ -234,10 +255,19 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
             if (linkNew.data) {
               // já existe → soma saldos
               const novoPontos = (linkNew.data.pontos ?? 0) + (linkOld.pontos ?? 0);
-              const novoCash = Math.round(((Number(linkNew.data.cashback_saldo) || 0) + (Number(linkOld.cashback_saldo) || 0)) * 100) / 100;
+              const novoCash =
+                Math.round(
+                  ((Number(linkNew.data.cashback_saldo) || 0) +
+                    (Number(linkOld.cashback_saldo) || 0)) *
+                    100,
+                ) / 100;
               await supabaseAdmin
                 .from("store_clients")
-                .update({ pontos: novoPontos, cashback_saldo: novoCash, pending_registration: false })
+                .update({
+                  pontos: novoPontos,
+                  cashback_saldo: novoCash,
+                  pending_registration: false,
+                })
                 .eq("id", linkNew.data.id);
               await supabaseAdmin.from("store_clients").delete().eq("id", linkOld.id);
             } else {
@@ -249,15 +279,22 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
             }
           }
           // Reapontar transações e notas fiscais
-          await supabaseAdmin.from("transactions").update({ client_user_id: context.userId }).eq("client_user_id", p.id);
-          await supabaseAdmin.from("fiscal_notes").update({ client_user_id: context.userId }).eq("client_user_id", p.id);
+          await supabaseAdmin
+            .from("transactions")
+            .update({ client_user_id: context.userId })
+            .eq("client_user_id", p.id);
+          await supabaseAdmin
+            .from("fiscal_notes")
+            .update({ client_user_id: context.userId })
+            .eq("client_user_id", p.id);
           // Remover roles/profile e auth user pendente
           await supabaseAdmin.from("user_roles").delete().eq("user_id", p.id);
           await supabaseAdmin.from("profiles").delete().eq("id", p.id);
           await supabaseAdmin.auth.admin.deleteUser(p.id);
         } catch (mergeErr) {
           await logVinculo("erro", `merge pendente falhou: ${(mergeErr as Error).message}`, {
-            user_id: context.userId, pending_id: p.id,
+            user_id: context.userId,
+            pending_id: p.id,
           });
         }
       }
@@ -295,12 +332,19 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     if (data.referrer_phone) {
       const digits = data.referrer_phone.replace(/\D/g, "");
       if (digits.length >= 8) {
-        const prof = await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
+        const prof = await supabaseAdmin
+          .from("profiles")
+          .select("id")
+          .eq("phone", digits)
+          .maybeSingle();
         if (prof.data && prof.data.id !== context.userId) {
           // indicador precisa ser cliente da mesma loja
           const refLink = await supabaseAdmin
-            .from("store_clients").select("id")
-            .eq("store_id", data.store_id).eq("user_id", prof.data.id).maybeSingle();
+            .from("store_clients")
+            .select("id")
+            .eq("store_id", data.store_id)
+            .eq("user_id", prof.data.id)
+            .maybeSingle();
           if (refLink.data) referrer_user_id = prof.data.id;
         }
       }
@@ -308,7 +352,12 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
       .upsert(
-        { store_id: data.store_id, user_id: context.userId, referrer_user_id, pending_registration: false },
+        {
+          store_id: data.store_id,
+          user_id: context.userId,
+          referrer_user_id,
+          pending_registration: false,
+        },
         { onConflict: "store_id,user_id", ignoreDuplicates: false },
       )
       .select("*")
@@ -327,7 +376,9 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     // com profiles está resolvendo. Se algo estiver inconsistente, registramos.
     const verify = await supabaseAdmin
       .from("store_clients")
-      .select("id, store_id, user_id, pontos, cashback_saldo, profiles:user_id(full_name, cpf, phone)")
+      .select(
+        "id, store_id, user_id, pontos, cashback_saldo, profiles:user_id(full_name, cpf, phone)",
+      )
       .eq("id", link.id)
       .maybeSingle();
 
@@ -336,16 +387,22 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
       verify.data.store_id === data.store_id &&
       verify.data.user_id === context.userId;
 
-    await logVinculo(verifyOk ? "sucesso" : "erro", verifyOk ? null : (verify.error?.message ?? "verificação pós-insert falhou"), {
-      user_id: context.userId,
-      store_slug: lojaCheck.data.slug,
-      link_id: link.id,
-      profile_encontrado: !!verify.data?.profiles,
-      profile_nome: (verify.data?.profiles as { full_name?: string } | null)?.full_name ?? null,
-    });
+    await logVinculo(
+      verifyOk ? "sucesso" : "erro",
+      verifyOk ? null : (verify.error?.message ?? "verificação pós-insert falhou"),
+      {
+        user_id: context.userId,
+        store_slug: lojaCheck.data.slug,
+        link_id: link.id,
+        profile_encontrado: !!verify.data?.profiles,
+        profile_nome: (verify.data?.profiles as { full_name?: string } | null)?.full_name ?? null,
+      },
+    );
 
     if (!verifyOk) {
-      throw new Error("Cliente foi criado mas não pôde ser confirmado no painel — tente novamente.");
+      throw new Error(
+        "Cliente foi criado mas não pôde ser confirmado no painel — tente novamente.",
+      );
     }
     return link;
   });
@@ -356,11 +413,13 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
 // normalizamos a conta existente vinculada à loja para o e-mail por CPF.
 export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z.object({
-      store_id: z.string().uuid(),
-      cpf: z.string().min(11).max(20),
-      senha: z.string().min(6).max(72),
-    }).parse(input),
+    z
+      .object({
+        store_id: z.string().uuid(),
+        cpf: z.string().min(11).max(20),
+        senha: z.string().min(6).max(72),
+      })
+      .parse(input),
   )
   .handler(async ({ data }) => {
     const cpfDigits = data.cpf.replace(/\D/g, "");
@@ -546,7 +605,10 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
     });
     await supabaseAdmin
       .from("user_roles")
-      .upsert({ user_id: created.data.user.id, role: "cliente" as const }, { onConflict: "user_id,role" });
+      .upsert(
+        { user_id: created.data.user.id, role: "cliente" as const },
+        { onConflict: "user_id,role" },
+      );
     return { email };
   });
 
@@ -570,7 +632,11 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const storePerm = await supabaseAdmin.from("stores").select("id, owner_id").eq("id", data.store_id).maybeSingle();
+    const storePerm = await supabaseAdmin
+      .from("stores")
+      .select("id, owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
     if (!storePerm.data) throw new Error("Loja inválida.");
     if (storePerm.data.owner_id !== context.userId) {
       const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
@@ -602,10 +668,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
 
     // Colisão de telefone com outro CPF já cadastrado nesta loja.
     if (digits) {
-      const byPhone = await supabaseAdmin
-        .from("profiles")
-        .select("id, cpf")
-        .eq("phone", digits);
+      const byPhone = await supabaseAdmin.from("profiles").select("id, cpf").eq("phone", digits);
       const phoneOwners = (byPhone.data ?? []).filter(
         (p) => p.id !== existingByCpf?.id && (!cpfDigits || p.cpf !== cpfDigits),
       );
@@ -649,12 +712,17 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         email_confirm: true,
         user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits || null },
       });
-      if (created.error || !created.data.user) throw new Error(created.error?.message ?? "Falha ao criar cliente");
+      if (created.error || !created.data.user)
+        throw new Error(created.error?.message ?? "Falha ao criar cliente");
       userId = created.data.user.id;
       // Ensure profile exists (trigger handles it, but idempotent)
-      await supabaseAdmin.from("profiles").upsert({ id: userId, full_name: data.nome, phone: digits, cpf: cpfDigits || null });
+      await supabaseAdmin
+        .from("profiles")
+        .upsert({ id: userId, full_name: data.nome, phone: digits, cpf: cpfDigits || null });
     }
-    await supabaseAdmin.from("user_roles").upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id,role" });
+    await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: userId, role: "cliente" }, { onConflict: "user_id,role" });
     const { data: link, error } = await supabaseAdmin
       .from("store_clients")
       .upsert(
@@ -683,7 +751,9 @@ export const lancarVenda = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("id, owner_id, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, nome_fantasia")
+      .select(
+        "id, owner_id, modalidade, regra_pontos, percentual_cashback, indicacao_ativa, bonus_indicador, bonus_indicado, nome_fantasia",
+      )
       .eq("id", data.store_id)
       .maybeSingle();
     if (!loja.data) throw new Error("Loja inválida.");
@@ -712,16 +782,18 @@ export const lancarVenda = createServerFn({ method: "POST" })
       .eq("store_id", data.store_id)
       .eq("ativo", true);
     const multiplicador = getActiveMultiplier(promosRes.data ?? []);
-    const pontosBase = inclP ? Math.floor(data.valor * Number(loja.data.regra_pontos) * multiplicador) : 0;
-    const cashback = inclC ? +(data.valor * (Number(loja.data.percentual_cashback) / 100)).toFixed(2) : 0;
+    const pontosBase = inclP
+      ? Math.floor(data.valor * Number(loja.data.regra_pontos) * multiplicador)
+      : 0;
+    const cashback = inclC
+      ? +(data.valor * (Number(loja.data.percentual_cashback) / 100)).toFixed(2)
+      : 0;
 
     // -------- Bônus de indicação (só na 1ª compra) --------
     let bonusIndicado = 0;
     let bonusIndicador = 0;
     const pagarIndicacao =
-      loja.data.indicacao_ativa &&
-      !link.data.referral_bonus_paid &&
-      link.data.referrer_user_id;
+      loja.data.indicacao_ativa && !link.data.referral_bonus_paid && link.data.referrer_user_id;
     if (pagarIndicacao) {
       bonusIndicado = Number(loja.data.bonus_indicado) || 0;
       bonusIndicador = Number(loja.data.bonus_indicador) || 0;
@@ -730,15 +802,19 @@ export const lancarVenda = createServerFn({ method: "POST" })
     const pontos = pontosBase + bonusIndicado;
     const novoPontos = link.data.pontos + pontos;
     const novoCashback = +(Number(link.data.cashback_saldo) + cashback).toFixed(2);
-    const { data: txRow, error: txErr } = await supabaseAdmin.from("transactions").insert({
-      store_id: data.store_id,
-      client_user_id: data.client_user_id,
-      tipo: "venda",
-      valor: data.valor,
-      pontos_delta: pontos,
-      cashback_delta: cashback,
-      status: "entregue",
-    }).select("id").single();
+    const { data: txRow, error: txErr } = await supabaseAdmin
+      .from("transactions")
+      .insert({
+        store_id: data.store_id,
+        client_user_id: data.client_user_id,
+        tipo: "venda",
+        valor: data.valor,
+        pontos_delta: pontos,
+        cashback_delta: cashback,
+        status: "entregue",
+      })
+      .select("id")
+      .single();
     if (txErr) throw new Error(txErr.message);
     const { error: updErr } = await supabaseAdmin
       .from("store_clients")
@@ -754,11 +830,15 @@ export const lancarVenda = createServerFn({ method: "POST" })
     // Creditar indicador
     if (pagarIndicacao && bonusIndicador > 0 && link.data.referrer_user_id) {
       const refLink = await supabaseAdmin
-        .from("store_clients").select("id, pontos")
-        .eq("store_id", data.store_id).eq("user_id", link.data.referrer_user_id).maybeSingle();
+        .from("store_clients")
+        .select("id, pontos")
+        .eq("store_id", data.store_id)
+        .eq("user_id", link.data.referrer_user_id)
+        .maybeSingle();
       if (refLink.data) {
         const novoRef = refLink.data.pontos + bonusIndicador;
-        await supabaseAdmin.from("store_clients")
+        await supabaseAdmin
+          .from("store_clients")
           .update({ pontos: novoRef, nivel: calcularNivel(novoRef) })
           .eq("id", refLink.data.id);
         await supabaseAdmin.from("transactions").insert({
@@ -805,7 +885,11 @@ export const salvarPromocao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => promoSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const loja = await context.supabase.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const loja = await context.supabase
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
     const payload = {
       store_id: loja.data.id,
@@ -857,7 +941,10 @@ export const salvarNotificacoes = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("stores").update(data).eq("owner_id", context.userId);
+    const { error } = await context.supabase
+      .from("stores")
+      .update(data)
+      .eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -866,11 +953,16 @@ export const salvarNotificacoes = createServerFn({ method: "POST" })
 export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      client_user_id: z.string().uuid(),
-      store_id: z.string().uuid(),
-      birthdate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
-    }).parse(input),
+    z
+      .object({
+        client_user_id: z.string().uuid(),
+        store_id: z.string().uuid(),
+        birthdate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .nullable(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -889,9 +981,17 @@ export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
       if (perm.error) throw new Error(perm.error.message);
       if (!perm.data) throw new Error("Sem permissão para editar clientes nesta loja.");
     }
-    const link = await supabaseAdmin.from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
+    const link = await supabaseAdmin
+      .from("store_clients")
+      .select("id")
+      .eq("store_id", data.store_id)
+      .eq("user_id", data.client_user_id)
+      .maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
-    const { error } = await supabaseAdmin.from("profiles").update({ birthdate: data.birthdate }).eq("id", data.client_user_id);
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ birthdate: data.birthdate })
+      .eq("id", data.client_user_id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -900,18 +1000,23 @@ export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
 export const atualizarClienteInfo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      store_id: z.string().uuid(),
-      client_user_id: z.string().uuid(),
-      full_name: z.string().min(1).max(120),
-      phone: z.string().min(8).max(20),
-      cpf: z.string().min(11).max(20),
-    }).parse(input),
+    z
+      .object({
+        store_id: z.string().uuid(),
+        client_user_id: z.string().uuid(),
+        full_name: z.string().min(1).max(120),
+        phone: z.string().min(8).max(20),
+        cpf: z.string().min(11).max(20),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const storePerm = await supabaseAdmin
-      .from("stores").select("id, owner_id").eq("id", data.store_id).maybeSingle();
+      .from("stores")
+      .select("id, owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
     if (!storePerm.data) throw new Error("Loja inválida.");
     if (storePerm.data.owner_id !== context.userId) {
       const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
@@ -923,7 +1028,11 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
       if (!perm.data) throw new Error("Sem permissão para editar clientes nesta loja.");
     }
     const link = await supabaseAdmin
-      .from("store_clients").select("id").eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
+      .from("store_clients")
+      .select("id")
+      .eq("store_id", data.store_id)
+      .eq("user_id", data.client_user_id)
+      .maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
 
     const phoneDigits = data.phone.replace(/\D/g, "");
@@ -934,16 +1043,23 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
     // Duplicidade dentro da mesma loja (outros clientes com mesmo telefone/CPF)
     const orClauses = [`phone.eq.${phoneDigits}`, `cpf.eq.${cpfDigits}`];
     const dup = await supabaseAdmin
-      .from("profiles").select("id, phone, cpf").or(orClauses.join(","))
+      .from("profiles")
+      .select("id, phone, cpf")
+      .or(orClauses.join(","))
       .neq("id", data.client_user_id);
     const dupIds = (dup.data ?? []).map((p) => p.id);
     if (dupIds.length > 0) {
       const links = await supabaseAdmin
-        .from("store_clients").select("user_id").eq("store_id", data.store_id).in("user_id", dupIds);
+        .from("store_clients")
+        .select("user_id")
+        .eq("store_id", data.store_id)
+        .in("user_id", dupIds);
       if ((links.data ?? []).length > 0) {
         const conflict = dup.data!.find((p) => links.data!.some((l) => l.user_id === p.id));
-        if (conflict?.phone === phoneDigits) throw new Error("Já existe outro cliente nesta loja com este telefone.");
-        if (conflict?.cpf === cpfDigits) throw new Error("Já existe outro cliente nesta loja com este CPF.");
+        if (conflict?.phone === phoneDigits)
+          throw new Error("Já existe outro cliente nesta loja com este telefone.");
+        if (conflict?.cpf === cpfDigits)
+          throw new Error("Já existe outro cliente nesta loja com este CPF.");
         throw new Error("Já existe outro cliente nesta loja com este telefone ou CPF.");
       }
     }
@@ -966,18 +1082,28 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
 export const ajustarPontosCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      store_id: z.string().uuid(),
-      client_user_id: z.string().uuid(),
-      // positivo = adicionar; negativo = estornar
-      delta: z.number().int().min(-1_000_000).max(1_000_000).refine((n) => n !== 0, "Informe uma quantidade diferente de zero."),
-      motivo: z.string().max(200).optional(),
-    }).parse(input),
+    z
+      .object({
+        store_id: z.string().uuid(),
+        client_user_id: z.string().uuid(),
+        // positivo = adicionar; negativo = estornar
+        delta: z
+          .number()
+          .int()
+          .min(-1_000_000)
+          .max(1_000_000)
+          .refine((n) => n !== 0, "Informe uma quantidade diferente de zero."),
+        motivo: z.string().max(200).optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const storePerm = await supabaseAdmin
-      .from("stores").select("id, owner_id").eq("id", data.store_id).maybeSingle();
+      .from("stores")
+      .select("id, owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
     if (!storePerm.data) throw new Error("Loja inválida.");
     if (storePerm.data.owner_id !== context.userId) {
       const requiredPerm = data.delta > 0 ? "pontos.adicionar" : "pontos.estornar";
@@ -990,11 +1116,15 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
       if (!perm.data) throw new Error("Sem permissão para ajustar pontos nesta loja.");
     }
     const link = await supabaseAdmin
-      .from("store_clients").select("id, pontos")
-      .eq("store_id", data.store_id).eq("user_id", data.client_user_id).maybeSingle();
+      .from("store_clients")
+      .select("id, pontos")
+      .eq("store_id", data.store_id)
+      .eq("user_id", data.client_user_id)
+      .maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
     const novoPontos = link.data.pontos + data.delta;
-    if (novoPontos < 0) throw new Error(`Estorno maior que o saldo atual (${link.data.pontos} pts).`);
+    if (novoPontos < 0)
+      throw new Error(`Estorno maior que o saldo atual (${link.data.pontos} pts).`);
     const { error: eIns } = await supabaseAdmin.from("transactions").insert({
       store_id: data.store_id,
       client_user_id: data.client_user_id,
@@ -1018,16 +1148,20 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
 export const estornarVenda = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      transaction_id: z.string().uuid(),
-      motivo: z.string().max(200).optional(),
-    }).parse(input),
+    z
+      .object({
+        transaction_id: z.string().uuid(),
+        motivo: z.string().max(200).optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, store_id, client_user_id, tipo, valor, pontos_delta, cashback_delta, origem, stores:store_id(owner_id)")
+      .select(
+        "id, store_id, client_user_id, tipo, valor, pontos_delta, cashback_delta, origem, stores:store_id(owner_id)",
+      )
       .eq("id", data.transaction_id)
       .maybeSingle();
     if (!tx.data) throw new Error("Venda não encontrada.");
@@ -1041,7 +1175,8 @@ export const estornarVenda = createServerFn({ method: "POST" })
       if (perm.error) throw new Error(perm.error.message);
       if (!perm.data) throw new Error("Sem permissão para estornar esta venda.");
     }
-    if (tx.data.tipo !== "venda") throw new Error("Só é possível estornar transações do tipo venda.");
+    if (tx.data.tipo !== "venda")
+      throw new Error("Só é possível estornar transações do tipo venda.");
     if (typeof tx.data.origem === "string" && tx.data.origem.startsWith("estornada:")) {
       throw new Error("Esta venda já foi estornada.");
     }
@@ -1056,14 +1191,20 @@ export const estornarVenda = createServerFn({ method: "POST" })
     if (jaEstornada.data) throw new Error("Esta venda já foi estornada.");
 
     const link = await supabaseAdmin
-      .from("store_clients").select("id, pontos, cashback_saldo")
-      .eq("store_id", tx.data.store_id).eq("user_id", tx.data.client_user_id).maybeSingle();
+      .from("store_clients")
+      .select("id, pontos, cashback_saldo")
+      .eq("store_id", tx.data.store_id)
+      .eq("user_id", tx.data.client_user_id)
+      .maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado à loja.");
 
     const deltaPontos = -Number(tx.data.pontos_delta || 0);
     const deltaCashback = -Number(tx.data.cashback_delta || 0);
     const novoPontos = Math.max(0, link.data.pontos + deltaPontos);
-    const novoCashback = Math.max(0, +(Number(link.data.cashback_saldo) + deltaCashback).toFixed(2));
+    const novoCashback = Math.max(
+      0,
+      +(Number(link.data.cashback_saldo) + deltaCashback).toFixed(2),
+    );
 
     const ins = await supabaseAdmin.from("transactions").insert({
       store_id: tx.data.store_id,
@@ -1079,7 +1220,11 @@ export const estornarVenda = createServerFn({ method: "POST" })
 
     const upd = await supabaseAdmin
       .from("store_clients")
-      .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+      .update({
+        pontos: novoPontos,
+        cashback_saldo: novoCashback,
+        nivel: calcularNivel(novoPontos),
+      })
       .eq("id", link.data.id);
     if (upd.error) throw new Error(upd.error.message);
 
@@ -1098,9 +1243,15 @@ export const dispararNotificacoesAgora = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Só permite se for dono de alguma loja (evita endpoint público via serverFn)
-    const store = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const store = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!store.data) throw new Error("Sem loja.");
-    const url = process.env.VITE_APP_URL || "https://project--62bd2a63-6908-43c2-9917-f4ddac34c65f.lovable.app";
+    const url =
+      process.env.VITE_APP_URL ||
+      "https://project--62bd2a63-6908-43c2-9917-f4ddac34c65f.lovable.app";
     const key = process.env.SUPABASE_PUBLISHABLE_KEY;
     const res = await fetch(`${url}/api/public/hooks/notifications-daily`, {
       method: "POST",
@@ -1146,7 +1297,9 @@ export const resgatarProduto = createServerFn({ method: "POST" })
 export const resgatarCashback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ store_id: z.string().uuid(), valor: z.number().positive().max(1_000_000) }).parse(input),
+    z
+      .object({ store_id: z.string().uuid(), valor: z.number().positive().max(1_000_000) })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1180,7 +1333,9 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, store_id, status, tipo, voucher_code, voucher_expires_at, delivered_at, pontos_delta, cashback_delta, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone), stores:store_id(owner_id, nome_fantasia)")
+      .select(
+        "id, store_id, status, tipo, voucher_code, voucher_expires_at, delivered_at, pontos_delta, cashback_delta, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone), stores:store_id(owner_id, nome_fantasia)",
+      )
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
@@ -1203,7 +1358,8 @@ export const confirmarResgate = createServerFn({ method: "POST" })
     if (tx.data.status === "entregue") {
       throw new Error(formatVoucherJaUsado(tx.data.delivered_at));
     }
-    if (tx.data.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
+    if (tx.data.status === "expirado")
+      throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
     }
@@ -1224,8 +1380,10 @@ export const confirmarResgate = createServerFn({ method: "POST" })
         .select("status, delivered_at")
         .eq("id", data.transaction_id)
         .maybeSingle();
-      if (recheck.data?.status === "entregue") throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
-      if (recheck.data?.status === "expirado") throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
+      if (recheck.data?.status === "entregue")
+        throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
+      if (recheck.data?.status === "expirado")
+        throw new Error("Voucher expirado — os pontos/cashback já foram devolvidos ao cliente.");
       if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
       throw new Error("Não foi possível confirmar o voucher. Atualize a página e tente novamente.");
     }
@@ -1250,16 +1408,17 @@ export const confirmarResgate = createServerFn({ method: "POST" })
           delivered_at: deliveredAt,
         },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     try {
       const { notifyMerchant, resolveActorLabel } = await import("@/lib/team.functions");
       const actor = await resolveActorLabel(context.userId, tx.data.store_id);
       const pts = Math.abs(Number(tx.data.pontos_delta ?? 0));
       const cb = Math.abs(Number(tx.data.cashback_delta ?? 0));
-      const partes = [
-        pts ? `${pts} pts` : null,
-        cb ? `R$ ${cb.toFixed(2)} cashback` : null,
-      ].filter(Boolean).join(" • ");
+      const partes = [pts ? `${pts} pts` : null, cb ? `R$ ${cb.toFixed(2)} cashback` : null]
+        .filter(Boolean)
+        .join(" • ");
       await notifyMerchant({
         storeId: tx.data.store_id,
         actorUserId: context.userId,
@@ -1267,9 +1426,16 @@ export const confirmarResgate = createServerFn({ method: "POST" })
         tipo: "resgate.confirmado",
         titulo: `Resgate confirmado${actor ? ` por ${actor}` : ""}`,
         mensagem: `${profile?.full_name ?? "Cliente"} — ${product?.nome ?? tx.data.tipo}${partes ? " • " + partes : ""}`,
-        metadata: { transaction_id: tx.data.id, voucher: tx.data.voucher_code, pontos: pts, cashback: cb },
+        metadata: {
+          transaction_id: tx.data.id,
+          voucher: tx.data.voucher_code,
+          pontos: pts,
+          cashback: cb,
+        },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return {
       ok: true,
       comprovante: {
@@ -1294,7 +1460,10 @@ export const validarVoucher = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let store = await supabaseAdmin
-      .from("stores").select("id, nome_fantasia").eq("owner_id", context.userId).maybeSingle();
+      .from("stores")
+      .select("id, nome_fantasia")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!store.data) {
       const emp = await supabaseAdmin
         .from("store_employees")
@@ -1310,7 +1479,11 @@ export const validarVoucher = createServerFn({ method: "POST" })
         });
         if (perm.error) throw new Error(perm.error.message);
         if (perm.data) {
-          store = await supabaseAdmin.from("stores").select("id, nome_fantasia").eq("id", row.store_id).maybeSingle();
+          store = await supabaseAdmin
+            .from("stores")
+            .select("id, nome_fantasia")
+            .eq("id", row.store_id)
+            .maybeSingle();
           break;
         }
       }
@@ -1319,7 +1492,9 @@ export const validarVoucher = createServerFn({ method: "POST" })
     const code = data.voucher_code.trim().toUpperCase();
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, tipo, status, valor, pontos_delta, cashback_delta, voucher_code, voucher_expires_at, delivered_at, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone)")
+      .select(
+        "id, tipo, status, valor, pontos_delta, cashback_delta, voucher_code, voucher_expires_at, delivered_at, product_id, client_user_id, products:product_id(nome), profiles:client_user_id(full_name, phone)",
+      )
       .eq("store_id", store.data.id)
       .eq("voucher_code", code)
       .maybeSingle();
@@ -1327,14 +1502,19 @@ export const validarVoucher = createServerFn({ method: "POST" })
     if (tx.data.status === "entregue") {
       throw new Error(formatVoucherJaUsado(tx.data.delivered_at));
     }
-    if (tx.data.status === "expirado") throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
+    if (tx.data.status === "expirado")
+      throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
     if (tx.data.voucher_expires_at && new Date(tx.data.voucher_expires_at).getTime() < Date.now()) {
       throw new Error("Voucher expirado — saldo já devolvido ao cliente.");
     }
     // Update condicional idempotente: previne dupla entrega em corrida.
     const upd = await supabaseAdmin
       .from("transactions")
-      .update({ status: "entregue", delivered_at: new Date().toISOString(), redeemed_by: context.userId })
+      .update({
+        status: "entregue",
+        delivered_at: new Date().toISOString(),
+        redeemed_by: context.userId,
+      })
       .eq("id", tx.data.id)
       .eq("status", "pendente")
       .select("id");
@@ -1345,7 +1525,8 @@ export const validarVoucher = createServerFn({ method: "POST" })
         .select("status, delivered_at")
         .eq("id", tx.data.id)
         .maybeSingle();
-      if (recheck.data?.status === "entregue") throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
+      if (recheck.data?.status === "entregue")
+        throw new Error(formatVoucherJaUsado(recheck.data.delivered_at));
       if (recheck.data?.status === "cancelado") throw new Error("Voucher cancelado.");
       throw new Error("Voucher indisponível para entrega.");
     }
@@ -1363,14 +1544,19 @@ export const validarVoucher = createServerFn({ method: "POST" })
           cashback: Math.abs(Number(tx.data.cashback_delta || 0)),
         },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     try {
       const { notifyMerchant, resolveActorLabel } = await import("@/lib/team.functions");
       const actor = await resolveActorLabel(context.userId, store.data.id);
       const pts = Math.abs(Number(tx.data.pontos_delta || 0));
       const cb = Math.abs(Number(tx.data.cashback_delta || 0));
-      const partes = [pts ? `${pts} pts` : null, cb ? `R$ ${cb.toFixed(2)} cashback` : null].filter(Boolean).join(" • ");
-      const clienteNome = (tx.data.profiles as { full_name: string | null } | null)?.full_name ?? "Cliente";
+      const partes = [pts ? `${pts} pts` : null, cb ? `R$ ${cb.toFixed(2)} cashback` : null]
+        .filter(Boolean)
+        .join(" • ");
+      const clienteNome =
+        (tx.data.profiles as { full_name: string | null } | null)?.full_name ?? "Cliente";
       await notifyMerchant({
         storeId: store.data.id,
         actorUserId: context.userId,
@@ -1378,9 +1564,16 @@ export const validarVoucher = createServerFn({ method: "POST" })
         tipo: "voucher.validado",
         titulo: `Voucher validado${actor ? ` por ${actor}` : ""}`,
         mensagem: `${clienteNome} — ${tx.data.voucher_code}${partes ? " • " + partes : ""}`,
-        metadata: { transaction_id: tx.data.id, voucher: tx.data.voucher_code, pontos: pts, cashback: cb },
+        metadata: {
+          transaction_id: tx.data.id,
+          voucher: tx.data.voucher_code,
+          pontos: pts,
+          cashback: cb,
+        },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return {
       ok: true,
       voucher: tx.data.voucher_code,
@@ -1400,7 +1593,9 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
       .from("transactions")
-      .select("id, store_id, status, tipo, pontos_delta, cashback_delta, client_user_id, stores:store_id(owner_id)")
+      .select(
+        "id, store_id, status, tipo, pontos_delta, cashback_delta, client_user_id, stores:store_id(owner_id)",
+      )
       .eq("id", data.transaction_id)
       .maybeSingle();
     const ownerId = (tx.data?.stores as unknown as { owner_id: string } | null)?.owner_id;
@@ -1414,7 +1609,8 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
       if (perm.error) throw new Error(perm.error.message);
       if (!perm.data) throw new Error("Não autorizado.");
     }
-    if (tx.data.status !== "pendente") throw new Error("Só é possível cancelar vouchers pendentes.");
+    if (tx.data.status !== "pendente")
+      throw new Error("Só é possível cancelar vouchers pendentes.");
     const upd = await supabaseAdmin
       .from("transactions")
       .update({ status: "cancelado", redeemed_by: context.userId })
@@ -1422,7 +1618,8 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
       .eq("status", "pendente")
       .select("id");
     if (upd.error) throw new Error(upd.error.message);
-    if (!upd.data || upd.data.length === 0) throw new Error("Voucher já foi entregue ou cancelado.");
+    if (!upd.data || upd.data.length === 0)
+      throw new Error("Voucher já foi entregue ou cancelado.");
     // Devolve pontos/cashback ao cliente.
     if (tx.data.client_user_id) {
       const { calcularNivel } = await import("@/lib/qsf-shared");
@@ -1436,10 +1633,17 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
         const pontosDevolver = -Number(tx.data.pontos_delta || 0);
         const cashbackDevolver = -Number(tx.data.cashback_delta || 0);
         const novoPontos = Math.max(0, link.data.pontos + pontosDevolver);
-        const novoCashback = Math.max(0, +(Number(link.data.cashback_saldo) + cashbackDevolver).toFixed(2));
+        const novoCashback = Math.max(
+          0,
+          +(Number(link.data.cashback_saldo) + cashbackDevolver).toFixed(2),
+        );
         await supabaseAdmin
           .from("store_clients")
-          .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel: calcularNivel(novoPontos) })
+          .update({
+            pontos: novoPontos,
+            cashback_saldo: novoCashback,
+            nivel: calcularNivel(novoPontos),
+          })
           .eq("id", link.data.id);
       }
     }
@@ -1456,13 +1660,20 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
           cashback_devolvido: -Number(tx.data.cashback_delta || 0),
         },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     try {
       const { notifyMerchant, resolveActorLabel } = await import("@/lib/team.functions");
       const actor = await resolveActorLabel(context.userId, tx.data.store_id);
       const pts = -Number(tx.data.pontos_delta || 0);
       const cb = -Number(tx.data.cashback_delta || 0);
-      const partes = [pts ? `${pts} pts devolvidos` : null, cb ? `R$ ${cb.toFixed(2)} cashback devolvido` : null].filter(Boolean).join(" • ");
+      const partes = [
+        pts ? `${pts} pts devolvidos` : null,
+        cb ? `R$ ${cb.toFixed(2)} cashback devolvido` : null,
+      ]
+        .filter(Boolean)
+        .join(" • ");
       await notifyMerchant({
         storeId: tx.data.store_id,
         actorUserId: context.userId,
@@ -1472,7 +1683,9 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
         mensagem: `${tx.data.tipo}${partes ? " • " + partes : ""}`,
         metadata: { transaction_id: tx.data.id, pontos: pts, cashback: cb },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     return { ok: true };
   });
 
@@ -1493,12 +1706,22 @@ export const salvarProduto = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const check = await context.supabase.from("stores").select("id").eq("id", data.store_id).maybeSingle();
+    const check = await context.supabase
+      .from("stores")
+      .select("id")
+      .eq("id", data.store_id)
+      .maybeSingle();
     if (!check.data) throw new Error("Loja não encontrada.");
     if (data.id) {
       const { error } = await context.supabase
         .from("products")
-        .update({ nome: data.nome, descricao: data.descricao, custo_pontos: data.custo_pontos, ativo: data.ativo, foto_url: data.foto_url ?? null })
+        .update({
+          nome: data.nome,
+          descricao: data.descricao,
+          custo_pontos: data.custo_pontos,
+          ativo: data.ativo,
+          foto_url: data.foto_url ?? null,
+        })
         .eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
@@ -1589,7 +1812,10 @@ export const salvarWhatsapp = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("stores").update(data).eq("owner_id", context.userId);
+    const { error } = await context.supabase
+      .from("stores")
+      .update(data)
+      .eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -1598,7 +1824,12 @@ export const salvarWhatsapp = createServerFn({ method: "POST" })
 export const enviarWhatsappTeste = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ telefone: z.string().min(8).max(20), texto: z.string().min(1).max(1000).optional() }).parse(input),
+    z
+      .object({
+        telefone: z.string().min(8).max(20),
+        texto: z.string().min(1).max(1000).optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1614,7 +1845,9 @@ export const enviarWhatsappTeste = createServerFn({ method: "POST" })
     const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
     const numero = formatBrazilPhone(data.telefone);
     if (!numero) throw new Error("Telefone inválido.");
-    const texto = data.texto ?? `✅ Teste PontuaMax — ${loja.data.nome_fantasia}. Integração WhatsApp funcionando!`;
+    const texto =
+      data.texto ??
+      `✅ Teste PontuaMax — ${loja.data.nome_fantasia}. Integração WhatsApp funcionando!`;
     const res = await sendWhatsappRaw({
       storeId: loja.data.id,
       url: loja.data.evolution_url,
@@ -1664,7 +1897,9 @@ export const conectarWhatsappQR = createServerFn({ method: "POST" })
       /* segue pro connect */
     }
     if (!qr) {
-      const connRes = await fetch(`${base}/instance/connect/${encodeURIComponent(instance)}`, { headers });
+      const connRes = await fetch(`${base}/instance/connect/${encodeURIComponent(instance)}`, {
+        headers,
+      });
       if (!connRes.ok) {
         const body = await connRes.text();
         throw new Error(`Evolution API [${connRes.status}]: ${body.slice(0, 200)}`);
@@ -1673,7 +1908,10 @@ export const conectarWhatsappQR = createServerFn({ method: "POST" })
       qr = j?.base64 ?? j?.qrcode?.base64 ?? null;
     }
     if (loja.data.evolution_instance !== instance) {
-      await supabaseAdmin.from("stores").update({ evolution_instance: instance }).eq("id", loja.data.id);
+      await supabaseAdmin
+        .from("stores")
+        .update({ evolution_instance: instance })
+        .eq("id", loja.data.id);
     }
     if (!qr) throw new Error("Instância já conectada ou QR indisponível.");
     return { instance, qr };
@@ -1695,9 +1933,12 @@ export const statusWhatsapp = createServerFn({ method: "POST" })
     }
     const base = d.evolution_url.replace(/\/$/, "");
     try {
-      const res = await fetch(`${base}/instance/connectionState/${encodeURIComponent(d.evolution_instance)}`, {
-        headers: { apikey: d.evolution_apikey },
-      });
+      const res = await fetch(
+        `${base}/instance/connectionState/${encodeURIComponent(d.evolution_instance)}`,
+        {
+          headers: { apikey: d.evolution_apikey },
+        },
+      );
       if (!res.ok) return { state: "error" };
       const j = (await res.json()) as { instance?: { state?: string }; state?: string };
       return { state: j?.instance?.state ?? j?.state ?? "unknown" };
@@ -1730,19 +1971,37 @@ export const desconectarWhatsapp = createServerFn({ method: "POST" })
 export const criarCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      nome: z.string().min(1).max(100),
-      mensagem: z.string().min(1).max(2000),
-      segmento: z.enum(["todos", "bronze", "prata", "ouro", "inativos_30", "inativos_60", "inativos_90", "aniversariantes"]),
-      agendada_para: z.string().datetime().optional().nullable(),
-    }).parse(input),
+    z
+      .object({
+        nome: z.string().min(1).max(100),
+        mensagem: z.string().min(1).max(2000),
+        segmento: z.enum([
+          "todos",
+          "bronze",
+          "prata",
+          "ouro",
+          "inativos_30",
+          "inativos_60",
+          "inativos_90",
+          "aniversariantes",
+        ]),
+        agendada_para: z.string().datetime().optional().nullable(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
     const destinatarios = await selecionarDestinatarios(loja.data.id, data.segmento);
-    const agendada = data.agendada_para && new Date(data.agendada_para).getTime() > Date.now() ? data.agendada_para : null;
+    const agendada =
+      data.agendada_para && new Date(data.agendada_para).getTime() > Date.now()
+        ? data.agendada_para
+        : null;
     const { data: camp, error } = await supabaseAdmin
       .from("campaigns")
       .insert({
@@ -1791,16 +2050,34 @@ export const excluirCampanha = createServerFn({ method: "POST" })
 export const previewDestinatarios = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      segmento: z.enum(["todos", "bronze", "prata", "ouro", "inativos_30", "inativos_60", "inativos_90", "aniversariantes"]),
-    }).parse(input),
+    z
+      .object({
+        segmento: z.enum([
+          "todos",
+          "bronze",
+          "prata",
+          "ouro",
+          "inativos_30",
+          "inativos_60",
+          "inativos_90",
+          "aniversariantes",
+        ]),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
     const destinatarios = await selecionarDestinatarios(loja.data.id, data.segmento);
-    return { total: destinatarios.length, amostra: destinatarios.slice(0, 5).map((d) => ({ nome: d.full_name, telefone: d.phone })) };
+    return {
+      total: destinatarios.length,
+      amostra: destinatarios.slice(0, 5).map((d) => ({ nome: d.full_name, telefone: d.phone })),
+    };
   });
 // ============================================================
 // VALE-PRESENTE / GIFT CARDS
@@ -1808,14 +2085,20 @@ export const previewDestinatarios = createServerFn({ method: "POST" })
 export const criarGiftCards = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      pontos: z.number().int().positive().max(100000),
-      quantidade: z.number().int().min(1).max(100),
-    }).parse(input),
+    z
+      .object({
+        pontos: z.number().int().positive().max(100000),
+        quantidade: z.number().int().min(1).max(100),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
     const rows = Array.from({ length: data.quantidade }, () => ({
       store_id: loja.data!.id,
@@ -1832,9 +2115,14 @@ export const removerGiftCard = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const gc = await supabaseAdmin.from("gift_cards").select("id, store_id, redeemed_at, stores!inner(owner_id)").eq("id", data.id).maybeSingle();
+    const gc = await supabaseAdmin
+      .from("gift_cards")
+      .select("id, store_id, redeemed_at, stores!inner(owner_id)")
+      .eq("id", data.id)
+      .maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join shape
-    if (!gc.data || (gc.data as any).stores.owner_id !== context.userId) throw new Error("Vale não encontrado.");
+    if (!gc.data || (gc.data as any).stores.owner_id !== context.userId)
+      throw new Error("Vale não encontrado.");
     if (gc.data.redeemed_at) throw new Error("Vale já resgatado, não pode remover.");
     const { error } = await supabaseAdmin.from("gift_cards").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -1846,37 +2134,69 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const gc = await supabaseAdmin.from("gift_cards").select("*").eq("codigo", data.codigo).maybeSingle();
+    const gc = await supabaseAdmin
+      .from("gift_cards")
+      .select("*")
+      .eq("codigo", data.codigo)
+      .maybeSingle();
     if (!gc.data) throw new Error("Código inválido.");
     if (gc.data.redeemed_at) throw new Error("Vale já resgatado.");
     // vincula cliente à loja se ainda não estiver
     const linkExisting = await supabaseAdmin
-      .from("store_clients").select("*")
-      .eq("store_id", gc.data.store_id).eq("user_id", context.userId).maybeSingle();
+      .from("store_clients")
+      .select("*")
+      .eq("store_id", gc.data.store_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
     let link = linkExisting.data;
     if (!link) {
-      const ins = await supabaseAdmin.from("store_clients").insert({
-        store_id: gc.data.store_id, user_id: context.userId, pontos: 0, cashback_saldo: 0, nivel: "bronze",
-      }).select("*").single();
+      const ins = await supabaseAdmin
+        .from("store_clients")
+        .insert({
+          store_id: gc.data.store_id,
+          user_id: context.userId,
+          pontos: 0,
+          cashback_saldo: 0,
+          nivel: "bronze",
+        })
+        .select("*")
+        .single();
       if (ins.error) throw new Error(ins.error.message);
       link = ins.data;
     }
     const novoPontos = link.pontos + gc.data.pontos;
-    const upd = await supabaseAdmin.from("store_clients").update({
-      pontos: novoPontos, nivel: calcularNivel(novoPontos),
-    }).eq("id", link.id);
+    const upd = await supabaseAdmin
+      .from("store_clients")
+      .update({
+        pontos: novoPontos,
+        nivel: calcularNivel(novoPontos),
+      })
+      .eq("id", link.id);
     if (upd.error) throw new Error(upd.error.message);
-    const mark = await supabaseAdmin.from("gift_cards").update({
-      redeemed_by: context.userId, redeemed_at: new Date().toISOString(),
-    }).eq("id", gc.data.id).is("redeemed_at", null).select("id").single();
+    const mark = await supabaseAdmin
+      .from("gift_cards")
+      .update({
+        redeemed_by: context.userId,
+        redeemed_at: new Date().toISOString(),
+      })
+      .eq("id", gc.data.id)
+      .is("redeemed_at", null)
+      .select("id")
+      .single();
     if (mark.error) {
       // rollback pontos
-      await supabaseAdmin.from("store_clients").update({ pontos: link.pontos, nivel: calcularNivel(link.pontos) }).eq("id", link.id);
+      await supabaseAdmin
+        .from("store_clients")
+        .update({ pontos: link.pontos, nivel: calcularNivel(link.pontos) })
+        .eq("id", link.id);
       throw new Error("Falha no resgate (concorrência).");
     }
     await supabaseAdmin.from("transactions").insert({
-      store_id: gc.data.store_id, client_user_id: context.userId,
-      tipo: "vale_presente", pontos_delta: gc.data.pontos, status: "entregue",
+      store_id: gc.data.store_id,
+      client_user_id: context.userId,
+      tipo: "vale_presente",
+      pontos_delta: gc.data.pontos,
+      status: "entregue",
     });
     return { pontos: gc.data.pontos };
   });
@@ -1887,20 +2207,31 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
 export const submitNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      store_id: z.string().uuid(),
-      image_path: z.string().min(1),
-      image_base64: z.string().min(100), // data URL sem prefix
-      mime: z.string().default("image/jpeg"),
-    }).parse(input),
+    z
+      .object({
+        store_id: z.string().uuid(),
+        image_path: z.string().min(1),
+        image_base64: z.string().min(100), // data URL sem prefix
+        mime: z.string().default("image/jpeg"),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const loja = await supabaseAdmin.from("stores").select("id, cnpj, regra_pontos, modalidade").eq("id", data.store_id).maybeSingle();
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id, cnpj, regra_pontos, modalidade")
+      .eq("id", data.store_id)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
 
     const hash = await sha256Hex(data.image_base64);
-    const dup = await supabaseAdmin.from("fiscal_notes").select("id").eq("store_id", data.store_id).eq("image_hash", hash).maybeSingle();
+    const dup = await supabaseAdmin
+      .from("fiscal_notes")
+      .select("id")
+      .eq("store_id", data.store_id)
+      .eq("image_hash", hash)
+      .maybeSingle();
     if (dup.data) throw new Error("Esta nota já foi enviada.");
 
     // Chama Lovable AI
@@ -1926,18 +2257,30 @@ export const submitNotaFiscal = createServerFn({ method: "POST" })
                     type: "text",
                     text: 'Extraia o VALOR TOTAL (em reais, número) e o CNPJ do estabelecimento desta nota fiscal. Responda APENAS um JSON no formato: {"valor": 12.34, "cnpj": "00.000.000/0000-00"}. Se não conseguir ler algum campo, use null. Sem comentários.',
                   },
-                  { type: "image_url", image_url: { url: `data:${data.mime};base64,${data.image_base64}` } },
+                  {
+                    type: "image_url",
+                    image_url: { url: `data:${data.mime};base64,${data.image_base64}` },
+                  },
                 ],
               },
             ],
           }),
         });
-        const j = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
+        const j = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
         ocrRaw = j;
         const raw = j.choices?.[0]?.message?.content ?? "";
         const jsonStr = raw.match(/\{[\s\S]*\}/)?.[0] ?? "{}";
         const parsed = JSON.parse(jsonStr);
-        valor = typeof parsed.valor === "number" ? parsed.valor : parsed.valor ? Number(String(parsed.valor).replace(/[^\d.,]/g, "").replace(",", ".")) : null;
+        valor =
+          typeof parsed.valor === "number"
+            ? parsed.valor
+            : parsed.valor
+              ? Number(
+                  String(parsed.valor)
+                    .replace(/[^\d.,]/g, "")
+                    .replace(",", "."),
+                )
+              : null;
         cnpj = parsed.cnpj ? String(parsed.cnpj).replace(/\D/g, "") : null;
       } catch (e) {
         ocrRaw = { error: (e as Error).message };
@@ -1945,16 +2288,20 @@ export const submitNotaFiscal = createServerFn({ method: "POST" })
     }
 
     // Status inicial: pendente (lojista revisa)
-    const { data: inserted, error } = await supabaseAdmin.from("fiscal_notes").insert({
-      store_id: data.store_id,
-      client_user_id: context.userId,
-      image_path: data.image_path,
-      image_hash: hash,
-      valor,
-      cnpj_extraido: cnpj,
-      ocr_raw: ocrRaw as never,
-      status: "pendente",
-    }).select("*").single();
+    const { data: inserted, error } = await supabaseAdmin
+      .from("fiscal_notes")
+      .insert({
+        store_id: data.store_id,
+        client_user_id: context.userId,
+        image_path: data.image_path,
+        image_hash: hash,
+        valor,
+        cnpj_extraido: cnpj,
+        ocr_raw: ocrRaw as never,
+        status: "pendente",
+      })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return inserted;
   });
@@ -1962,14 +2309,20 @@ export const submitNotaFiscal = createServerFn({ method: "POST" })
 export const aprovarNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      id: z.string().uuid(),
-      valor_final: z.number().positive(),
-    }).parse(input),
+    z
+      .object({
+        id: z.string().uuid(),
+        valor_final: z.number().positive(),
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const nota = await supabaseAdmin.from("fiscal_notes").select("*, stores!inner(owner_id, regra_pontos, modalidade)").eq("id", data.id).maybeSingle();
+    const nota = await supabaseAdmin
+      .from("fiscal_notes")
+      .select("*, stores!inner(owner_id, regra_pontos, modalidade)")
+      .eq("id", data.id)
+      .maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join
     const n: any = nota.data;
     if (!n || n.stores.owner_id !== context.userId) throw new Error("Nota não encontrada.");
@@ -1979,35 +2332,67 @@ export const aprovarNotaFiscal = createServerFn({ method: "POST" })
     const pontos = inclP ? Math.floor(data.valor_final * Number(n.stores.regra_pontos)) : 0;
 
     // credita
-    const link = await supabaseAdmin.from("store_clients").select("*")
-      .eq("store_id", n.store_id).eq("user_id", n.client_user_id).maybeSingle();
+    const link = await supabaseAdmin
+      .from("store_clients")
+      .select("*")
+      .eq("store_id", n.store_id)
+      .eq("user_id", n.client_user_id)
+      .maybeSingle();
     if (!link.data) throw new Error("Cliente não vinculado.");
     const novoPontos = link.data.pontos + pontos;
-    await supabaseAdmin.from("store_clients").update({
-      pontos: novoPontos, nivel: calcularNivel(novoPontos),
-    }).eq("id", link.data.id);
+    await supabaseAdmin
+      .from("store_clients")
+      .update({
+        pontos: novoPontos,
+        nivel: calcularNivel(novoPontos),
+      })
+      .eq("id", link.data.id);
     await supabaseAdmin.from("transactions").insert({
-      store_id: n.store_id, client_user_id: n.client_user_id,
-      tipo: "nota_fiscal", valor: data.valor_final, pontos_delta: pontos, status: "entregue",
+      store_id: n.store_id,
+      client_user_id: n.client_user_id,
+      tipo: "nota_fiscal",
+      valor: data.valor_final,
+      pontos_delta: pontos,
+      status: "entregue",
     });
-    await supabaseAdmin.from("fiscal_notes").update({
-      status: "aprovada", valor: data.valor_final, pontos_creditados: pontos,
-    }).eq("id", data.id);
+    await supabaseAdmin
+      .from("fiscal_notes")
+      .update({
+        status: "aprovada",
+        valor: data.valor_final,
+        pontos_creditados: pontos,
+      })
+      .eq("id", data.id);
 
     const { notifyClient } = await import("./notify.server");
-    await notifyClient({ event: "pontos_ganhos", storeId: n.store_id, clientUserId: n.client_user_id, pontosGanhos: pontos });
+    await notifyClient({
+      event: "pontos_ganhos",
+      storeId: n.store_id,
+      clientUserId: n.client_user_id,
+      pontosGanhos: pontos,
+    });
     return { pontos };
   });
 
 export const rejeitarNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ id: z.string().uuid(), motivo: z.string().max(300) }).parse(input))
+  .inputValidator((input) =>
+    z.object({ id: z.string().uuid(), motivo: z.string().max(300) }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const nota = await supabaseAdmin.from("fiscal_notes").select("id, stores!inner(owner_id)").eq("id", data.id).maybeSingle();
+    const nota = await supabaseAdmin
+      .from("fiscal_notes")
+      .select("id, stores!inner(owner_id)")
+      .eq("id", data.id)
+      .maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join
-    if (!nota.data || (nota.data as any).stores.owner_id !== context.userId) throw new Error("Nota não encontrada.");
-    await supabaseAdmin.from("fiscal_notes").update({ status: "rejeitada", motivo_rejeicao: data.motivo }).eq("id", data.id);
+    if (!nota.data || (nota.data as any).stores.owner_id !== context.userId)
+      throw new Error("Nota não encontrada.");
+    await supabaseAdmin
+      .from("fiscal_notes")
+      .update({ status: "rejeitada", motivo_rejeicao: data.motivo })
+      .eq("id", data.id);
     return { ok: true };
   });
 
@@ -2016,12 +2401,22 @@ export const rejeitarNotaFiscal = createServerFn({ method: "POST" })
 // ============================================================
 export const addClientTag = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({
-    store_id: z.string().uuid(), client_user_id: z.string().uuid(), tag: z.string().min(1).max(30),
-  }).parse(input))
+  .inputValidator((input) =>
+    z
+      .object({
+        store_id: z.string().uuid(),
+        client_user_id: z.string().uuid(),
+        tag: z.string().min(1).max(30),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const loja = await supabaseAdmin.from("stores").select("owner_id").eq("id", data.store_id).maybeSingle();
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("owner_id")
+      .eq("id", data.store_id)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja inválida.");
     if (loja.data.owner_id !== context.userId) {
       const perm = await (supabaseAdmin as any).rpc("employee_has_permission", {
@@ -2033,7 +2428,9 @@ export const addClientTag = createServerFn({ method: "POST" })
       if (!perm.data) throw new Error("Sem permissão para editar etiquetas de clientes.");
     }
     const { error } = await supabaseAdmin.from("client_tags").insert({
-      store_id: data.store_id, client_user_id: data.client_user_id, tag: data.tag.trim().toLowerCase(),
+      store_id: data.store_id,
+      client_user_id: data.client_user_id,
+      tag: data.tag.trim().toLowerCase(),
     });
     if (error && !error.message.includes("duplicate")) throw new Error(error.message);
     return { ok: true };
@@ -2044,7 +2441,11 @@ export const removeClientTag = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const t = await supabaseAdmin.from("client_tags").select("id, store_id, stores:store_id(owner_id)").eq("id", data.id).maybeSingle();
+    const t = await supabaseAdmin
+      .from("client_tags")
+      .select("id, store_id, stores:store_id(owner_id)")
+      .eq("id", data.id)
+      .maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join
     if (!t.data) throw new Error("Tag não encontrada.");
     if ((t.data as any).stores.owner_id !== context.userId) {
@@ -2066,13 +2467,22 @@ export const removeClientTag = createServerFn({ method: "POST" })
 // deste cliente nesta loja.
 export const excluirClienteDaLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({
-    store_id: z.string().uuid(),
-    client_user_id: z.string().uuid(),
-  }).parse(input))
+  .inputValidator((input) =>
+    z
+      .object({
+        store_id: z.string().uuid(),
+        client_user_id: z.string().uuid(),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const owner = await supabaseAdmin.from("stores").select("id").eq("id", data.store_id).eq("owner_id", context.userId).maybeSingle();
+    const owner = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("id", data.store_id)
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!owner.data) throw new Error("Você não é dono desta loja.");
 
     // Apaga TUDO deste cliente nesta loja (fidelidade zerada nesta loja)
@@ -2086,17 +2496,33 @@ export const excluirClienteDaLoja = createServerFn({ method: "POST" })
     // 3) Notas fiscais enviadas
     await supabaseAdmin.from("fiscal_notes").delete().eq("store_id", sid).eq("client_user_id", uid);
     // 4) Respostas de NPS
-    await supabaseAdmin.from("nps_responses").delete().eq("store_id", sid).eq("client_user_id", uid);
+    await supabaseAdmin
+      .from("nps_responses")
+      .delete()
+      .eq("store_id", sid)
+      .eq("client_user_id", uid);
     // 5) Logs de notificação
-    await supabaseAdmin.from("notification_logs").delete().eq("store_id", sid).eq("client_user_id", uid);
+    await supabaseAdmin
+      .from("notification_logs")
+      .delete()
+      .eq("store_id", sid)
+      .eq("client_user_id", uid);
     // 6) Destinatários de campanhas (apaga por campanhas desta loja)
     const camps = await supabaseAdmin.from("campaigns").select("id").eq("store_id", sid);
     const campIds = (camps.data ?? []).map((c) => c.id);
     if (campIds.length) {
-      await supabaseAdmin.from("campaign_recipients").delete().eq("client_user_id", uid).in("campaign_id", campIds);
+      await supabaseAdmin
+        .from("campaign_recipients")
+        .delete()
+        .eq("client_user_id", uid)
+        .in("campaign_id", campIds);
     }
     // 7) Vales-presente resgatados por este cliente nesta loja: soltar o resgate
-    await supabaseAdmin.from("gift_cards").update({ redeemed_by: null, redeemed_at: null }).eq("store_id", sid).eq("redeemed_by", uid);
+    await supabaseAdmin
+      .from("gift_cards")
+      .update({ redeemed_by: null, redeemed_at: null })
+      .eq("store_id", sid)
+      .eq("redeemed_by", uid);
 
     // 8) Vínculo com a loja (por último)
     const del = await supabaseAdmin
@@ -2106,7 +2532,8 @@ export const excluirClienteDaLoja = createServerFn({ method: "POST" })
       .eq("user_id", uid)
       .select("id");
     if (del.error) throw new Error(del.error.message);
-    if (!del.data || del.data.length === 0) throw new Error("Cliente não estava vinculado a esta loja.");
+    if (!del.data || del.data.length === 0)
+      throw new Error("Cliente não estava vinculado a esta loja.");
 
     // 9) Se o cliente não pertence a nenhuma outra loja, remover profile e conta de auth
     // (libera CPF/telefone para novo cadastro do zero).
@@ -2131,23 +2558,36 @@ export const excluirClienteDaLoja = createServerFn({ method: "POST" })
 // ============================================================
 export const salvarSorteio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({
-    titulo: z.string().min(1).max(80),
-    premio: z.string().min(1).max(160),
-    filtro_tag: z.string().max(30).nullable().optional(),
-    filtro_nivel_min: z.enum(["bronze","prata","ouro"]).nullable().optional(),
-  }).parse(input))
+  .inputValidator((input) =>
+    z
+      .object({
+        titulo: z.string().min(1).max(80),
+        premio: z.string().min(1).max(160),
+        filtro_tag: z.string().max(30).nullable().optional(),
+        filtro_nivel_min: z.enum(["bronze", "prata", "ouro"]).nullable().optional(),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const loja = await supabaseAdmin.from("stores").select("id").eq("owner_id", context.userId).maybeSingle();
+    const loja = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
-    const { data: inserted, error } = await supabaseAdmin.from("raffles").insert({
-      store_id: loja.data.id,
-      titulo: data.titulo, premio: data.premio,
-      filtro_tag: data.filtro_tag ?? null,
-      filtro_nivel_min: data.filtro_nivel_min ?? null,
-      status: "aberto",
-    }).select().single();
+    const { data: inserted, error } = await supabaseAdmin
+      .from("raffles")
+      .insert({
+        store_id: loja.data.id,
+        titulo: data.titulo,
+        premio: data.premio,
+        filtro_tag: data.filtro_tag ?? null,
+        filtro_nivel_min: data.filtro_nivel_min ?? null,
+        status: "aberto",
+      })
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return inserted;
   });
@@ -2157,7 +2597,11 @@ export const sortearGanhador = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const raffle = await supabaseAdmin.from("raffles").select("*, stores!inner(owner_id, nome_fantasia)").eq("id", data.id).maybeSingle();
+    const raffle = await supabaseAdmin
+      .from("raffles")
+      .select("*, stores!inner(owner_id, nome_fantasia)")
+      .eq("id", data.id)
+      .maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join
     const r: any = raffle.data;
     if (!r || r.stores.owner_id !== context.userId) throw new Error("Sorteio não encontrado.");
@@ -2167,27 +2611,42 @@ export const sortearGanhador = createServerFn({ method: "POST" })
     // filtragem/seleção à lógica pura em raffle-logic.ts (testada em unit).
     const { elegiveisSorteio, escolherVencedor } = await import("./raffle-logic");
     const linkRes = await supabaseAdmin
-      .from("store_clients").select("user_id, nivel").eq("store_id", r.store_id);
+      .from("store_clients")
+      .select("user_id, nivel")
+      .eq("store_id", r.store_id);
     if (linkRes.error) throw new Error(linkRes.error.message);
     const tagRes = r.filtro_tag
-      ? await supabaseAdmin.from("client_tags")
-          .select("client_user_id, tag").eq("store_id", r.store_id).eq("tag", r.filtro_tag)
+      ? await supabaseAdmin
+          .from("client_tags")
+          .select("client_user_id, tag")
+          .eq("store_id", r.store_id)
+          .eq("tag", r.filtro_tag)
       : { data: [] as { client_user_id: string; tag: string }[], error: null };
     // biome-ignore lint/suspicious/noExplicitAny: linhas do Supabase
-    const userIds = elegiveisSorteio(
-      (linkRes.data ?? []) as any,
-      (tagRes.data ?? []) as any,
-      { filtro_tag: r.filtro_tag, filtro_nivel_min: r.filtro_nivel_min },
-    );
+    const userIds = elegiveisSorteio((linkRes.data ?? []) as any, (tagRes.data ?? []) as any, {
+      filtro_tag: r.filtro_tag,
+      filtro_nivel_min: r.filtro_nivel_min,
+    });
     const winner = escolherVencedor(userIds);
-    const prof = await supabaseAdmin.from("profiles").select("full_name").eq("id", winner).maybeSingle();
-    await supabaseAdmin.from("raffles").update({
-      ganhador_user_id: winner,
-      ganhador_nome: prof.data?.full_name ?? null,
-      status: "sorteado",
-      sorted_at: new Date().toISOString(),
-    }).eq("id", r.id);
-    return { winner_user_id: winner, winner_name: prof.data?.full_name ?? null, total_elegiveis: userIds.length };
+    const prof = await supabaseAdmin
+      .from("profiles")
+      .select("full_name")
+      .eq("id", winner)
+      .maybeSingle();
+    await supabaseAdmin
+      .from("raffles")
+      .update({
+        ganhador_user_id: winner,
+        ganhador_nome: prof.data?.full_name ?? null,
+        status: "sorteado",
+        sorted_at: new Date().toISOString(),
+      })
+      .eq("id", r.id);
+    return {
+      winner_user_id: winner,
+      winner_name: prof.data?.full_name ?? null,
+      total_elegiveis: userIds.length,
+    };
   });
 
 export const cancelarSorteio = createServerFn({ method: "POST" })
@@ -2195,9 +2654,14 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const r = await supabaseAdmin.from("raffles").select("id, stores!inner(owner_id)").eq("id", data.id).maybeSingle();
+    const r = await supabaseAdmin
+      .from("raffles")
+      .select("id, stores!inner(owner_id)")
+      .eq("id", data.id)
+      .maybeSingle();
     // biome-ignore lint/suspicious/noExplicitAny: join
-    if (!r.data || (r.data as any).stores.owner_id !== context.userId) throw new Error("Sorteio não encontrado.");
+    if (!r.data || (r.data as any).stores.owner_id !== context.userId)
+      throw new Error("Sorteio não encontrado.");
     await supabaseAdmin.from("raffles").update({ status: "cancelado" }).eq("id", data.id);
     return { ok: true };
   });

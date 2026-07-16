@@ -20,7 +20,12 @@ export const Route = createFileRoute("/api/public/hooks/expirar-pontos")({
           )
           .in("pontos_expiracao_modo", ["validade", "decaimento"]);
 
-        const results: Array<{ store_id: string; modo: string; afetados: number; pontos_removidos: number }> = [];
+        const results: Array<{
+          store_id: string;
+          modo: string;
+          afetados: number;
+          pontos_removidos: number;
+        }> = [];
 
         for (const s of stores.data ?? []) {
           let afetados = 0;
@@ -30,9 +35,15 @@ export const Route = createFileRoute("/api/public/hooks/expirar-pontos")({
             const dias = Math.max(1, s.pontos_validade_dias ?? 365);
             const cutoff = new Date();
             cutoff.setDate(cutoff.getDate() - dias);
-            const lastRun = s.pontos_expiracao_last_run_at ? new Date(s.pontos_expiracao_last_run_at) : null;
+            const lastRun = s.pontos_expiracao_last_run_at
+              ? new Date(s.pontos_expiracao_last_run_at)
+              : null;
             // Janela: transações que "amadureceram" desde a última execução.
-            const fromIso = lastRun ? new Date(Math.min(lastRun.getTime() - dias * 86400000, cutoff.getTime())).toISOString() : "1970-01-01T00:00:00Z";
+            const fromIso = lastRun
+              ? new Date(
+                  Math.min(lastRun.getTime() - dias * 86400000, cutoff.getTime()),
+                ).toISOString()
+              : "1970-01-01T00:00:00Z";
             const toIso = cutoff.toISOString();
 
             const txs = await supabaseAdmin
@@ -49,14 +60,18 @@ export const Route = createFileRoute("/api/public/hooks/expirar-pontos")({
             const porCliente = new Map<string, number>();
             for (const t of txs.data ?? []) {
               if (!t.client_user_id) continue;
-              porCliente.set(t.client_user_id, (porCliente.get(t.client_user_id) ?? 0) + (t.pontos_delta ?? 0));
+              porCliente.set(
+                t.client_user_id,
+                (porCliente.get(t.client_user_id) ?? 0) + (t.pontos_delta ?? 0),
+              );
             }
 
             for (const [uid, ptsVenc] of porCliente) {
               const link = await supabaseAdmin
                 .from("store_clients")
                 .select("id, pontos")
-                .eq("store_id", s.id).eq("user_id", uid)
+                .eq("store_id", s.id)
+                .eq("user_id", uid)
                 .maybeSingle();
               if (!link.data) continue;
               const remove = Math.min(link.data.pontos, ptsVenc);
@@ -132,7 +147,12 @@ export const Route = createFileRoute("/api/public/hooks/expirar-pontos")({
             .update({ pontos_expiracao_last_run_at: new Date().toISOString() })
             .eq("id", s.id);
 
-          results.push({ store_id: s.id, modo: s.pontos_expiracao_modo, afetados, pontos_removidos: removidos });
+          results.push({
+            store_id: s.id,
+            modo: s.pontos_expiracao_modo,
+            afetados,
+            pontos_removidos: removidos,
+          });
         }
 
         return new Response(JSON.stringify({ lojas: results.length, results }), {

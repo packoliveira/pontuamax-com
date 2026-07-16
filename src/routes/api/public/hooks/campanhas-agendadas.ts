@@ -25,17 +25,20 @@ export const Route = createFileRoute("/api/public/hooks/campanhas-agendadas")({
           .order("agendada_para", { ascending: true })
           .limit(5); // no máximo 5 campanhas por rodada
 
-        const results: Array<{ id: string; enviados?: number; falhas?: number; total?: number; erro?: string }> = [];
+        const results: Array<{
+          id: string;
+          enviados?: number;
+          falhas?: number;
+          total?: number;
+          erro?: string;
+        }> = [];
         for (const c of pend.data ?? []) {
           try {
             const r = await _processarEnvioCampanhaInternal(c.id);
             results.push({ id: c.id, ...r });
           } catch (e) {
             results.push({ id: c.id, erro: (e as Error).message });
-            await supabaseAdmin
-              .from("campaigns")
-              .update({ status: "falhou" })
-              .eq("id", c.id);
+            await supabaseAdmin.from("campaigns").update({ status: "falhou" }).eq("id", c.id);
           }
         }
 

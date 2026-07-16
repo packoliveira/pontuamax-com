@@ -79,10 +79,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "PontuaMax | Programa de Fidelidade para Empresas" },
-      { name: "description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
+      {
+        name: "description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
       { name: "author", content: "PontuaMax | Programa de Fidelidade para Empresas" },
       { property: "og:title", content: "PontuaMax | Programa de Fidelidade para Empresas" },
-      { property: "og:description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
+      {
+        property: "og:description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "PontuaMax" },
       { property: "og:url", content: "https://retail-rewards.lovable.app/" },
@@ -95,7 +103,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "twitter:site", content: "@pontuamax" },
       { name: "twitter:title", content: "PontuaMax | Programa de Fidelidade para Empresas" },
-      { name: "twitter:description", content: "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax." },
+      {
+        name: "twitter:description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
       { property: "og:image", content: "https://retail-rewards.lovable.app/og-image.jpg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
@@ -115,7 +127,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+      },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },

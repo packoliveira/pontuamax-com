@@ -33,12 +33,9 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
 
         // 1) Assinatura
         const sigHeader =
-          request.headers.get("x-olist-signature") ??
-          request.headers.get("x-signature") ??
-          null;
-        const { verifyWebhookSignature, refreshAccessToken, fetchPedido } = await import(
-          "@/lib/olist.server"
-        );
+          request.headers.get("x-olist-signature") ?? request.headers.get("x-signature") ?? null;
+        const { verifyWebhookSignature, refreshAccessToken, fetchPedido } =
+          await import("@/lib/olist.server");
         const valid = verifyWebhookSignature(raw, sigHeader);
         if (!valid) {
           await supabaseAdmin.from("erp_webhook_events").insert({
@@ -48,7 +45,15 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
             signature: sigHeader,
             signature_valid: false,
             status: "rejected",
-            payload: raw ? (() => { try { return JSON.parse(raw); } catch { return { raw }; } })() : null,
+            payload: raw
+              ? (() => {
+                  try {
+                    return JSON.parse(raw);
+                  } catch {
+                    return { raw };
+                  }
+                })()
+              : null,
             error_message: "assinatura inválida",
           });
           return json({ error: "assinatura inválida" }, 401);
@@ -90,20 +95,27 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
         if (!credRes.data) return json({ error: "loja não conectada" }, 404);
         const cred = credRes.data as Record<string, unknown> & { stores: Record<string, unknown> };
         const loja = cred.stores as Record<string, unknown> & {
-          id: string; modalidade: string; regra_pontos: number; percentual_cashback: number;
+          id: string;
+          modalidade: string;
+          regra_pontos: number;
+          percentual_cashback: number;
         };
 
         // 4) Idempotência
-        const eventInsert = await supabaseAdmin.from("erp_webhook_events").insert({
-          store_id: loja.id,
-          provider: "olist_v3",
-          evento,
-          resource_id: resourceId,
-          signature: sigHeader,
-          signature_valid: true,
-          status: "received",
-          payload: payload as never,
-        }).select("id").maybeSingle();
+        const eventInsert = await supabaseAdmin
+          .from("erp_webhook_events")
+          .insert({
+            store_id: loja.id,
+            provider: "olist_v3",
+            evento,
+            resource_id: resourceId,
+            signature: sigHeader,
+            signature_valid: true,
+            status: "received",
+            payload: payload as never,
+          })
+          .select("id")
+          .maybeSingle();
         if (eventInsert.error) {
           if (eventInsert.error.code === "23505") {
             return json({ status: "duplicado", message: "evento já processado" });
@@ -129,7 +141,10 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
               })
               .eq("id", cred.id as string);
           } catch (e) {
-            await supabaseAdmin.from("erp_credentials").update({ status: "expired" }).eq("id", cred.id as string);
+            await supabaseAdmin
+              .from("erp_credentials")
+              .update({ status: "expired" })
+              .eq("id", cred.id as string);
             return json({ error: `refresh falhou: ${(e as Error).message}` }, 500);
           }
         }
@@ -139,31 +154,49 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
         try {
           pedido = await fetchPedido(accessToken, resourceId);
         } catch (e) {
-          await supabaseAdmin.from("erp_webhook_events").update({
-            status: "error", error_message: (e as Error).message,
-          }).eq("id", eventInsert.data!.id);
+          await supabaseAdmin
+            .from("erp_webhook_events")
+            .update({
+              status: "error",
+              error_message: (e as Error).message,
+            })
+            .eq("id", eventInsert.data!.id);
           return json({ error: (e as Error).message }, 502);
         }
 
         const pedidoData = (pedido.pedido as Record<string, unknown>) ?? pedido;
         const situacao = String(
           (pedidoData.situacao as string | undefined) ??
-            ((pedidoData.situacao as Record<string, unknown> | undefined)?.descricao as string | undefined) ??
+            ((pedidoData.situacao as Record<string, unknown> | undefined)?.descricao as
+              | string
+              | undefined) ??
             "",
-        ).trim().toLowerCase();
+        )
+          .trim()
+          .toLowerCase();
         const acao = classificarSituacao(situacao);
 
         if (acao === "ignorar") {
-          await supabaseAdmin.from("erp_webhook_events").update({
-            status: "ignored", processed_at: new Date().toISOString(),
-          }).eq("id", eventInsert.data!.id);
+          await supabaseAdmin
+            .from("erp_webhook_events")
+            .update({
+              status: "ignored",
+              processed_at: new Date().toISOString(),
+            })
+            .eq("id", eventInsert.data!.id);
           return json({ status: "ignorado", situacao });
         }
 
-        const valor = Number((pedidoData.valor as number | undefined) ?? (pedidoData.total as number | undefined) ?? 0);
+        const valor = Number(
+          (pedidoData.valor as number | undefined) ?? (pedidoData.total as number | undefined) ?? 0,
+        );
         const cliente = (pedidoData.cliente as Record<string, unknown>) ?? {};
-        const cpf = String((cliente.cpfCnpj as string | undefined) ?? (cliente.cpf_cnpj as string | undefined) ?? "").replace(/\D/g, "");
-        const telefone = String((cliente.telefone as string | undefined) ?? (cliente.fone as string | undefined) ?? "").replace(/\D/g, "");
+        const cpf = String(
+          (cliente.cpfCnpj as string | undefined) ?? (cliente.cpf_cnpj as string | undefined) ?? "",
+        ).replace(/\D/g, "");
+        const telefone = String(
+          (cliente.telefone as string | undefined) ?? (cliente.fone as string | undefined) ?? "",
+        ).replace(/\D/g, "");
         const nome = String((cliente.nome as string | undefined) ?? "").trim() || "Cliente";
 
         const idExterno = `olist:${resourceId}`;
@@ -171,34 +204,67 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
         // ---------- ESTORNO ----------
         if (acao === "estorno") {
           const idEstorno = `${idExterno}:estorno`;
-          const jaEst = await supabaseAdmin.from("transactions").select("id")
-            .eq("store_id", loja.id).eq("id_venda_externa", idEstorno).maybeSingle();
+          const jaEst = await supabaseAdmin
+            .from("transactions")
+            .select("id")
+            .eq("store_id", loja.id)
+            .eq("id_venda_externa", idEstorno)
+            .maybeSingle();
           if (jaEst.data) {
-            await supabaseAdmin.from("erp_webhook_events").update({
-              status: "duplicated", processed_at: new Date().toISOString(),
-            }).eq("id", eventInsert.data!.id);
+            await supabaseAdmin
+              .from("erp_webhook_events")
+              .update({
+                status: "duplicated",
+                processed_at: new Date().toISOString(),
+              })
+              .eq("id", eventInsert.data!.id);
             return json({ status: "já estornado" });
           }
-          const vOrig = await supabaseAdmin.from("transactions").select("*")
-            .eq("store_id", loja.id).eq("id_venda_externa", idExterno).eq("tipo", "venda").maybeSingle();
+          const vOrig = await supabaseAdmin
+            .from("transactions")
+            .select("*")
+            .eq("store_id", loja.id)
+            .eq("id_venda_externa", idExterno)
+            .eq("tipo", "venda")
+            .maybeSingle();
           if (!vOrig.data) return json({ error: "venda original não encontrada" }, 404);
-          const lOrig = await supabaseAdmin.from("store_clients").select("*")
-            .eq("store_id", loja.id).eq("user_id", vOrig.data.client_user_id).maybeSingle();
+          const lOrig = await supabaseAdmin
+            .from("store_clients")
+            .select("*")
+            .eq("store_id", loja.id)
+            .eq("user_id", vOrig.data.client_user_id)
+            .maybeSingle();
           if (!lOrig.data) return json({ error: "cliente não vinculado" }, 404);
           const pE = -Number(vOrig.data.pontos_delta ?? 0);
           const cE = -Number(vOrig.data.cashback_delta ?? 0);
           const novoP = Math.max(0, lOrig.data.pontos + pE);
-          const novoC = Math.max(0, Math.round((Number(lOrig.data.cashback_saldo) + cE) * 100) / 100);
+          const novoC = Math.max(
+            0,
+            Math.round((Number(lOrig.data.cashback_saldo) + cE) * 100) / 100,
+          );
           const nivel = novoP <= 100 ? "bronze" : novoP <= 300 ? "prata" : "ouro";
           await supabaseAdmin.from("transactions").insert({
-            store_id: loja.id, client_user_id: vOrig.data.client_user_id, tipo: "ajuste",
-            valor: -Number(vOrig.data.valor ?? 0), pontos_delta: pE, cashback_delta: cE,
-            status: "entregue", id_venda_externa: idEstorno, origem: "olist",
+            store_id: loja.id,
+            client_user_id: vOrig.data.client_user_id,
+            tipo: "ajuste",
+            valor: -Number(vOrig.data.valor ?? 0),
+            pontos_delta: pE,
+            cashback_delta: cE,
+            status: "entregue",
+            id_venda_externa: idEstorno,
+            origem: "olist",
           });
-          await supabaseAdmin.from("store_clients").update({ pontos: novoP, cashback_saldo: novoC, nivel }).eq("id", lOrig.data.id);
-          await supabaseAdmin.from("erp_webhook_events").update({
-            status: "processed", processed_at: new Date().toISOString(),
-          }).eq("id", eventInsert.data!.id);
+          await supabaseAdmin
+            .from("store_clients")
+            .update({ pontos: novoP, cashback_saldo: novoC, nivel })
+            .eq("id", lOrig.data.id);
+          await supabaseAdmin
+            .from("erp_webhook_events")
+            .update({
+              status: "processed",
+              processed_at: new Date().toISOString(),
+            })
+            .eq("id", eventInsert.data!.id);
           return json({ status: "estornado", pontos: pE, cashback: cE });
         }
 
@@ -207,12 +273,20 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
         if (!cpf || cpf.length !== 11) return json({ error: "cpf ausente/ inválido" }, 400);
 
         // idempotência por venda
-        const dup = await supabaseAdmin.from("transactions").select("id")
-          .eq("store_id", loja.id).eq("id_venda_externa", idExterno).maybeSingle();
+        const dup = await supabaseAdmin
+          .from("transactions")
+          .select("id")
+          .eq("store_id", loja.id)
+          .eq("id_venda_externa", idExterno)
+          .maybeSingle();
         if (dup.data) {
-          await supabaseAdmin.from("erp_webhook_events").update({
-            status: "duplicated", processed_at: new Date().toISOString(),
-          }).eq("id", eventInsert.data!.id);
+          await supabaseAdmin
+            .from("erp_webhook_events")
+            .update({
+              status: "duplicated",
+              processed_at: new Date().toISOString(),
+            })
+            .eq("id", eventInsert.data!.id);
           return json({ status: "duplicado" });
         }
 
@@ -227,25 +301,41 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
           const email = cpfToEmail(cpf);
           const password = randomBytes(24).toString("hex");
           const created = await supabaseAdmin.auth.admin.createUser({
-            email, password, email_confirm: true,
+            email,
+            password,
+            email_confirm: true,
             user_metadata: { full_name: nome, phone: telefone || null, cpf },
           });
-          if (created.error || !created.data.user) return json({ error: `criar cliente: ${created.error?.message}` }, 500);
+          if (created.error || !created.data.user)
+            return json({ error: `criar cliente: ${created.error?.message}` }, 500);
           clientProfile = { id: created.data.user.id };
           justCreated = true;
           await supabaseAdmin.from("profiles").upsert({
-            id: clientProfile.id, full_name: nome, phone: telefone || null, cpf,
+            id: clientProfile.id,
+            full_name: nome,
+            phone: telefone || null,
+            cpf,
           });
-          await supabaseAdmin.from("user_roles").upsert(
-            { user_id: clientProfile.id, role: "cliente" as const },
-            { onConflict: "user_id,role" },
-          );
+          await supabaseAdmin
+            .from("user_roles")
+            .upsert(
+              { user_id: clientProfile.id, role: "cliente" as const },
+              { onConflict: "user_id,role" },
+            );
         }
 
-        const linkRes = await supabaseAdmin.from("store_clients").upsert({
-          store_id: loja.id, user_id: clientProfile.id,
-          ...(justCreated ? { pending_registration: true } : {}),
-        }, { onConflict: "store_id,user_id" }).select("*").single();
+        const linkRes = await supabaseAdmin
+          .from("store_clients")
+          .upsert(
+            {
+              store_id: loja.id,
+              user_id: clientProfile.id,
+              ...(justCreated ? { pending_registration: true } : {}),
+            },
+            { onConflict: "store_id,user_id" },
+          )
+          .select("*")
+          .single();
         if (linkRes.error) return json({ error: linkRes.error.message }, 500);
         const link = linkRes.data;
 
@@ -258,27 +348,46 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
         const nivel = novoP <= 100 ? "bronze" : novoP <= 300 ? "prata" : "ouro";
 
         const tx = await supabaseAdmin.from("transactions").insert({
-          store_id: loja.id, client_user_id: clientProfile.id, tipo: "venda",
-          valor, pontos_delta: pontos, cashback_delta: cashback, status: "entregue",
-          id_venda_externa: idExterno, origem: "olist",
+          store_id: loja.id,
+          client_user_id: clientProfile.id,
+          tipo: "venda",
+          valor,
+          pontos_delta: pontos,
+          cashback_delta: cashback,
+          status: "entregue",
+          id_venda_externa: idExterno,
+          origem: "olist",
         });
         if (tx.error) {
           if (tx.error.code === "23505") return json({ status: "duplicado" });
           return json({ error: tx.error.message }, 500);
         }
-        await supabaseAdmin.from("store_clients").update({ pontos: novoP, cashback_saldo: novoC, nivel }).eq("id", link.id);
-        await supabaseAdmin.from("stores").update({ webhook_last_at: new Date().toISOString() }).eq("id", loja.id);
+        await supabaseAdmin
+          .from("store_clients")
+          .update({ pontos: novoP, cashback_saldo: novoC, nivel })
+          .eq("id", link.id);
+        await supabaseAdmin
+          .from("stores")
+          .update({ webhook_last_at: new Date().toISOString() })
+          .eq("id", loja.id);
 
         if (pontos > 0) {
           const { notifyClient } = await import("@/lib/notify.server");
           await notifyClient({
-            event: "pontos_ganhos", storeId: loja.id, clientUserId: clientProfile.id, pontosGanhos: pontos,
+            event: "pontos_ganhos",
+            storeId: loja.id,
+            clientUserId: clientProfile.id,
+            pontosGanhos: pontos,
           });
         }
 
-        await supabaseAdmin.from("erp_webhook_events").update({
-          status: "processed", processed_at: new Date().toISOString(),
-        }).eq("id", eventInsert.data!.id);
+        await supabaseAdmin
+          .from("erp_webhook_events")
+          .update({
+            status: "processed",
+            processed_at: new Date().toISOString(),
+          })
+          .eq("id", eventInsert.data!.id);
 
         return json({ status: "processado", pontos, cashback, novo_saldo_pontos: novoP });
       },
