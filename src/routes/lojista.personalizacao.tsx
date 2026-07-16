@@ -22,7 +22,7 @@ import {
   ColorPresets,
   SuggestedBanners,
   LivePreview,
-} from "./lojista.configuracoes";
+} from "@/components/lojista/personalizacao-shared";
 
 export const Route = createFileRoute("/lojista/personalizacao")({
   ssr: false,
