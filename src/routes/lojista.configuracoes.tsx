@@ -330,19 +330,21 @@ function ConfigPage() {
             {salvar.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
 
-          <IntegracoesCard
-            storeId={loja.id}
-            slug={loja.slug}
-            secret={loja.webhook_secret}
-            lastAt={loja.webhook_last_at}
-          />
-          <OlistOAuthCard storeId={loja.id} />
-          <WhatsappCard loja={loja} />
-          <NotificacoesCard loja={loja} />
-          <IndicacaoCard loja={loja} />
-          <NpsCard loja={loja} />
-          <InstagramCard loja={loja} />
-          <ValidadePontosCard loja={loja} />
+          <Suspense fallback={<CardSkeleton />}>
+            <IntegracoesCard
+              storeId={loja.id}
+              slug={loja.slug}
+              secret={loja.webhook_secret}
+              lastAt={loja.webhook_last_at}
+            />
+            <OlistOAuthCard storeId={loja.id} />
+            <WhatsappCard loja={loja} />
+            <NotificacoesCard loja={loja} />
+            <IndicacaoCard loja={loja} />
+            <NpsCard loja={loja} />
+            <InstagramCard loja={loja} />
+            <ValidadePontosCard loja={loja} />
+          </Suspense>
         </div>
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">
