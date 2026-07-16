@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { calcularNivel } from "./qsf-shared";
 
 // -------- Promoções: multiplicador ativo agora --------
 export function getActiveMultiplier(
@@ -211,6 +210,3 @@ export async function processarEnvioCampanha(campaignId: string): Promise<{ envi
 
   return { enviados, falhas, total: destinatarios.length };
 }
-
-// silencia "unused" quando builders só chamam via casts
-void calcularNivel;
