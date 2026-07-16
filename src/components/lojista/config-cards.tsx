@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
 
-function IntegracoesCard({
+export function IntegracoesCard({
   storeId,
   slug,
   secret,
@@ -260,7 +260,7 @@ type IgLoja = {
   instagram_instructions: string | null;
 };
 
-function InstagramCard({ loja }: { loja: IgLoja }) {
+export function InstagramCard({ loja }: { loja: IgLoja }) {
   const qc = useQueryClient();
   const [on, setOn] = useState(loja.instagram_program_active);
   const [handle, setHandle] = useState(loja.instagram_handle ?? "");
@@ -382,7 +382,7 @@ type ValidadeLoja = {
   pontos_expiracao_last_run_at: string | null;
 };
 
-function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
+export function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   const qc = useQueryClient();
   const [modo, setModo] = useState<"nenhum" | "validade" | "decaimento">(
     (loja.pontos_expiracao_modo as never) ?? "nenhum",
@@ -510,7 +510,7 @@ function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   );
 }
 
-function IndicacaoCard({
+export function IndicacaoCard({
   loja,
 }: {
   loja: {
@@ -604,7 +604,7 @@ function IndicacaoCard({
   );
 }
 
-function NpsCard({
+export function NpsCard({
   loja,
 }: {
   loja: { id: string; nps_enabled: boolean; nps_ask_comment: boolean; nps_template: string };
@@ -671,7 +671,7 @@ function NpsCard({
   );
 }
 
-function WhatsappQRConnect({ storeId }: { storeId: string }) {
+export function WhatsappQRConnect({ storeId }: { storeId: string }) {
   const qc = useQueryClient();
   const [qr, setQr] = useState<string | null>(null);
   const [state, setState] = useState<string>("unknown");
@@ -808,7 +808,7 @@ Seu saldo atual: {pontos_saldo} pontos.
 Faltam {pontos_faltantes} pontos para você trocar por: {proximo_premio}.
 Confira tudo aqui: {link_portal_cliente}`;
 
-function WhatsappCard({ loja }: { loja: LojaRow }) {
+export function WhatsappCard({ loja }: { loja: LojaRow }) {
   const qc = useQueryClient();
   const [url, setUrl] = useState(loja.evolution_url ?? "");
   const [apikey, setApikey] = useState(loja.evolution_apikey ?? "");
@@ -995,7 +995,7 @@ type LojaLite = {
   notif_expiry_template: string;
 };
 
-function NotificacoesCard({ loja }: { loja: LojaLite }) {
+export function NotificacoesCard({ loja }: { loja: LojaLite }) {
   const [bDayOn, setBDayOn] = useState(loja.notif_birthday_enabled);
   const [bDayBonus, setBDayBonus] = useState(String(loja.notif_birthday_bonus_points));
   const [bDayTpl, setBDayTpl] = useState(loja.notif_birthday_template);
@@ -1201,7 +1201,7 @@ function NotificacoesCard({ loja }: { loja: LojaLite }) {
     </Card>
   );
 }
-function OlistOAuthCard({ storeId }: { storeId: string }) {
+export function OlistOAuthCard({ storeId }: { storeId: string }) {
   const qc = useQueryClient();
   const { data: status } = useQuery({
     queryKey: ["olist-status", storeId],
