@@ -182,19 +182,18 @@ export async function processarEnvioCampanha(
   const camp = await supabaseAdmin
     .from("campaigns")
     .select(
-      "*, stores:store_id(nome_fantasia, evolution_url, evolution_apikey, evolution_instance, whatsapp_enabled)",
+      "*, stores:store_id(nome_fantasia, whatsapp_enabled)",
     )
     .eq("id", campaignId)
     .maybeSingle();
   if (!camp.data) throw new Error("Campanha não encontrada.");
   const loja = camp.data.stores as unknown as {
     nome_fantasia: string;
-    evolution_url: string | null;
-    evolution_apikey: string | null;
-    evolution_instance: string | null;
     whatsapp_enabled: boolean;
   };
-  if (!loja.evolution_url || !loja.evolution_apikey || !loja.evolution_instance) {
+  const { getStoreSecrets } = await import("./store-secrets.server");
+  const secrets = await getStoreSecrets(camp.data.store_id);
+  if (!secrets.evolution_url || !secrets.evolution_apikey || !secrets.evolution_instance) {
     await supabaseAdmin.from("campaigns").update({ status: "falhou" }).eq("id", camp.data.id);
     throw new Error("Evolution API não configurada nesta loja.");
   }
@@ -229,9 +228,9 @@ export async function processarEnvioCampanha(
     }
     const res = await sendWhatsappRaw({
       storeId: camp.data.store_id,
-      url: loja.evolution_url,
-      apikey: loja.evolution_apikey,
-      instance: loja.evolution_instance,
+      url: secrets.evolution_url,
+      apikey: secrets.evolution_apikey,
+      instance: secrets.evolution_instance,
       number: numero,
       text: texto,
     });

@@ -1173,6 +1173,48 @@ export type Database = {
           },
         ]
       }
+      store_secrets: {
+        Row: {
+          evolution_apikey: string | null
+          evolution_instance: string | null
+          evolution_url: string | null
+          store_id: string
+          updated_at: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          evolution_apikey?: string | null
+          evolution_instance?: string | null
+          evolution_url?: string | null
+          store_id: string
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          evolution_apikey?: string | null
+          evolution_instance?: string | null
+          evolution_url?: string | null
+          store_id?: string
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_secrets_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: true
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_secrets_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: true
+            referencedRelation: "stores_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stores: {
         Row: {
           activated_at: string | null

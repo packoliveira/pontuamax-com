@@ -113,14 +113,16 @@ export async function notifyClient(params: {
     const { data: loja } = await supabaseAdmin
       .from("stores")
       .select(
-        "id, slug, nome_fantasia, whatsapp_enabled, whatsapp_template_pontos, evolution_url, evolution_apikey, evolution_instance, nps_enabled, nps_template",
+        "id, slug, nome_fantasia, whatsapp_enabled, whatsapp_template_pontos, nps_enabled, nps_template",
       )
       .eq("id", params.storeId)
       .maybeSingle();
     if (!loja) return;
     if (!loja.whatsapp_enabled) return;
     if (params.event === "nps_request" && !loja.nps_enabled) return;
-    if (!loja.evolution_url || !loja.evolution_apikey || !loja.evolution_instance) {
+    const { getStoreSecrets } = await import("./store-secrets.server");
+    const secrets = await getStoreSecrets(loja.id);
+    if (!secrets.evolution_url || !secrets.evolution_apikey || !secrets.evolution_instance) {
       await logIntegration(loja.id, "erro", "WhatsApp ativado mas Evolution API não configurada", {
         event: params.event,
       });
@@ -188,9 +190,9 @@ export async function notifyClient(params: {
 
     await sendWhatsappRaw({
       storeId: loja.id,
-      url: loja.evolution_url,
-      apikey: loja.evolution_apikey,
-      instance: loja.evolution_instance,
+      url: secrets.evolution_url,
+      apikey: secrets.evolution_apikey,
+      instance: secrets.evolution_instance,
       number: numero,
       text,
     });

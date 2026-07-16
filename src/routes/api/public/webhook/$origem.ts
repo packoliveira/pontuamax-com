@@ -149,6 +149,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         const loja = storeRes.data;
         if (!loja) return json({ error: "loja não encontrada" }, 404);
 
+        // Fetch webhook secret from the isolated secrets table.
+        const { getStoreSecrets } = await import("@/lib/store-secrets.server");
+        const storeSecrets = await getStoreSecrets(loja.id);
+
         const logAndRespond = async (
           status: "sucesso" | "erro",
           message: string,
@@ -171,7 +175,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return json({ status, message, ...extra }, httpStatus);
         };
 
-        if (!secret || !safeEqual(secret, loja.webhook_secret)) {
+        if (!secret || !safeEqual(secret, storeSecrets.webhook_secret ?? "")) {
           return logAndRespond("erro", "segredo inválido", 401);
         }
 

@@ -52,7 +52,7 @@ export function IntegracoesCard({
 }: {
   storeId: string;
   slug: string;
-  secret: string;
+  secret: string | null;
   lastAt: string | null;
 }) {
   const qc = useQueryClient();
@@ -62,7 +62,8 @@ export function IntegracoesCard({
     origin.includes("localhost") || origin.includes("id-preview--")
       ? "https://pontuamax-com.lovable.app"
       : origin;
-  const query = `store=${encodeURIComponent(slug)}&secret=${encodeURIComponent(secret)}`;
+  const secretStr = secret ?? "";
+  const query = `store=${encodeURIComponent(slug)}&secret=${encodeURIComponent(secretStr)}`;
   const urlBling = `${webhookOrigin}/api/public/webhook/bling?${query}`;
   const urlOlist = `${webhookOrigin}/api/public/webhook/olist?${query}`;
   const headerUrlBling = `${webhookOrigin}/api/public/webhook/bling`;
@@ -160,12 +161,12 @@ export function IntegracoesCard({
         <div>
           <Label>Chave secreta</Label>
           <div className="flex gap-2">
-            <Input readOnly value={secret} className="font-mono text-xs" />
+            <Input readOnly value={secretStr} className="font-mono text-xs" />
             <Button
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => copy(secret, "Segredo")}
+              onClick={() => copy(secretStr, "Segredo")}
             >
               <Copy className="h-4 w-4" />
             </Button>

@@ -1755,11 +1755,14 @@ export const rotacionarWebhookSecret = createServerFn({ method: "POST" })
     const bytes = new Uint8Array(24);
     crypto.getRandomValues(bytes);
     const secret = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-    const { error } = await supabaseAdmin
+    const store = await supabaseAdmin
       .from("stores")
-      .update({ webhook_secret: secret })
-      .eq("owner_id", context.userId);
-    if (error) throw new Error(error.message);
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!store.data) throw new Error("Loja não encontrada.");
+    const { saveStoreSecrets } = await import("./store-secrets.server");
+    await saveStoreSecrets(store.data.id, { webhook_secret: secret });
     return { webhook_secret: secret };
   });
 
@@ -1773,7 +1776,7 @@ export const testarWebhook = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("id, slug, webhook_secret")
+      .select("id, slug")
       .eq("owner_id", context.userId)
       .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
@@ -1812,11 +1815,27 @@ export const salvarWhatsapp = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const store = await supabaseAdmin
+      .from("stores")
+      .select("id")
+      .eq("owner_id", context.userId)
+      .maybeSingle();
+    if (!store.data) throw new Error("Loja não encontrada.");
     const { error } = await context.supabase
       .from("stores")
-      .update(data)
+      .update({
+        whatsapp_enabled: data.whatsapp_enabled,
+        whatsapp_template_pontos: data.whatsapp_template_pontos,
+      })
       .eq("owner_id", context.userId);
     if (error) throw new Error(error.message);
+    const { saveStoreSecrets } = await import("./store-secrets.server");
+    await saveStoreSecrets(store.data.id, {
+      evolution_url: data.evolution_url ?? null,
+      evolution_apikey: data.evolution_apikey ?? null,
+      evolution_instance: data.evolution_instance ?? null,
+    });
     return { ok: true };
   });
 
@@ -1835,11 +1854,13 @@ export const enviarWhatsappTeste = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("id, nome_fantasia, evolution_url, evolution_apikey, evolution_instance")
+      .select("id, nome_fantasia")
       .eq("owner_id", context.userId)
       .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
-    if (!loja.data.evolution_url || !loja.data.evolution_apikey || !loja.data.evolution_instance) {
+    const { getStoreSecrets } = await import("./store-secrets.server");
+    const secrets = await getStoreSecrets(loja.data.id);
+    if (!secrets.evolution_url || !secrets.evolution_apikey || !secrets.evolution_instance) {
       throw new Error("Configure URL, API key e instância da Evolution API antes de testar.");
     }
     const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
@@ -1850,9 +1871,9 @@ export const enviarWhatsappTeste = createServerFn({ method: "POST" })
       `✅ Teste PontuaMax — ${loja.data.nome_fantasia}. Integração WhatsApp funcionando!`;
     const res = await sendWhatsappRaw({
       storeId: loja.data.id,
-      url: loja.data.evolution_url,
-      apikey: loja.data.evolution_apikey,
-      instance: loja.data.evolution_instance,
+      url: secrets.evolution_url,
+      apikey: secrets.evolution_apikey,
+      instance: secrets.evolution_instance,
       number: numero,
       text: texto,
     });
@@ -1867,16 +1888,18 @@ export const conectarWhatsappQR = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("id, slug, evolution_url, evolution_apikey, evolution_instance")
+      .select("id, slug")
       .eq("owner_id", context.userId)
       .maybeSingle();
     if (!loja.data) throw new Error("Loja não encontrada.");
-    if (!loja.data.evolution_url || !loja.data.evolution_apikey) {
+    const { getStoreSecrets, saveStoreSecrets } = await import("./store-secrets.server");
+    const secrets = await getStoreSecrets(loja.data.id);
+    if (!secrets.evolution_url || !secrets.evolution_apikey) {
       throw new Error("Configure URL e API Key da Evolution API antes de conectar.");
     }
-    const base = loja.data.evolution_url.replace(/\/$/, "");
-    const instance = loja.data.evolution_instance || `qsf-${loja.data.slug}`;
-    const headers = { "Content-Type": "application/json", apikey: loja.data.evolution_apikey };
+    const base = secrets.evolution_url.replace(/\/$/, "");
+    const instance = secrets.evolution_instance || `qsf-${loja.data.slug}`;
+    const headers = { "Content-Type": "application/json", apikey: secrets.evolution_apikey };
     let qr: string | null = null;
     // Tenta criar (idempotente na maioria das versões — se já existe, cai no connect)
     try {
@@ -1907,11 +1930,8 @@ export const conectarWhatsappQR = createServerFn({ method: "POST" })
       const j = (await connRes.json()) as { base64?: string; qrcode?: { base64?: string } };
       qr = j?.base64 ?? j?.qrcode?.base64 ?? null;
     }
-    if (loja.data.evolution_instance !== instance) {
-      await supabaseAdmin
-        .from("stores")
-        .update({ evolution_instance: instance })
-        .eq("id", loja.data.id);
+    if (secrets.evolution_instance !== instance) {
+      await saveStoreSecrets(loja.data.id, { evolution_instance: instance });
     }
     if (!qr) throw new Error("Instância já conectada ou QR indisponível.");
     return { instance, qr };
@@ -1924,10 +1944,12 @@ export const statusWhatsapp = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("evolution_url, evolution_apikey, evolution_instance")
+      .select("id")
       .eq("owner_id", context.userId)
       .maybeSingle();
-    const d = loja.data;
+    if (!loja.data) return { state: "unconfigured" as string };
+    const { getStoreSecrets } = await import("./store-secrets.server");
+    const d = await getStoreSecrets(loja.data.id);
     if (!d?.evolution_url || !d?.evolution_apikey || !d?.evolution_instance) {
       return { state: "unconfigured" as string };
     }
@@ -1954,10 +1976,12 @@ export const desconectarWhatsapp = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const loja = await supabaseAdmin
       .from("stores")
-      .select("evolution_url, evolution_apikey, evolution_instance")
+      .select("id")
       .eq("owner_id", context.userId)
       .maybeSingle();
-    const d = loja.data;
+    if (!loja.data) return { ok: true };
+    const { getStoreSecrets } = await import("./store-secrets.server");
+    const d = await getStoreSecrets(loja.data.id);
     if (!d?.evolution_url || !d?.evolution_apikey || !d?.evolution_instance) return { ok: true };
     const base = d.evolution_url.replace(/\/$/, "");
     await fetch(`${base}/instance/logout/${encodeURIComponent(d.evolution_instance)}`, {
@@ -2720,5 +2744,15 @@ export const getMyStoreFull = createServerFn({ method: "GET" })
       .eq("owner_id", context.userId)
       .maybeSingle();
     if (r.error) throw new Error(r.error.message);
-    return r.data;
+    if (!r.data) return null;
+    // Merge sensitive secrets (kept in a separate service-role-only table)
+    // so the merchant dashboard shape stays unchanged.
+    const { getStoreSecrets } = await import("./store-secrets.server");
+    const s = await getStoreSecrets(r.data.id);
+    return { ...r.data, ...s } as typeof r.data & {
+      webhook_secret: string | null;
+      evolution_url: string | null;
+      evolution_apikey: string | null;
+      evolution_instance: string | null;
+    };
   });
