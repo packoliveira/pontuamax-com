@@ -8,6 +8,15 @@ import {
   lookupPublicStoreBySlug,
 } from "./qsf.functions";
 
+// Escalas de frescor por natureza do dado (evita refetch desnecessário
+// e mantém navegação instantânea entre abas do painel).
+const FRESH = {
+  VOLATILE: 15_000, // transações/listas quentes
+  SHORT: 60_000, // produtos, promos, listas gerais
+  MEDIUM: 5 * 60_000, // loja, tags, papéis, config estática
+  LONG: 10 * 60_000, // lookups de vale-presente, storefronts públicas
+} as const;
+
 export type StorePublic = Pick<
   Tables<"stores">,
   | "id"
@@ -66,6 +75,7 @@ export type StorePublic = Pick<
 export const myStoreQuery = () =>
   queryOptions({
     queryKey: ["my-store"],
+    staleTime: FRESH.MEDIUM,
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) return null;
@@ -78,6 +88,7 @@ export const myStoreQuery = () =>
 export const storeBySlugQuery = (slug: string) =>
   queryOptions({
     queryKey: ["store", slug],
+    staleTime: FRESH.LONG,
     queryFn: async () => {
       return await lookupPublicStoreBySlug({ data: { slug } });
     },
@@ -87,6 +98,7 @@ export const publicStoreByIdQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["public-store", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.LONG,
     queryFn: async () => {
       if (!storeId) return null;
       return await lookupPublicStoreById({ data: { id: storeId } });
@@ -97,6 +109,7 @@ export const storeProductsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["products", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -113,6 +126,7 @@ export const storeClientsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["store-clients", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -129,6 +143,7 @@ export const storeTransactionsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["transactions", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -146,6 +161,7 @@ export const myLinkAtStoreQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["my-link", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return null;
       const { data: session } = await supabase.auth.getSession();
@@ -165,6 +181,7 @@ export const myTransactionsAtStoreQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["my-transactions", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!storeId) return [];
       const { data: session } = await supabase.auth.getSession();
@@ -185,6 +202,7 @@ export const activeStoreProductsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["active-products", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -202,6 +220,7 @@ export const integrationLogsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["integration-logs", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -219,6 +238,7 @@ export const storePromotionsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["promotions", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -236,6 +256,7 @@ export const storeGiftCardsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["gift-cards", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -252,6 +273,7 @@ export const giftCardByCodeQuery = (codigo: string | undefined) =>
   queryOptions({
     queryKey: ["gift-card", codigo],
     enabled: !!codigo,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!codigo) return null;
       return await lookupGiftCardByCodigo({ data: { codigo } });
@@ -262,6 +284,7 @@ export const storeFiscalNotesQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["fiscal-notes", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -279,6 +302,7 @@ export const myFiscalNotesQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["my-fiscal-notes", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!storeId) return [];
       const { data: sess } = await supabase.auth.getSession();
@@ -298,6 +322,7 @@ export const clientTagsQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["client-tags", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.MEDIUM,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -313,6 +338,7 @@ export const storeRafflesQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["raffles", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.SHORT,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
@@ -329,6 +355,7 @@ export const storeNpsResponsesQuery = (storeId: string | undefined) =>
   queryOptions({
     queryKey: ["nps-responses", storeId],
     enabled: !!storeId,
+    staleTime: FRESH.VOLATILE,
     queryFn: async () => {
       if (!storeId) return [];
       const { data, error } = await supabase
