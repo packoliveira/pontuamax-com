@@ -403,6 +403,10 @@ function ResgatesPage() {
           icon={Clock}
           tone="bg-gradient-to-br from-[#F59E0B] to-[#F97316]"
           items={pendentes}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          confirming={confirmar.isPending}
+          cancelling={cancelar.isPending}
         />
       ) : (
         <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-10 text-center">
@@ -421,21 +425,33 @@ function ResgatesPage() {
         tone="bg-gradient-to-br from-[#F59E0B] to-[#EF4444]"
         items={expirados}
         limit={20}
-      />
+        onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          confirming={confirmar.isPending}
+          cancelling={cancelar.isPending}
+        />
       <Section
         title="Utilizados"
         icon={CheckCircle2}
         tone="bg-gradient-to-br from-[#2563EB] to-[#14CBA8]"
         items={utilizados}
         limit={30}
-      />
+        onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          confirming={confirmar.isPending}
+          cancelling={cancelar.isPending}
+        />
       <Section
         title="Cancelados"
         icon={XCircle}
         tone="bg-gradient-to-br from-[#EF4444] to-[#B91C1C]"
         items={cancelados}
         limit={20}
-      />
+        onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          confirming={confirmar.isPending}
+          cancelling={cancelar.isPending}
+        />
 
       <Dialog
         open={!!comprovante}
