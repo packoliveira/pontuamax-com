@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeTransactionsQuery } from "@/lib/queries";
 import { confirmarResgate, validarVoucher, cancelarVoucher } from "@/lib/qsf.functions";
@@ -46,6 +46,225 @@ type Comprovante = {
   pontos_usados: number;
   cashback_aplicado: number;
 };
+
+function tempoRestante(iso: string | null): { label: string; danger: boolean } | null {
+  if (!iso) return null;
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return { label: "expirado", danger: true };
+  const h = Math.floor(ms / 3_600_000);
+  if (h < 24) return { label: `${h}h restantes`, danger: h < 12 };
+  const d = Math.floor(h / 24);
+  return { label: `${d}d restantes`, danger: d < 2 };
+}
+
+const StatusBadge = memo(function StatusBadge({ status }: { status: string }) {
+  if (status === "pendente")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F59E0B] to-[#F97316] px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+        <Clock className="h-3 w-3" /> Pendente
+      </span>
+    );
+  if (status === "entregue")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#2563EB] to-[#14CBA8] px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+        <CheckCircle2 className="h-3 w-3" /> Utilizado
+      </span>
+    );
+  if (status === "expirado")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#F59E0B] to-[#EF4444] px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+        <AlertTriangle className="h-3 w-3" /> Expirado
+      </span>
+    );
+  if (status === "cancelado")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#EF4444] to-[#B91C1C] px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+        <XCircle className="h-3 w-3" /> Cancelado
+      </span>
+    );
+  return null;
+});
+
+const StatCard = memo(function StatCard({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: number;
+  icon: LucideIcon;
+  tone: "pending" | "used" | "expired" | "cancelled";
+}) {
+  const gradient = {
+    pending: "from-[#F59E0B] to-[#F97316]",
+    used: "from-[#2563EB] to-[#14CBA8]",
+    expired: "from-[#F59E0B] to-[#EF4444]",
+    cancelled: "from-[#EF4444] to-[#B91C1C]",
+  }[tone];
+  return (
+    <Card className="rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">{label}</div>
+          <div
+            className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-sm`}
+          >
+            <Icon className="h-4 w-4" />
+          </div>
+        </div>
+        <div className="mt-3 text-2xl font-bold text-[#0F172A]">
+          {value.toLocaleString("pt-BR")}
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+const Row = memo(function Row({
+  r,
+  onConfirm,
+  onCancel,
+  confirming,
+  cancelling,
+}: {
+  r: TxRow;
+  onConfirm: (id: string) => void;
+  onCancel: (id: string) => void;
+  confirming: boolean;
+  cancelling: boolean;
+}) {
+  const nomeCli = r.profiles?.full_name ?? "—";
+  const isProduto = r.tipo === "resgate_produto";
+  const tr = tempoRestante(r.voucher_expires_at);
+  const initials =
+    nomeCli
+      .split(" ")
+      .map((s) => s[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "—";
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 p-5 transition duration-200 hover:bg-[#F8FAFC]">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="relative shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-xs font-semibold text-white shadow-sm">
+            {initials}
+          </div>
+          <div
+            className={`absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-white ${isProduto ? "bg-[#6D28D9]" : "bg-[#14CBA8]"} text-white`}
+          >
+            {isProduto ? <Gift className="h-2.5 w-2.5" /> : <Wallet className="h-2.5 w-2.5" />}
+          </div>
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="truncate font-semibold text-[#0F172A]">{nomeCli}</span>
+            <StatusBadge status={r.status ?? "pendente"} />
+          </div>
+          <div className="mt-0.5 text-sm text-[#64748B]">
+            {isProduto
+              ? `${r.products?.nome ?? "Produto"} • ${Math.abs(r.pontos_delta)} pts`
+              : `Voucher de cashback • ${formatBRL(Math.abs(Number(r.cashback_delta)))}`}
+          </div>
+          <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 shadow-sm">
+            <Ticket className="h-3.5 w-3.5 text-[#14CBA8]" />
+            <span className="select-all font-mono text-base font-black tracking-widest text-white">
+              {r.voucher_code}
+            </span>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#94A3B8]">
+            <span>{formatDate(r.created_at)}</span>
+            {tr && r.status === "pendente" && (
+              <span
+                className={`inline-flex items-center gap-1 ${tr.danger ? "font-semibold text-[#F97316]" : "text-[#64748B]"}`}
+              >
+                <Clock className="h-3 w-3" /> {tr.label}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      {r.status === "pendente" && (
+        <div className="flex shrink-0 flex-col gap-1.5">
+          <Button
+            size="sm"
+            disabled={confirming}
+            onClick={() => onConfirm(r.id)}
+            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+          >
+            <CheckCircle2 className="mr-1 h-4 w-4" /> Confirmar entrega
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="rounded-xl text-[#EF4444] hover:bg-[#EF4444]/5"
+            disabled={cancelling}
+            onClick={() => {
+              if (confirm("Cancelar este voucher e devolver o saldo ao cliente?")) onCancel(r.id);
+            }}
+          >
+            <XCircle className="mr-1 h-3.5 w-3.5" /> Cancelar
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const Section = memo(function Section({
+  title,
+  icon: Icon,
+  tone,
+  items,
+  limit,
+  onConfirm,
+  onCancel,
+  confirming,
+  cancelling,
+}: {
+  title: string;
+  icon: LucideIcon;
+  tone: string;
+  items: TxRow[];
+  limit?: number;
+  onConfirm: (id: string) => void;
+  onCancel: (id: string) => void;
+  confirming: boolean;
+  cancelling: boolean;
+}) {
+  if (items.length === 0) return null;
+  const shown = limit ? items.slice(0, limit) : items;
+  return (
+    <section>
+      <div className="mb-3 flex items-center gap-2">
+        <div className={`flex h-6 w-6 items-center justify-center rounded-lg ${tone}`}>
+          <Icon className="h-3.5 w-3.5 text-white" />
+        </div>
+        <h2 className="text-sm font-semibold text-[#0F172A]">
+          {title} <span className="ml-1 font-medium text-[#64748B]">({items.length})</span>
+        </h2>
+      </div>
+      <Card className="rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <CardContent className="p-0">
+          <div className="divide-y divide-[#F1F5F9]">
+            {shown.map((r) => (
+              <Row
+                key={r.id}
+                r={r}
+                onConfirm={onConfirm}
+                onCancel={onCancel}
+                confirming={confirming}
+                cancelling={cancelling}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+  );
+});
 
 export const Route = createFileRoute("/lojista/resgates")({
   ssr: false,
