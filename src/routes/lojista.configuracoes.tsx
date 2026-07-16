@@ -1000,8 +1000,7 @@ function NpsCard({
           {salvar.isPending ? "Salvando..." : "Salvar NPS"}
         </Button>
       </CardContent>
-      </p>
-    </div>
+    </Card>
   );
 }
 
