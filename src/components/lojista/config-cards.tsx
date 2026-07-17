@@ -690,13 +690,15 @@ export function WhatsappQRConnect({ storeId }: { storeId: string }) {
       setState(r.state);
       if (r.state === "open") setQr(null);
     } catch {
-      setState("error");
+      // 502/timeout transitório do gateway — mantém último estado conhecido
     }
   }
 
   useEffect(() => {
     checkStatus();
-    const id = setInterval(checkStatus, 5000);
+    // Polling a cada 5s martelava o worker e gerava 502 intermitente.
+    // 20s dá folga suficiente para status de conexão do WhatsApp.
+    const id = setInterval(checkStatus, 20000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId]);
