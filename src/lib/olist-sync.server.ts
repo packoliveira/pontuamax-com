@@ -85,7 +85,7 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
       store_id: storeId,
       origem: "olist-polling",
       status: "erro",
-      mensagem: `list /pedidos falhou: ${err}`,
+      mensagem_erro: `list /pedidos falhou: ${err}`,
     });
     return { ...base, error: err };
   }
@@ -140,8 +140,18 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
   await supabaseAdmin.from("integration_logs").insert({
     store_id: storeId,
     origem: "olist-polling",
-    status,
-    mensagem: `polling: ${base.processados} processados, ${base.duplicados} duplicados, ${base.ignorados} ignorados, ${base.erros} erros (de ${base.totalPedidos})`,
+    status: status === "erro" ? "erro" : "sucesso",
+    mensagem_erro:
+      status === "erro"
+        ? `polling: ${base.erros} erros de ${base.totalPedidos}`
+        : null,
+    payload_recebido: {
+      processados: base.processados,
+      duplicados: base.duplicados,
+      ignorados: base.ignorados,
+      erros: base.erros,
+      total: base.totalPedidos,
+    } as never,
   });
 
   return base;
