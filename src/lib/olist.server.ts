@@ -188,14 +188,31 @@ export async function listPedidosAlterados(
     offset: String(offset),
   });
   const url = `${OLIST_API_BASE}/pedidos?${params.toString()}`;
-  const resp = await fetch(url, {
-    headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
-  });
-  if (!resp.ok) {
+  // Retry com backoff em 429/5xx, igual ao fetchPedido.
+  const maxAttempts = 4;
+  let lastErr = "";
+  let body: Record<string, unknown> | null = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
+    });
+    if (resp.ok) {
+      body = (await resp.json()) as Record<string, unknown>;
+      break;
+    }
     const t = await resp.text();
-    throw new Error(`Olist GET /pedidos ${resp.status}: ${t}`);
+    lastErr = `Olist GET /pedidos ${resp.status}: ${t.slice(0, 200)}`;
+    if (resp.status !== 429 && resp.status < 500) throw new Error(lastErr);
+    if (attempt === maxAttempts) throw new Error(lastErr);
+    const retryAfterHeader = resp.headers.get("retry-after");
+    const retryAfterSec = retryAfterHeader ? Number(retryAfterHeader) : NaN;
+    const waitMs =
+      Number.isFinite(retryAfterSec) && retryAfterSec > 0
+        ? Math.min(retryAfterSec * 1000, 15_000)
+        : Math.min(1500 * attempt * attempt, 12_000);
+    await new Promise((r) => setTimeout(r, waitMs));
   }
-  const body = (await resp.json()) as Record<string, unknown>;
+  if (!body) throw new Error(lastErr || "Olist GET /pedidos falhou");
   // Aceita { itens: [...] } ou { data: [...] } ou array direto — API é inconsistente entre revisões.
   const items =
     (body.itens as unknown[]) ??
