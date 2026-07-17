@@ -107,7 +107,8 @@ export async function processarPedidoOlist(input: {
       .eq("id_venda_externa", idExterno)
       .eq("tipo", "venda")
       .maybeSingle();
-    if (!vOrig.data) return { status: "erro", error: "venda original não encontrada" };
+    if (!vOrig.data)
+      return { status: "ignorado", motivo: "cancelamento sem venda original registrada" };
 
     const lOrig = await supabaseAdmin
       .from("store_clients")
@@ -115,7 +116,7 @@ export async function processarPedidoOlist(input: {
       .eq("store_id", loja.id)
       .eq("user_id", vOrig.data.client_user_id)
       .maybeSingle();
-    if (!lOrig.data) return { status: "erro", error: "cliente não vinculado" };
+    if (!lOrig.data) return { status: "ignorado", motivo: "cliente não vinculado" };
 
     const pE = -Number(vOrig.data.pontos_delta ?? 0);
     const cE = -Number(vOrig.data.cashback_delta ?? 0);
