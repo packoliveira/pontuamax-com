@@ -7,9 +7,30 @@ import { cpfToEmail } from "@/lib/qsf-shared";
 
 export type SituacaoAcao = "credito" | "estorno" | "ignorar";
 
-export function classificarSituacao(s: string): SituacaoAcao {
-  const v = (s ?? "").toLowerCase().trim();
-  if (v === "faturado" || v === "aprovado" || v === "concluido" || v === "entregue")
+// Aceita string ("faturado"), número (código Tiny) ou objeto ({ id, descricao }).
+// Tiny V3 códigos comuns: 1=Em aberto, 2=Atendido, 3=Cancelado, 4=Preparando envio,
+// 5=Faturado, 6=Pronto p/ envio, 7=Enviado, 8=Entregue, 9=Não entregue.
+export function classificarSituacao(s: unknown): SituacaoAcao {
+  if (s == null) return "ignorar";
+  if (typeof s === "object") {
+    const o = s as Record<string, unknown>;
+    return classificarSituacao(o.descricao ?? o.valor ?? o.id ?? o.codigo ?? "");
+  }
+  if (typeof s === "number") {
+    if (s === 3) return "estorno";
+    if (s === 2 || s === 5 || s === 7 || s === 8) return "credito";
+    return "ignorar";
+  }
+  const v = String(s).toLowerCase().trim();
+  if (
+    v === "faturado" ||
+    v === "aprovado" ||
+    v === "concluido" ||
+    v === "concluído" ||
+    v === "entregue" ||
+    v === "atendido" ||
+    v === "enviado"
+  )
     return "credito";
   if (v === "cancelado") return "estorno";
   return "ignorar";
@@ -42,15 +63,14 @@ export async function processarPedidoOlist(input: {
   const pedidoData =
     (input.pedidoRaw.pedido as Record<string, unknown>) ?? input.pedidoRaw;
 
-  const situacaoRaw = String(
-    (pedidoData.situacao as string | undefined) ??
-      ((pedidoData.situacao as Record<string, unknown> | undefined)?.descricao as
-        | string
-        | undefined) ??
-      "",
-  );
+  const situacaoRaw =
+    pedidoData.situacao ??
+    (pedidoData as Record<string, unknown>).codigoSituacao ??
+    (pedidoData as Record<string, unknown>).descricaoSituacao ??
+    "";
   const acao = classificarSituacao(situacaoRaw);
-  if (acao === "ignorar") return { status: "ignorado", motivo: `situacao=${situacaoRaw}` };
+  if (acao === "ignorar")
+    return { status: "ignorado", motivo: `situacao=${JSON.stringify(situacaoRaw)}` };
 
   const valor = Number(
     (pedidoData.valor as number | undefined) ??
