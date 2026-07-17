@@ -12,6 +12,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
+  Store as StoreIcon,
+  Palette,
+  Gift,
+  Plug,
+  MessageCircle,
+  Bell,
+  Sparkles,
+  Timer,
+} from "lucide-react";
+import {
   LivePreview,
   AssetUploader,
   ColorPresets,
@@ -41,6 +51,27 @@ function CardSkeleton() {
   );
 }
 
+type SectionId =
+  | "loja"
+  | "aparencia"
+  | "recompensas"
+  | "integracoes"
+  | "whatsapp"
+  | "notificacoes"
+  | "engajamento"
+  | "avancado";
+
+const SECTIONS: { id: SectionId; label: string; icon: typeof StoreIcon; hint: string }[] = [
+  { id: "loja", label: "Dados da loja", icon: StoreIcon, hint: "Nome, telefone" },
+  { id: "aparencia", label: "Aparência", icon: Palette, hint: "Logo, banner, cores" },
+  { id: "recompensas", label: "Recompensas", icon: Gift, hint: "Pontos, cashback, voucher" },
+  { id: "integracoes", label: "Integrações", icon: Plug, hint: "Webhook, Olist" },
+  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle, hint: "Evolution API" },
+  { id: "notificacoes", label: "Notificações", icon: Bell, hint: "Mensagens automáticas" },
+  { id: "engajamento", label: "Engajamento", icon: Sparkles, hint: "Indicação, NPS, Instagram" },
+  { id: "avancado", label: "Avançado", icon: Timer, hint: "Validade de pontos" },
+];
+
 export const Route = createFileRoute("/lojista/configuracoes")({
   ssr: false,
   component: ConfigPage,
@@ -50,6 +81,7 @@ function ConfigPage() {
   const qc = useQueryClient();
   const { data: loja } = useQuery(myStoreQuery());
 
+  const [section, setSection] = useState<SectionId>("loja");
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [logo, setLogo] = useState("");
@@ -112,9 +144,10 @@ function ConfigPage() {
 
   const inclP = modalidade !== "cashback";
   const inclC = modalidade !== "pontos";
+  const showSave = ["loja", "aparencia", "recompensas"].includes(section);
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="space-y-6 max-w-6xl">
       <div className="space-y-1">
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">
           Ajustes
@@ -124,8 +157,68 @@ function ConfigPage() {
           Personalize a página do cliente, regras de recompensa e integrações
         </p>
       </div>
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-6">
+
+      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        {/* Sidebar de categorias */}
+        <nav className="lg:sticky lg:top-6 lg:self-start">
+          {/* Mobile: chips horizontais */}
+          <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden -mx-1 px-1">
+            {SECTIONS.map((s) => {
+              const Icon = s.icon;
+              const active = section === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSection(s.id)}
+                  className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-[#2563EB] bg-[#2563EB] text-white"
+                      : "border-[#E5E7EB] bg-white text-[#334155] hover:bg-[#F8FAFC]"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+          {/* Desktop: lista vertical */}
+          <div className="hidden lg:block rounded-2xl border border-[#E5E7EB] bg-white p-2 shadow-sm">
+            {SECTIONS.map((s) => {
+              const Icon = s.icon;
+              const active = section === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSection(s.id)}
+                  className={`w-full text-left flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                    active
+                      ? "bg-[#EEF2FF] text-[#1D4ED8]"
+                      : "text-[#334155] hover:bg-[#F8FAFC]"
+                  }`}
+                >
+                  <span
+                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
+                      active ? "bg-white text-[#2563EB]" : "bg-[#F1F5F9] text-[#64748B]"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold leading-tight truncate">
+                      {s.label}
+                    </span>
+                    <span className="block text-[11px] text-[#64748B] truncate">{s.hint}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Painel da categoria selecionada */}
+        <div className="min-w-0 space-y-6">
+        {section === "loja" && (
           <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
             <CardHeader>
@@ -142,7 +235,10 @@ function ConfigPage() {
               </div>
             </CardContent>
           </Card>
+        )}
 
+        {section === "aparencia" && (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
           <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
             <CardHeader>
@@ -227,7 +323,27 @@ function ConfigPage() {
               </p>
             </CardContent>
           </Card>
+          <div className="xl:sticky xl:top-6 xl:self-start">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">
+              Prévia ao vivo
+            </div>
+            <LivePreview
+              nome={nome}
+              logo={logo}
+              banner={banner}
+              bannerMobile={bannerMobile}
+              cor1={cor1}
+              cor2={cor2}
+              modalidade={modalidade}
+            />
+            <p className="mt-2 text-[11px] text-[#64748B]">
+              Atualiza em tempo real conforme você ajusta cores, banner e logo.
+            </p>
+          </div>
+          </div>
+        )}
 
+        {section === "recompensas" && (
           <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
             <CardHeader>
@@ -320,7 +436,9 @@ function ConfigPage() {
               </div>
             </CardContent>
           </Card>
+        )}
 
+        {showSave && (
           <Button
             onClick={() => salvar.mutate()}
             disabled={salvar.isPending}
@@ -329,39 +447,49 @@ function ConfigPage() {
           >
             {salvar.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
+        )}
 
+        {section === "integracoes" && (
           <Suspense fallback={<CardSkeleton />}>
-            <IntegracoesCard
-              storeId={loja.id}
-              slug={loja.slug}
-              secret={loja.webhook_secret}
-              lastAt={loja.webhook_last_at}
-            />
-            <OlistOAuthCard storeId={loja.id} />
+            <div className="space-y-6">
+              <IntegracoesCard
+                storeId={loja.id}
+                slug={loja.slug}
+                secret={loja.webhook_secret}
+                lastAt={loja.webhook_last_at}
+              />
+              <OlistOAuthCard storeId={loja.id} />
+            </div>
+          </Suspense>
+        )}
+
+        {section === "whatsapp" && (
+          <Suspense fallback={<CardSkeleton />}>
             <WhatsappCard loja={loja} />
+          </Suspense>
+        )}
+
+        {section === "notificacoes" && (
+          <Suspense fallback={<CardSkeleton />}>
             <NotificacoesCard loja={loja} />
-            <IndicacaoCard loja={loja} />
-            <NpsCard loja={loja} />
-            <InstagramCard loja={loja} />
+          </Suspense>
+        )}
+
+        {section === "engajamento" && (
+          <Suspense fallback={<CardSkeleton />}>
+            <div className="space-y-6">
+              <IndicacaoCard loja={loja} />
+              <NpsCard loja={loja} />
+              <InstagramCard loja={loja} />
+            </div>
+          </Suspense>
+        )}
+
+        {section === "avancado" && (
+          <Suspense fallback={<CardSkeleton />}>
             <ValidadePontosCard loja={loja} />
           </Suspense>
-        </div>
-        <div className="lg:sticky lg:top-8 lg:self-start">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">
-            Prévia ao vivo
-          </div>
-          <LivePreview
-            nome={nome}
-            logo={logo}
-            banner={banner}
-            bannerMobile={bannerMobile}
-            cor1={cor1}
-            cor2={cor2}
-            modalidade={modalidade}
-          />
-          <p className="mt-2 text-[11px] text-[#64748B]">
-            Atualiza em tempo real conforme você ajusta cores, banner e logo.
-          </p>
+        )}
         </div>
       </div>
     </div>
