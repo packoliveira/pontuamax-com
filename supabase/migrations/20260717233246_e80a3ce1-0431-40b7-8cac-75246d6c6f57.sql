@@ -1,0 +1,1 @@
+update public.erp_credentials set last_sync_error = null, last_sync_status = 'sem_novidades' where provider = 'olist_v3' and last_sync_error = 'cancelamento sem venda original registrada';
