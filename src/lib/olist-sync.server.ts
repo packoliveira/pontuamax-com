@@ -127,7 +127,12 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
     base.detalhes.push({
       resourceId: rid,
       status: result.status,
-      error: result.status === "erro" ? result.error : undefined,
+      error:
+        result.status === "erro"
+          ? result.error
+          : result.status === "ignorado"
+            ? result.motivo
+            : undefined,
     });
   }
 
@@ -155,6 +160,7 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
       ignorados: base.ignorados,
       erros: base.erros,
       total: base.totalPedidos,
+      amostra: base.detalhes.slice(0, 5),
     } as never,
   });
 
