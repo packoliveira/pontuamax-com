@@ -1232,6 +1232,28 @@ export function OlistOAuthCard({ storeId }: { storeId: string }) {
     onError: (e) => toast.error((e as Error).message),
   });
 
+  const sincronizar = useMutation({
+    mutationFn: () => sincronizarOlistAgora({ data: { storeId } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["olist-status", storeId] });
+      if (r?.error) toast.error(r.error);
+      else
+        toast.success(
+          `Sync: ${r.processados} processados, ${r.duplicados} duplicados, ${r.ignorados} ignorados${r.erros ? `, ${r.erros} erros` : ""}`,
+        );
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const toggleSync = useMutation({
+    mutationFn: (enabled: boolean) => alternarSyncOlist({ data: { storeId, enabled } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["olist-status", storeId] });
+      toast.success(r.enabled ? "Sync automático ligado" : "Sync automático pausado");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
   const conectado = status?.status === "connected";
 
   return (
