@@ -13,8 +13,7 @@ export const Route = createFileRoute("/api/public/oauth/olist/callback")({
         const errorParam = url.searchParams.get("error");
 
         const back = (msg: string, ok = false) => {
-          const origin = process.env.PUBLIC_APP_ORIGIN ?? process.env.VITE_APP_ORIGIN ?? url.origin;
-          const target = new URL(`${origin}/lojista/configuracoes`);
+          const target = new URL(`${url.origin}/lojista/configuracoes`);
           target.searchParams.set("olist", ok ? "connected" : "error");
           target.searchParams.set("msg", msg);
           return Response.redirect(target.toString(), 302);

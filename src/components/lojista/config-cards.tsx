@@ -1219,22 +1219,40 @@ export function OlistOAuthCard({ storeId }: { storeId: string }) {
 
   const conectar = useMutation({
     mutationFn: () => iniciarConexaoOlist({ data: { storeId } }),
-    onSuccess: (r) => {
-      if (!r?.url) return;
-      // Abre em nova aba: dentro do preview da Lovable o Tiny bloqueia iframe
-      // (X-Frame-Options: SAMEORIGIN). Nova aba funciona em preview e produção.
-      const win = window.open(r.url, "_blank", "noopener,noreferrer");
-      if (!win) {
-        // Pop-up bloqueado: escapa do iframe para o topo.
-        try {
-          window.top!.location.href = r.url;
-        } catch {
-          window.location.href = r.url;
-        }
-      }
-    },
-    onError: (e) => toast.error((e as Error).message),
   });
+
+  const handleConectarOlist = async () => {
+    // Precisa abrir no clique do usuário; se abrir só após o servidor responder,
+    // alguns navegadores bloqueiam o pop-up e o Tiny/Olist não permite iframe.
+    const win = window.open("about:blank", "olist-oauth", "width=720,height=820");
+    try {
+      if (win) {
+        win.document.title = "Conectando Olist";
+        win.document.body.innerHTML =
+          '<p style="font-family:system-ui;margin:24px;color:#0f172a">Abrindo conexão segura com Olist...</p>';
+      }
+
+      const r = await conectar.mutateAsync();
+      if (!r?.url) {
+        win?.close();
+        return;
+      }
+
+      if (win) {
+        win.location.replace(r.url);
+        return;
+      }
+
+      try {
+        window.top!.location.href = r.url;
+      } catch {
+        window.location.href = r.url;
+      }
+    } catch (e) {
+      win?.close();
+      toast.error((e as Error).message);
+    }
+  };
 
   const desconectar = useMutation({
     mutationFn: () => desconectarOlist({ data: { storeId } }),
@@ -1368,7 +1386,7 @@ export function OlistOAuthCard({ storeId }: { storeId: string }) {
         ) : (
           <Button
             type="button"
-            onClick={() => conectar.mutate()}
+            onClick={handleConectarOlist}
             disabled={conectar.isPending}
             className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
           >

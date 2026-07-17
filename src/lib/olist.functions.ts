@@ -1,23 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-async function ensureOwner(ctx: { supabase: any; userId: string }, storeId: string) {
-  const { data, error } = await ctx.supabase
-    .from("stores")
-    .select("id, owner_id")
-    .eq("id", storeId)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data || data.owner_id !== ctx.userId) throw new Error("Acesso negado");
-}
+import { ensureOlistStoreOwner } from "@/lib/olist-auth.server";
 
 // Retorna a URL de autorização Olist para o lojista abrir/redirecionar.
 export const iniciarConexaoOlist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ storeId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureOwner(context, data.storeId);
+    await ensureOlistStoreOwner(context, data.storeId);
     const { newNonce, signState, buildAuthorizeUrl, olistRedirectUri } =
       await import("@/lib/olist.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -29,10 +20,8 @@ export const iniciarConexaoOlist = createServerFn({ method: "POST" })
       provider: "olist_v3",
     });
     if (error) throw new Error(error.message);
-    // A rota do TSS não expõe Request aqui; usamos origin do próprio app via env.
-    const origin =
-      process.env.PUBLIC_APP_ORIGIN ?? process.env.VITE_APP_ORIGIN ?? "https://pontuamax.com";
-    const redirectUri = `${origin}/api/public/oauth/olist/callback`;
+    // O redirect_uri precisa bater exatamente com o cadastrado na Olist.
+    const redirectUri = olistRedirectUri();
     return { url: buildAuthorizeUrl(state, redirectUri) };
   });
 
@@ -41,7 +30,7 @@ export const getStatusOlist = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ storeId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureOwner(context, data.storeId);
+    await ensureOlistStoreOwner(context, data.storeId);
     const { data: row, error } = await context.supabase
       .from("erp_credentials")
       .select(
@@ -59,7 +48,7 @@ export const desconectarOlist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ storeId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureOwner(context, data.storeId);
+    await ensureOlistStoreOwner(context, data.storeId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("erp_credentials")
@@ -76,7 +65,7 @@ export const sincronizarOlistAgora = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ storeId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureOwner(context, data.storeId);
+    await ensureOlistStoreOwner(context, data.storeId);
     const { sincronizarLojaOlist } = await import("@/lib/olist-sync.server");
     return await sincronizarLojaOlist(data.storeId);
   });
@@ -88,7 +77,7 @@ export const alternarSyncOlist = createServerFn({ method: "POST" })
     z.object({ storeId: z.string().uuid(), enabled: z.boolean() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await ensureOwner(context, data.storeId);
+    await ensureOlistStoreOwner(context, data.storeId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("erp_credentials")
