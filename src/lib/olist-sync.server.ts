@@ -164,6 +164,9 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
     })
     .eq("id", cred.id);
 
+  const detalhesComErro = base.detalhes.filter((d) => d.status === "erro" && d.error);
+  const detalhesIgnorados = base.detalhes.filter((d) => d.status === "ignorado" && d.error);
+
   await supabaseAdmin.from("integration_logs").insert({
     store_id: storeId,
     origem: "olist-polling",
@@ -178,6 +181,8 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
       ignorados: base.ignorados,
       erros: base.erros,
       total: base.totalPedidos,
+      amostra_erros: detalhesComErro.slice(0, 5),
+      amostra_ignorados: detalhesIgnorados.slice(0, 5),
       amostra: base.detalhes.slice(0, 5),
     } as never,
   });
