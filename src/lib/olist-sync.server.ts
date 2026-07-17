@@ -157,7 +157,10 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
     .update({
       last_sync_at: now.toISOString(),
       last_sync_status: status,
-      last_sync_error: base.erros > 0 ? base.detalhes.find((d) => d.error)?.error ?? null : null,
+      last_sync_error:
+        base.erros > 0
+          ? base.detalhes.find((d) => d.status === "erro" && d.error)?.error ?? null
+          : null,
     })
     .eq("id", cred.id);
 
