@@ -42,7 +42,13 @@ import {
   Link as LinkIcon,
   Unplug,
 } from "lucide-react";
-import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
+import {
+  iniciarConexaoOlist,
+  getStatusOlist,
+  desconectarOlist,
+  sincronizarOlistAgora,
+  alternarSyncOlist,
+} from "@/lib/olist.functions";
 
 export function IntegracoesCard({
   storeId,
