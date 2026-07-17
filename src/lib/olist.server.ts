@@ -9,8 +9,15 @@ export const OLIST_API_BASE = "https://api.tiny.com.br/public-api/v3";
 const DEFAULT_OLIST_REDIRECT_ORIGIN = "https://pontuamax-com.lovable.app";
 
 function cleanOrigin(value?: string | null): string | null {
-  const origin = value?.trim().replace(/\/+$/, "");
-  return origin && /^https:\/\//i.test(origin) ? origin : null;
+  const raw = value?.trim().replace(/\/+$/, "");
+  if (!raw || !/^https:\/\//i.test(raw)) return null;
+
+  try {
+    const url = new URL(raw);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return null;
+  }
 }
 
 export function getPublicOrigin(request: Request): string {
