@@ -17,10 +17,22 @@ export type SyncStoreResult = {
   detalhes: Array<{ resourceId: string; status: string; error?: string }>;
 };
 
-// Janela mínima quando não há last_sync_at (primeira execução): 1h atrás.
-const FALLBACK_LOOKBACK_MS = 60 * 60_000;
 // Guardrail: mesmo que o Olist devolva um monte de pedidos antigos, processa no máx X por ciclo.
 const MAX_PEDIDOS_POR_CICLO = 50;
+
+// Cutoff: só processamos pedidos alterados a partir do início do dia de HOJE
+// (America/Sao_Paulo). Pedidos históricos são ignorados para manter o histórico
+// da loja limpo — nada anterior a hoje entra na pontuação.
+function inicioDoDiaSaoPauloIso(): string {
+  const now = new Date();
+  // America/Sao_Paulo = UTC-3 (sem horário de verão desde 2019).
+  const utcMs = now.getTime();
+  const spMs = utcMs - 3 * 60 * 60_000;
+  const spDay = new Date(spMs);
+  spDay.setUTCHours(0, 0, 0, 0);
+  // Volta pro UTC: 00:00 em SP = 03:00 UTC.
+  return new Date(spDay.getTime() + 3 * 60 * 60_000).toISOString();
+}
 
 export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreResult> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -58,7 +70,10 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
   if (cred.sync_enabled === false) return { ...base, error: "sync desabilitado" };
 
   const now = new Date();
-  const sinceIso = cred.last_sync_at ?? new Date(now.getTime() - FALLBACK_LOOKBACK_MS).toISOString();
+  const cutoffIso = inicioDoDiaSaoPauloIso();
+  // Nunca voltar antes do início de hoje, mesmo que last_sync_at seja mais antigo.
+  const lastIso = cred.last_sync_at ?? cutoffIso;
+  const sinceIso = lastIso > cutoffIso ? lastIso : cutoffIso;
 
   let accessToken: string;
   try {
