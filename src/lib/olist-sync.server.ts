@@ -92,7 +92,11 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
 
   base.totalPedidos = items.length;
 
-  for (const item of items) {
+  // Throttle: ~2 req/s pra ficar bem abaixo do limite (Olist ~120/min).
+  const THROTTLE_MS = 500;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (i > 0) await new Promise((r) => setTimeout(r, THROTTLE_MS));
     const rid = String(
       (item.id as string | number | undefined) ??
         (item.pedidoId as string | number | undefined) ??

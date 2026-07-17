@@ -145,14 +145,28 @@ export async function refreshAccessToken(refreshToken: string): Promise<OlistTok
 // --- REST calls (get pedido) ----------------------------------------------------
 
 export async function fetchPedido(accessToken: string, pedidoId: string | number) {
-  const resp = await fetch(`${OLIST_API_BASE}/pedidos/${pedidoId}`, {
-    headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
-  });
-  if (!resp.ok) {
-    const t = await resp.text();
-    throw new Error(`Olist GET /pedidos/${pedidoId} ${resp.status}: ${t}`);
+  // Retry com backoff para 429/5xx. Olist Tiny limita ~120 req/min por app.
+  const url = `${OLIST_API_BASE}/pedidos/${pedidoId}`;
+  const maxAttempts = 4;
+  let lastErr = "";
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
+    });
+    if (resp.ok) return (await resp.json()) as Record<string, unknown>;
+    const body = await resp.text();
+    lastErr = `Olist GET /pedidos/${pedidoId} ${resp.status}: ${body.slice(0, 200)}`;
+    // Só faz backoff em 429 e 5xx; 4xx (exceto 429) é erro definitivo.
+    if (resp.status !== 429 && resp.status < 500) throw new Error(lastErr);
+    if (attempt === maxAttempts) break;
+    const retryAfterHeader = resp.headers.get("retry-after");
+    const retryAfterSec = retryAfterHeader ? Number(retryAfterHeader) : NaN;
+    const waitMs = Number.isFinite(retryAfterSec) && retryAfterSec > 0
+      ? Math.min(retryAfterSec * 1000, 15_000)
+      : Math.min(1500 * attempt * attempt, 12_000);
+    await new Promise((r) => setTimeout(r, waitMs));
   }
-  return (await resp.json()) as Record<string, unknown>;
+  throw new Error(lastErr);
 }
 
 // Lista pedidos alterados desde `sinceIso`. Trata paginação simples.
