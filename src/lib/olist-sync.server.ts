@@ -3,7 +3,11 @@
 //  - cron a cada 5min (rota /api/public/hooks/olist-sync)
 //  - server-fn manual `sincronizarOlistAgora`
 
-import { processarPedidoOlist, ensureFreshOlistToken } from "@/lib/olist-processor.server";
+import {
+  classificarSituacao,
+  processarPedidoOlist,
+  ensureFreshOlistToken,
+} from "@/lib/olist-processor.server";
 
 export type SyncStoreResult = {
   storeId: string;
@@ -121,9 +125,45 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
       base.ignorados++;
       continue;
     }
+
+    const situacaoLista =
+      item.situacao ?? item.codigoSituacao ?? item.descricaoSituacao ?? item.status;
+    const temSituacaoNaLista = situacaoLista !== undefined && situacaoLista !== null && situacaoLista !== "";
+    const acaoLista = temSituacaoNaLista ? classificarSituacao(situacaoLista) : null;
+
+    // A listagem do Olist pode devolver dezenas de cancelamentos antigos. Se a
+    // venda original nunca entrou no PontuaMax, não há nada a estornar — e não
+    // precisamos gastar uma chamada extra em /pedidos/{id}, evitando 429.
+    if (acaoLista === "estorno") {
+      const original = await supabaseAdmin
+        .from("transactions")
+        .select("id")
+        .eq("store_id", cred.stores.id)
+        .eq("id_venda_externa", `olist:${rid}`)
+        .eq("tipo", "venda")
+        .maybeSingle();
+      if (!original.data) {
+        base.ignorados++;
+        base.detalhes.push({
+          resourceId: rid,
+          status: "ignorado",
+          error: "cancelamento sem venda original registrada",
+        });
+        continue;
+      }
+    } else if (acaoLista === "ignorar") {
+      base.ignorados++;
+      base.detalhes.push({
+        resourceId: rid,
+        status: "ignorado",
+        error: `situacao=${JSON.stringify(situacaoLista)}`,
+      });
+      continue;
+    }
+
     let pedidoRaw: Record<string, unknown>;
     try {
-      pedidoRaw = await fetchPedido(accessToken, rid);
+      pedidoRaw = acaoLista === "estorno" ? item : await fetchPedido(accessToken, rid);
     } catch (e) {
       base.erros++;
       base.detalhes.push({ resourceId: rid, status: "erro", error: (e as Error).message });
@@ -164,6 +204,9 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
     })
     .eq("id", cred.id);
 
+  const detalhesComErro = base.detalhes.filter((d) => d.status === "erro" && d.error);
+  const detalhesIgnorados = base.detalhes.filter((d) => d.status === "ignorado" && d.error);
+
   await supabaseAdmin.from("integration_logs").insert({
     store_id: storeId,
     origem: "olist-polling",
@@ -178,6 +221,8 @@ export async function sincronizarLojaOlist(storeId: string): Promise<SyncStoreRe
       ignorados: base.ignorados,
       erros: base.erros,
       total: base.totalPedidos,
+      amostra_erros: detalhesComErro.slice(0, 5),
+      amostra_ignorados: detalhesIgnorados.slice(0, 5),
       amostra: base.detalhes.slice(0, 5),
     } as never,
   });
