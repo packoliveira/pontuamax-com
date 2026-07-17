@@ -6,6 +6,12 @@ import { createHmac, timingSafeEqual, randomBytes } from "crypto";
 
 export const OLIST_OAUTH_BASE = "https://accounts.tiny.com.br/realms/tiny/protocol/openid-connect";
 export const OLIST_API_BASE = "https://api.tiny.com.br/public-api/v3";
+const DEFAULT_OLIST_REDIRECT_ORIGIN = "https://pontuamax-com.lovable.app";
+
+function cleanOrigin(value?: string | null): string | null {
+  const origin = value?.trim().replace(/\/+$/, "");
+  return origin && /^https:\/\//i.test(origin) ? origin : null;
+}
 
 export function getPublicOrigin(request: Request): string {
   // Prefer explicit env, fallback to request URL origin (handles preview + prod).
@@ -14,8 +20,16 @@ export function getPublicOrigin(request: Request): string {
   );
 }
 
-export function olistRedirectUri(request: Request): string {
-  return `${getPublicOrigin(request)}/api/public/oauth/olist/callback`;
+export function getOlistRedirectOrigin(request?: Request): string {
+  return (
+    cleanOrigin(process.env.OLIST_REDIRECT_ORIGIN) ??
+    (request ? cleanOrigin(new URL(request.url).origin) : null) ??
+    DEFAULT_OLIST_REDIRECT_ORIGIN
+  );
+}
+
+export function olistRedirectUri(request?: Request): string {
+  return `${getOlistRedirectOrigin(request)}/api/public/oauth/olist/callback`;
 }
 
 // --- state signing (HMAC + nonce) ------------------------------------------------

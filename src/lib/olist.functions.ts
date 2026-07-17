@@ -29,10 +29,8 @@ export const iniciarConexaoOlist = createServerFn({ method: "POST" })
       provider: "olist_v3",
     });
     if (error) throw new Error(error.message);
-    // A rota do TSS não expõe Request aqui; usamos origin do próprio app via env.
-    const origin =
-      process.env.PUBLIC_APP_ORIGIN ?? process.env.VITE_APP_ORIGIN ?? "https://pontuamax.com";
-    const redirectUri = `${origin}/api/public/oauth/olist/callback`;
+    // O redirect_uri precisa bater exatamente com o cadastrado na Olist.
+    const redirectUri = olistRedirectUri();
     return { url: buildAuthorizeUrl(state, redirectUri) };
   });
 
