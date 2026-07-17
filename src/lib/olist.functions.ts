@@ -44,7 +44,9 @@ export const getStatusOlist = createServerFn({ method: "GET" })
     await ensureOwner(context, data.storeId);
     const { data: row, error } = await context.supabase
       .from("erp_credentials")
-      .select("provider, account_id, status, expires_at, last_refresh_at, scopes, created_at")
+      .select(
+        "provider, account_id, status, expires_at, last_refresh_at, scopes, created_at, last_sync_at, last_sync_status, last_sync_error, sync_enabled",
+      )
       .eq("store_id", data.storeId)
       .eq("provider", "olist_v3")
       .maybeSingle();
