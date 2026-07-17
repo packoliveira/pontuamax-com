@@ -134,6 +134,42 @@ export async function fetchPedido(accessToken: string, pedidoId: string | number
   return (await resp.json()) as Record<string, unknown>;
 }
 
+// Lista pedidos alterados desde `sinceIso`. Trata paginação simples.
+// Olist Tiny V3 aceita `dataAtualizacaoInicial` (yyyy-mm-dd HH:mm:ss) — se o
+// formato variar em outra versão, ajustar aqui em um único ponto.
+export async function listPedidosAlterados(
+  accessToken: string,
+  sinceIso: string,
+  opts?: { limit?: number; offset?: number },
+) {
+  const limit = opts?.limit ?? 50;
+  const offset = opts?.offset ?? 0;
+  // Formata `YYYY-MM-DD HH:mm:ss` (UTC) que a API V3 aceita.
+  const d = new Date(sinceIso);
+  const iso = d.toISOString().replace("T", " ").slice(0, 19);
+  const params = new URLSearchParams({
+    dataAtualizacaoInicial: iso,
+    limit: String(limit),
+    offset: String(offset),
+  });
+  const url = `${OLIST_API_BASE}/pedidos?${params.toString()}`;
+  const resp = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
+  });
+  if (!resp.ok) {
+    const t = await resp.text();
+    throw new Error(`Olist GET /pedidos ${resp.status}: ${t}`);
+  }
+  const body = (await resp.json()) as Record<string, unknown>;
+  // Aceita { itens: [...] } ou { data: [...] } ou array direto — API é inconsistente entre revisões.
+  const items =
+    (body.itens as unknown[]) ??
+    (body.data as unknown[]) ??
+    (body.pedidos as unknown[]) ??
+    (Array.isArray(body) ? (body as unknown[]) : []);
+  return items as Array<Record<string, unknown>>;
+}
+
 // --- Webhook signature (HMAC-SHA256 do body cru) -------------------------------
 
 export function verifyWebhookSignature(rawBody: string, headerSig: string | null): boolean {
