@@ -1220,7 +1220,18 @@ export function OlistOAuthCard({ storeId }: { storeId: string }) {
   const conectar = useMutation({
     mutationFn: () => iniciarConexaoOlist({ data: { storeId } }),
     onSuccess: (r) => {
-      if (r?.url) window.location.href = r.url;
+      if (!r?.url) return;
+      // Abre em nova aba: dentro do preview da Lovable o Tiny bloqueia iframe
+      // (X-Frame-Options: SAMEORIGIN). Nova aba funciona em preview e produção.
+      const win = window.open(r.url, "_blank", "noopener,noreferrer");
+      if (!win) {
+        // Pop-up bloqueado: escapa do iframe para o topo.
+        try {
+          window.top!.location.href = r.url;
+        } catch {
+          window.location.href = r.url;
+        }
+      }
     },
     onError: (e) => toast.error((e as Error).message),
   });
