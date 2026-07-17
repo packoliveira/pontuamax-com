@@ -268,11 +268,15 @@ export type Database = {
           expires_at: string | null
           id: string
           last_refresh_at: string | null
+          last_sync_at: string | null
+          last_sync_error: string | null
+          last_sync_status: string | null
           provider: string
           refresh_token: string | null
           scopes: string[] | null
           status: string
           store_id: string
+          sync_enabled: boolean
           updated_at: string
         }
         Insert: {
@@ -282,11 +286,15 @@ export type Database = {
           expires_at?: string | null
           id?: string
           last_refresh_at?: string | null
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
           provider: string
           refresh_token?: string | null
           scopes?: string[] | null
           status?: string
           store_id: string
+          sync_enabled?: boolean
           updated_at?: string
         }
         Update: {
@@ -296,11 +304,15 @@ export type Database = {
           expires_at?: string | null
           id?: string
           last_refresh_at?: string | null
+          last_sync_at?: string | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
           provider?: string
           refresh_token?: string | null
           scopes?: string[] | null
           status?: string
           store_id?: string
+          sync_enabled?: boolean
           updated_at?: string
         }
         Relationships: [

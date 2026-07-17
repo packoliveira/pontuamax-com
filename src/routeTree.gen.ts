@@ -54,6 +54,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
+import { Route as ApiPublicHooksOlistSyncRouteImport } from './routes/api/public/hooks/olist-sync'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
 import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
@@ -286,6 +287,11 @@ const ApiPublicNpsSubmitRoute = ApiPublicNpsSubmitRouteImport.update({
   path: '/api/public/nps/submit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksOlistSyncRoute = ApiPublicHooksOlistSyncRouteImport.update({
+  id: '/api/public/hooks/olist-sync',
+  path: '/api/public/hooks/olist-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksNotificationsDailyRoute =
   ApiPublicHooksNotificationsDailyRouteImport.update({
     id: '/api/public/hooks/notifications-daily',
@@ -369,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
+    | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
+    | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
@@ -631,6 +642,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
+    | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
@@ -653,6 +665,7 @@ export interface RootRouteChildren {
   ApiPublicHooksExpirarPontosRoute: typeof ApiPublicHooksExpirarPontosRoute
   ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
+  ApiPublicHooksOlistSyncRoute: typeof ApiPublicHooksOlistSyncRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
   ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
@@ -977,6 +990,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicNpsSubmitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/olist-sync': {
+      id: '/api/public/hooks/olist-sync'
+      path: '/api/public/hooks/olist-sync'
+      fullPath: '/api/public/hooks/olist-sync'
+      preLoaderRoute: typeof ApiPublicHooksOlistSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/notifications-daily': {
       id: '/api/public/hooks/notifications-daily'
       path: '/api/public/hooks/notifications-daily'
@@ -1128,6 +1148,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksExpirarPontosRoute: ApiPublicHooksExpirarPontosRoute,
   ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
+  ApiPublicHooksOlistSyncRoute: ApiPublicHooksOlistSyncRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
   ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
@@ -1137,13 +1158,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

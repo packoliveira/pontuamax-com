@@ -42,7 +42,13 @@ import {
   Link as LinkIcon,
   Unplug,
 } from "lucide-react";
-import { iniciarConexaoOlist, getStatusOlist, desconectarOlist } from "@/lib/olist.functions";
+import {
+  iniciarConexaoOlist,
+  getStatusOlist,
+  desconectarOlist,
+  sincronizarOlistAgora,
+  alternarSyncOlist,
+} from "@/lib/olist.functions";
 
 export function IntegracoesCard({
   storeId,
@@ -1226,6 +1232,28 @@ export function OlistOAuthCard({ storeId }: { storeId: string }) {
     onError: (e) => toast.error((e as Error).message),
   });
 
+  const sincronizar = useMutation({
+    mutationFn: () => sincronizarOlistAgora({ data: { storeId } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["olist-status", storeId] });
+      if (r?.error) toast.error(r.error);
+      else
+        toast.success(
+          `Sync: ${r.processados} processados, ${r.duplicados} duplicados, ${r.ignorados} ignorados${r.erros ? `, ${r.erros} erros` : ""}`,
+        );
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const toggleSync = useMutation({
+    mutationFn: (enabled: boolean) => alternarSyncOlist({ data: { storeId, enabled } }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["olist-status", storeId] });
+      toast.success(r.enabled ? "Sync automático ligado" : "Sync automático pausado");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
   const conectado = status?.status === "connected";
 
   return (
@@ -1264,6 +1292,53 @@ export function OlistOAuthCard({ storeId }: { storeId: string }) {
               <div>
                 <b>Expira em:</b>{" "}
                 {status?.expires_at ? new Date(status.expires_at).toLocaleString("pt-BR") : "—"}
+              </div>
+            </div>
+            <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-3 space-y-1.5 text-xs text-[#334155]">
+              <div className="flex items-center justify-between">
+                <b>Sincronização automática (a cada 5 min)</b>
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    status?.sync_enabled
+                      ? "bg-[#22C55E]/10 text-[#15803D]"
+                      : "bg-[#F59E0B]/10 text-[#B45309]"
+                  }`}
+                >
+                  {status?.sync_enabled ? "ativa" : "pausada"}
+                </span>
+              </div>
+              <div>
+                <b>Último sync:</b>{" "}
+                {status?.last_sync_at
+                  ? new Date(status.last_sync_at).toLocaleString("pt-BR")
+                  : "nunca"}{" "}
+                {status?.last_sync_status ? `(${status.last_sync_status})` : ""}
+              </div>
+              {status?.last_sync_error ? (
+                <div className="text-[#B91C1C]">
+                  <b>Último erro:</b> {status.last_sync_error}
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => sincronizar.mutate()}
+                  disabled={sincronizar.isPending}
+                  className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+                >
+                  {sincronizar.isPending ? "Sincronizando..." : "Sincronizar agora"}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleSync.mutate(!status?.sync_enabled)}
+                  disabled={toggleSync.isPending}
+                  className="rounded-xl"
+                >
+                  {status?.sync_enabled ? "Pausar sync automático" : "Retomar sync automático"}
+                </Button>
               </div>
             </div>
             <Button
