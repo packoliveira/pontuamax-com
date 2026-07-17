@@ -36,8 +36,10 @@ export function NotificationsBell({ variant = "light" }: { variant?: "light" | "
 
   useEffect(() => {
     if (!storeId) return;
+    // Suffix aleatório evita reaproveitamento do canal já-subscrito do StrictMode/remonte.
+    const suffix = Math.random().toString(36).slice(2, 10);
     const channel = supabase
-      .channel(`merchant-notifications-${storeId}`)
+      .channel(`merchant-notifications-${storeId}-${suffix}`)
       .on(
         "postgres_changes",
         {
