@@ -440,12 +440,12 @@ function QuickLinksSection() {
       ],
     },
     {
-      title: "Funcionário",
+      title: "Vendedor",
       color: "text-purple-600",
       items: [
-        { label: "Login Funcionário", path: "/funcionario/login", desc: "Vendedores da loja" },
+        { label: "Login do Vendedor", path: "/funcionario/login", desc: "Vendedores da loja" },
         {
-          label: "Painel Funcionário",
+          label: "Painel do Vendedor",
           path: "/funcionario",
           desc: "Operação de caixa/atendimento",
         },
