@@ -23,6 +23,7 @@ import {
   Ticket,
   History,
   User,
+  QrCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePanelTheme } from "@/hooks/use-panel-theme";
@@ -35,6 +36,7 @@ const ICONS: Record<string, any> = {
   vouchers: Ticket,
   historico: History,
   perfil: User,
+  qr: QrCode,
 };
 
 export const Route = createFileRoute("/funcionario")({
@@ -84,7 +86,7 @@ function FuncionarioLayout() {
       <div className="min-w-0">
         <PontuaMaxWordmark variant="dark" size={15} />
         <div className="text-xs text-white/50 truncate max-w-[140px]">
-          {data?.store?.nome_fantasia ?? "Painel do funcionário"}
+          {data?.store?.nome_fantasia ?? "Painel do vendedor"}
         </div>
       </div>
     </div>

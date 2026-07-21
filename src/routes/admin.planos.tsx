@@ -182,7 +182,7 @@ function AdminPlanos() {
               </div>
               <div className="text-xs text-muted-foreground space-y-0.5">
                 <div>Clientes: {p.max_clientes ?? "ilimitado"}</div>
-                <div>Funcionários: {p.max_funcionarios ?? "ilimitado"}</div>
+                <div>Vendedores: {p.max_funcionarios ?? "ilimitado"}</div>
                 <div>Lojas: {p.max_lojas ?? "ilimitado"}</div>
               </div>
               <div className="flex flex-wrap gap-1">
@@ -287,7 +287,7 @@ function AdminPlanos() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Máx. funcionários</Label>
+                <Label>Máx. vendedores</Label>
                 <Input
                   type="number"
                   value={draft.max_funcionarios ?? ""}

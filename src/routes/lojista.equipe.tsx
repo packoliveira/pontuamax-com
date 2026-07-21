@@ -94,7 +94,7 @@ function EquipePage() {
   const mDelete = useMutation({
     mutationFn: (id: string) => deleteEmployee({ data: { id } }),
     onSuccess: () => {
-      toast.success("Funcionário removido.");
+      toast.success("Vendedor removido.");
       qc.invalidateQueries({ queryKey: ["team"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -117,7 +117,7 @@ function EquipePage() {
             <Users className="h-6 w-6 text-[#2563EB]" /> Equipe
           </h1>
           <p className="text-sm text-[#64748B]">
-            Gerencie funcionários, cargos e permissões da sua loja.
+            Gerencie vendedores, cargos e permissões da sua loja.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -145,7 +145,7 @@ function EquipePage() {
             onClick={() => setOpenCreate(true)}
             className="rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-md hover:opacity-95"
           >
-            <UserPlus className="h-4 w-4" /> Cadastrar funcionário
+            <UserPlus className="h-4 w-4" /> Cadastrar vendedor
           </Button>
         </div>
       </div>
@@ -153,7 +153,7 @@ function EquipePage() {
       <Tabs defaultValue="lista" className="space-y-4">
         <TabsList>
           <TabsTrigger value="lista">
-            <Users className="h-4 w-4" /> Funcionários
+            <Users className="h-4 w-4" /> Vendedores
           </TabsTrigger>
           <TabsTrigger value="logs">
             <ScrollText className="h-4 w-4" /> Logs de acesso
@@ -208,7 +208,7 @@ function EquipePage() {
               <div className="divide-y divide-[#F1F5F9]">
                 {filtered.length === 0 ? (
                   <div className="p-10 text-center text-sm text-[#64748B]">
-                    Nenhum funcionário encontrado. Clique em <strong>Cadastrar funcionário</strong>{" "}
+                    Nenhum vendedor encontrado. Clique em <strong>Cadastrar vendedor</strong>{" "}
                     para começar.
                   </div>
                 ) : (
@@ -434,7 +434,7 @@ function CreateOrEditDialog({
       });
     },
     onSuccess: () => {
-      toast.success("Funcionário cadastrado.");
+      toast.success("Vendedor cadastrado.");
       qc.invalidateQueries({ queryKey: ["team"] });
       onOpenChange(false);
       setForm({ nome: "", cpf: "", email: "", phone: "", role_key: "funcionario", password: "" });
@@ -453,7 +453,7 @@ function CreateOrEditDialog({
         },
       }),
     onSuccess: () => {
-      toast.success("Funcionário atualizado.");
+      toast.success("Vendedor atualizado.");
       qc.invalidateQueries({ queryKey: ["team"] });
       onOpenChange(false);
     },
@@ -478,11 +478,11 @@ function CreateOrEditDialog({
     >
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Editar funcionário" : "Cadastrar funcionário"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Editar vendedor" : "Cadastrar vendedor"}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Atualize os dados do funcionário."
-              : "O funcionário receberá acesso ao painel reduzido."}
+              ? "Atualize os dados do vendedor."
+              : "O vendedor receberá acesso ao painel reduzido."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
@@ -573,7 +573,7 @@ function CreateOrEditDialog({
                 </button>
               </div>
               <div className="text-xs text-[#64748B]">
-                Marque ou desmarque o que este funcionário poderá acessar. Você pode ajustar depois
+                Marque ou desmarque o que este vendedor poderá acessar. Você pode ajustar depois
                 em "Permissões".
               </div>
               <div className="space-y-3 max-h-72 overflow-y-auto rounded-xl border border-[#E5E7EB] p-3">
