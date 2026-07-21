@@ -25,8 +25,16 @@ export function validarResgateProduto(params: {
 export function validarResgateCashback(params: {
   saldoCashback: number;
   valor: number;
+  minimoResgate?: number;
 }): ValidationResult {
   if (params.valor <= 0) return { ok: false, error: "Valor de cashback inválido." };
+  const minimo = params.minimoResgate ?? 0;
+  if (minimo > 0 && params.saldoCashback < minimo) {
+    return {
+      ok: false,
+      error: `É preciso acumular pelo menos R$ ${minimo.toFixed(2)} de cashback para resgatar. Saldo atual: R$ ${params.saldoCashback.toFixed(2)}.`,
+    };
+  }
   if (params.valor > params.saldoCashback) {
     return {
       ok: false,
