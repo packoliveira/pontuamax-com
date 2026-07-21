@@ -407,6 +407,22 @@ function ConfigPage() {
                   </p>
                 </div>
               )}
+              {inclC && (
+                <div>
+                  <Label>Valor mínimo de compra para usar o cashback (R$)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={compraMinCashback}
+                    onChange={(e) => setCompraMinCashback(e.target.value)}
+                  />
+                  <p className="text-xs text-[#64748B] mt-1">
+                    O cliente só poderá usar o voucher de cashback em compras a partir desse valor.
+                    Deixe em <strong>0</strong> para permitir uso em qualquer compra.
+                  </p>
+                </div>
+              )}
               <div>
                 <Label>Validade do voucher de resgate (dias)</Label>
                 <Input
