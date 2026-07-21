@@ -1166,6 +1166,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           <p className="text-sm text-muted-foreground">
             Você tem <strong>{formatBRL(Number(link.cashback_saldo))}</strong> disponível.
           </p>
+          {Number(loja.cashback_valor_minimo || 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Valor mínimo para resgate:{" "}
+              <strong>{formatBRL(Number(loja.cashback_valor_minimo))}</strong>
+            </p>
+          )}
           <div>
             <Label>Quanto usar (R$)</Label>
             <Input
