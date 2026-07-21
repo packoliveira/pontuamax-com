@@ -393,22 +393,6 @@ function ConfigPage() {
               )}
               {inclC && (
                 <div>
-                  <Label>Valor mínimo para resgate de cashback (R$)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={minCashback}
-                    onChange={(e) => setMinCashback(e.target.value)}
-                  />
-                  <p className="text-xs text-[#64748B] mt-1">
-                    O cliente só poderá resgatar o cashback quando o saldo dele atingir esse valor.
-                    Deixe em <strong>0</strong> para permitir resgate a qualquer momento.
-                  </p>
-                </div>
-              )}
-              {inclC && (
-                <div>
                   <Label>Valor mínimo de compra para usar o cashback (R$)</Label>
                   <Input
                     type="number"
