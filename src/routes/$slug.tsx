@@ -1029,7 +1029,11 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                   borderColor: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 40%, transparent)`,
                   color: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 25%, #ecfeff)`,
                 }}
-                disabled={Number(link.cashback_saldo) <= 0}
+                disabled={
+                  Number(link.cashback_saldo) <= 0 ||
+                  (Number(loja.cashback_valor_minimo || 0) > 0 &&
+                    Number(link.cashback_saldo) < Number(loja.cashback_valor_minimo))
+                }
                 onClick={() => setCashbackModal(true)}
               >
                 {Number(loja.cashback_valor_minimo || 0) > 0 &&
