@@ -1250,6 +1250,7 @@ export type Database = {
           brand_secondary: string
           brand_vip: string | null
           cancelled_at: string | null
+          cashback_valor_minimo: number
           cnpj: string | null
           created_at: string
           erp_provider: string | null
@@ -1330,6 +1331,7 @@ export type Database = {
           brand_secondary?: string
           brand_vip?: string | null
           cancelled_at?: string | null
+          cashback_valor_minimo?: number
           cnpj?: string | null
           created_at?: string
           erp_provider?: string | null
@@ -1410,6 +1412,7 @@ export type Database = {
           brand_secondary?: string
           brand_vip?: string | null
           cancelled_at?: string | null
+          cashback_valor_minimo?: number
           cnpj?: string | null
           created_at?: string
           erp_provider?: string | null
