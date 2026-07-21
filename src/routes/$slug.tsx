@@ -909,6 +909,11 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
     const v = parseFloat(cashbackValor.replace(",", "."));
     if (!v || v <= 0) return toast.error("Valor inválido");
     const saldo = Number(link.cashback_saldo);
+    const minimo = Number(loja.cashback_valor_minimo || 0);
+    if (minimo > 0 && saldo < minimo)
+      return toast.error(
+        `É preciso acumular ${formatBRL(minimo)} de cashback para resgatar. Saldo atual: ${formatBRL(saldo)}.`,
+      );
     if (v > saldo)
       return toast.error(`Cashback insuficiente. Saldo disponível: ${formatBRL(saldo)}.`);
     resgatarC.mutate(+v.toFixed(2));
@@ -1024,10 +1029,17 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                   borderColor: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 40%, transparent)`,
                   color: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 25%, #ecfeff)`,
                 }}
-                disabled={Number(link.cashback_saldo) <= 0}
+                disabled={
+                  Number(link.cashback_saldo) <= 0 ||
+                  (Number(loja.cashback_valor_minimo || 0) > 0 &&
+                    Number(link.cashback_saldo) < Number(loja.cashback_valor_minimo))
+                }
                 onClick={() => setCashbackModal(true)}
               >
-                Usar no próximo pagamento
+                {Number(loja.cashback_valor_minimo || 0) > 0 &&
+                Number(link.cashback_saldo) < Number(loja.cashback_valor_minimo)
+                  ? `Resgate a partir de ${formatBRL(Number(loja.cashback_valor_minimo))}`
+                  : "Usar no próximo pagamento"}
               </Button>
             </div>
           </Card>
@@ -1154,6 +1166,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
           <p className="text-sm text-muted-foreground">
             Você tem <strong>{formatBRL(Number(link.cashback_saldo))}</strong> disponível.
           </p>
+          {Number(loja.cashback_valor_minimo || 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Valor mínimo para resgate:{" "}
+              <strong>{formatBRL(Number(loja.cashback_valor_minimo))}</strong>
+            </p>
+          )}
           <div>
             <Label>Quanto usar (R$)</Label>
             <Input

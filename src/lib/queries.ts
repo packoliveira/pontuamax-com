@@ -37,6 +37,7 @@ export type StorePublic = Pick<
   | "modalidade"
   | "regra_pontos"
   | "percentual_cashback"
+  | "cashback_valor_minimo"
   | "indicacao_ativa"
   | "bonus_indicador"
   | "bonus_indicado"

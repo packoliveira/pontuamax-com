@@ -92,6 +92,7 @@ function ConfigPage() {
   const [modalidade, setModalidade] = useState<Modalidade>("ambos");
   const [regraP, setRegraP] = useState("1");
   const [pctC, setPctC] = useState("5");
+  const [minCashback, setMinCashback] = useState("0");
   const [validadeVoucher, setValidadeVoucher] = useState("7");
   const [voucherVisivelAposUso, setVoucherVisivelAposUso] = useState(false);
   const [voucherMostrarExpirados, setVoucherMostrarExpirados] = useState(true);
@@ -108,6 +109,7 @@ function ConfigPage() {
       setModalidade(loja.modalidade as Modalidade);
       setRegraP(String(loja.regra_pontos));
       setPctC(String(loja.percentual_cashback));
+      setMinCashback(String(loja.cashback_valor_minimo ?? 0));
       setValidadeVoucher(String(loja.voucher_validade_dias ?? 7));
       setVoucherVisivelAposUso(loja.voucher_visivel_apos_uso ?? false);
       setVoucherMostrarExpirados(loja.voucher_mostrar_expirados ?? true);
@@ -128,6 +130,7 @@ function ConfigPage() {
           modalidade,
           regra_pontos: parseFloat(regraP) || 1,
           percentual_cashback: parseFloat(pctC) || 0,
+          cashback_valor_minimo: Math.max(0, parseFloat(minCashback.replace(",", ".")) || 0),
           voucher_validade_dias: Math.max(1, Math.min(365, parseInt(validadeVoucher, 10) || 7)),
           voucher_visivel_apos_uso: voucherVisivelAposUso,
           voucher_mostrar_expirados: voucherMostrarExpirados,
@@ -383,6 +386,22 @@ function ConfigPage() {
                     value={pctC}
                     onChange={(e) => setPctC(e.target.value)}
                   />
+                </div>
+              )}
+              {inclC && (
+                <div>
+                  <Label>Valor mínimo para resgate de cashback (R$)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={minCashback}
+                    onChange={(e) => setMinCashback(e.target.value)}
+                  />
+                  <p className="text-xs text-[#64748B] mt-1">
+                    O cliente só poderá resgatar o cashback quando o saldo dele atingir esse valor.
+                    Deixe em <strong>0</strong> para permitir resgate a qualquer momento.
+                  </p>
                 </div>
               )}
               <div>
