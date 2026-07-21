@@ -153,7 +153,7 @@ function EquipePage() {
       <Tabs defaultValue="lista" className="space-y-4">
         <TabsList>
           <TabsTrigger value="lista">
-            <Users className="h-4 w-4" /> Funcionários
+            <Users className="h-4 w-4" /> Vendedores
           </TabsTrigger>
           <TabsTrigger value="logs">
             <ScrollText className="h-4 w-4" /> Logs de acesso
