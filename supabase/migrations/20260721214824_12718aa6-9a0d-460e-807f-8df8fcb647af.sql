@@ -1,0 +1,1 @@
+ALTER TABLE public.stores ADD COLUMN IF NOT EXISTS cashback_compra_minima numeric(10,2) NOT NULL DEFAULT 0;

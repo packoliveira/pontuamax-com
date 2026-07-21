@@ -115,6 +115,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         regra_pontos: z.number().min(0).max(100).optional(),
         percentual_cashback: z.number().min(0).max(100).optional(),
         cashback_valor_minimo: z.number().min(0).max(1_000_000).optional(),
+        cashback_compra_minima: z.number().min(0).max(1_000_000).optional(),
         brand_primary: z.string().max(20).optional(),
         brand_secondary: z.string().max(20).optional(),
         logo_url: z.string().max(2000).optional().nullable(),
