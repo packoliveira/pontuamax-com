@@ -28,8 +28,10 @@ import {
   Ticket,
   Wallet,
   XCircle,
+  Camera,
   type LucideIcon,
 } from "lucide-react";
+import { QRScannerDialog } from "@/components/qr-scanner-dialog";
 
 type TxRow = Tables<"transactions"> & {
   profiles: { full_name: string | null; phone: string | null } | null;
@@ -57,6 +59,7 @@ export function FuncionarioResgatesPanel({ title = "Resgates" }: { title?: strin
   const { data: txs = [] } = useQuery(storeTransactionsQuery(storeId));
   const [codigo, setCodigo] = useState("");
   const [comprovante, setComprovante] = useState<Comprovante | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const canValidate = hasPermission("vouchers.validar");
   const canRedeem = hasPermission("resgates.produtos");
@@ -369,6 +372,15 @@ export function FuncionarioResgatesPanel({ title = "Resgates" }: { title?: strin
                 autoComplete="off"
               />
               <Button
+                type="button"
+                variant="outline"
+                onClick={() => setScannerOpen(true)}
+                className="h-11 shrink-0 rounded-xl border-[#E5E7EB] px-4"
+                title="Escanear QR do voucher"
+              >
+                <Camera className="h-4 w-4" /> Escanear
+              </Button>
+              <Button
                 type="submit"
                 disabled={validar.isPending || !codigo.trim()}
                 className="h-11 shrink-0 rounded-xl bg-[#2563EB] px-6 text-white shadow-sm hover:bg-[#1D4ED8]"
@@ -376,6 +388,17 @@ export function FuncionarioResgatesPanel({ title = "Resgates" }: { title?: strin
                 {validar.isPending ? "Validando..." : "Validar e entregar"}
               </Button>
             </form>
+            <QRScannerDialog
+              open={scannerOpen}
+              onOpenChange={setScannerOpen}
+              title="Escanear QR do voucher"
+              description="Aponte a câmera para o QR exibido pelo cliente."
+              onDetected={(text) => {
+                const code = text.trim().toUpperCase();
+                setCodigo(code);
+                validar.mutate(code);
+              }}
+            />
             <p className="mt-3 text-xs text-[#64748B]">
               Vouchers vencem em{" "}
               <span className="font-semibold text-[#0F172A]">
