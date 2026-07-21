@@ -87,4 +87,5 @@ export const EMPLOYEE_MENU: {
     requires: ["historico.consultar"],
   },
   { key: "perfil", label: "Perfil", to: "/funcionario/perfil", requires: [] },
+  { key: "qr", label: "Meu QR", to: "/funcionario/qr", requires: [] },
 ];
