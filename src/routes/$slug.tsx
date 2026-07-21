@@ -909,6 +909,11 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
     const v = parseFloat(cashbackValor.replace(",", "."));
     if (!v || v <= 0) return toast.error("Valor inválido");
     const saldo = Number(link.cashback_saldo);
+    const minimo = Number(loja.cashback_valor_minimo || 0);
+    if (minimo > 0 && saldo < minimo)
+      return toast.error(
+        `É preciso acumular ${formatBRL(minimo)} de cashback para resgatar. Saldo atual: ${formatBRL(saldo)}.`,
+      );
     if (v > saldo)
       return toast.error(`Cashback insuficiente. Saldo disponível: ${formatBRL(saldo)}.`);
     resgatarC.mutate(+v.toFixed(2));
@@ -1027,7 +1032,10 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
                 disabled={Number(link.cashback_saldo) <= 0}
                 onClick={() => setCashbackModal(true)}
               >
-                Usar no próximo pagamento
+                {Number(loja.cashback_valor_minimo || 0) > 0 &&
+                Number(link.cashback_saldo) < Number(loja.cashback_valor_minimo)
+                  ? `Resgate a partir de ${formatBRL(Number(loja.cashback_valor_minimo))}`
+                  : "Usar no próximo pagamento"}
               </Button>
             </div>
           </Card>
