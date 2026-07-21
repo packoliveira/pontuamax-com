@@ -24,6 +24,7 @@ import {
 import { formatBRL } from "@/lib/qsf-shared";
 import type { StorePublic } from "@/lib/queries";
 import { type VoucherTx, formatDateTime } from "./portal-types";
+import { QRCodeImage } from "@/components/qr-code";
 
 type Loja = StorePublic;
 
@@ -231,6 +232,16 @@ export function VouchersSection({
                   aria-label="Código do voucher"
                 >
                   {selected.voucher_code}
+                </div>
+              )}
+              {selected.voucher_code && selected.status === "pendente" && (
+                <div className="flex flex-col items-center gap-1 pt-1">
+                  <div className="rounded-lg bg-white p-2 ring-1 ring-slate-200">
+                    <QRCodeImage value={selected.voucher_code} size={180} />
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    Mostre o QR ao vendedor para validar
+                  </div>
                 </div>
               )}
               <div className="border-t pt-2 grid grid-cols-[110px_1fr] gap-y-1">
