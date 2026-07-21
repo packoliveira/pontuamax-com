@@ -93,6 +93,7 @@ function ConfigPage() {
   const [regraP, setRegraP] = useState("1");
   const [pctC, setPctC] = useState("5");
   const [minCashback, setMinCashback] = useState("0");
+  const [compraMinCashback, setCompraMinCashback] = useState("0");
   const [validadeVoucher, setValidadeVoucher] = useState("7");
   const [voucherVisivelAposUso, setVoucherVisivelAposUso] = useState(false);
   const [voucherMostrarExpirados, setVoucherMostrarExpirados] = useState(true);
@@ -110,6 +111,7 @@ function ConfigPage() {
       setRegraP(String(loja.regra_pontos));
       setPctC(String(loja.percentual_cashback));
       setMinCashback(String(loja.cashback_valor_minimo ?? 0));
+      setCompraMinCashback(String(loja.cashback_compra_minima ?? 0));
       setValidadeVoucher(String(loja.voucher_validade_dias ?? 7));
       setVoucherVisivelAposUso(loja.voucher_visivel_apos_uso ?? false);
       setVoucherMostrarExpirados(loja.voucher_mostrar_expirados ?? true);
@@ -131,6 +133,7 @@ function ConfigPage() {
           regra_pontos: parseFloat(regraP) || 1,
           percentual_cashback: parseFloat(pctC) || 0,
           cashback_valor_minimo: Math.max(0, parseFloat(minCashback.replace(",", ".")) || 0),
+          cashback_compra_minima: Math.max(0, parseFloat(compraMinCashback.replace(",", ".")) || 0),
           voucher_validade_dias: Math.max(1, Math.min(365, parseInt(validadeVoucher, 10) || 7)),
           voucher_visivel_apos_uso: voucherVisivelAposUso,
           voucher_mostrar_expirados: voucherMostrarExpirados,
