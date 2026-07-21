@@ -1172,6 +1172,12 @@ function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
               <strong>{formatBRL(Number(loja.cashback_valor_minimo))}</strong>
             </p>
           )}
+          {Number(loja.cashback_compra_minima || 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Só pode ser usado em compras a partir de{" "}
+              <strong>{formatBRL(Number(loja.cashback_compra_minima))}</strong>.
+            </p>
+          )}
           <div>
             <Label>Quanto usar (R$)</Label>
             <Input
