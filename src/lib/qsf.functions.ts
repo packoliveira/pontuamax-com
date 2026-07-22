@@ -14,6 +14,19 @@ import {
   processarEnvioCampanha,
 } from "./qsf-helpers.server";
 
+// Rate limit helper para server functions sensíveis (público ou por usuário).
+// Dinamicamente carrega os módulos server-only para não vazar no client bundle.
+async function rateLimitByIp(scope: string, max: number, windowSec: number) {
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const { checkRateLimit, getClientIp } = await import("./rate-limit.server");
+  const req = getRequest();
+  const ip = getClientIp(req as unknown as Request);
+  const ok = await checkRateLimit(`sfn:${scope}:${ip}`, max, windowSec);
+  if (!ok) {
+    throw new Error("Muitas tentativas em pouco tempo. Aguarde alguns segundos e tente novamente.");
+  }
+}
+
 // re-export para o cron `/api/public/hooks/campanhas-agendadas`
 export { processarEnvioCampanha as _processarEnvioCampanhaInternal };
 // evita "unused import" (renderMsg é usado apenas dentro do helper server)
