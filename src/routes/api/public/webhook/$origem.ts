@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { cpfToEmail } from "@/lib/qsf-shared";
 import { timingSafeEqual, randomBytes } from "crypto";
+import {
+  extractOlistPayload,
+  shouldProcessOlistEvent,
+  computeRewards,
+} from "@/lib/olist-webhook";
 
 // Public webhook endpoint for external POS/ERP integrations (Bling, Olist).
 // URL: /api/public/webhook/{bling|olist}
@@ -22,65 +27,6 @@ import { timingSafeEqual, randomBytes } from "crypto";
 // 2) Formato nativo Olist ERP (pedido de venda):
 //    { "pedido": { "numero", "total", "cliente": { "nome", "documento", "fones":[{"fone"}] } } }
 //    ou com envelope { "data": { ... } } / { "resource": "...", "data": {...} }
-
-function extractOlistPayload(p: Record<string, unknown>): {
-  idVenda: string;
-  valor: number;
-  cpf: string;
-  telefone: string;
-  nome: string;
-  tipoEvento: string;
-} {
-  // Desembrulha envelopes comuns
-  const root =
-    (p.pedido as Record<string, unknown>) ??
-    (p.dados as Record<string, unknown>) ??
-    (p.data as Record<string, unknown>) ??
-    (p.venda as Record<string, unknown>) ??
-    p;
-  const cliente = (root.cliente as Record<string, unknown>) ?? {};
-  const fones = (cliente.fones as Array<Record<string, unknown>>) ?? [];
-  const fonePrincipal =
-    (cliente.fone as string | undefined) ??
-    (cliente.celular as string | undefined) ??
-    (cliente.telefone as string | undefined) ??
-    (fones[0]?.fone as string | undefined) ??
-    (fones[0]?.numero as string | undefined) ??
-    "";
-
-  const idVenda = String(
-    p.id_venda_externa ?? root.id ?? root.numero ?? root.numero_pedido ?? root.codigo ?? "",
-  ).trim();
-
-  const valorRaw =
-    p.valor ??
-    root.total ??
-    root.valor_total ??
-    root.total_pedido ??
-    root.valor ??
-    root.totalPedido ??
-    root.valorTotal ??
-    0;
-  const valor =
-    typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
-
-  const cpfRaw = String(
-    p.cpf_cliente ?? cliente.cpfCnpj ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
-  );
-  const cpf = cpfRaw.replace(/\D/g, "");
-
-  const telRaw = String(p.telefone_cliente ?? fonePrincipal ?? "");
-  const telefone = telRaw.replace(/\D/g, "");
-
-  const nome =
-    String(p.nome_cliente ?? cliente.nome ?? cliente.razao_social ?? "").trim() || "Cliente";
-
-  const tipoEvento = String(p.tipo ?? p.event ?? p.evento ?? "")
-    .trim()
-    .toLowerCase();
-
-  return { idVenda, valor, cpf, telefone, nome, tipoEvento };
-}
 
 const CORS = {
   // Webhooks não são chamados por browsers; mantemos apenas o mínimo para
@@ -201,6 +147,16 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         if (!idVenda)
           return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
 
+        // Filtro por tipo de evento: só creditamos em "faturamento_pedido".
+        // Notificações leves (inclusao_pedido, alteracao_pedido) chegam antes
+        // do pedido virar venda efetiva — respondemos 200 e não pontuamos.
+        const gate = shouldProcessOlistEvent(origem, tipoEvento);
+        if (!gate.process) {
+          return logAndRespond("sucesso", gate.reason ?? "evento ignorado", 200, {
+            ignored_event: tipoEvento,
+          });
+        }
+
         if (!cpf) {
           return logAndRespond(
             "erro",
@@ -310,14 +266,13 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           );
         }
 
-        // Calcula pontos + cashback conforme modalidade
-        const inclP = loja.modalidade !== "cashback";
-        const inclC = loja.modalidade !== "pontos";
-        const pontos = inclP ? Math.floor(valor * Number(loja.regra_pontos)) : 0;
-        const cashback = inclC ? Math.round(valor * Number(loja.percentual_cashback)) / 100 : 0;
-        const novoPontos = link.pontos + pontos;
-        const novoCashback = Math.round((Number(link.cashback_saldo) + cashback) * 100) / 100;
-        const nivel = novoPontos <= 100 ? "bronze" : novoPontos <= 300 ? "prata" : "ouro";
+        // Calcula pontos + cashback conforme modalidade (função pura testada)
+        const { pontos, cashback, novoPontos, novoCashback, nivel } = computeRewards(
+          valor,
+          loja,
+          link.pontos,
+          Number(link.cashback_saldo),
+        );
 
         const tx = await supabaseAdmin.from("transactions").insert({
           store_id: loja.id,
