@@ -57,21 +57,30 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
         const db = supabaseAdmin as any;
         async function anonimizarTabela(tabela: string, coluna: string): Promise<number> {
           let total = 0;
-          for (let i = 0; i < 20; i++) {
-            const rows = await db
+          let lastId: string | null = null;
+          // Paginação por cursor em `id` para não reprocessar sempre a mesma
+          // janela: o filtro por conteúdo continuaria batendo em linhas já
+          // mascaradas (a chave "cpf" segue presente após o mascaramento).
+          for (let i = 0; i < 50; i++) {
+            let query = db
               .from(tabela)
               .select(`id, ${coluna}`)
               .lt("created_at", cutoff)
               .not(coluna, "is", null)
+              .order("id", { ascending: true })
               .limit(200);
+            if (lastId) query = query.gt("id", lastId);
+            const rows = await query;
             if (rows.error) throw new Error(`${tabela}: ${rows.error.message}`);
             const data: Array<Record<string, unknown>> = rows.data ?? [];
             if (data.length === 0) break;
+            lastId = data[data.length - 1].id as string;
             const toUpdate = data.filter((r) => {
               const j = JSON.stringify(r[coluna] ?? {});
+              // pula linhas já mascaradas (contêm o marcador "***")
+              if (j.includes('"***')) return false;
               return [...PII_KEYS].some((k) => j.includes(`"${k}"`));
             });
-            if (toUpdate.length === 0) break;
             for (const r of toUpdate) {
               const cleaned = anonymize((r[coluna] ?? null) as Json);
               const upd = await db
@@ -80,7 +89,7 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
                 .eq("id", r.id as string);
               if (!upd.error) total += 1;
             }
-            if (toUpdate.length < 200) break;
+            if (data.length < 200) break;
           }
           return total;
         }
