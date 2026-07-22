@@ -438,7 +438,7 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    await rateLimitByIp("prep-login-cpf", 10, 60);
+    await rateLimitByIp("prep-login-cpf", 5, 60);
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits) || data.senha !== cpfDigits) return { normalized: false };
 
