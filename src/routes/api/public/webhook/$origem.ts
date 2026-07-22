@@ -391,11 +391,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         if (linkRes.error) return logAndRespond("erro", linkRes.error.message, 500);
         const link = linkRes.data;
 
-        // 8) Sem valor no payload → só vincula, aguarda próxima notificação.
-        if (!Number.isFinite(valor) || valor <= 0) {
+        // 8) Sem valor no payload → tenta enriquecer via API Tiny/Olist V2.
+        let valorFinal = valor;
+        let enriquecido = false;
+        if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
+          const totalApi = await buscarTotalPedidoOlist(idVenda);
+          if (totalApi && totalApi > 0) {
+            valorFinal = totalApi;
+            enriquecido = true;
+          }
+        }
+
+        if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
           return logAndRespond(
             "sucesso",
-            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total — quando a Olist enviar o evento com o total, os pontos serão creditados automaticamente.`,
+            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total e a API da Olist não retornou o pedido — verifique o OLIST_API_TOKEN ou lance o valor manualmente.`,
             200,
             { cliente_vinculado: true, aguardando_valor: true },
           );
@@ -403,7 +413,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         // 9) Calcula e credita.
         const { pontos, cashback, novoPontos, novoCashback, nivel } = calcularRecompensa(
-          valor,
+          valorFinal,
           loja,
           link.pontos,
           Number(link.cashback_saldo),
@@ -413,12 +423,12 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           store_id: loja.id,
           client_user_id: clientProfile.id,
           tipo: "venda",
-          valor,
+          valor: valorFinal,
           pontos_delta: pontos,
           cashback_delta: cashback,
           status: "entregue",
           id_venda_externa: idVenda,
-          origem,
+          origem: enriquecido ? `${origem}:api_enriched` : origem,
         });
         if (tx.error) {
           if (tx.error.code === "23505") {
