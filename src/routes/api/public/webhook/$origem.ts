@@ -128,6 +128,38 @@ function extrair(p: Record<string, unknown>): Extraido {
 }
 
 // ---------- Cálculo de recompensas ----------
+// ---------- Enriquecimento via API Tiny/Olist V2 ----------
+// Quando o webhook chega sem valor total, tentamos buscar o pedido completo
+// via API pública da Tiny (https://api.tiny.com.br/api2/pedido.obter.php).
+// Requer o secret `OLIST_API_TOKEN` configurado.
+async function buscarTotalPedidoOlist(idPedido: string): Promise<number | null> {
+  const token = process.env.OLIST_API_TOKEN;
+  if (!token) return null;
+  try {
+    const body = new URLSearchParams({ token, id: idPedido, formato: "json" });
+    const res = await fetch("https://api.tiny.com.br/api2/pedido.obter.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      retorno?: {
+        status?: string;
+        pedido?: { total_pedido?: string | number; valor?: string | number };
+      };
+    };
+    if (json?.retorno?.status !== "OK" || !json.retorno.pedido) return null;
+    const p = json.retorno.pedido;
+    const rawTotal = p.total_pedido ?? p.valor ?? 0;
+    const total =
+      typeof rawTotal === "string" ? Number(rawTotal.replace(",", ".")) : Number(rawTotal);
+    return Number.isFinite(total) && total > 0 ? total : null;
+  } catch {
+    return null;
+  }
+}
+
 function calcularRecompensa(
   valor: number,
   loja: { modalidade: string; regra_pontos: number | string; percentual_cashback: number | string },
