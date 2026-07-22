@@ -3,7 +3,6 @@ import {
   extractOlistPayload,
   shouldProcessOlistEvent,
   computeRewards,
-  OLIST_PROCESSABLE_EVENT,
 } from "../olist-webhook";
 
 // -------------------------------------------------------------
