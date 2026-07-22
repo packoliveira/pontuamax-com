@@ -62,10 +62,9 @@ type Extraido = {
 
 function parseValor(raw: unknown): number | null {
   if (raw === null || raw === undefined || raw === "") return null;
-  const normalized =
-    typeof raw === "string"
-      ? raw.replace(/\./g, "").replace(",", ".")
-      : raw;
+  const normalized = typeof raw === "string" && raw.includes(",")
+    ? raw.replace(/\./g, "").replace(",", ".")
+    : raw;
   const value = Number(normalized);
   return Number.isFinite(value) && value > 0 ? value : null;
 }
