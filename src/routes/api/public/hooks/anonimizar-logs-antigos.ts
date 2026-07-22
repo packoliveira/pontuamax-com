@@ -53,43 +53,57 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-        let anonimizados = 0;
-        // Processa em lotes pequenos para não estourar tempo/limite de linha.
-        for (let i = 0; i < 20; i++) {
-          const rows = await supabaseAdmin
-            .from("integration_logs")
-            .select("id, payload_recebido")
-            .lt("created_at", cutoff)
-            .not("payload_recebido", "is", null)
-            .limit(200);
-          if (rows.error) {
-            return new Response(JSON.stringify({ error: rows.error.message }), { status: 500 });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db = supabaseAdmin as any;
+        async function anonimizarTabela(tabela: string, coluna: string): Promise<number> {
+          let total = 0;
+          for (let i = 0; i < 20; i++) {
+            const rows = await db
+              .from(tabela)
+              .select(`id, ${coluna}`)
+              .lt("created_at", cutoff)
+              .not(coluna, "is", null)
+              .limit(200);
+            if (rows.error) throw new Error(`${tabela}: ${rows.error.message}`);
+            const data: Array<Record<string, unknown>> = rows.data ?? [];
+            if (data.length === 0) break;
+            const toUpdate = data.filter((r) => {
+              const j = JSON.stringify(r[coluna] ?? {});
+              return [...PII_KEYS].some((k) => j.includes(`"${k}"`));
+            });
+            if (toUpdate.length === 0) break;
+            for (const r of toUpdate) {
+              const cleaned = anonymize((r[coluna] ?? null) as Json);
+              const upd = await db
+                .from(tabela)
+                .update({ [coluna]: cleaned })
+                .eq("id", r.id as string);
+              if (!upd.error) total += 1;
+            }
+            if (toUpdate.length < 200) break;
           }
-          if (!rows.data || rows.data.length === 0) break;
-
-          // Filtra os que ainda contêm alguma chave de PII no payload.
-          const toUpdate = rows.data.filter((r) => {
-            const p = r.payload_recebido as unknown;
-            const json = JSON.stringify(p ?? {});
-            return [...PII_KEYS].some((k) => json.includes(`"${k}"`));
-          });
-          if (toUpdate.length === 0) break;
-
-          for (const r of toUpdate) {
-            const cleaned = anonymize((r.payload_recebido ?? null) as Json);
-            const upd = await supabaseAdmin
-              .from("integration_logs")
-              .update({ payload_recebido: cleaned as never })
-              .eq("id", r.id);
-            if (!upd.error) anonimizados += 1;
-          }
-          if (toUpdate.length < 200) break;
+          return total;
         }
 
-        return new Response(
-          JSON.stringify({ ok: true, anonimizados, cutoff }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
+        try {
+          const integration = await anonimizarTabela("integration_logs", "payload_recebido");
+          const webhookEvents = await anonimizarTabela("erp_webhook_events", "payload");
+          return new Response(
+            JSON.stringify({
+              ok: true,
+              anonimizados: integration + webhookEvents,
+              integration_logs: integration,
+              erp_webhook_events: webhookEvents,
+              cutoff,
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          );
+        } catch (e) {
+          return new Response(
+            JSON.stringify({ error: (e as Error).message }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
+        }
       },
     },
   },
