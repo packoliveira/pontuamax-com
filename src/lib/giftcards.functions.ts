@@ -1,17 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
-import { gerarVoucher } from "./voucher.server";
-import {
-  getActiveMultiplier,
-  promoSchema,
-  formatVoucherJaUsado,
-  randomGiftCode,
-  sha256Hex,
-  selecionarDestinatarios,
-  processarEnvioCampanha,
-} from "./qsf-helpers.server";
+import { calcularNivel } from "./qsf-shared";
+import { randomGiftCode } from "./qsf-helpers.server";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const criarGiftCards = createServerFn({ method: "POST" })
@@ -151,4 +142,3 @@ export const lookupGiftCardByCodigo = createServerFn({ method: "GET" })
     return r.data;
   });
 
-// -------- Full store row for the authenticated owner --------

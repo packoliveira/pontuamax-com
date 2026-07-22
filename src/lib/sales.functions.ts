@@ -1,18 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
-import { gerarVoucher } from "./voucher.server";
-import {
-  getActiveMultiplier,
-  promoSchema,
-  formatVoucherJaUsado,
-  randomGiftCode,
-  sha256Hex,
-  selecionarDestinatarios,
-  processarEnvioCampanha,
-} from "./qsf-helpers.server";
-import { rateLimitByIp } from "./sfn-rate-limit.server";
+import { calcularNivel } from "./qsf-shared";
+import { getActiveMultiplier } from "./qsf-helpers.server";
 
 export const lancarVenda = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -346,4 +336,3 @@ export const dispararNotificacoesAgora = createServerFn({ method: "POST" })
     return JSON.parse(body);
   });
 
-// -------- Cliente: resgatar produto --------

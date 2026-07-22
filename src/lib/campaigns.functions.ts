@@ -1,18 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
-import { gerarVoucher } from "./voucher.server";
 import {
-  getActiveMultiplier,
-  promoSchema,
-  formatVoucherJaUsado,
-  randomGiftCode,
-  sha256Hex,
   selecionarDestinatarios,
   processarEnvioCampanha,
 } from "./qsf-helpers.server";
-import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const criarCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -125,6 +117,3 @@ export const previewDestinatarios = createServerFn({ method: "POST" })
       amostra: destinatarios.slice(0, 5).map((d) => ({ nome: d.full_name, telefone: d.phone })),
     };
   });
-// ============================================================
-// VALE-PRESENTE / GIFT CARDS
-// ============================================================
