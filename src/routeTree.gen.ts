@@ -55,14 +55,11 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
-import { Route as ApiPublicHooksOlistSyncRouteImport } from './routes/api/public/hooks/olist-sync'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
 import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
 import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
 import { Route as ApiPublicHooksAnonimizarLogsAntigosRouteImport } from './routes/api/public/hooks/anonimizar-logs-antigos'
-import { Route as ApiPublicWebhookOlistV3RouteImport } from './routes/api/public/webhook/olist.v3'
-import { Route as ApiPublicOauthOlistCallbackRouteImport } from './routes/api/public/oauth/olist.callback'
 
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
@@ -294,11 +291,6 @@ const ApiPublicNpsSubmitRoute = ApiPublicNpsSubmitRouteImport.update({
   path: '/api/public/nps/submit',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksOlistSyncRoute = ApiPublicHooksOlistSyncRouteImport.update({
-  id: '/api/public/hooks/olist-sync',
-  path: '/api/public/hooks/olist-sync',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicHooksNotificationsDailyRoute =
   ApiPublicHooksNotificationsDailyRouteImport.update({
     id: '/api/public/hooks/notifications-daily',
@@ -327,17 +319,6 @@ const ApiPublicHooksAnonimizarLogsAntigosRoute =
   ApiPublicHooksAnonimizarLogsAntigosRouteImport.update({
     id: '/api/public/hooks/anonimizar-logs-antigos',
     path: '/api/public/hooks/anonimizar-logs-antigos',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicWebhookOlistV3Route = ApiPublicWebhookOlistV3RouteImport.update({
-  id: '/api/public/webhook/olist/v3',
-  path: '/api/public/webhook/olist/v3',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicOauthOlistCallbackRoute =
-  ApiPublicOauthOlistCallbackRouteImport.update({
-    id: '/api/public/oauth/olist/callback',
-    path: '/api/public/oauth/olist/callback',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -390,12 +371,9 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
-  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
-  '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
-  '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -443,12 +421,9 @@ export interface FileRoutesByTo {
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
-  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
-  '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
-  '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -500,12 +475,9 @@ export interface FileRoutesById {
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
-  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
   '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
-  '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
-  '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -558,12 +530,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
-    | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
-    | '/api/public/oauth/olist/callback'
-    | '/api/public/webhook/olist/v3'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -611,12 +580,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
-    | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
-    | '/api/public/oauth/olist/callback'
-    | '/api/public/webhook/olist/v3'
   id:
     | '__root__'
     | '/'
@@ -667,12 +633,9 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
-    | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
     | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
-    | '/api/public/oauth/olist/callback'
-    | '/api/public/webhook/olist/v3'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -691,12 +654,9 @@ export interface RootRouteChildren {
   ApiPublicHooksExpirarPontosRoute: typeof ApiPublicHooksExpirarPontosRoute
   ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
-  ApiPublicHooksOlistSyncRoute: typeof ApiPublicHooksOlistSyncRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
   ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
   ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
-  ApiPublicOauthOlistCallbackRoute: typeof ApiPublicOauthOlistCallbackRoute
-  ApiPublicWebhookOlistV3Route: typeof ApiPublicWebhookOlistV3Route
 }
 
 declare module '@tanstack/react-router' {
@@ -1023,13 +983,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicNpsSubmitRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/olist-sync': {
-      id: '/api/public/hooks/olist-sync'
-      path: '/api/public/hooks/olist-sync'
-      fullPath: '/api/public/hooks/olist-sync'
-      preLoaderRoute: typeof ApiPublicHooksOlistSyncRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/notifications-daily': {
       id: '/api/public/hooks/notifications-daily'
       path: '/api/public/hooks/notifications-daily'
@@ -1063,20 +1016,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/anonimizar-logs-antigos'
       fullPath: '/api/public/hooks/anonimizar-logs-antigos'
       preLoaderRoute: typeof ApiPublicHooksAnonimizarLogsAntigosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/webhook/olist/v3': {
-      id: '/api/public/webhook/olist/v3'
-      path: '/api/public/webhook/olist/v3'
-      fullPath: '/api/public/webhook/olist/v3'
-      preLoaderRoute: typeof ApiPublicWebhookOlistV3RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/oauth/olist/callback': {
-      id: '/api/public/oauth/olist/callback'
-      path: '/api/public/oauth/olist/callback'
-      fullPath: '/api/public/oauth/olist/callback'
-      preLoaderRoute: typeof ApiPublicOauthOlistCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1192,12 +1131,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksExpirarPontosRoute: ApiPublicHooksExpirarPontosRoute,
   ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
-  ApiPublicHooksOlistSyncRoute: ApiPublicHooksOlistSyncRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
   ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
   ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
-  ApiPublicOauthOlistCallbackRoute: ApiPublicOauthOlistCallbackRoute,
-  ApiPublicWebhookOlistV3Route: ApiPublicWebhookOlistV3Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

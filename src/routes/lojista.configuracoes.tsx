@@ -31,7 +31,6 @@ import {
 // Below-the-fold cards ship in a separate chunk (~1200 lines) and load after first paint.
 const CardsModule = () => import("@/components/lojista/config-cards");
 const IntegracoesCard = lazy(() => CardsModule().then((m) => ({ default: m.IntegracoesCard })));
-const OlistOAuthCard = lazy(() => CardsModule().then((m) => ({ default: m.OlistOAuthCard })));
 const WhatsappCard = lazy(() => CardsModule().then((m) => ({ default: m.WhatsappCard })));
 const NotificacoesCard = lazy(() => CardsModule().then((m) => ({ default: m.NotificacoesCard })));
 const IndicacaoCard = lazy(() => CardsModule().then((m) => ({ default: m.IndicacaoCard })));
@@ -65,7 +64,7 @@ const SECTIONS: { id: SectionId; label: string; icon: typeof StoreIcon; hint: st
   { id: "loja", label: "Dados da loja", icon: StoreIcon, hint: "Nome, telefone" },
   { id: "aparencia", label: "Aparência", icon: Palette, hint: "Logo, banner, cores" },
   { id: "recompensas", label: "Recompensas", icon: Gift, hint: "Pontos, cashback, voucher" },
-  { id: "integracoes", label: "Integrações", icon: Plug, hint: "Webhook, Olist" },
+  { id: "integracoes", label: "Integrações", icon: Plug, hint: "Webhook" },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle, hint: "Evolution API" },
   { id: "notificacoes", label: "Notificações", icon: Bell, hint: "Mensagens automáticas" },
   { id: "engajamento", label: "Engajamento", icon: Sparkles, hint: "Indicação, NPS, Instagram" },
@@ -480,7 +479,6 @@ function ConfigPage() {
                 secret={loja.webhook_secret}
                 lastAt={loja.webhook_last_at}
               />
-              <OlistOAuthCard storeId={loja.id} />
             </div>
           </Suspense>
         )}
