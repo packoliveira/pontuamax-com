@@ -1,8 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./qsf-shared";
-import { sha256Hex } from "./qsf-helpers.server";
+import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
+import { gerarVoucher } from "./voucher.server";
+import {
+  getActiveMultiplier,
+  promoSchema,
+  formatVoucherJaUsado,
+  randomGiftCode,
+  sha256Hex,
+  selecionarDestinatarios,
+  processarEnvioCampanha,
+} from "./qsf-helpers.server";
+import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const submitNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -195,3 +205,7 @@ export const rejeitarNotaFiscal = createServerFn({ method: "POST" })
       .eq("id", data.id);
     return { ok: true };
   });
+
+// ============================================================
+// CLIENT TAGS
+// ============================================================

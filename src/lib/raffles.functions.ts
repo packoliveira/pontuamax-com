@@ -1,7 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { sha256Hex } from "./qsf-helpers.server";
+import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
+import { gerarVoucher } from "./voucher.server";
+import {
+  getActiveMultiplier,
+  promoSchema,
+  formatVoucherJaUsado,
+  randomGiftCode,
+  sha256Hex,
+  selecionarDestinatarios,
+  processarEnvioCampanha,
+} from "./qsf-helpers.server";
+import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const salvarSorteio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -112,3 +123,7 @@ export const cancelarSorteio = createServerFn({ method: "POST" })
     await supabaseAdmin.from("raffles").update({ status: "cancelado" }).eq("id", data.id);
     return { ok: true };
   });
+
+// -------- Public lookups (no auth) with safe fields only --------
+const PUBLIC_STORE_SELECT =
+  "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, banner_mobile_fit, banner_mobile_position_x, banner_mobile_position_y, banner_mobile_zoom, brand_primary, brand_secondary, bg_mode, bg_color_1, bg_color_2, modalidade, regra_pontos, percentual_cashback, cashback_valor_minimo, cashback_compra_minima, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados, brand_accent_points, brand_accent_cashback, brand_cta, brand_vip, brand_price, text_on_dark, header_title_size, header_title_weight, header_kicker_text, header_kicker_show, header_kicker_size, header_title_size_mobile, header_kicker_size_mobile, reward_rain_enabled, reward_rain_colors, reward_rain_opacity";

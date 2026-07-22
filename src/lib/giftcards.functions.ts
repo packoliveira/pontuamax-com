@@ -1,8 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./qsf-shared";
-import { randomGiftCode } from "./qsf-helpers.server";
+import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
+import { gerarVoucher } from "./voucher.server";
+import {
+  getActiveMultiplier,
+  promoSchema,
+  formatVoucherJaUsado,
+  randomGiftCode,
+  sha256Hex,
+  selecionarDestinatarios,
+  processarEnvioCampanha,
+} from "./qsf-helpers.server";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const criarGiftCards = createServerFn({ method: "POST" })
@@ -124,3 +133,22 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
     });
     return { pontos: gc.data.pontos };
   });
+
+// ============================================================
+// NOTA FISCAL — OCR via Lovable AI Gateway
+// ============================================================
+
+export const lookupGiftCardByCodigo = createServerFn({ method: "GET" })
+  .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const r = await supabaseAdmin
+      .from("gift_cards")
+      .select("id, store_id, pontos, redeemed_at")
+      .eq("codigo", data.codigo)
+      .maybeSingle();
+    if (r.error) throw new Error(r.error.message);
+    return r.data;
+  });
+
+// -------- Full store row for the authenticated owner --------
