@@ -478,6 +478,10 @@ function ConfigPage() {
                 slug={loja.slug}
                 secret={loja.webhook_secret}
                 lastAt={loja.webhook_last_at}
+                gatilho={
+                  (loja as { olist_gatilho_pontuacao?: "aprovado" | "faturado" | "ambos" })
+                    .olist_gatilho_pontuacao ?? "ambos"
+                }
               />
             </div>
           </Suspense>
