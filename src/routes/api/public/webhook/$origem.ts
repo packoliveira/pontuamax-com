@@ -142,7 +142,8 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        const { idVenda, valor, cpf, telefone, nome, tipoEvento } = extractOlistPayload(payload);
+        const { idVenda, cpf, telefone, nome, tipoEvento } = extractOlistPayload(payload);
+        let valor = extractOlistPayload(payload).valor;
 
         if (!idVenda)
           return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
@@ -306,18 +307,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
               { cliente_vinculado: true },
             );
           }
-          // Reatribui `valor` local via casting via variável nova
-          (valor as unknown as number); // eslint no-op — usamos valorApi abaixo
-          // Substitui o valor para o cálculo abaixo
-          Object.assign({ valor }, {}); // placeholder para evitar reatribuição de const
-          // eslint-disable-next-line no-var
-          var valorFinal = valorApi;
-          // fall-through: reatribuímos o valor lógico
-          // eslint-disable-next-line prefer-const
-          // @ts-expect-error — sobrescreve o const `valor` no escopo abaixo
-          // eslint-disable-next-line no-func-assign
-          // (mantido só para clareza; o cálculo usa `valorFinal`)
-          void valorFinal;
+          valor = valorApi;
         }
 
         // Calcula pontos + cashback conforme modalidade (função pura testada)
