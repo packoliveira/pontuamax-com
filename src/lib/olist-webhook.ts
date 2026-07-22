@@ -62,24 +62,16 @@ export function extractOlistPayload(p: Record<string, unknown>): OlistExtracted 
   return { idVenda, valor, cpf, telefone, nome, tipoEvento };
 }
 
-// Só creditamos pontos/cashback para "faturamento_pedido" da Olist —
-// as demais notificações (inclusao_pedido, alteracao_pedido, etc.) chegam
-// antes do pedido virar venda efetivada e não devem gerar transação.
-// Payloads sem tipoEvento (nosso formato simples, Bling, Tiny, testes)
-// seguem processando normalmente.
-export const OLIST_PROCESSABLE_EVENT = "faturamento_pedido";
-
+// Aceitamos qualquer tipo de evento — o gate real é o valor total.
+// Se a notificação vier com valor > 0, credita pontos/cashback.
+// Se não vier, o cliente entra como "pendente" (sem transação) e a
+// próxima notificação do mesmo pedido que trouxer o total credita.
+// Idempotência por id_venda_externa evita crédito duplicado.
 export function shouldProcessOlistEvent(
-  origem: string,
-  tipoEvento: string,
+  _origem: string,
+  _tipoEvento: string,
 ): { process: boolean; reason?: string } {
-  if (origem !== "olist") return { process: true };
-  if (!tipoEvento) return { process: true };
-  if (tipoEvento === OLIST_PROCESSABLE_EVENT) return { process: true };
-  return {
-    process: false,
-    reason: `Notificação Olist "${tipoEvento}" ignorada — só processamos "${OLIST_PROCESSABLE_EVENT}".`,
-  };
+  return { process: true };
 }
 
 export type RewardStoreConfig = {

@@ -3,7 +3,6 @@ import {
   extractOlistPayload,
   shouldProcessOlistEvent,
   computeRewards,
-  OLIST_PROCESSABLE_EVENT,
 } from "../olist-webhook";
 
 // -------------------------------------------------------------
@@ -88,30 +87,18 @@ describe("extractOlistPayload", () => {
 // shouldProcessOlistEvent
 // -------------------------------------------------------------
 describe("shouldProcessOlistEvent", () => {
-  it("olist + faturamento_pedido → processa", () => {
-    expect(shouldProcessOlistEvent("olist", "faturamento_pedido").process).toBe(true);
-  });
-
-  it.each([
-    "inclusao_pedido",
-    "alteracao_pedido",
-    "cancelamento_pedido",
-    "inclusao_nota_fiscal",
-  ])("olist + %s → IGNORA (não pontua)", (evt) => {
-    const r = shouldProcessOlistEvent("olist", evt);
-    expect(r.process).toBe(false);
-    expect(r.reason).toContain(evt);
-    expect(r.reason).toContain(OLIST_PROCESSABLE_EVENT);
-  });
-
-  it("olist sem tipoEvento → processa (compatibilidade)", () => {
-    expect(shouldProcessOlistEvent("olist", "").process).toBe(true);
-  });
-
-  it("outras origens sempre processam, mesmo com tipoEvento estranho", () => {
-    expect(shouldProcessOlistEvent("bling", "qualquer_coisa").process).toBe(true);
+  it("processa qualquer tipo de evento (gate real é o valor)", () => {
+    for (const evt of [
+      "faturamento_pedido",
+      "inclusao_pedido",
+      "alteracao_pedido",
+      "alteracao_situacao",
+      "",
+    ]) {
+      expect(shouldProcessOlistEvent("olist", evt).process).toBe(true);
+    }
+    expect(shouldProcessOlistEvent("bling", "qualquer").process).toBe(true);
     expect(shouldProcessOlistEvent("tiny", "").process).toBe(true);
-    expect(shouldProcessOlistEvent("teste", "inclusao_pedido").process).toBe(true);
   });
 });
 
