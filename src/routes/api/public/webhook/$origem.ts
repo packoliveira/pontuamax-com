@@ -117,7 +117,8 @@ function calcularRecompensa(
   const cashback = inclC ? Math.round(valor * Number(loja.percentual_cashback)) / 100 : 0;
   const novoPontos = saldoPontos + pontos;
   const novoCashback = Math.round((Number(saldoCashback) + cashback) * 100) / 100;
-  const nivel = novoPontos <= 100 ? "bronze" : novoPontos <= 300 ? "prata" : "ouro";
+  const nivel: "bronze" | "prata" | "ouro" =
+    novoPontos <= 100 ? "bronze" : novoPontos <= 300 ? "prata" : "ouro";
   return { pontos, cashback, novoPontos, novoCashback, nivel };
 }
 

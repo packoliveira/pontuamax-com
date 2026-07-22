@@ -53,6 +53,7 @@ import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.cl
 import { Route as AdminPlanosRouteImport } from './routes/admin.planos'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
+import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
@@ -280,6 +281,11 @@ const ApiPublicWidgetSlugRoute = ApiPublicWidgetSlugRouteImport.update({
   path: '/api/public/widget/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
+  id: '/api/public/webhook/$origem',
+  path: '/api/public/webhook/$origem',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicNpsSubmitRoute = ApiPublicNpsSubmitRouteImport.update({
   id: '/api/public/nps/submit',
   path: '/api/public/nps/submit',
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
+  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesByTo {
@@ -415,6 +422,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
+  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesById {
@@ -468,6 +476,7 @@ export interface FileRoutesById {
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
+  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRouteTypes {
@@ -522,6 +531,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
+    | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -571,6 +581,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
+    | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
   id:
     | '__root__'
@@ -623,6 +634,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/expirar-vouchers'
     | '/api/public/hooks/notifications-daily'
     | '/api/public/nps/submit'
+    | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -643,6 +655,7 @@ export interface RootRouteChildren {
   ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
+  ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
   ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
 }
 
@@ -956,6 +969,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWidgetSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhook/$origem': {
+      id: '/api/public/webhook/$origem'
+      path: '/api/public/webhook/$origem'
+      fullPath: '/api/public/webhook/$origem'
+      preLoaderRoute: typeof ApiPublicWebhookOrigemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/nps/submit': {
       id: '/api/public/nps/submit'
       path: '/api/public/nps/submit'
@@ -1112,6 +1132,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
+  ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
   ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
 }
 export const routeTree = rootRouteImport
