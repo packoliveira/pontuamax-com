@@ -60,6 +60,7 @@ import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/a
 import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
 import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
 import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
+import { Route as ApiPublicHooksAnonimizarLogsAntigosRouteImport } from './routes/api/public/hooks/anonimizar-logs-antigos'
 import { Route as ApiPublicWebhookOlistV3RouteImport } from './routes/api/public/webhook/olist.v3'
 import { Route as ApiPublicOauthOlistCallbackRouteImport } from './routes/api/public/oauth/olist.callback'
 
@@ -322,6 +323,12 @@ const ApiPublicHooksCampanhasAgendadasRoute =
     path: '/api/public/hooks/campanhas-agendadas',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAnonimizarLogsAntigosRoute =
+  ApiPublicHooksAnonimizarLogsAntigosRouteImport.update({
+    id: '/api/public/hooks/anonimizar-logs-antigos',
+    path: '/api/public/hooks/anonimizar-logs-antigos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWebhookOlistV3Route = ApiPublicWebhookOlistV3RouteImport.update({
   id: '/api/public/webhook/olist/v3',
   path: '/api/public/webhook/olist/v3',
@@ -378,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
@@ -430,6 +438,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/funcionario': typeof FuncionarioIndexRoute
   '/lojista': typeof LojistaIndexRoute
+  '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
@@ -486,6 +495,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
   '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/funcionario/'
     | '/lojista/'
+    | '/api/public/hooks/anonimizar-logs-antigos'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/funcionario'
     | '/lojista'
+    | '/api/public/hooks/anonimizar-logs-antigos'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
@@ -650,6 +662,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/funcionario/'
     | '/lojista/'
+    | '/api/public/hooks/anonimizar-logs-antigos'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
     | '/api/public/hooks/expirar-vouchers'
@@ -673,6 +686,7 @@ export interface RootRouteChildren {
   NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
   ValeCodigoRoute: typeof ValeCodigoRoute
+  ApiPublicHooksAnonimizarLogsAntigosRoute: typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   ApiPublicHooksCampanhasAgendadasRoute: typeof ApiPublicHooksCampanhasAgendadasRoute
   ApiPublicHooksExpirarPontosRoute: typeof ApiPublicHooksExpirarPontosRoute
   ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
@@ -1044,6 +1058,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCampanhasAgendadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/anonimizar-logs-antigos': {
+      id: '/api/public/hooks/anonimizar-logs-antigos'
+      path: '/api/public/hooks/anonimizar-logs-antigos'
+      fullPath: '/api/public/hooks/anonimizar-logs-antigos'
+      preLoaderRoute: typeof ApiPublicHooksAnonimizarLogsAntigosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhook/olist/v3': {
       id: '/api/public/webhook/olist/v3'
       path: '/api/public/webhook/olist/v3'
@@ -1165,6 +1186,8 @@ const rootRouteChildren: RootRouteChildren = {
   NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
   ValeCodigoRoute: ValeCodigoRoute,
+  ApiPublicHooksAnonimizarLogsAntigosRoute:
+    ApiPublicHooksAnonimizarLogsAntigosRoute,
   ApiPublicHooksCampanhasAgendadasRoute: ApiPublicHooksCampanhasAgendadasRoute,
   ApiPublicHooksExpirarPontosRoute: ApiPublicHooksExpirarPontosRoute,
   ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
@@ -1179,13 +1202,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

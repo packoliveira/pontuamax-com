@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, cpfToEmail, gerarVoucher, isValidCPF } from "./qsf-shared";
+import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
+import { gerarVoucher } from "./voucher.server";
 import {
   getActiveMultiplier,
   promoSchema,
@@ -12,6 +13,19 @@ import {
   selecionarDestinatarios,
   processarEnvioCampanha,
 } from "./qsf-helpers.server";
+
+// Rate limit helper para server functions sensíveis (público ou por usuário).
+// Dinamicamente carrega os módulos server-only para não vazar no client bundle.
+async function rateLimitByIp(scope: string, max: number, windowSec: number) {
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const { checkRateLimit, getClientIp } = await import("./rate-limit.server");
+  const req = getRequest();
+  const ip = getClientIp(req as unknown as Request);
+  const ok = await checkRateLimit(`sfn:${scope}:${ip}`, max, windowSec);
+  if (!ok) {
+    throw new Error("Muitas tentativas em pouco tempo. Aguarde alguns segundos e tente novamente.");
+  }
+}
 
 // re-export para o cron `/api/public/hooks/campanhas-agendadas`
 export { processarEnvioCampanha as _processarEnvioCampanhaInternal };
@@ -424,6 +438,7 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    await rateLimitByIp("prep-login-cpf", 10, 60);
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits) || data.senha !== cpfDigits) return { normalized: false };
 
@@ -552,6 +567,7 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    await rateLimitByIp("criar-cliente-cpf", 5, 60);
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
     const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || null;
@@ -1460,6 +1476,7 @@ export const validarVoucher = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ voucher_code: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
+    await rateLimitByIp(`validar-voucher:${context.userId}`, 30, 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let store = await supabaseAdmin
       .from("stores")
@@ -2159,6 +2176,7 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
+    await rateLimitByIp(`gift-card:${context.userId}`, 10, 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const gc = await supabaseAdmin
       .from("gift_cards")

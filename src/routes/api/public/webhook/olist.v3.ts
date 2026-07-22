@@ -28,6 +28,12 @@ export const Route = createFileRoute("/api/public/webhook/olist/v3")({
     handlers: {
       GET: async () => json({ status: "ok", endpoint: "olist v3" }),
       POST: async ({ request }) => {
+        // Rate limit: 120 req/min por IP (Olist envia rajadas de notificações).
+        const { checkRateLimit, getClientIp } = await import("@/lib/rate-limit.server");
+        const ip = getClientIp(request);
+        const allowed = await checkRateLimit(`webhook-v3:${ip}`, 120, 60);
+        if (!allowed) return json({ error: "rate_limited" }, 429);
+
         const raw = await request.text();
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

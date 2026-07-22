@@ -27,11 +27,6 @@ export function progressoNivel(pontos: number) {
   return { atual: pontos, alvo: pontos, proximo: null, pct: 100 };
 }
 
-export function gerarVoucher() {
-  const p = () => Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `QSF-${p()}-${p()}`;
-}
-
 export function slugify(s: string) {
   return (
     s
