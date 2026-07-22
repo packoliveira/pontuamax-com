@@ -425,6 +425,7 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    await rateLimitByIp("prep-login-cpf", 10, 60);
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits) || data.senha !== cpfDigits) return { normalized: false };
 
@@ -553,6 +554,7 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    await rateLimitByIp("criar-cliente-cpf", 5, 60);
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
     const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || null;
@@ -1461,6 +1463,7 @@ export const validarVoucher = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ voucher_code: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
+    await rateLimitByIp(`validar-voucher:${context.userId}`, 30, 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let store = await supabaseAdmin
       .from("stores")
@@ -2160,6 +2163,7 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
+    await rateLimitByIp(`gift-card:${context.userId}`, 10, 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const gc = await supabaseAdmin
       .from("gift_cards")
