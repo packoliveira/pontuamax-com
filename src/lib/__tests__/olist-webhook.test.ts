@@ -165,8 +165,8 @@ describe("computeRewards", () => {
   it("nivel escala com pontos acumulados", () => {
     const cfg = { modalidade: "pontos", regra_pontos: 1, percentual_cashback: 0 };
     expect(computeRewards(50, cfg, 0, 0).nivel).toBe("bronze");
-    expect(computeRewards(50, cfg, 100, 0).nivel).toBe("bronze"); // 150? -> prata
-    expect(computeRewards(50, cfg, 60, 0).nivel).toBe("bronze"); // 110 -> prata (>100)
+    expect(computeRewards(50, cfg, 50, 0).nivel).toBe("bronze"); // 100 -> bronze (limite)
+    expect(computeRewards(50, cfg, 60, 0).nivel).toBe("prata"); // 110 -> prata (>100)
     expect(computeRewards(1, cfg, 100, 0).nivel).toBe("prata"); // 101
     expect(computeRewards(1, cfg, 300, 0).nivel).toBe("ouro"); // 301
   });
