@@ -142,8 +142,9 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        const { idVenda, cpf, telefone, nome, tipoEvento } = extractOlistPayload(payload);
-        let valor = extractOlistPayload(payload).valor;
+        const extracted = extractOlistPayload(payload);
+        const { idVenda, cpf, telefone, nome, tipoEvento } = extracted;
+        let valor = extracted.valor;
 
         if (!idVenda)
           return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
