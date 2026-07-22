@@ -10,7 +10,6 @@ import {
   Gift,
   Users,
   ArrowRight,
-  Trophy,
   Check,
   Home,
   ShoppingBag,
