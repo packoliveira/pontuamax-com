@@ -39,16 +39,7 @@ import {
   Star,
   Instagram,
   Hourglass,
-  Link as LinkIcon,
-  Unplug,
 } from "lucide-react";
-import {
-  iniciarConexaoOlist,
-  getStatusOlist,
-  desconectarOlist,
-  sincronizarOlistAgora,
-  alternarSyncOlist,
-} from "@/lib/olist.functions";
 
 export function IntegracoesCard({
   storeId,
