@@ -1201,12 +1201,3 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
     </Card>
   );
 }
-export function OlistOAuthCard({ storeId }: { storeId: string }) {
-  const qc = useQueryClient();
-  const { data: status } = useQuery({
-    queryKey: ["olist-status", storeId],
-    queryFn: () => getStatusOlist({ data: { storeId } }),
-  });
-
-  const conectar = useMutation({
-    mutationFn: () => iniciarConexaoOlist({ data: { storeId } }),
