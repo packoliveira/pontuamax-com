@@ -55,7 +55,11 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db = supabaseAdmin as any;
-        async function anonimizarTabela(tabela: string, coluna: string): Promise<number> {
+        async function anonimizarTabela(
+          tabela: string,
+          coluna: string,
+          colunaData: string,
+        ): Promise<number> {
           let total = 0;
           let lastId: string | null = null;
           // Paginação por cursor em `id` para não reprocessar sempre a mesma
@@ -65,7 +69,7 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
             let query = db
               .from(tabela)
               .select(`id, ${coluna}`)
-              .lt("created_at", cutoff)
+              .lt(colunaData, cutoff)
               .not(coluna, "is", null)
               .order("id", { ascending: true })
               .limit(200);
@@ -95,8 +99,16 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
         }
 
         try {
-          const integration = await anonimizarTabela("integration_logs", "payload_recebido");
-          const webhookEvents = await anonimizarTabela("erp_webhook_events", "payload");
+          const integration = await anonimizarTabela(
+            "integration_logs",
+            "payload_recebido",
+            "created_at",
+          );
+          const webhookEvents = await anonimizarTabela(
+            "erp_webhook_events",
+            "payload",
+            "received_at",
+          );
           return new Response(
             JSON.stringify({
               ok: true,
