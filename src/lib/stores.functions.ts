@@ -107,6 +107,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
         reward_rain_enabled: z.boolean().optional(),
         reward_rain_colors: z.array(z.string().max(20)).max(12).optional(),
         reward_rain_opacity: z.number().min(0.1).max(1).optional(),
+        olist_gatilho_pontuacao: z.enum(["aprovado", "faturado", "ambos"]).optional(),
       })
       .parse(input),
   )
