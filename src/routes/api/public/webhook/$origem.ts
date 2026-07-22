@@ -9,7 +9,7 @@ import { cpfToEmail } from "@/lib/qsf-shared";
 // Autenticação: query `?store=<slug|uuid>&secret=<webhook_secret>`
 //   (também aceita headers `x-qsf-store` / `x-qsf-secret`).
 //
-// Fluxo (só webhook, sem chamada de API):
+// Fluxo:
 //   1. Valida origem, rate limit e segredo da loja.
 //   2. Extrai id do pedido, valor total, CPF e dados do cliente do payload.
 //   3. Se a notificação corresponde ao gatilho configurado pelo lojista
@@ -52,12 +52,23 @@ function eventoAtendeGatilho(evento: Gatilho | null, gatilho: Gatilho): boolean 
 // ---------- Extração de payload ----------
 type Extraido = {
   idVenda: string;
+  numeroPedido: string;
   valor: number;
   cpf: string;
   telefone: string;
   nome: string;
   tipoEvento: string;
 };
+
+function parseValor(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const normalized =
+    typeof raw === "string"
+      ? raw.replace(/\./g, "").replace(",", ".")
+      : raw;
+  const value = Number(normalized);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
 
 function extrair(p: Record<string, unknown>): Extraido {
   const root =
@@ -77,7 +88,11 @@ function extrair(p: Record<string, unknown>): Extraido {
     "";
 
   const idVenda = String(
-    p.id_venda_externa ?? root.id ?? root.numero ?? root.numero_pedido ?? root.codigo ?? "",
+    p.id_venda_externa ?? root.id ?? root.idPedido ?? root.numero ?? root.numero_pedido ?? root.codigo ?? "",
+  ).trim();
+
+  const numeroPedido = String(
+    p.numero_pedido ?? root.numero ?? root.numeroPedido ?? root.numero_pedido ?? root.codigo ?? "",
   ).trim();
 
   const valorRaw =
@@ -89,8 +104,7 @@ function extrair(p: Record<string, unknown>): Extraido {
     root.totalPedido ??
     root.valorTotal ??
     0;
-  const valor =
-    typeof valorRaw === "string" ? Number(valorRaw.replace(",", ".")) : Number(valorRaw);
+  const valor = parseValor(valorRaw) ?? 0;
 
   const cpfRaw = String(
     p.cpf_cliente ?? cliente.cpfCnpj ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
@@ -124,41 +138,112 @@ function extrair(p: Record<string, unknown>): Extraido {
     ? `${tipoEvento}|${situacao}`
     : tipoEvento;
 
-  return { idVenda, valor, cpf, telefone, nome, tipoEvento: tipoFinal };
+  return { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento: tipoFinal };
 }
 
-// ---------- Cálculo de recompensas ----------
 // ---------- Enriquecimento via API Tiny/Olist V2 ----------
 // Quando o webhook chega sem valor total, tentamos buscar o pedido completo
 // via API pública da Tiny (https://api.tiny.com.br/api2/pedido.obter.php).
 // Requer o secret `OLIST_API_TOKEN` configurado.
-async function buscarTotalPedidoOlist(idPedido: string): Promise<number | null> {
+type TinyPedido = Record<string, unknown>;
+type EnriquecimentoApi = { valor: number | null; fonte?: string; motivo?: string };
+
+function totalDoPedidoTiny(pedido: TinyPedido | undefined): number | null {
+  if (!pedido) return null;
+  return parseValor(
+    pedido.total_pedido ?? pedido.totalPedido ?? pedido.valor_total ?? pedido.valorTotal ?? pedido.total ?? pedido.valor,
+  );
+}
+
+function motivoTiny(retorno: Record<string, unknown> | undefined, fallback: string): string {
+  if (!retorno) return fallback;
+  const status = typeof retorno.status === "string" ? retorno.status : "";
+  const codigo = retorno.codigo_erro ? `código ${String(retorno.codigo_erro)}` : "";
+  const erros = Array.isArray(retorno.erros)
+    ? retorno.erros
+        .map((item) => {
+          if (typeof item === "string") return item;
+          if (item && typeof item === "object") {
+            const obj = item as Record<string, unknown>;
+            return String(obj.erro ?? obj.message ?? obj.mensagem ?? "").trim();
+          }
+          return "";
+        })
+        .filter(Boolean)
+        .join("; ")
+    : "";
+  return [status, codigo, erros].filter(Boolean).join(" — ") || fallback;
+}
+
+async function tinyPost(endpoint: string, params: URLSearchParams): Promise<Record<string, unknown> | null> {
+  const res = await fetch(`https://api.tiny.com.br/api2/${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+  if (!res.ok) return { _http_error: res.status };
+  return (await res.json()) as Record<string, unknown>;
+}
+
+async function buscarPedidoPorId(token: string, idPedido: string): Promise<EnriquecimentoApi> {
+  const json = await tinyPost(
+    "pedido.obter.php",
+    new URLSearchParams({ token, id: idPedido, formato: "json" }),
+  );
+  if (json?._http_error) return { valor: null, motivo: `pedido.obter HTTP ${json._http_error}` };
+  const retorno = json?.retorno as Record<string, unknown> | undefined;
+  const pedido = retorno?.pedido as TinyPedido | undefined;
+  const valor = totalDoPedidoTiny(pedido);
+  if (valor) return { valor, fonte: "pedido.obter" };
+  return { valor: null, motivo: `pedido.obter: ${motivoTiny(retorno, "pedido sem total")}` };
+}
+
+async function pesquisarPedido(token: string, termo: string, numeroPedido: string): Promise<EnriquecimentoApi> {
+  const json = await tinyPost(
+    "pedidos.pesquisa.php",
+    new URLSearchParams({ token, pesquisa: termo, formato: "json" }),
+  );
+  if (json?._http_error) return { valor: null, motivo: `pedidos.pesquisa HTTP ${json._http_error}` };
+  const retorno = json?.retorno as Record<string, unknown> | undefined;
+  const pedidosRaw = retorno?.pedidos as Array<{ pedido?: TinyPedido }> | undefined;
+  const pedidos = (pedidosRaw ?? []).map((item) => item.pedido).filter(Boolean) as TinyPedido[];
+  const escolhido =
+    pedidos.find((pedido) => {
+      const id = String(pedido.id ?? "").trim();
+      const numero = String(pedido.numero ?? "").trim();
+      const ecommerce = String(pedido.numero_ecommerce ?? pedido.numeroEcommerce ?? "").trim();
+      return id === termo || numero === termo || numero === numeroPedido || ecommerce === termo;
+    }) ?? (pedidos.length === 1 ? pedidos[0] : undefined);
+  const valor = totalDoPedidoTiny(escolhido);
+  if (valor) return { valor, fonte: "pedidos.pesquisa" };
+  return { valor: null, motivo: `pedidos.pesquisa(${termo}): ${motivoTiny(retorno, "pedido não encontrado ou sem total")}` };
+}
+
+async function buscarTotalPedidoOlist(idPedido: string, numeroPedido = ""): Promise<EnriquecimentoApi> {
   const token = process.env.OLIST_API_TOKEN;
-  if (!token) return null;
+  if (!token) return { valor: null, motivo: "OLIST_API_TOKEN não configurado" };
+  const tentativas: string[] = [];
   try {
-    const body = new URLSearchParams({ token, id: idPedido, formato: "json" });
-    const res = await fetch("https://api.tiny.com.br/api2/pedido.obter.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as {
-      retorno?: {
-        status?: string;
-        pedido?: { total_pedido?: string | number; valor?: string | number };
-      };
-    };
-    if (json?.retorno?.status !== "OK" || !json.retorno.pedido) return null;
-    const p = json.retorno.pedido;
-    const rawTotal = p.total_pedido ?? p.valor ?? 0;
-    const total =
-      typeof rawTotal === "string" ? Number(rawTotal.replace(",", ".")) : Number(rawTotal);
-    return Number.isFinite(total) && total > 0 ? total : null;
+    const porId = await buscarPedidoPorId(token, idPedido);
+    if (porId.valor) return porId;
+    if (porId.motivo) tentativas.push(porId.motivo);
+
+    const termos = [numeroPedido, idPedido].filter(
+      (termo, index, all) => termo && all.indexOf(termo) === index,
+    );
+    for (const termo of termos) {
+      const pesquisado = await pesquisarPedido(token, termo, numeroPedido);
+      if (pesquisado.valor) return pesquisado;
+      if (pesquisado.motivo) tentativas.push(pesquisado.motivo);
+    }
+
+    return { valor: null, motivo: tentativas.join(" | ") || "API não retornou total" };
   } catch {
-    return null;
+    return { valor: null, motivo: "falha de comunicação com a API da Olist/Tiny" };
   }
 }
+
+// ---------- Cálculo de recompensas ----------
 
 function calcularRecompensa(
   valor: number,
@@ -290,7 +375,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         }
 
         // 4) Extração + gatilho configurado.
-        const { idVenda, valor, cpf, telefone, nome, tipoEvento } = extrair(payload);
+        const { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento } = extrair(payload);
         if (!idVenda) {
           return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
         }
@@ -394,18 +479,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         // 8) Sem valor no payload → tenta enriquecer via API Tiny/Olist V2.
         let valorFinal = valor;
         let enriquecido = false;
+        let motivoApi = "";
         if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
-          const totalApi = await buscarTotalPedidoOlist(idVenda);
-          if (totalApi && totalApi > 0) {
-            valorFinal = totalApi;
+          const totalApi = await buscarTotalPedidoOlist(idVenda, numeroPedido);
+          if (totalApi.valor && totalApi.valor > 0) {
+            valorFinal = totalApi.valor;
             enriquecido = true;
+          } else {
+            motivoApi = totalApi.motivo ?? "sem detalhe da API";
           }
         }
 
         if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
           return logAndRespond(
-            "sucesso",
-            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total e a API da Olist não retornou o pedido — verifique o OLIST_API_TOKEN ou lance o valor manualmente.`,
+            "erro",
+            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total e a API da Olist não retornou o total. Motivo: ${motivoApi || "não informado"}.`,
             200,
             { cliente_vinculado: true, aguardando_valor: true },
           );
