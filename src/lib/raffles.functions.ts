@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { sha256Hex } from "./qsf-helpers.server";
+
 
 export const salvarSorteio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
