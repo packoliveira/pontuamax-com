@@ -53,7 +53,6 @@ import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.cl
 import { Route as AdminPlanosRouteImport } from './routes/admin.planos'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
-import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
 import { Route as ApiPublicHooksOlistSyncRouteImport } from './routes/api/public/hooks/olist-sync'
 import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
@@ -284,11 +283,6 @@ const ApiPublicWidgetSlugRoute = ApiPublicWidgetSlugRouteImport.update({
   path: '/api/public/widget/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
-  id: '/api/public/webhook/$origem',
-  path: '/api/public/webhook/$origem',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicNpsSubmitRoute = ApiPublicNpsSubmitRouteImport.update({
   id: '/api/public/nps/submit',
   path: '/api/public/nps/submit',
@@ -392,7 +386,6 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
-  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
   '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
   '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
@@ -445,7 +438,6 @@ export interface FileRoutesByTo {
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
-  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
   '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
   '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
@@ -502,7 +494,6 @@ export interface FileRoutesById {
   '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
   '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
   '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
-  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
   '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
   '/api/public/oauth/olist/callback': typeof ApiPublicOauthOlistCallbackRoute
   '/api/public/webhook/olist/v3': typeof ApiPublicWebhookOlistV3Route
@@ -560,7 +551,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/notifications-daily'
     | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
-    | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
     | '/api/public/oauth/olist/callback'
     | '/api/public/webhook/olist/v3'
@@ -613,7 +603,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/notifications-daily'
     | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
-    | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
     | '/api/public/oauth/olist/callback'
     | '/api/public/webhook/olist/v3'
@@ -669,7 +658,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/notifications-daily'
     | '/api/public/hooks/olist-sync'
     | '/api/public/nps/submit'
-    | '/api/public/webhook/$origem'
     | '/api/public/widget/$slug'
     | '/api/public/oauth/olist/callback'
     | '/api/public/webhook/olist/v3'
@@ -693,7 +681,6 @@ export interface RootRouteChildren {
   ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
   ApiPublicHooksOlistSyncRoute: typeof ApiPublicHooksOlistSyncRoute
   ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
-  ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
   ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
   ApiPublicOauthOlistCallbackRoute: typeof ApiPublicOauthOlistCallbackRoute
   ApiPublicWebhookOlistV3Route: typeof ApiPublicWebhookOlistV3Route
@@ -1009,13 +996,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWidgetSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/webhook/$origem': {
-      id: '/api/public/webhook/$origem'
-      path: '/api/public/webhook/$origem'
-      fullPath: '/api/public/webhook/$origem'
-      preLoaderRoute: typeof ApiPublicWebhookOrigemRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/nps/submit': {
       id: '/api/public/nps/submit'
       path: '/api/public/nps/submit'
@@ -1194,7 +1174,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
   ApiPublicHooksOlistSyncRoute: ApiPublicHooksOlistSyncRoute,
   ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
-  ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
   ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
   ApiPublicOauthOlistCallbackRoute: ApiPublicOauthOlistCallbackRoute,
   ApiPublicWebhookOlistV3Route: ApiPublicWebhookOlistV3Route,
@@ -1202,13 +1181,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
