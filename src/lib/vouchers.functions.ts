@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./qsf-shared";
+
 import { gerarVoucher } from "./voucher.server";
 import { formatVoucherJaUsado } from "./qsf-helpers.server";
 import { rateLimitByIp } from "./sfn-rate-limit.server";

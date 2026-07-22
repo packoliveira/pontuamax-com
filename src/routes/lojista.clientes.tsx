@@ -18,7 +18,6 @@ import {
   formatCPF,
   formatPhone,
   isValidCPF,
-  onlyDigits,
 } from "@/lib/qsf-shared";
 import { NivelBadge } from "@/components/nivel-badge";
 import { Input } from "@/components/ui/input";

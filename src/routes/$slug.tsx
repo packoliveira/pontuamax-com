@@ -46,22 +46,18 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Coins,
   Wallet,
   LogOut,
-  Trophy,
   Ticket,
   Share2,
   Gift,
   FileText,
   Package,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { RewardRain } from "@/components/reward-rain";
 import { HistoricoSection } from "@/components/portal/HistoricoSection";
 import { InstagramCard, MeusPostsInstagram } from "@/components/portal/InstagramSection";
