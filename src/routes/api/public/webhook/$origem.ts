@@ -128,6 +128,38 @@ function extrair(p: Record<string, unknown>): Extraido {
 }
 
 // ---------- Cálculo de recompensas ----------
+// ---------- Enriquecimento via API Tiny/Olist V2 ----------
+// Quando o webhook chega sem valor total, tentamos buscar o pedido completo
+// via API pública da Tiny (https://api.tiny.com.br/api2/pedido.obter.php).
+// Requer o secret `OLIST_API_TOKEN` configurado.
+async function buscarTotalPedidoOlist(idPedido: string): Promise<number | null> {
+  const token = process.env.OLIST_API_TOKEN;
+  if (!token) return null;
+  try {
+    const body = new URLSearchParams({ token, id: idPedido, formato: "json" });
+    const res = await fetch("https://api.tiny.com.br/api2/pedido.obter.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      retorno?: {
+        status?: string;
+        pedido?: { total_pedido?: string | number; valor?: string | number };
+      };
+    };
+    if (json?.retorno?.status !== "OK" || !json.retorno.pedido) return null;
+    const p = json.retorno.pedido;
+    const rawTotal = p.total_pedido ?? p.valor ?? 0;
+    const total =
+      typeof rawTotal === "string" ? Number(rawTotal.replace(",", ".")) : Number(rawTotal);
+    return Number.isFinite(total) && total > 0 ? total : null;
+  } catch {
+    return null;
+  }
+}
+
 function calcularRecompensa(
   valor: number,
   loja: { modalidade: string; regra_pontos: number | string; percentual_cashback: number | string },
@@ -359,11 +391,21 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         if (linkRes.error) return logAndRespond("erro", linkRes.error.message, 500);
         const link = linkRes.data;
 
-        // 8) Sem valor no payload → só vincula, aguarda próxima notificação.
-        if (!Number.isFinite(valor) || valor <= 0) {
+        // 8) Sem valor no payload → tenta enriquecer via API Tiny/Olist V2.
+        let valorFinal = valor;
+        let enriquecido = false;
+        if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
+          const totalApi = await buscarTotalPedidoOlist(idVenda);
+          if (totalApi && totalApi > 0) {
+            valorFinal = totalApi;
+            enriquecido = true;
+          }
+        }
+
+        if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
           return logAndRespond(
             "sucesso",
-            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total — quando a Olist enviar o evento com o total, os pontos serão creditados automaticamente.`,
+            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total e a API da Olist não retornou o pedido — verifique o OLIST_API_TOKEN ou lance o valor manualmente.`,
             200,
             { cliente_vinculado: true, aguardando_valor: true },
           );
@@ -371,7 +413,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
 
         // 9) Calcula e credita.
         const { pontos, cashback, novoPontos, novoCashback, nivel } = calcularRecompensa(
-          valor,
+          valorFinal,
           loja,
           link.pontos,
           Number(link.cashback_saldo),
@@ -381,12 +423,12 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           store_id: loja.id,
           client_user_id: clientProfile.id,
           tipo: "venda",
-          valor,
+          valor: valorFinal,
           pontos_delta: pontos,
           cashback_delta: cashback,
           status: "entregue",
           id_venda_externa: idVenda,
-          origem,
+          origem: enriquecido ? `${origem}:api_enriched` : origem,
         });
         if (tx.error) {
           if (tx.error.code === "23505") {
