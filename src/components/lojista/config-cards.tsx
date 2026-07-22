@@ -46,11 +46,13 @@ export function IntegracoesCard({
   slug,
   secret,
   lastAt,
+  gatilho,
 }: {
   storeId: string;
   slug: string;
   secret: string | null;
   lastAt: string | null;
+  gatilho: "aprovado" | "faturado" | "ambos" | null;
 }) {
   const qc = useQueryClient();
   const origin =
@@ -85,6 +87,22 @@ export function IntegracoesCard({
       qc.invalidateQueries({ queryKey: ["my-store"] });
       qc.invalidateQueries({ queryKey: ["integration-logs", storeId] });
       toast.success("Webhook de teste registrado.");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const [gatilhoLocal, setGatilhoLocal] = useState<"aprovado" | "faturado" | "ambos">(
+    gatilho ?? "ambos",
+  );
+  useEffect(() => {
+    setGatilhoLocal(gatilho ?? "ambos");
+  }, [gatilho]);
+  const salvarGatilho = useMutation({
+    mutationFn: (v: "aprovado" | "faturado" | "ambos") =>
+      atualizarLoja({ data: { olist_gatilho_pontuacao: v } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Gatilho de pontuação atualizado.");
     },
     onError: (e) => toast.error((e as Error).message),
   });
