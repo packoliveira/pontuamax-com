@@ -1136,6 +1136,7 @@ export type Database = {
           nps_ask_comment: boolean
           nps_enabled: boolean
           nps_template: string
+          olist_gatilho_pontuacao: string
           owner_id: string
           percentual_cashback: number
           plan: string
@@ -1218,6 +1219,7 @@ export type Database = {
           nps_ask_comment?: boolean
           nps_enabled?: boolean
           nps_template?: string
+          olist_gatilho_pontuacao?: string
           owner_id: string
           percentual_cashback?: number
           plan?: string
@@ -1300,6 +1302,7 @@ export type Database = {
           nps_ask_comment?: boolean
           nps_enabled?: boolean
           nps_template?: string
+          olist_gatilho_pontuacao?: string
           owner_id?: string
           percentual_cashback?: number
           plan?: string

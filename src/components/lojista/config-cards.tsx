@@ -46,11 +46,13 @@ export function IntegracoesCard({
   slug,
   secret,
   lastAt,
+  gatilho,
 }: {
   storeId: string;
   slug: string;
   secret: string | null;
   lastAt: string | null;
+  gatilho: "aprovado" | "faturado" | "ambos" | null;
 }) {
   const qc = useQueryClient();
   const origin =
@@ -89,6 +91,22 @@ export function IntegracoesCard({
     onError: (e) => toast.error((e as Error).message),
   });
 
+  const [gatilhoLocal, setGatilhoLocal] = useState<"aprovado" | "faturado" | "ambos">(
+    gatilho ?? "ambos",
+  );
+  useEffect(() => {
+    setGatilhoLocal(gatilho ?? "ambos");
+  }, [gatilho]);
+  const salvarGatilho = useMutation({
+    mutationFn: (v: "aprovado" | "faturado" | "ambos") =>
+      atualizarLoja({ data: { olist_gatilho_pontuacao: v } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-store"] });
+      toast.success("Gatilho de pontuação atualizado.");
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
   const copy = (v: string, label: string) => {
     navigator.clipboard.writeText(v).then(() => toast.success(`${label} copiado`));
   };
@@ -115,6 +133,41 @@ export function IntegracoesCard({
           lançada automaticamente no PontuaMax, creditando pontos/cashback para o cliente sem
           precisar digitar em <em>Lançar Venda</em>.
         </p>
+
+        <div className="rounded-xl border border-[#E5E7EB] p-3 space-y-2">
+          <Label className="text-[#0F172A]">Quando pontuar as vendas da Olist?</Label>
+          <RadioGroup
+            value={gatilhoLocal}
+            onValueChange={(v) => {
+              const nv = v as "aprovado" | "faturado" | "ambos";
+              setGatilhoLocal(nv);
+              salvarGatilho.mutate(nv);
+            }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-2"
+          >
+            {[
+              { v: "aprovado", t: "Quando aprovado", d: "Assim que o pedido vira 'aprovado' na Olist (sem NF-e)." },
+              { v: "faturado", t: "Quando faturado", d: "Só depois da NF-e emitida (mais seguro contra cancelamentos)." },
+              { v: "ambos", t: "Ambos", d: "Aceita qualquer notificação com valor total no payload." },
+            ].map((opt) => (
+              <label
+                key={opt.v}
+                className={`flex gap-2 rounded-lg border p-2 cursor-pointer text-xs ${
+                  gatilhoLocal === opt.v ? "border-[#2563EB] bg-[#2563EB]/5" : "border-[#E5E7EB]"
+                }`}
+              >
+                <RadioGroupItem value={opt.v} id={`gt-${opt.v}`} className="mt-0.5" />
+                <div>
+                  <div className="font-medium text-[#0F172A]">{opt.t}</div>
+                  <div className="text-[#64748B]">{opt.d}</div>
+                </div>
+              </label>
+            ))}
+          </RadioGroup>
+          {salvarGatilho.isPending && (
+            <p className="text-xs text-[#64748B]">Salvando...</p>
+          )}
+        </div>
 
         <div>
           <Label>URL completa do webhook (Bling)</Label>

@@ -1,0 +1,1 @@
+ALTER TABLE public.stores ADD COLUMN IF NOT EXISTS olist_gatilho_pontuacao TEXT NOT NULL DEFAULT 'ambos' CHECK (olist_gatilho_pontuacao IN ('aprovado','faturado','ambos'));
