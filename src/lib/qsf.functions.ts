@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel, cpfToEmail, gerarVoucher, isValidCPF } from "./qsf-shared";
+import { calcularNivel, cpfToEmail, isValidCPF } from "./qsf-shared";
+import { gerarVoucher } from "./voucher.server";
 import {
   getActiveMultiplier,
   promoSchema,
