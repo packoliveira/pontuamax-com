@@ -29,7 +29,13 @@ type Gatilho = "aprovado" | "faturado" | "ambos";
 function classificarEvento(tipo: string): Gatilho | null {
   const t = tipo.toLowerCase();
   if (!t) return "aprovado"; // payloads sem tipo (nossos testes) → tratamos como aprovado
-  if (t.includes("faturamento") || t.includes("nota_fiscal") || t.includes("nfe")) return "faturado";
+  if (
+    t.includes("faturamento") ||
+    t.includes("faturad") ||
+    t.includes("nota_fiscal") ||
+    t.includes("nfe")
+  )
+    return "faturado";
   if (t.includes("inclusao") || t.includes("aprovad") || t.includes("alteracao_situacao") || t.includes("alteracao_pedido"))
     return "aprovado";
   if (t.includes("cancel") || t.includes("devolucao") || t.includes("estorno")) return null;
@@ -101,7 +107,24 @@ function extrair(p: Record<string, unknown>): Extraido {
     .trim()
     .toLowerCase();
 
-  return { idVenda, valor, cpf, telefone, nome, tipoEvento };
+  // Situação atual do pedido (Olist envia em `dados.codigoSituacao` / `descricaoSituacao`).
+  const situacao = String(
+    root.codigoSituacao ??
+      root.codigo_situacao ??
+      root.descricaoSituacao ??
+      root.descricao_situacao ??
+      root.situacao ??
+      "",
+  )
+    .trim()
+    .toLowerCase();
+
+  // Se a situação for mais específica que o `tipo`, usamos ela para classificar.
+  const tipoFinal = situacao
+    ? `${tipoEvento}|${situacao}`
+    : tipoEvento;
+
+  return { idVenda, valor, cpf, telefone, nome, tipoEvento: tipoFinal };
 }
 
 // ---------- Cálculo de recompensas ----------
