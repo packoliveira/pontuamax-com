@@ -196,57 +196,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
-        let { idVenda, valor, cpf, telefone, nome, tipoEvento } = extractOlistPayload(payload);
+        const { idVenda, valor, cpf, telefone, nome, tipoEvento } = extractOlistPayload(payload);
 
         if (!idVenda)
           return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
-
-        // Se a Olist mandou só notificação (sem valor total), enriquece via
-        // OAuth v3 (mesmo caminho de webhook/olist/v3). Não usamos mais o
-        // token estático v2 na URL — segredo de longa duração vazava em logs.
-        if ((!Number.isFinite(valor) || valor <= 0) && origem === "olist") {
-          try {
-            const cred = await supabaseAdmin
-              .from("erp_credentials")
-              .select("*")
-              .eq("provider", "olist_v3")
-              .eq("store_id", loja.id)
-              .maybeSingle();
-            if (cred.data) {
-              const { refreshAccessToken, fetchPedido } = await import("@/lib/olist.server");
-              let accessToken = cred.data.access_token as string;
-              const expiresAt = new Date(cred.data.expires_at as string).getTime();
-              if (Date.now() > expiresAt - 60_000 && cred.data.refresh_token) {
-                const refreshed = await refreshAccessToken(cred.data.refresh_token as string);
-                accessToken = refreshed.access_token;
-                await supabaseAdmin
-                  .from("erp_credentials")
-                  .update({
-                    access_token: refreshed.access_token,
-                    refresh_token: refreshed.refresh_token,
-                    expires_at: new Date(
-                      Date.now() + refreshed.expires_in * 1000,
-                    ).toISOString(),
-                    last_refresh_at: new Date().toISOString(),
-                    status: "connected",
-                  })
-                  .eq("id", cred.data.id);
-              }
-              const pedido = await fetchPedido(accessToken, idVenda);
-              const pedidoData =
-                (pedido.pedido as Record<string, unknown>) ?? pedido;
-              const full = extractOlistPayload({ pedido: pedidoData });
-              if (Number.isFinite(full.valor) && full.valor > 0) valor = full.valor;
-              if (!cpf && full.cpf) cpf = full.cpf;
-              if (!telefone && full.telefone) telefone = full.telefone;
-              if (!nome || nome === "Cliente") nome = full.nome;
-            }
-            // Se a loja não conectou OAuth v3, segue com o fluxo de "pendente".
-          } catch {
-            // Falha ao enriquecer — cai no fluxo abaixo que cria/atualiza o
-            // cliente como pendente aguardando o valor.
-          }
-        }
 
         if (!cpf) {
           return logAndRespond(
