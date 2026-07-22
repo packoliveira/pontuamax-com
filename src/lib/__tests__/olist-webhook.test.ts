@@ -191,7 +191,7 @@ describe("Fluxo Olist: extract → shouldProcess → computeRewards", () => {
     expect(r.cashback).toBe(7.5);
   });
 
-  it("inclusao_pedido: cliente vinculado, mas NÃO pontua/cashback", () => {
+  it("inclusao_pedido com total no payload: processa normalmente", () => {
     const payload = {
       tipo: "inclusao_pedido",
       pedido: {
@@ -201,9 +201,8 @@ describe("Fluxo Olist: extract → shouldProcess → computeRewards", () => {
       },
     };
     const ext = extractOlistPayload(payload);
-    // Mesmo com valor > 0, o gate barra antes do computeRewards.
-    const gate = shouldProcessOlistEvent("olist", ext.tipoEvento);
-    expect(gate.process).toBe(false);
-    expect(gate.reason).toMatch(/inclusao_pedido/);
+    expect(shouldProcessOlistEvent("olist", ext.tipoEvento).process).toBe(true);
+    const r = computeRewards(ext.valor, loja, 0, 0);
+    expect(r.pontos).toBe(150);
   });
 });
