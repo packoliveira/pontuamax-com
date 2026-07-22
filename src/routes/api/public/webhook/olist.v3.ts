@@ -1,33 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { cpfToEmail } from "@/lib/qsf-shared";
-import { randomBytes } from "crypto";
 
-// Webhook oficial Olist Tiny API V3.
-// URL a registrar no aplicativo Olist:
-//   https://pontuamax.com/api/public/webhook/olist/v3
-// A assinatura HMAC-SHA256 do body cru deve vir no header `X-Olist-Signature`.
-// A rota identifica a loja pela credencial OAuth cujo `account_id` corresponde
-// ao contido no payload.
+// Webhook v3 desativado a pedido do lojista.
+// Só o endpoint legado `/api/public/webhook/olist` está ativo.
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-
-type SituacaoAcao = "credito" | "estorno" | "ignorar";
-function classificarSituacao(s: string): SituacaoAcao {
-  const v = s.toLowerCase();
-  if (v === "faturado" || v === "aprovado" || v === "concluido") return "credito";
-  if (v === "cancelado") return "estorno";
-  return "ignorar";
-}
+const gone = () =>
+  new Response(
+    JSON.stringify({
+      ok: false,
+      error: "endpoint_desativado",
+      message:
+        "Webhook v3 desativado. Use /api/public/webhook/olist?store=<slug>&secret=<...>.",
+    }),
+    { status: 410, headers: { "Content-Type": "application/json" } },
+  );
 
 export const Route = createFileRoute("/api/public/webhook/olist/v3")({
   server: {
     handlers: {
-      GET: async () => json({ status: "ok", endpoint: "olist v3" }),
-      POST: async ({ request }) => {
+      GET: async () => gone(),
+      POST: async () => gone(),
+    },
+  },
+});
         // Rate limit: 60 req/min por IP.
         const { checkRateLimit, getClientIp } = await import("@/lib/rate-limit.server");
         const ip = getClientIp(request);
