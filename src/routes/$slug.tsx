@@ -52,6 +52,7 @@ import {
   Coins,
   Wallet,
   LogOut,
+  Trophy,
   Ticket,
   Share2,
   Gift,
