@@ -29,6 +29,15 @@ type Gatilho = "aprovado" | "faturado" | "ambos";
 function classificarEvento(tipo: string): Gatilho | null {
   const t = tipo.toLowerCase();
   if (!t) return "aprovado"; // payloads sem tipo (nossos testes) → tratamos como aprovado
+  // Eventos de estoque/produto/cadastro não são vendas — ignorar silenciosamente.
+  if (
+    t.includes("estoque") ||
+    t.includes("produto") ||
+    t.includes("preco") ||
+    t.includes("preço") ||
+    t.startsWith("cadastro_")
+  )
+    return null;
   if (
     t.includes("faturamento") ||
     t.includes("faturad") ||
