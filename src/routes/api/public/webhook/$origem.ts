@@ -251,6 +251,88 @@ async function buscarTotalPedidoOlist(idPedido: string, numeroPedido = ""): Prom
   }
 }
 
+function dataTiny(date: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+async function obterPedidoCompletoTiny(token: string, idPedido: string): Promise<TinyPedido | null> {
+  const json = await tinyPost(
+    "pedido.obter.php",
+    new URLSearchParams({ token, id: idPedido, formato: "json" }),
+  );
+  const retorno = json?.retorno as Record<string, unknown> | undefined;
+  return (retorno?.pedido as TinyPedido | undefined) ?? null;
+}
+
+async function buscarPedidosRecentesOlist(): Promise<{ pedidos: TinyPedido[]; motivo?: string }> {
+  const token = process.env.OLIST_API_TOKEN;
+  if (!token) return { pedidos: [], motivo: "OLIST_API_TOKEN não configurado" };
+
+  const agora = new Date();
+  const inicio = new Date(agora.getTime() - 36 * 60 * 60 * 1000);
+  const json = await tinyPost(
+    "pedidos.pesquisa.php",
+    new URLSearchParams({
+      token,
+      formato: "json",
+      dataInicial: dataTiny(inicio),
+      dataFinal: dataTiny(agora),
+    }),
+  );
+  if (json?._http_error) return { pedidos: [], motivo: `pedidos.pesquisa HTTP ${json._http_error}` };
+
+  const retorno = json?.retorno as Record<string, unknown> | undefined;
+  const pedidosRaw = retorno?.pedidos as Array<{ pedido?: TinyPedido }> | undefined;
+  const ids = (pedidosRaw ?? [])
+    .map((item) => String(item.pedido?.id ?? "").trim())
+    .filter(Boolean)
+    .filter((id, index, all) => all.indexOf(id) === index)
+    .slice(0, 25);
+
+  const pedidos: TinyPedido[] = [];
+  for (const id of ids) {
+    const pedido = await obterPedidoCompletoTiny(token, id);
+    if (pedido) pedidos.push(pedido);
+  }
+
+  return {
+    pedidos,
+    motivo: pedidos.length ? undefined : motivoTiny(retorno, "nenhum pedido recente encontrado na API"),
+  };
+}
+
+function eventoPodeSinalizarVenda(tipoEvento: string): boolean {
+  const t = tipoEvento.toLowerCase();
+  return t.includes("estoque") || t.includes("produto") || t.includes("preco") || t.includes("preço");
+}
+
+async function sincronizarPedidosRecentesOlist(request: Request) {
+  const { pedidos, motivo } = await buscarPedidosRecentesOlist();
+  let processadas = 0;
+  let duplicadas = 0;
+  let erros = 0;
+
+  for (const pedido of pedidos) {
+    const syncRequest = new Request(request.url, {
+      method: "POST",
+      headers: new Headers(request.headers),
+      body: JSON.stringify({ tipo: "sincronizacao_api", pedido }),
+    });
+    const response = await handlePost({ request: syncRequest, params: { origem: "olist" } });
+    const body = await response.json().catch(() => ({})) as Record<string, unknown>;
+    if (body.status === "sucesso" && body.duplicated) duplicadas += 1;
+    else if (body.status === "sucesso" && body.message === "venda processada") processadas += 1;
+    else if (body.status === "erro") erros += 1;
+  }
+
+  return { encontrados: pedidos.length, processadas, duplicadas, erros, motivo };
+}
+
 // ---------- Cálculo de recompensas ----------
 
 function calcularRecompensa(
@@ -442,6 +524,13 @@ async function handlePost({
 
         // Ping de conectividade (Olist às vezes envia POST vazio na configuração).
         if (!raw || Object.keys(payload).length === 0) {
+          if (origem === "olist") {
+            const sync = await sincronizarPedidosRecentesOlist(request);
+            return logAndRespond("sucesso", "webhook validado e pedidos recentes verificados", 200, {
+              validation: true,
+              sync,
+            });
+          }
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
@@ -451,6 +540,15 @@ async function handlePost({
           .olist_gatilho_pontuacao ?? "ambos") as Gatilho;
         const evento = classificarEvento(tipoEvento);
         if (!eventoAtendeGatilho(evento, gatilhoLoja)) {
+          if (origem === "olist" && eventoPodeSinalizarVenda(tipoEvento)) {
+            const sync = await sincronizarPedidosRecentesOlist(request);
+            return logAndRespond(
+              "sucesso",
+              `evento "${tipoEvento || "sem tipo"}" ignorado, pedidos recentes verificados pela API`,
+              200,
+              { ignored_event: tipoEvento, gatilho: gatilhoLoja, sync },
+            );
+          }
           return logAndRespond(
             "sucesso",
             `evento "${tipoEvento || "sem tipo"}" ignorado — gatilho da loja é "${gatilhoLoja}"`,
