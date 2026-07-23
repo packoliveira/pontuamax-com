@@ -288,6 +288,30 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         json({ status: "ok", message: "PontuaMax webhook endpoint ativo" }, 200),
 
       POST: async ({ request, params }) => {
+        // Guardião externo: qualquer exceção inesperada retorna 200 vazio
+        // para o ERP (Olist/Tiny/Bling) — nunca deixar vazar 5xx, senão
+        // eles desativam o webhook por "erros consecutivos".
+        try {
+          return await handlePost({ request, params });
+        } catch (e) {
+          console.error("[webhook] exceção não tratada:", (e as Error).message);
+          return json(
+            { status: "erro", message: "erro interno — registrado para análise" },
+            200,
+          );
+        }
+      },
+    },
+  },
+});
+
+async function handlePost({
+  request,
+  params,
+}: {
+  request: Request;
+  params: { origem: string };
+}) {
         // IMPORTANTE: sempre respondemos HTTP 200 para o ERP (Olist/Tiny/Bling).
         // A Olist desativa o webhook após poucos erros consecutivos (não-2xx),
         // então erros de negócio ficam no corpo (`status: "erro"`) e no
@@ -362,6 +386,29 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
               .from("stores")
               .update({ webhook_last_at: new Date().toISOString() })
               .eq("id", loja.id);
+          } else {
+            // Alerta o lojista no painel — throttled 1x a cada 30 min
+            // por loja+origem para não gerar avalanche de notificações.
+            try {
+              const { checkRateLimit } = await import("@/lib/rate-limit.server");
+              const podeNotificar = await checkRateLimit(
+                `webhook_alert:${loja.id}:${origem}`,
+                1,
+                1800,
+              );
+              if (podeNotificar) {
+                const { notifyMerchant } = await import("@/lib/team-helpers.server");
+                await notifyMerchant({
+                  storeId: loja.id,
+                  tipo: "webhook_erro",
+                  titulo: `Erro no webhook (${origem})`,
+                  mensagem: message,
+                  metadata: { origem, ...extra },
+                });
+              }
+            } catch (e) {
+              console.warn("[webhook] falha ao criar alerta:", (e as Error).message);
+            }
           }
           // Sempre HTTP 200 para o ERP não desativar o webhook por
           // "erros consecutivos". O status real vai no corpo.
@@ -552,7 +599,4 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           novo_saldo_pontos: novoPontos,
           novo_saldo_cashback: novoCashback,
         });
-      },
-    },
-  },
-});
+}
