@@ -41,6 +41,16 @@ const ICONS: Record<string, any> = {
 
 export const Route = createFileRoute("/funcionario")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Portal do Vendedor — PontuaMax" },
+      { name: "apple-mobile-web-app-title", content: "PM Vendedor" },
+      { name: "theme-color", content: "#0B132B" },
+    ],
+    links: [
+      { rel: "manifest", href: "/manifest-funcionario.webmanifest" },
+    ],
+  }),
   beforeLoad: async ({ location }) => {
     // rotas públicas dentro do painel do funcionário
     const publicPaths = ["/funcionario/login", "/funcionario/esqueci-senha"];
