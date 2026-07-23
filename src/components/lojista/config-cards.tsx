@@ -58,15 +58,19 @@ export function IntegracoesCard({
   const origin =
     typeof window !== "undefined" ? window.location.origin : "https://pontuamax-com.lovable.app";
   const webhookOrigin =
-    origin.includes("localhost") || origin.includes("id-preview--")
-      ? "https://pontuamax-com.lovable.app"
+    origin.includes("pontuamax.com")
+      ? origin
+      : "https://pontuamax.com";
+  const legacyWebhookOrigin =
+    origin.includes("localhost") || origin.includes("id-preview--") || origin.includes("lovableproject.com")
+      ? "https://pontuamax.com"
       : origin;
   const secretStr = secret ?? "";
   const query = `store=${encodeURIComponent(slug)}&secret=${encodeURIComponent(secretStr)}`;
-  const urlBling = `${webhookOrigin}/api/public/webhook/bling?${query}`;
-  const urlOlist = `${webhookOrigin}/api/public/webhook/olist?${query}`;
-  const headerUrlBling = `${webhookOrigin}/api/public/webhook/bling`;
-  const headerUrlOlist = `${webhookOrigin}/api/public/webhook/olist`;
+  const urlBling = `${legacyWebhookOrigin}/api/public/webhook/bling?${query}`;
+  const urlOlist = `${webhookOrigin}/api/public/olist-vendas?${query}`;
+  const headerUrlBling = `${legacyWebhookOrigin}/api/public/webhook/bling`;
+  const headerUrlOlist = `${webhookOrigin}/api/public/olist-vendas`;
 
   const conectada = !!lastAt && Date.now() - new Date(lastAt).getTime() < 30 * 24 * 60 * 60 * 1000;
 
@@ -184,7 +188,7 @@ export function IntegracoesCard({
           </div>
         </div>
         <div>
-          <Label>URL completa do webhook (Olist)</Label>
+          <Label>Nova URL completa do webhook (Olist vendas)</Label>
           <div className="flex gap-2">
             <Input readOnly value={urlOlist} className="font-mono text-xs" />
             <Button
@@ -196,6 +200,9 @@ export function IntegracoesCard({
               <Copy className="h-4 w-4" />
             </Button>
           </div>
+          <p className="mt-1 text-xs text-[#DC2626]">
+            Use esta URL nova na Olist. Remova/desative a URL antiga em <code>/api/public/webhook/olist</code>.
+          </p>
         </div>
 
         <div>

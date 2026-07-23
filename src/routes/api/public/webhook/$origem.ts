@@ -272,8 +272,10 @@ function calcularRecompensa(
 
 // ---------- Utilitários HTTP ----------
 const CORS = {
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, x-qsf-secret, x-qsf-store",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin, x-qsf-secret, x-qsf-store",
+  "Access-Control-Max-Age": "86400",
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -313,6 +315,15 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
     },
   },
 });
+
+export async function handleOlistWebhookAlias(request: Request) {
+  try {
+    return await handlePost({ request, params: { origem: "olist" } });
+  } catch (e) {
+    console.error("[olist-vendas] exceção não tratada:", (e as Error).message);
+    return json({ status: "erro", message: "erro interno — registrado para análise" }, 200);
+  }
+}
 
 async function handlePost({
   request,
