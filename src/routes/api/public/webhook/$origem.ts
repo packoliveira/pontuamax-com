@@ -599,7 +599,4 @@ async function handlePost({
           novo_saldo_pontos: novoPontos,
           novo_saldo_cashback: novoCashback,
         });
-      },
-    },
-  },
-});
+}
