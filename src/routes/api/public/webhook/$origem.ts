@@ -524,6 +524,13 @@ async function handlePost({
 
         // Ping de conectividade (Olist às vezes envia POST vazio na configuração).
         if (!raw || Object.keys(payload).length === 0) {
+          if (origem === "olist") {
+            const sync = await sincronizarPedidosRecentesOlist(request);
+            return logAndRespond("sucesso", "webhook validado e pedidos recentes verificados", 200, {
+              validation: true,
+              sync,
+            });
+          }
           return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
         }
 
@@ -533,6 +540,15 @@ async function handlePost({
           .olist_gatilho_pontuacao ?? "ambos") as Gatilho;
         const evento = classificarEvento(tipoEvento);
         if (!eventoAtendeGatilho(evento, gatilhoLoja)) {
+          if (origem === "olist" && eventoPodeSinalizarVenda(tipoEvento)) {
+            const sync = await sincronizarPedidosRecentesOlist(request);
+            return logAndRespond(
+              "sucesso",
+              `evento "${tipoEvento || "sem tipo"}" ignorado, pedidos recentes verificados pela API`,
+              200,
+              { ignored_event: tipoEvento, gatilho: gatilhoLoja, sync },
+            );
+          }
           return logAndRespond(
             "sucesso",
             `evento "${tipoEvento || "sem tipo"}" ignorado — gatilho da loja é "${gatilhoLoja}"`,
