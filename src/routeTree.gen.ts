@@ -52,6 +52,7 @@ import { Route as FuncionarioEsqueciSenhaRouteImport } from './routes/funcionari
 import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
 import { Route as AdminPlanosRouteImport } from './routes/admin.planos'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as ApiPublicOlistVendasRouteImport } from './routes/api/public/olist-vendas'
 import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
 import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
 import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
@@ -276,6 +277,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicOlistVendasRoute = ApiPublicOlistVendasRouteImport.update({
+  id: '/api/public/olist-vendas',
+  path: '/api/public/olist-vendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWidgetSlugRoute = ApiPublicWidgetSlugRouteImport.update({
   id: '/api/public/widget/$slug',
   path: '/api/public/widget/$slug',
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/olist-vendas': typeof ApiPublicOlistVendasRoute
   '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -416,6 +423,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/funcionario': typeof FuncionarioIndexRoute
   '/lojista': typeof LojistaIndexRoute
+  '/api/public/olist-vendas': typeof ApiPublicOlistVendasRoute
   '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/funcionario/': typeof FuncionarioIndexRoute
   '/lojista/': typeof LojistaIndexRoute
+  '/api/public/olist-vendas': typeof ApiPublicOlistVendasRoute
   '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
   '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
@@ -525,6 +534,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/funcionario/'
     | '/lojista/'
+    | '/api/public/olist-vendas'
     | '/api/public/hooks/anonimizar-logs-antigos'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -575,6 +585,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/funcionario'
     | '/lojista'
+    | '/api/public/olist-vendas'
     | '/api/public/hooks/anonimizar-logs-antigos'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -628,6 +639,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/funcionario/'
     | '/lojista/'
+    | '/api/public/olist-vendas'
     | '/api/public/hooks/anonimizar-logs-antigos'
     | '/api/public/hooks/campanhas-agendadas'
     | '/api/public/hooks/expirar-pontos'
@@ -649,6 +661,7 @@ export interface RootRouteChildren {
   NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
   ValeCodigoRoute: typeof ValeCodigoRoute
+  ApiPublicOlistVendasRoute: typeof ApiPublicOlistVendasRoute
   ApiPublicHooksAnonimizarLogsAntigosRoute: typeof ApiPublicHooksAnonimizarLogsAntigosRoute
   ApiPublicHooksCampanhasAgendadasRoute: typeof ApiPublicHooksCampanhasAgendadasRoute
   ApiPublicHooksExpirarPontosRoute: typeof ApiPublicHooksExpirarPontosRoute
@@ -962,6 +975,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/olist-vendas': {
+      id: '/api/public/olist-vendas'
+      path: '/api/public/olist-vendas'
+      fullPath: '/api/public/olist-vendas'
+      preLoaderRoute: typeof ApiPublicOlistVendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/widget/$slug': {
       id: '/api/public/widget/$slug'
       path: '/api/public/widget/$slug'
@@ -1125,6 +1145,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
   ValeCodigoRoute: ValeCodigoRoute,
+  ApiPublicOlistVendasRoute: ApiPublicOlistVendasRoute,
   ApiPublicHooksAnonimizarLogsAntigosRoute:
     ApiPublicHooksAnonimizarLogsAntigosRoute,
   ApiPublicHooksCampanhasAgendadasRoute: ApiPublicHooksCampanhasAgendadasRoute,
