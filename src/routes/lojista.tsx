@@ -5,6 +5,16 @@ import { usePanelTheme } from "@/hooks/use-panel-theme";
 
 export const Route = createFileRoute("/lojista")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Painel do Lojista — PontuaMax" },
+      { name: "apple-mobile-web-app-title", content: "PM Lojista" },
+      { name: "theme-color", content: "#0B132B" },
+    ],
+    links: [
+      { rel: "manifest", href: "/manifest-lojista.webmanifest" },
+    ],
+  }),
   beforeLoad: async ({ location }) => {
     const publicos = ["/lojista/login", "/lojista/onboarding"];
     if (publicos.includes(location.pathname)) return;

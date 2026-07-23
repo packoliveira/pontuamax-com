@@ -10,6 +10,16 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Painel Master — PontuaMax" },
+      { name: "apple-mobile-web-app-title", content: "PM Admin" },
+      { name: "theme-color", content: "#0B132B" },
+    ],
+    links: [
+      { rel: "manifest", href: "/manifest-admin.webmanifest" },
+    ],
+  }),
   beforeLoad: async ({ location }) => {
     // /admin/login é público
     if (location.pathname === "/admin/login") return;
