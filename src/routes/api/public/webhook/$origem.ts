@@ -288,9 +288,14 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         json({ status: "ok", message: "PontuaMax webhook endpoint ativo" }, 200),
 
       POST: async ({ request, params }) => {
+        // IMPORTANTE: sempre respondemos HTTP 200 para o ERP (Olist/Tiny/Bling).
+        // A Olist desativa o webhook após poucos erros consecutivos (não-2xx),
+        // então erros de negócio ficam no corpo (`status: "erro"`) e no
+        // `integration_logs` — nunca no código HTTP.
+        const ok = (body: unknown) => json(body, 200);
         const origem = String(params.origem).toLowerCase();
         if (!["olist", "tiny", "bling", "teste"].includes(origem)) {
-          return json({ error: "origem inválida (use olist|tiny|bling|teste)" }, 404);
+          return ok({ status: "erro", message: "origem inválida (use olist|tiny|bling|teste)" });
         }
 
         // 1) Rate limit: 60 req/min por IP.
@@ -298,10 +303,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         const ip = getClientIp(request);
         const allowed = await checkRateLimit(`webhook:${origem}:${ip}`, 60, 60);
         if (!allowed) {
-          return json(
-            { error: "Muitas tentativas, aguarde um minuto e tente novamente." },
-            429,
-          );
+          return ok({ status: "erro", message: "rate limit — aguarde um minuto" });
         }
 
         // 2) Corpo (aceita vazio como "ping de conectividade").
@@ -310,7 +312,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         try {
           payload = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
         } catch {
-          return json({ error: "JSON inválido" }, 400);
+          return ok({ status: "erro", message: "JSON inválido" });
         }
 
         // 3) Identificação da loja + segredo (via query ou header).
@@ -336,7 +338,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         const q = supabaseAdmin.from("stores").select("*");
         const storeRes = await (isUuid ? q.eq("id", storeRef) : q.eq("slug", storeRef)).maybeSingle();
         const loja = storeRes.data;
-        if (!loja) return json({ error: "loja não encontrada" }, 404);
+        if (!loja) return ok({ status: "erro", message: "loja não encontrada" });
 
         const { getStoreSecrets } = await import("@/lib/store-secrets.server");
         const storeSecrets = await getStoreSecrets(loja.id);
@@ -345,7 +347,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
         const logAndRespond = async (
           status: "sucesso" | "erro",
           message: string,
-          httpStatus: number,
+          _httpStatus: number,
           extra: Record<string, unknown> = {},
         ) => {
           await supabaseAdmin.from("integration_logs").insert({
@@ -361,7 +363,10 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
               .update({ webhook_last_at: new Date().toISOString() })
               .eq("id", loja.id);
           }
-          return json({ status, message, ...extra }, httpStatus);
+          // Sempre HTTP 200 para o ERP não desativar o webhook por
+          // "erros consecutivos". O status real vai no corpo.
+          void _httpStatus;
+          return json({ status, message, ...extra }, 200);
         };
 
         if (!secret || !safeEqual(secret, storeSecrets.webhook_secret ?? "")) {
