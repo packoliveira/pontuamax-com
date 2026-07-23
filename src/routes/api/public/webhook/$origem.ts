@@ -436,10 +436,6 @@ async function handlePost({
 
         // 4) Extração + gatilho configurado.
         const { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento } = extrair(payload);
-        if (!idVenda) {
-          return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
-        }
-
         const gatilhoLoja = ((loja as { olist_gatilho_pontuacao?: string })
           .olist_gatilho_pontuacao ?? "ambos") as Gatilho;
         const evento = classificarEvento(tipoEvento);
@@ -450,6 +446,10 @@ async function handlePost({
             200,
             { ignored_event: tipoEvento, gatilho: gatilhoLoja },
           );
+        }
+
+        if (!idVenda) {
+          return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
         }
 
         if (!cpf || cpf.length !== 11) {
