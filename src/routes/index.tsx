@@ -76,7 +76,7 @@ function Index() {
             <h1 className="font-display text-[54px] leading-[0.92] tracking-[-0.035em] sm:text-[76px] md:text-[92px] lg:text-[108px]">
               Fidelize clientes
               <br />
-              <span className="italic text-white/70">e venda mais</span>
+              <span className="text-white/70">e venda mais</span>
               <br />
               <span className="relative inline-block">
                 todos os meses.
@@ -144,7 +144,7 @@ function Index() {
         {/* Faixa editorial — frase única de posicionamento */}
         <div className="border-t border-white/10">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between md:py-12">
-            <p className="font-display text-2xl italic leading-tight text-white/85 sm:text-3xl md:text-[34px]">
+            <p className="font-display text-2xl leading-tight text-white/85 sm:text-3xl md:text-[34px]">
               "A gente parou de dar desconto — e faturou mais."
             </p>
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-white/40">
@@ -178,7 +178,7 @@ function Index() {
                 ].map((n) => (
                   <span
                     key={`${r}-${n}`}
-                    className="font-display text-2xl italic tracking-tight text-[#0B0F1A]/55"
+                    className="font-display text-2xl tracking-tight text-[#0B0F1A]/55"
                   >
                     {n}
                   </span>
@@ -205,8 +205,8 @@ function Index() {
             </div>
             <div className="md:col-span-9">
               <h2 className="font-display text-[44px] leading-[1.02] tracking-[-0.02em] text-[#0B0F1A] sm:text-6xl md:text-[80px]">
-                Desconto <em className="text-[#0B0F1A]/50">gasta</em> caro.<br />
-                Fidelidade <em className="text-[#14CBA8]">rende</em> sempre.
+                Desconto <span className="text-[#0B0F1A]/50">gasta</span> caro.<br />
+                Fidelidade <span className="text-[#14CBA8]">rende</span> sempre.
               </h2>
               <div className="mt-10 grid gap-8 border-t border-black/10 pt-8 text-[15px] leading-relaxed text-[#0B0F1A]/70 sm:grid-cols-2 md:text-base">
                 <p>
@@ -283,9 +283,9 @@ function Index() {
           <div className="grid gap-12 md:grid-cols-12 md:items-end md:gap-6">
             <div className="md:col-span-8">
               <h2 className="font-display text-[52px] leading-[0.98] tracking-[-0.03em] text-[#0B0F1A] sm:text-7xl md:text-[104px]">
-                Comece <em className="text-[#0B0F1A]/50">hoje</em>.
+                Comece <span className="text-[#0B0F1A]/50">hoje</span>.
                 <br />
-                Veja seu cliente <em className="text-[#14CBA8]">voltar</em>.
+                Veja seu cliente <span className="text-[#14CBA8]">voltar</span>.
               </h2>
             </div>
             <div className="md:col-span-4 md:pb-4">
