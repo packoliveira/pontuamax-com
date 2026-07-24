@@ -138,65 +138,84 @@ function Index() {
             <div className="flex justify-center md:justify-end">
               <PhoneMockup />
             </div>
+          </div>
+        </div>
 
-            {/* Card 1 — Campanha ativa (topo esquerdo) */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -left-6 top-10 hidden w-[248px] rounded-[18px] border border-white/10 bg-[#0B1220]/95 p-4 text-left shadow-[0_30px_60px_-25px_rgba(0,0,0,0.7)] backdrop-blur md:block lg:-left-14 lg:w-[264px] animate-[float-card-left_7s_ease-in-out_infinite]"
-            >
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#14CBA8]/12 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-[#14CBA8]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8]" />
-                  Campanha ativa
-                </span>
-                <span className="text-[10px] text-white/40">agora</span>
-              </div>
-              <div className="mt-3 flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/8 text-[11px] font-semibold text-white/75">
-                  MC
-                </div>
-                <div className="leading-tight">
-                  <p className="text-[13px] font-semibold text-white">Mariana C.</p>
-                  <p className="text-[10.5px] text-white/45">cliente há 4 meses</p>
-                </div>
-              </div>
-              <div className="mt-3 rounded-xl bg-white/[0.04] px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-white/40">Benefício enviado</p>
-                <p className="mt-0.5 text-[15px] font-semibold text-white">
-                  Cashback de <span className="text-[#14CBA8]">R$ 18</span>
+        {/* Seção — Campanha em tempo real */}
+        <div className="border-t border-white/10">
+          <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-20">
+            <div className="mb-10 flex flex-col gap-3 md:mb-12 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#14CBA8]">
+                  Campanha em tempo real
                 </p>
+                <h2 className="mt-3 max-w-xl font-display text-3xl leading-[1.1] text-white sm:text-4xl md:text-[42px]">
+                  Do envio ao retorno em vendas — no mesmo dia.
+                </h2>
               </div>
-              <div className="mt-3 flex items-center gap-1.5 text-[10.5px] text-white/45">
-                <span className="h-1 w-1 rounded-full bg-white/40" />
-                Entregue há 12 min
-              </div>
+              <p className="max-w-sm text-[13.5px] leading-relaxed text-white/55">
+                Um recorte real de uma campanha automática: quem recebeu, o que recebeu e o que voltou pro seu caixa.
+              </p>
             </div>
 
-            {/* Card 2 — Retorno da campanha (canto inferior direito) */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -bottom-8 right-0 hidden w-[228px] rounded-[18px] bg-white p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.35)] ring-1 ring-black/5 md:block lg:-right-8 lg:w-[248px] animate-[float-card-right_9s_ease-in-out_infinite]"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                  Retorno da campanha
-                </p>
-                <span className="text-[10px] text-neutral-400">hoje</span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="font-display text-[30px] font-bold leading-none tracking-tight text-neutral-900">
-                  3
-                </span>
-                <span className="text-[12px] text-neutral-500">clientes voltaram</span>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-neutral-50 px-2.5 py-2">
-                  <p className="text-[9.5px] uppercase tracking-[0.12em] text-neutral-500">Vendas</p>
-                  <p className="mt-0.5 text-[13px] font-semibold text-neutral-900">+R$ 312</p>
+            <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+              {/* Card 1 — Campanha ativa */}
+              <div className="rounded-[22px] border border-white/10 bg-[#0B1220]/80 p-6 backdrop-blur">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#14CBA8]/12 px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#14CBA8]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8]" />
+                    Campanha ativa
+                  </span>
+                  <span className="text-[11px] text-white/40">agora</span>
                 </div>
-                <div className="rounded-lg bg-neutral-50 px-2.5 py-2">
-                  <p className="text-[9.5px] uppercase tracking-[0.12em] text-neutral-500">Ticket</p>
-                  <p className="mt-0.5 text-[13px] font-semibold text-emerald-600">+14%</p>
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-[13px] font-semibold text-white/80">
+                    MC
+                  </div>
+                  <div className="leading-tight">
+                    <p className="text-[15px] font-semibold text-white">Mariana C.</p>
+                    <p className="text-[11.5px] text-white/45">cliente há 4 meses</p>
+                  </div>
+                </div>
+                <div className="mt-5 rounded-xl bg-white/[0.04] px-4 py-3.5">
+                  <p className="text-[10.5px] uppercase tracking-[0.16em] text-white/40">Benefício enviado</p>
+                  <p className="mt-1 font-display text-xl font-semibold text-white">
+                    Cashback de <span className="text-[#14CBA8]">R$ 18</span>
+                  </p>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-[11.5px] text-white/45">
+                  <span className="h-1 w-1 rounded-full bg-white/40" />
+                  Entregue há 12 min
+                </div>
+              </div>
+
+              {/* Card 2 — Retorno da campanha */}
+              <div className="rounded-[22px] bg-white p-6 ring-1 ring-black/5 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.4)]">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-neutral-500">
+                    Retorno da campanha
+                  </p>
+                  <span className="text-[11px] text-neutral-400">hoje</span>
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="font-display text-[44px] font-bold leading-none tracking-tight text-neutral-900">
+                    3
+                  </span>
+                  <span className="text-[13px] text-neutral-500">clientes voltaram</span>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-neutral-50 px-3.5 py-3">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Vendas</p>
+                    <p className="mt-1 font-display text-lg font-semibold text-neutral-900">+R$ 312</p>
+                  </div>
+                  <div className="rounded-xl bg-neutral-50 px-3.5 py-3">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Ticket médio</p>
+                    <p className="mt-1 font-display text-lg font-semibold text-emerald-600">+14%</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-[11.5px] text-neutral-500">
+                  <span className="h-1 w-1 rounded-full bg-neutral-400" />
+                  Fechamento parcial · 18h20
                 </div>
               </div>
             </div>
