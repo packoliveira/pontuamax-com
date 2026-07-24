@@ -269,13 +269,13 @@ function AppSidebar({
         <button
           type="button"
           onClick={onOpenSearch}
-          aria-label="Buscar no FitGestor"
+          aria-label="Buscar no PontuaMax"
           className={`flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors ${collapsed ? "h-9 justify-center" : "h-9.5"}`}
         >
           <Search className="h-4 w-4 shrink-0 text-slate-400" />
           {!collapsed && (
             <>
-              <span className="flex-1 text-left truncate">Buscar no FitGestor</span>
+              <span className="flex-1 text-left truncate">Buscar no PontuaMax</span>
               <kbd className="hidden md:inline-flex h-5 items-center rounded-md border border-slate-200 bg-white px-1.5 text-[10px] font-mono font-bold text-slate-500">⌘K</kbd>
             </>
           )}
@@ -412,7 +412,7 @@ function AppSidebar({
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-slate-800 truncate leading-tight">{userEmail || "Operador"}</p>
-                  <p className="text-xs text-slate-400 font-normal truncate leading-tight">FitGestor ERP</p>
+                  <p className="text-xs text-slate-400 font-normal truncate leading-tight">PontuaMax SaaS</p>
                 </div>
                 <ChevronDown className="h-3.5 w-3.5 shrink-0 text-slate-400" />
               </button>
@@ -637,10 +637,10 @@ export function AppShell({ children, userEmail }: { children: ReactNode; userEma
               type="button"
               onClick={() => setSearchOpen(true)}
               className="hidden md:flex relative flex-1 max-w-md h-10 items-center rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/50 pl-9 pr-14 text-left text-xs font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all shadow-2xs"
-              aria-label="Buscar no FitGestor"
+              aria-label="Buscar no PontuaMax"
             >
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <span>Buscar no FitGestor (módulos, clientes, produtos)…</span>
+              <span>Buscar no PontuaMax (módulos, clientes, pontos)…</span>
               <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 hidden lg:inline-flex h-6 items-center rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-1.5 text-[10px] font-mono font-bold text-slate-600 dark:text-slate-300">Ctrl+K</kbd>
             </button>
 
@@ -649,8 +649,8 @@ export function AppShell({ children, userEmail }: { children: ReactNode; userEma
             {/* Quick Cash Status Badge */}
             <button
               type="button"
-              onClick={() => navigate({ to: "/vendas/pdv" })}
-              title="Ir para a Frente de Caixa (PDV)"
+              onClick={() => navigate({ to: "/caixa" })}
+              title="Ir para a Frente de Caixa"
               className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-2xs ${
                 cashShiftStatus === "open"
                   ? "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300"

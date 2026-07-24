@@ -1,66 +1,52 @@
-import { cn } from "@/lib/utils";
-import iconAsset from "@/assets/fitgestor-icon.png.asset.json";
-import lockupAsset from "@/assets/fitgestor-lockup.png.asset.json";
-
 /**
- * Marca oficial do sistema — FitGestor.
- * Desenvolvido pela Quero Ser Fit®.
+ * PontuaMax — Brand Logo Component
+ * Exibe o logotipo e a marca do PontuaMax SaaS Whitelabel.
  */
-export function BrandMark({
-  size = 36,
-  className,
-}: {
+import type { HTMLAttributes } from "react";
+
+interface BrandMarkProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
-  className?: string;
-}) {
-  return (
-    <img
-      src={iconAsset.url}
-      alt="FitGestor"
-      width={size}
-      height={size}
-      className={cn("shrink-0 object-contain", className)}
-      style={{ width: size, height: size }}
-    />
-  );
+  onDark?: boolean;
 }
 
-export function BrandLockup({
-  size = "md",
-  align = "left",
-  onDark = false,
-  showSignature = false,
-  className,
-}: {
+interface BrandLockupProps extends HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg";
   align?: "left" | "center";
   onDark?: boolean;
-  showSignature?: boolean;
-  className?: string;
-}) {
-  const height = size === "lg" ? 52 : size === "sm" ? 28 : 38;
-  const sigCls = size === "lg" ? "text-[11.5px]" : size === "sm" ? "text-[10.5px]" : "text-[11px]";
-  const muted = onDark ? "text-white/60" : "text-muted-foreground";
+}
+
+/** Ícone quadrado com as iniciais PM */
+export function BrandMark({ size = 32, className, onDark, ...props }: BrandMarkProps) {
+  return (
+    <div
+      {...props}
+      className={className}
+      style={{ width: size, height: size, ...props.style }}
+    >
+      <div
+        style={{ width: size, height: size }}
+        className="flex items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 font-black text-white shadow-lg select-none"
+      >
+        <span style={{ fontSize: size * 0.38 }}>PM</span>
+      </div>
+    </div>
+  );
+}
+
+/** Logotipo completo: ícone + nome */
+export function BrandLockup({ size = "md", align = "left", onDark, className, ...props }: BrandLockupProps) {
+  const iconSize = size === "lg" ? 40 : size === "md" ? 32 : 24;
+  const textClass = size === "lg" ? "text-2xl" : size === "md" ? "text-xl" : "text-base";
 
   return (
     <div
-      className={cn(
-        "flex items-center gap-2",
-        align === "center" && "flex-col text-center gap-2",
-        className,
-      )}
+      {...props}
+      className={`flex items-center gap-2.5 ${align === "center" ? "justify-center" : ""} ${className ?? ""}`}
     >
-      <img
-        src={lockupAsset.url}
-        alt="FitGestor"
-        style={{ height, width: "auto" }}
-        className={cn("object-contain", onDark && "brightness-0 invert")}
-      />
-      {showSignature && (
-        <p className={cn("mt-1 font-medium", sigCls, muted)}>
-          Desenvolvido pela Quero Ser Fit<sup className="text-[0.6em]">®</sup>
-        </p>
-      )}
+      <BrandMark size={iconSize} />
+      <span className={`font-extrabold tracking-tight ${textClass} ${onDark ? "text-white" : "text-slate-900"}`}>
+        Pontua<span className="text-indigo-400">Max</span>
+      </span>
     </div>
   );
 }

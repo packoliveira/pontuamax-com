@@ -1,25 +1,38 @@
-import { supabase } from "@/integrations/supabase/client";
+/**
+ * erp.ts — Utilitários genéricos de formatação (PontuaMax)
+ * Apenas helpers de data/moeda usados nas rotas ativas.
+ */
 
-export async function currentOrgId(): Promise<string | null> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase.from("profiles").select("organization_id").eq("id", user.id).maybeSingle();
-  return data?.organization_id ?? null;
-}
-
-export function formatBRL(value: number | null | undefined) {
-  if (value == null) return "—";
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
-}
-
-export function formatDateTime(value: string | Date | null | undefined) {
+export function formatDateTime(value: string | null | undefined): string {
   if (!value) return "—";
-  const d = typeof value === "string" ? new Date(value) : value;
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(d);
+  try {
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
 }
 
-export const SIZE_SUGGESTIONS = ["PP", "P", "M", "G", "GG", "XG", "G1", "G2", "G3", "Único"];
+export function formatDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  try {
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
 
-// Valor oficial persistido em product_variants.size para produtos sem grade.
-export const SIZE_SINGLE = "ÚNICO";
-export const SIZE_SINGLE_LABEL = "Tamanho único";
+/**
+ * currentOrgId — stub de compatibilidade.
+ * A organização real é resolvida pelo Supabase RLS automaticamente.
+ * Manter apenas para compatibilidade com imports legados durante a transição.
+ */
+export async function currentOrgId(): Promise<string | null> {
+  const { createClient } = await import("@/integrations/supabase/client");
+  const { data } = await (createClient as any).auth.getUser();
+  return (data?.user as any)?.user_metadata?.organization_id ?? null;
+}

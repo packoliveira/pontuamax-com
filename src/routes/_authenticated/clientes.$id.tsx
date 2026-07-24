@@ -40,7 +40,7 @@ function ClienteDetalhe() {
         }
       />
 
-      <Tabs value={tab} onValueChange={(v) => navigate({ search: { tab: v as "dados" | "credito" } })}>
+      <Tabs value={tab} onValueChange={(v) => navigate({ search: { tab: v as "dados" | "credito" } as any })}>
         <TabsList>
           <TabsTrigger value="dados">Dados</TabsTrigger>
           <TabsTrigger value="credito">Crédito da loja</TabsTrigger>

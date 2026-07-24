@@ -436,10 +436,10 @@ function ImportPage() {
               <Button variant="outline" onClick={() => { setStep(1); setResult(null); setRows([]); setHeaders([]); setFileName(""); }}>
                 Nova importação
               </Button>
-              {kind === "products" && <Button asChild><Link to="/produtos">Ver produtos</Link></Button>}
+              {kind === "products" && <Button asChild><Link to="/clientes">Ver clientes</Link></Button>}
               {kind === "clients" && <Button asChild><Link to="/clientes">Ver clientes</Link></Button>}
-              {kind === "suppliers" && <Button asChild><Link to="/fornecedores">Ver fornecedores</Link></Button>}
-              {kind === "stock" && <Button asChild><Link to="/estoque">Ver estoque</Link></Button>}
+              {kind === "suppliers" && <Button asChild><Link to="/dashboard">Ver dashboard</Link></Button>}
+              {kind === "stock" && <Button asChild><Link to="/dashboard">Ver dashboard</Link></Button>}
             </div>
           </CardContent>
         </Card>

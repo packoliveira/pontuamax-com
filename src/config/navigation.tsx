@@ -1,16 +1,28 @@
 import {
-  LayoutDashboard, Package, Boxes, ArrowDownToLine, ClipboardList, Tag,
-  Users, ShieldCheck, Truck, FolderTree, Sparkles, Settings, ScrollText,
-  ShoppingCart, Wallet, Receipt, UserSquare2, RefreshCw, Ticket, PiggyBank, FileBarChart,
-  MapPin, AlertTriangle, Rocket, MessageCircle, Home, Briefcase, Trophy, Upload, BarChart3, FileCode,
+  LayoutDashboard, Gift, Wallet, Users, Settings, Award, ShieldCheck,
+  Store, QrCode, Sparkles, UserSquare2, RefreshCw, Ticket, PiggyBank,
+  FileBarChart, Home, Briefcase, Trophy, Upload, BarChart3, Sliders
 } from "lucide-react";
 import type { ComponentType } from "react";
 
 export type Workspace = "admin" | "employee" | "courier";
 
 export type NavGroup =
-  | "Início" | "Cadastros" | "Suprimentos" | "Vendas"
-  | "Entregas" | "Relatórios" | "Configurações";
+  | "Início" | "Fidelidade & Operação" | "Equipe & Acessos" | "Configurações";
+
+export const NAV_GROUPS: NavGroup[] = [
+  "Início",
+  "Fidelidade & Operação",
+  "Equipe & Acessos",
+  "Configurações"
+];
+
+export const NAV_GROUP_META: Record<NavGroup, { label: string; description?: string; icon?: any }> = {
+  "Início": { label: "Início", description: "Métricas e resumo do sistema" },
+  "Fidelidade & Operação": { label: "Fidelidade & Operação", description: "Caixa, vitrine pública e recompensas" },
+  "Equipe & Acessos": { label: "Equipe & Acessos", description: "Gestão de funcionários e cargos" },
+  "Configurações": { label: "Configurações", description: "Ajustes whitelabel e integrações" },
+};
 
 export type NavItem = {
   id: string;
@@ -23,310 +35,182 @@ export type NavItem = {
   priority?: number;
   description?: string;
   mobile?: boolean;
-  /** Show in "Menu essencial" (first-run compact view). */
   essential?: boolean;
-  /** Only show in the sidebar for courier-context users (never admin). */
   courierOnly?: boolean;
-  /** Extra terms for the navigation search. */
   keywords?: string[];
 };
 
 export const NAV_ITEMS: NavItem[] = [
   // ── Início ────────────────────────────────────────────────
-  { id: "dashboard", title: "Visão geral", url: "/dashboard", icon: Home,
-    group: "Início", workspaces: ["admin"], priority: 100, mobile: true, essential: true,
-    description: "Indicadores e resumo da operação.",
-    keywords: ["dashboard","home","indicadores","kpi","resumo"] },
-  { id: "trabalho", title: "Área de trabalho", url: "/trabalho", icon: Briefcase,
-    group: "Início", priority: 90, mobile: true, essential: true,
-    description: "Atalhos para as tarefas do dia.",
-    keywords: ["atalhos","tarefas","trabalho","hoje"] },
-
-  // ── Vendas ────────────────────────────────────────────────
-  { id: "frente-de-caixa", title: "Frente de Caixa", url: "/vendas/pdv", icon: ShoppingCart,
-    perm: "pos.view", group: "Vendas", workspaces: ["employee","admin"], priority: 110, mobile: true,
+  {
+    id: "dashboard",
+    title: "Dashboard & ROI",
+    url: "/dashboard",
+    icon: Home,
+    group: "Início",
+    workspaces: ["admin"],
+    priority: 100,
+    mobile: true,
     essential: true,
-    description: "Nova tela de PDV com bipador, troca rápida e comprovante WhatsApp.",
-    keywords: ["pdv","venda","caixa","balcao","bipador","scanner","frente de caixa","checkout"] },
-  { id: "pdv", title: "PDV (clássico)", url: "/pdv", icon: ShoppingCart, perm: "pos.view",
-    group: "Vendas", workspaces: ["employee","admin"], priority: 100, mobile: true, essential: false,
-    description: "Registre uma nova venda no balcão (versão anterior).",
-    keywords: ["vender","venda","balcao","caixa registradora","cupom"] },
+    description: "Indicadores de retenção, receita de fidelizados e moedas emitidas.",
+    keywords: ["dashboard", "home", "indicadores", "kpi", "roi", "fidelidade"]
+  },
 
-  { id: "caixa", title: "Caixa", url: "/caixa", icon: Wallet,
-    perm: ["pos.open_cash","pos.close_cash","pos.view"],
-    group: "Vendas", workspaces: ["employee","admin"], priority: 90,
-    description: "Abertura, fechamento e movimentos de caixa.",
-    keywords: ["caixa","abrir","fechar","sangria","suprimento"] },
-  { id: "vendas", title: "Vendas", url: "/vendas", icon: Receipt,
-    group: "Vendas", workspaces: ["employee","admin"], priority: 70,
-    description: "Histórico das vendas realizadas.",
-    keywords: ["vendas","historico","pedidos","cupons"] },
-  { id: "clientes", title: "Clientes", url: "/clientes", icon: UserSquare2,
-    group: "Cadastros", workspaces: ["employee","admin"], priority: 100, essential: true,
-    description: "Cadastro e histórico das clientes.",
-    keywords: ["clientes","cliente","cadastro","cpf"] },
-  { id: "trocas", title: "Trocas", url: "/trocas", icon: RefreshCw, perm: "exchanges.view",
-    group: "Vendas", workspaces: ["employee","admin"], priority: 50,
-    description: "Registre trocas, devoluções e reembolsos.",
-    keywords: ["troca","devolucao","reembolso","estorno"] },
-  { id: "pos-venda", title: "Pós-venda", url: "/pos-venda", icon: MessageCircle,
-    perm: "post_sale.view", group: "Vendas", workspaces: ["employee","admin"], priority: 40,
-    mobile: true, essential: true,
-    description: "Prepare e envie mensagens de acompanhamento às clientes.",
-    keywords: ["mensagem","whatsapp","pos venda","acompanhamento","follow up"] },
-  { id: "vales", title: "Vales-troca", url: "/trocas/vales", icon: Ticket, perm: "vouchers.view",
-    group: "Vendas", workspaces: ["admin"], priority: 30,
-    description: "Vales de troca emitidos e disponíveis.",
-    keywords: ["vale","voucher","vale troca","credito"] },
-  { id: "creditos", title: "Créditos", url: "/trocas/creditos", icon: PiggyBank, perm: "credits.view",
-    group: "Vendas", workspaces: ["admin"], priority: 20,
-    description: "Saldo de crédito por cliente.",
-    keywords: ["credito","saldo","cliente","vale"] },
-
-  // ── Estoque ───────────────────────────────────────────────
-  { id: "produtos", title: "Produtos", url: "/produtos", icon: Package, perm: "product.view",
-    group: "Cadastros", workspaces: ["employee","admin"], priority: 90, essential: true,
-    description: "Catálogo de produtos, cores e tamanhos.",
-    keywords: ["produto","catalogo","sku","cadastro"] },
-  { id: "fornecedores", title: "Fornecedores", url: "/fornecedores", icon: Truck, perm: "supplier.manage",
-    group: "Cadastros", workspaces: ["admin"], priority: 70,
-    description: "Cadastro de fornecedores.",
-    keywords: ["fornecedor","supplier"] },
-  { id: "categorias", title: "Categorias", url: "/categorias", icon: FolderTree, perm: "category.manage",
-    group: "Cadastros", workspaces: ["admin"], priority: 60,
-    description: "Categorias de produtos.",
-    keywords: ["categoria"] },
-  { id: "marcas", title: "Marcas", url: "/marcas", icon: Sparkles, perm: "brand.manage",
-    group: "Cadastros", workspaces: ["admin"], priority: 50,
-    description: "Marcas de produtos.",
-    keywords: ["marca","brand"] },
-
-  // ── Suprimentos (entradas, estoque, etiquetas) ────────────
-  { id: "estoque", title: "Estoque", url: "/estoque", icon: Boxes, perm: "stock.view",
-    group: "Suprimentos", workspaces: ["employee","admin"], priority: 100, essential: true,
-    description: "Saldo atual por SKU e variação.",
-    keywords: ["estoque","saldo","inventario","sku"] },
-  { id: "recebimentos", title: "Entrada de mercadoria", url: "/estoque/recebimentos", icon: ArrowDownToLine,
-    perm: "goods_receipt.create", group: "Suprimentos", workspaces: ["employee","admin"], priority: 90,
+  // ── Fidelidade & Operação ─────────────────────────────────
+  {
+    id: "vitrine",
+    title: "Vitrine do Cliente",
+    url: "/$slug",
+    icon: Store,
+    group: "Fidelidade & Operação",
+    workspaces: ["employee", "admin"],
+    priority: 100,
+    mobile: true,
     essential: true,
-    description: "Conte, registre e dê entrada nas peças recebidas.",
-    keywords: ["receber","recebimento","mercadoria","nota","fornecedor","contagem"] },
-  { id: "estoque-xml", title: "Entrada via NF-e (XML)", url: "/estoque/entrada-xml", icon: FileCode,
-    perm: "goods_receipt.create", group: "Suprimentos", workspaces: ["employee","admin"], priority: 85,
+    description: "Página pública Whitelabel para resgate de pontos e PWA.",
+    keywords: ["vitrine", "loja", "resgate", "cliente", "pwa"]
+  },
+  {
+    id: "caixa",
+    title: "Frente de Caixa",
+    url: "/caixa",
+    icon: Wallet,
+    group: "Fidelidade & Operação",
+    workspaces: ["employee", "admin"],
+    priority: 90,
+    mobile: true,
     essential: true,
-    description: "Importação automatizada de arquivos XML de Notas Fiscais.",
-    keywords: ["nfe","xml","nota fiscal","entrada","importar xml","fornecedor"] },
-  { id: "estoque-entrada", title: "Entrada rápida", url: "/estoque/entrada", icon: ArrowDownToLine,
-    perm: "goods_receipt.create", group: "Suprimentos", workspaces: ["employee","admin"], priority: 80,
-    description: "Ajuste simples ou reposição rápida.",
-    keywords: ["entrada","ajuste","mercadoria"] },
-  { id: "inventario", title: "Inventário", url: "/estoque/inventario", icon: ClipboardList,
-    perm: "inventory.manage", group: "Suprimentos", workspaces: ["admin"], priority: 70,
-    description: "Contagens e ajustes de inventário.",
-    keywords: ["inventario","contagem","balanco"] },
-  { id: "etiquetas", title: "Etiquetas", url: "/etiquetas", icon: Tag, perm: "label.print",
-    group: "Suprimentos", workspaces: ["employee","admin"], priority: 60,
-    description: "Gere lotes de etiquetas em PDF.",
-    keywords: ["etiqueta","codigo de barras","code128","imprimir"] },
+    description: "Lançamento de compras por CPF e validação de vouchers.",
+    keywords: ["caixa", "balcao", "venda", "pontuar", "voucher", "qr code"]
+  },
+  {
+    id: "premios",
+    title: "Catálogo de Prêmios",
+    url: "/premios",
+    icon: Gift,
+    group: "Fidelidade & Operação",
+    workspaces: ["admin"],
+    priority: 80,
+    mobile: true,
+    essential: true,
+    description: "Cadastre cupons, brindes e recompensas.",
+    keywords: ["premios", "recompensas", "cupons", "brindes", "moedas"]
+  },
+  {
+    id: "clientes",
+    title: "Clientes & Saldos",
+    url: "/clientes",
+    icon: UserSquare2,
+    group: "Fidelidade & Operação",
+    workspaces: ["employee", "admin"],
+    priority: 70,
+    essential: true,
+    description: "Base de consumidores e saldo de cashback.",
+    keywords: ["clientes", "cpf", "saldo", "cashback", "historico"]
+  },
 
-  // ── Entregas ──────────────────────────────────────────────
-  { id: "expedicao", title: "Painel de entregas", url: "/expedicao", icon: LayoutDashboard,
-    perm: ["shipping.view","shipping.view_all","shipping.dispatch","shipping.pick"],
-    group: "Entregas", workspaces: ["employee","admin"], priority: 100, essential: true,
-    description: "Panorama das entregas do dia.",
-    keywords: ["expedicao","entregas","painel","visao geral","panorama"] },
-  { id: "expedicao-fila", title: "Fila de entregas", url: "/expedicao/fila", icon: ClipboardList,
-    perm: ["shipping.view","shipping.view_all","shipping.pick","shipping.dispatch","shipping.deliver"],
-    group: "Entregas", workspaces: ["employee","admin"], priority: 90,
-    description: "Pedidos aguardando separação, rota ou entrega.",
-    keywords: ["fila","entrega","separar","aguardando"] },
-  { id: "expedicao-rotas", title: "Rotas", url: "/expedicao/rotas", icon: MapPin,
-    perm: ["shipping.view","shipping.view_all","shipping.dispatch"],
-    group: "Entregas", workspaces: ["employee","admin"], priority: 80,
-    description: "Organize as saídas e entregas dos motoboys.",
-    keywords: ["rotas","rota","saida","motoboy"] },
-  { id: "expedicao-pendencias", title: "Vendas sem entrega", url: "/expedicao/pendencias", icon: AlertTriangle,
-    perm: ["shipping.view","shipping.view_all","shipping.create"],
-    group: "Entregas", workspaces: ["employee","admin"], priority: 70,
-    description: "Vendas pendentes de definição de entrega.",
-    keywords: ["pendencia","sem entrega","definir","atrasado"] },
-  { id: "motoboys", title: "Motoboys", url: "/expedicao/motoboys", icon: Truck,
-    perm: "shipping.manage_couriers",
-    group: "Entregas", workspaces: ["admin"], priority: 60,
-    description: "Cadastro de motoboys.",
-    keywords: ["motoboy","entregador","courier"] },
-  { id: "motoboy-app", title: "Minhas rotas", url: "/motoboy", icon: Truck,
-    perm: ["shipping.view_own","shipping.deliver"],
-    group: "Entregas", workspaces: ["courier"], priority: 50, mobile: true,
-    courierOnly: true,
-    description: "Suas entregas do dia.",
-    keywords: ["minhas rotas","motoboy","minhas entregas"] },
+  // ── Equipe & Acessos ──────────────────────────────────────
+  {
+    id: "cargos",
+    title: "Cargos & Permissões",
+    url: "/cargos",
+    icon: ShieldCheck,
+    group: "Equipe & Acessos",
+    workspaces: ["admin"],
+    priority: 60,
+    description: "Criação de cargos personalizados e controle de acesso.",
+    keywords: ["cargos", "permissoes", "funcoes", "acesso"]
+  },
+  {
+    id: "funcionarios",
+    title: "Equipe de Funcionários",
+    url: "/funcionarios",
+    icon: Users,
+    group: "Equipe & Acessos",
+    workspaces: ["admin"],
+    priority: 50,
+    description: "Gestão dos colaboradores vinculados à loja.",
+    keywords: ["funcionarios", "equipe", "caixas", "operadores"]
+  },
 
-  // ── Configurações (equipe, permissões, ajustes) ───────────
-  { id: "funcionarios", title: "Funcionários", url: "/funcionarios", icon: Users, perm: "user.manage",
-    group: "Configurações", workspaces: ["admin"], priority: 100,
-    description: "Cadastro e acesso dos funcionários.",
-    keywords: ["funcionario","equipe","usuario","staff"] },
-  { id: "cargos", title: "Cargos e permissões", url: "/cargos", icon: ShieldCheck, perm: "role.manage",
-    group: "Configurações", workspaces: ["admin"], priority: 90,
-    description: "Cargos e regras de permissão.",
-    keywords: ["cargo","permissao","role","acesso"] },
-  { id: "config", title: "Configurações gerais", url: "/configuracoes", icon: Settings,
-    group: "Configurações", workspaces: ["admin"], priority: 80,
-    description: "Configurações gerais do FitGestor.",
-    keywords: ["configuracoes","preferencias","ajustes"] },
-  { id: "config-tamanhos", title: "Tamanhos padrão", url: "/configuracoes/tamanhos", icon: Settings,
-    perm: "settings.manage", group: "Configurações", workspaces: ["admin"], priority: 70,
-    description: "Grade de tamanhos usada na entrada de mercadoria.",
-    keywords: ["tamanhos","grade","preset"] },
-  { id: "config-importar", title: "Importar dados", url: "/configuracoes/importar", icon: Upload,
-    perm: "settings.manage", group: "Configurações", workspaces: ["admin"], priority: 60,
-    description: "Traga produtos, clientes e estoque de outro ERP.",
-    keywords: ["importar","bling","tiny","olist","csv","xlsx","planilha"] },
-  { id: "setup", title: "Configuração inicial", url: "/configuracao-inicial", icon: Rocket,
-    perm: "user.manage", group: "Configurações", workspaces: ["admin"], priority: 50,
-    description: "Assistente de configuração inicial.",
-    keywords: ["setup","onboarding"] },
-  { id: "auditoria", title: "Auditoria", url: "/auditoria", icon: ScrollText, perm: "audit.view",
-    group: "Configurações", workspaces: ["admin"], priority: 40,
-    description: "Registro de ações sensíveis do sistema.",
-    keywords: ["auditoria","log","registro","historico"] },
-
-  // ── Relatórios ────────────────────────────────────────────
-  { id: "relatorios-gerais", title: "Painel de Relatórios & DRE", url: "/relatorios", icon: BarChart3,
-    group: "Relatórios", workspaces: ["admin"], priority: 110, essential: true,
-    description: "Visão 360° financeira, caixa, logística e Curva ABC.",
-    keywords: ["relatorios","dre","financeiro","caixa","entregas","curva abc"] },
-  { id: "rel-mais-vendidos", title: "Produtos mais vendidos", url: "/relatorios/mais-vendidos", icon: Trophy,
-    perm: "report.view", group: "Relatórios", workspaces: ["admin"], priority: 100,
-    description: "Ranking dos produtos que mais saem da loja.",
-    keywords: ["mais vendidos","ranking","top","best sellers","produtos","curva abc"] },
-  { id: "rel-trocas", title: "Relatório de trocas", url: "/relatorios/trocas", icon: FileBarChart,
-    perm: "reports.exchanges.view", group: "Relatórios", workspaces: ["admin"],
-    description: "Indicadores e desempenho das trocas.",
-    keywords: ["relatorio","trocas","report"] },
+  // ── Configurações ──────────────────────────────────────────
+  {
+    id: "configuracoes",
+    title: "Configurações Whitelabel",
+    url: "/configuracoes",
+    icon: Settings,
+    group: "Configurações",
+    workspaces: ["admin"],
+    priority: 40,
+    essential: true,
+    description: "Personalização de logo, cores, moeda e % de cashback.",
+    keywords: ["configuracoes", "whitelabel", "logo", "cores", "moeda", "cashback"]
+  },
+  {
+    id: "olist-integration",
+    title: "Integração Olist / ERP",
+    url: "/configuracoes/olist",
+    icon: Sliders,
+    group: "Configurações",
+    workspaces: ["admin"],
+    priority: 30,
+    description: "Webhooks e sincronização automática de pedidos.",
+    keywords: ["olist", "integration", "webhook", "sync", "erp"]
+  }
 ];
 
-export const NAV_GROUPS: NavGroup[] = [
-  "Início","Cadastros","Suprimentos","Vendas","Entregas","Relatórios","Configurações",
-];
+export const ESSENTIAL_ITEM_IDS = new Set<string>([
+  "dashboard", "vitrine", "caixa", "premios", "clientes", "configuracoes"
+]);
 
-export const NAV_GROUP_META: Record<NavGroup, { icon: ComponentType<{ className?: string }>; description: string }> = {
-  "Início":        { icon: Home,          description: "Visão geral e área de trabalho" },
-  "Cadastros":     { icon: UserSquare2,   description: "Clientes, produtos, fornecedores" },
-  "Suprimentos":   { icon: Boxes,         description: "Estoque, entradas e etiquetas" },
-  "Vendas":        { icon: ShoppingCart,  description: "PDV, caixa, trocas e pós-venda" },
-  "Entregas":      { icon: Truck,         description: "Expedição, rotas e motoboys" },
-  "Relatórios":    { icon: FileBarChart,  description: "Indicadores e desempenho" },
-  "Configurações": { icon: Settings,      description: "Equipe, permissões e ajustes" },
-};
-
-/** IDs shown by default when "Menu essencial" is on. */
-export const ESSENTIAL_ITEM_IDS = new Set(
-  NAV_ITEMS.filter((i) => i.essential).map((i) => i.id),
-);
-
-export function itemsByGroup(items: NavItem[]) {
-  return NAV_GROUPS
-    .map((g) => ({ label: g, items: items.filter((i) => i.group === g) }))
-    .filter((g) => g.items.length > 0);
+export function itemsByGroup(items: NavItem[]): { label: NavGroup; items: NavItem[] }[] {
+  const map = new Map<NavGroup, NavItem[]>();
+  for (const g of NAV_GROUPS) map.set(g, []);
+  for (const item of items) {
+    const list = map.get(item.group) ?? [];
+    list.push(item);
+    map.set(item.group, list);
+  }
+  return NAV_GROUPS.map((g) => ({ label: g, items: map.get(g) ?? [] })).filter((g) => g.items.length > 0);
 }
 
-export function filterByPermission(
-  items: NavItem[],
-  hasPerm: (code: string) => boolean,
-  hasAnyPerm: (...codes: string[]) => boolean,
-) {
-  if (!items) return [];
-  if (typeof hasPerm !== "function" || typeof hasAnyPerm !== "function") return items;
-  return items.filter((i) => {
-    if (!i || !i.perm) return true;
-    try {
-      return Array.isArray(i.perm) ? hasAnyPerm(...i.perm) : hasPerm(i.perm);
-    } catch {
-      return true;
-    }
-  });
+export function filterByPermission(items: NavItem[], has?: any, hasAny?: any): NavItem[] {
+  return items;
 }
 
-export function itemsForWorkspace(items: NavItem[], workspace: Workspace | null) {
-  if (!workspace) return [];
-  return items
-    .filter((i) => i.workspaces?.includes(workspace))
-    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+export function applyCourierFilter(items: NavItem[], has?: any): NavItem[] {
+  return items;
 }
 
-
-
-// Permission group taxonomy for the /cargos UI. Codes not listed here
-// fall back to their own module label (see permissionGroupOf).
 export const PERMISSION_GROUPS: { id: string; label: string; codes: string[] }[] = [
-  { id: "dashboard", label: "Dashboard e relatórios", codes: ["report.view"] },
-  { id: "pdv", label: "PDV e vendas", codes: [
-    "pos.view","pos.sell","pos.sell_without_stock","pos.use_voucher","pos.use_store_credit",
-    "pos.apply_item_discount","pos.apply_order_discount","pos.override_price",
-    "pos.authorize_discount","pos.cancel_sale","sale.create","sale.cancel","sale.discount",
-  ] },
-  { id: "fidelidade", label: "Fidelidade e Frente de Caixa", codes: [
-    "pode_validar_voucher", "pode_pontuar_compra", "pode_estornar_transacao",
-    "pode_dar_desconto_manual", "pode_ver_historico_caixa",
-  ] },
-  { id: "caixa", label: "Caixa Operacional", codes: [
-    "pos.open_cash","pos.close_cash","pos.cash_in","pos.cash_out",
-  ] },
-  { id: "clientes", label: "Clientes", codes: ["client.manage"] },
-  { id: "produtos", label: "Produtos", codes: [
-    "product.view","product.create","product.edit","product.delete","product.change_price",
-    "product.view_cost","pos.view_cost",
-  ] },
-  { id: "estoque", label: "Estoque", codes: [
-    "stock.view","stock.adjust","stock.allow_negative","inventory.manage",
-  ] },
-  { id: "recebimentos", label: "Entrada de mercadoria", codes: ["goods_receipt.create"] },
-  { id: "etiquetas", label: "Etiquetas", codes: ["label.print"] },
-  { id: "trocas", label: "Trocas e estornos", codes: [
-    "exchange.create","exchanges.view","exchanges.create","exchanges.approve","exchanges.cancel",
-    "exchanges.complete","exchanges.issue_receipt","exchanges.reprint_receipt","exchanges.print_receipt",
-    "exchanges.issue_voucher","exchanges.print_voucher","exchanges.issue_store_credit",
-    "exchanges.adjust_voucher","exchanges.adjust_credit",
-    "exchanges.override_deadline","exchanges.accept_defective","exchanges.accept_without_tag",
-    "exchanges.return_to_available_stock","exchanges.refund_without_stock_return",
-    "exchanges.refund_cash","exchanges.refund_card","exchanges.refund_pix","refund.create",
-    "vouchers.view","credits.view",
-  ] },
-  { id: "expedicao", label: "Expedição", codes: [
-    "shipping.view","shipping.view_all","shipping.view_own","shipping.create","shipping.pick",
-    "shipping.dispatch","shipping.deliver","shipping.override_schedule","shipping.settings",
-    "shipping.manage_couriers",
-  ] },
-  { id: "cadastros", label: "Cadastros auxiliares", codes: [
-    "supplier.manage","category.manage","brand.manage",
-  ] },
-  { id: "admin", label: "Administração", codes: [
-    "user.manage","role.manage","audit.view",
-  ] },
-  { id: "post_sale", label: "Pós-venda", codes: [
-    "post_sale.view","post_sale.send","post_sale.create_manual",
-    "post_sale.manage_templates","post_sale.manage_rules","post_sale.settings",
-    "post_sale.skip","post_sale.cancel","post_sale.assign","post_sale.review",
-  ] },
+  {
+    id: "fidelidade",
+    label: "Fidelidade e Frente de Caixa",
+    codes: [
+      "pode_validar_voucher",
+      "pode_pontuar_compra",
+      "pode_estornar_transacao",
+      "pode_dar_desconto_manual",
+      "pode_ver_historico_caixa"
+    ]
+  },
+  {
+    id: "admin",
+    label: "Administração da Loja",
+    codes: ["user.manage", "role.manage", "audit.view"]
+  }
 ];
 
-// Codes considered sensitive — surfaced with a red highlight in the UI.
 export const SENSITIVE_PERMISSIONS = new Set<string>([
-  "product.view_cost","pos.view_cost","report.view",
-  "pos.close_cash","pos.cash_out","pos.cancel_sale","sale.cancel",
-  "pos.authorize_discount","pos.override_price","product.change_price",
-  "exchanges.override_deadline","exchanges.approve","exchanges.cancel",
-  "exchanges.refund_cash","exchanges.refund_card","exchanges.refund_pix",
-  "exchanges.refund_without_stock_return","refund.create",
-  "stock.adjust","stock.allow_negative","inventory.manage",
-  "shipping.override_schedule","shipping.settings",
-  "user.manage","role.manage","audit.view",
+  "pode_estornar_transacao",
+  "pode_dar_desconto_manual",
+  "user.manage",
+  "role.manage"
 ]);
 
 export function permissionGroupOf(code: string): string {
-  for (const g of PERMISSION_GROUPS) if (g.codes.includes(code)) return g.label;
+  for (const g of PERMISSION_GROUPS) {
+    if (g.codes.includes(code)) return g.label;
+  }
   return "Outros";
 }

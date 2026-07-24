@@ -52,7 +52,7 @@ function SetupPage() {
       toast.error("Não foi possível criar a loja", { description: error.message });
       return;
     }
-    toast.success("Loja criada! Bem-vinda ao FitGestor.");
+    toast.success("Loja criada! Bem-vindo ao PontuaMax.");
     navigate({ to: "/dashboard" });
   }
 

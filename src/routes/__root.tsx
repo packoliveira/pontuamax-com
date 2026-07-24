@@ -79,22 +79,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" },
-      { title: "FitGestor · Sistema de Gestão" },
+      { title: "PontuaMax · Fidelidade & Cashback Whitelabel" },
       {
         name: "description",
         content:
-          "FitGestor é o sistema de gestão desenvolvido pela Quero Ser Fit® para centralizar estoque, recebimentos, etiquetas, PDV, vendas, trocas e relatórios em uma única plataforma.",
+          "PontuaMax é o sistema SaaS Whitelabel de Programa de Fidelidade e Cashback para Varejo e E-commerce. Pontuação automática por CPF via Olist, Bling, Tiny e caixa físico.",
       },
-      { name: "author", content: "Quero Ser Fit®" },
+      { name: "author", content: "PontuaMax" },
       { name: "theme-color", content: "#4f46e5" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "FitGestor" },
-      { property: "og:title", content: "FitGestor · Sistema de Gestão" },
+      { name: "apple-mobile-web-app-title", content: "PontuaMax" },
+      { property: "og:title", content: "PontuaMax · Fidelidade & Cashback" },
       {
         property: "og:description",
-        content: "Desenvolvido pela Quero Ser Fit® para controlar toda a operação da empresa.",
+        content: "Plataforma SaaS Whitelabel de fidelização e cashback para varejo físico e e-commerce.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

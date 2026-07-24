@@ -39,11 +39,11 @@ function AuthPage() {
   return (
     <SignInFlow
       brand={<BrandLockup align="center" size="lg" onDark />}
-      title="Bem-vindo ao FitGestor"
-      description="Entre para acessar a gestão da sua loja."
+      title="Bem-vindo ao PontuaMax"
+      description="Entre para acessar o painel de fidelidade da sua loja."
       footer={
         <>
-          Desenvolvido pela Quero Ser Fit<sup className="text-[0.6em]">®</sup>
+          PontuaMax · Fidelidade & Cashback Whitelabel
         </>
       }
     >
