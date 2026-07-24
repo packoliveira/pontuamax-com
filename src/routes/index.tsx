@@ -74,12 +74,12 @@ function Index() {
           {/* Coluna texto */}
           <div className="md:col-span-7">
             <h1 className="font-display text-[54px] leading-[0.92] tracking-[-0.035em] sm:text-[76px] md:text-[92px] lg:text-[108px]">
-              O cliente
+              Fidelize clientes
               <br />
-              <span className="italic text-white/70">volta.</span>
+              <span className="italic text-white/70">e venda mais</span>
               <br />
               <span className="relative inline-block">
-                Sem desconto.
+                todos os meses.
                 <span
                   aria-hidden
                   className="absolute -bottom-2 left-0 h-[3px] w-[62%] bg-[#14CBA8]"
@@ -88,10 +88,8 @@ function Index() {
             </h1>
 
             <p className="mt-8 max-w-lg text-[15px] leading-relaxed text-white/60 sm:text-[17px]">
-              PontuaMax é o programa de pontos, cashback e campanhas que
-              lojistas brasileiros usam pra transformar cliente ocasional em
-              cliente de recorrência — na sua marca, no seu WhatsApp, com
-              resultado no seu caixa.
+              Crie um programa de fidelidade com pontos, cashback e campanhas
+              para aumentar a recorrência da sua loja.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
