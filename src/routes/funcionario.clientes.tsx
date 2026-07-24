@@ -11,14 +11,8 @@ import {
   atualizarClienteInfo,
   cadastrarClientePorTelefone,
   removeClientTag,
-} from "@/lib/qsf.functions";
-import {
-  formatBRL,
-  formatDate,
-  formatCPF,
-  formatPhone,
-  isValidCPF,
-} from "@/lib/qsf-shared";
+} from "@/lib/loyalty.functions";
+import { formatBRL, formatDate, formatCPF, formatPhone, isValidCPF } from "@/lib/loyalty-shared";
 import { NivelBadge } from "@/components/nivel-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

@@ -6,7 +6,7 @@ import {
   lookupGiftCardByCodigo,
   lookupPublicStoreById,
   lookupPublicStoreBySlug,
-} from "./qsf.functions";
+} from "./loyalty.functions";
 
 // Escalas de frescor por natureza do dado (evita refetch desnecessário
 // e mantém navegação instantânea entre abas do painel).

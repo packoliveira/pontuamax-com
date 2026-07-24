@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { timingSafeEqual, randomBytes } from "crypto";
-import { cpfToEmail } from "@/lib/qsf-shared";
+import { cpfToEmail } from "@/lib/loyalty-shared";
 
 // =====================================================================
 // Webhook público de integração com ERPs (Olist, Tiny, Bling, teste)
 // URL: /api/public/webhook/{olist|tiny|bling|teste}
 //
 // Autenticação: query `?store=<slug|uuid>&secret=<webhook_secret>`
-//   (também aceita headers `x-qsf-store` / `x-qsf-secret`).
+//   (headers atuais: `x-pontuamax-store` / `x-pontuamax-secret`).
+//   Os headers legados continuam aceitos para não interromper integrações existentes.
 //
 // Fluxo:
 //   1. Valida origem, rate limit e segredo da loja.
@@ -45,7 +46,12 @@ function classificarEvento(tipo: string): Gatilho | null {
     t.includes("nfe")
   )
     return "faturado";
-  if (t.includes("inclusao") || t.includes("aprovad") || t.includes("alteracao_situacao") || t.includes("alteracao_pedido"))
+  if (
+    t.includes("inclusao") ||
+    t.includes("aprovad") ||
+    t.includes("alteracao_situacao") ||
+    t.includes("alteracao_pedido")
+  )
     return "aprovado";
   if (t.includes("cancel") || t.includes("devolucao") || t.includes("estorno")) return null;
   // Qualquer outro tipo desconhecido: tratamos como "aprovado" (não bloqueia).
@@ -71,9 +77,8 @@ type Extraido = {
 
 function parseValor(raw: unknown): number | null {
   if (raw === null || raw === undefined || raw === "") return null;
-  const normalized = typeof raw === "string" && raw.includes(",")
-    ? raw.replace(/\./g, "").replace(",", ".")
-    : raw;
+  const normalized =
+    typeof raw === "string" && raw.includes(",") ? raw.replace(/\./g, "").replace(",", ".") : raw;
   const value = Number(normalized);
   return Number.isFinite(value) && value > 0 ? value : null;
 }
@@ -96,7 +101,13 @@ function extrair(p: Record<string, unknown>): Extraido {
     "";
 
   const idVenda = String(
-    p.id_venda_externa ?? root.id ?? root.idPedido ?? root.numero ?? root.numero_pedido ?? root.codigo ?? "",
+    p.id_venda_externa ??
+      root.id ??
+      root.idPedido ??
+      root.numero ??
+      root.numero_pedido ??
+      root.codigo ??
+      "",
   ).trim();
 
   const numeroPedido = String(
@@ -142,9 +153,7 @@ function extrair(p: Record<string, unknown>): Extraido {
     .toLowerCase();
 
   // Se a situação for mais específica que o `tipo`, usamos ela para classificar.
-  const tipoFinal = situacao
-    ? `${tipoEvento}|${situacao}`
-    : tipoEvento;
+  const tipoFinal = situacao ? `${tipoEvento}|${situacao}` : tipoEvento;
 
   return { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento: tipoFinal };
 }
@@ -159,7 +168,12 @@ type EnriquecimentoApi = { valor: number | null; fonte?: string; motivo?: string
 function totalDoPedidoTiny(pedido: TinyPedido | undefined): number | null {
   if (!pedido) return null;
   return parseValor(
-    pedido.total_pedido ?? pedido.totalPedido ?? pedido.valor_total ?? pedido.valorTotal ?? pedido.total ?? pedido.valor,
+    pedido.total_pedido ??
+      pedido.totalPedido ??
+      pedido.valor_total ??
+      pedido.valorTotal ??
+      pedido.total ??
+      pedido.valor,
   );
 }
 
@@ -183,7 +197,10 @@ function motivoTiny(retorno: Record<string, unknown> | undefined, fallback: stri
   return [status, codigo, erros].filter(Boolean).join(" — ") || fallback;
 }
 
-async function tinyPost(endpoint: string, params: URLSearchParams): Promise<Record<string, unknown> | null> {
+async function tinyPost(
+  endpoint: string,
+  params: URLSearchParams,
+): Promise<Record<string, unknown> | null> {
   const res = await fetch(`https://api.tiny.com.br/api2/${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -206,12 +223,17 @@ async function buscarPedidoPorId(token: string, idPedido: string): Promise<Enriq
   return { valor: null, motivo: `pedido.obter: ${motivoTiny(retorno, "pedido sem total")}` };
 }
 
-async function pesquisarPedido(token: string, termo: string, numeroPedido: string): Promise<EnriquecimentoApi> {
+async function pesquisarPedido(
+  token: string,
+  termo: string,
+  numeroPedido: string,
+): Promise<EnriquecimentoApi> {
   const json = await tinyPost(
     "pedidos.pesquisa.php",
     new URLSearchParams({ token, pesquisa: termo, formato: "json" }),
   );
-  if (json?._http_error) return { valor: null, motivo: `pedidos.pesquisa HTTP ${json._http_error}` };
+  if (json?._http_error)
+    return { valor: null, motivo: `pedidos.pesquisa HTTP ${json._http_error}` };
   const retorno = json?.retorno as Record<string, unknown> | undefined;
   const pedidosRaw = retorno?.pedidos as Array<{ pedido?: TinyPedido }> | undefined;
   const pedidos = (pedidosRaw ?? []).map((item) => item.pedido).filter(Boolean) as TinyPedido[];
@@ -224,10 +246,16 @@ async function pesquisarPedido(token: string, termo: string, numeroPedido: strin
     }) ?? (pedidos.length === 1 ? pedidos[0] : undefined);
   const valor = totalDoPedidoTiny(escolhido);
   if (valor) return { valor, fonte: "pedidos.pesquisa" };
-  return { valor: null, motivo: `pedidos.pesquisa(${termo}): ${motivoTiny(retorno, "pedido não encontrado ou sem total")}` };
+  return {
+    valor: null,
+    motivo: `pedidos.pesquisa(${termo}): ${motivoTiny(retorno, "pedido não encontrado ou sem total")}`,
+  };
 }
 
-async function buscarTotalPedidoOlist(idPedido: string, numeroPedido = ""): Promise<EnriquecimentoApi> {
+async function buscarTotalPedidoOlist(
+  idPedido: string,
+  numeroPedido = "",
+): Promise<EnriquecimentoApi> {
   const token = process.env.OLIST_API_TOKEN;
   if (!token) return { valor: null, motivo: "OLIST_API_TOKEN não configurado" };
   const tentativas: string[] = [];
@@ -260,7 +288,10 @@ function dataTiny(date: Date): string {
   }).format(date);
 }
 
-async function obterPedidoCompletoTiny(token: string, idPedido: string): Promise<TinyPedido | null> {
+async function obterPedidoCompletoTiny(
+  token: string,
+  idPedido: string,
+): Promise<TinyPedido | null> {
   const json = await tinyPost(
     "pedido.obter.php",
     new URLSearchParams({ token, id: idPedido, formato: "json" }),
@@ -284,7 +315,8 @@ async function buscarPedidosRecentesOlist(): Promise<{ pedidos: TinyPedido[]; mo
       dataFinal: dataTiny(agora),
     }),
   );
-  if (json?._http_error) return { pedidos: [], motivo: `pedidos.pesquisa HTTP ${json._http_error}` };
+  if (json?._http_error)
+    return { pedidos: [], motivo: `pedidos.pesquisa HTTP ${json._http_error}` };
 
   const retorno = json?.retorno as Record<string, unknown> | undefined;
   const pedidosRaw = retorno?.pedidos as Array<{ pedido?: TinyPedido }> | undefined;
@@ -302,13 +334,17 @@ async function buscarPedidosRecentesOlist(): Promise<{ pedidos: TinyPedido[]; mo
 
   return {
     pedidos,
-    motivo: pedidos.length ? undefined : motivoTiny(retorno, "nenhum pedido recente encontrado na API"),
+    motivo: pedidos.length
+      ? undefined
+      : motivoTiny(retorno, "nenhum pedido recente encontrado na API"),
   };
 }
 
 function eventoPodeSinalizarVenda(tipoEvento: string): boolean {
   const t = tipoEvento.toLowerCase();
-  return t.includes("estoque") || t.includes("produto") || t.includes("preco") || t.includes("preço");
+  return (
+    t.includes("estoque") || t.includes("produto") || t.includes("preco") || t.includes("preço")
+  );
 }
 
 async function sincronizarPedidosRecentesOlist(request: Request) {
@@ -324,7 +360,7 @@ async function sincronizarPedidosRecentesOlist(request: Request) {
       body: JSON.stringify({ tipo: "sincronizacao_api", pedido }),
     });
     const response = await handlePost({ request: syncRequest, params: { origem: "olist" } });
-    const body = await response.json().catch(() => ({})) as Record<string, unknown>;
+    const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
     if (body.status === "sucesso" && body.duplicated) duplicadas += 1;
     else if (body.status === "sucesso" && body.message === "venda processada") processadas += 1;
     else if (body.status === "erro") erros += 1;
@@ -356,7 +392,8 @@ function calcularRecompensa(
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin, x-qsf-secret, x-qsf-store",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin, x-pontuamax-secret, x-pontuamax-store, x-qsf-secret, x-qsf-store",
   "Access-Control-Max-Age": "86400",
 };
 const json = (body: unknown, status = 200) =>
@@ -377,8 +414,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       HEAD: async () => new Response(null, { status: 200, headers: CORS }),
-      GET: async () =>
-        json({ status: "ok", message: "PontuaMax webhook endpoint ativo" }, 200),
+      GET: async () => json({ status: "ok", message: "PontuaMax webhook endpoint ativo" }, 200),
 
       POST: async ({ request, params }) => {
         // Guardião externo: qualquer exceção inesperada retorna 200 vazio
@@ -388,10 +424,7 @@ export const Route = createFileRoute("/api/public/webhook/$origem")({
           return await handlePost({ request, params });
         } catch (e) {
           console.error("[webhook] exceção não tratada:", (e as Error).message);
-          return json(
-            { status: "erro", message: "erro interno — registrado para análise" },
-            200,
-          );
+          return json({ status: "erro", message: "erro interno — registrado para análise" }, 200);
         }
       },
     },
@@ -407,314 +440,296 @@ export async function handleOlistWebhookAlias(request: Request) {
   }
 }
 
-async function handlePost({
-  request,
-  params,
-}: {
-  request: Request;
-  params: { origem: string };
-}) {
-        // IMPORTANTE: sempre respondemos HTTP 200 para o ERP (Olist/Tiny/Bling).
-        // A Olist desativa o webhook após poucos erros consecutivos (não-2xx),
-        // então erros de negócio ficam no corpo (`status: "erro"`) e no
-        // `integration_logs` — nunca no código HTTP.
-        const ok = (body: unknown) => json(body, 200);
-        const origem = String(params.origem).toLowerCase();
-        if (!["olist", "tiny", "bling", "teste"].includes(origem)) {
-          return ok({ status: "erro", message: "origem inválida (use olist|tiny|bling|teste)" });
-        }
+async function handlePost({ request, params }: { request: Request; params: { origem: string } }) {
+  // IMPORTANTE: sempre respondemos HTTP 200 para o ERP (Olist/Tiny/Bling).
+  // A Olist desativa o webhook após poucos erros consecutivos (não-2xx),
+  // então erros de negócio ficam no corpo (`status: "erro"`) e no
+  // `integration_logs` — nunca no código HTTP.
+  const ok = (body: unknown) => json(body, 200);
+  const origem = String(params.origem).toLowerCase();
+  if (!["olist", "tiny", "bling", "teste"].includes(origem)) {
+    return ok({ status: "erro", message: "origem inválida (use olist|tiny|bling|teste)" });
+  }
 
-        // 1) Rate limit: 60 req/min por IP.
-        const { checkRateLimit, getClientIp } = await import("@/lib/rate-limit.server");
-        const ip = getClientIp(request);
-        const allowed = await checkRateLimit(`webhook:${origem}:${ip}`, 60, 60);
-        if (!allowed) {
-          return ok({ status: "erro", message: "rate limit — aguarde um minuto" });
-        }
+  // 1) Rate limit: 60 req/min por IP.
+  const { checkRateLimit, getClientIp } = await import("@/lib/rate-limit.server");
+  const ip = getClientIp(request);
+  const allowed = await checkRateLimit(`webhook:${origem}:${ip}`, 60, 60);
+  if (!allowed) {
+    return ok({ status: "erro", message: "rate limit — aguarde um minuto" });
+  }
 
-        // 2) Corpo (aceita vazio como "ping de conectividade").
-        const raw = await request.text();
-        let payload: Record<string, unknown> = {};
-        try {
-          payload = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
-        } catch {
-          return ok({ status: "erro", message: "JSON inválido" });
-        }
+  // 2) Corpo (aceita vazio como "ping de conectividade").
+  const raw = await request.text();
+  let payload: Record<string, unknown> = {};
+  try {
+    payload = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+  } catch {
+    return ok({ status: "erro", message: "JSON inválido" });
+  }
 
-        // 3) Identificação da loja + segredo (via query ou header).
-        const url = new URL(request.url);
-        const storeRef =
-          request.headers.get("x-qsf-store") ??
-          url.searchParams.get("store") ??
-          url.searchParams.get("loja") ??
-          (payload.store_slug as string | undefined) ??
-          (payload.store_id as string | undefined) ??
-          "";
-        const secret =
-          request.headers.get("x-qsf-secret") ??
-          url.searchParams.get("secret") ??
-          url.searchParams.get("token") ??
-          "";
+  // 3) Identificação da loja + segredo (via query ou header).
+  const url = new URL(request.url);
+  const storeRef =
+    request.headers.get("x-pontuamax-store") ??
+    request.headers.get("x-qsf-store") ??
+    url.searchParams.get("store") ??
+    url.searchParams.get("loja") ??
+    (payload.store_slug as string | undefined) ??
+    (payload.store_id as string | undefined) ??
+    "";
+  const secret =
+    request.headers.get("x-pontuamax-secret") ??
+    request.headers.get("x-qsf-secret") ??
+    url.searchParams.get("secret") ??
+    url.searchParams.get("token") ??
+    "";
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          storeRef,
-        );
-        const q = supabaseAdmin.from("stores").select("*");
-        const storeRes = await (isUuid ? q.eq("id", storeRef) : q.eq("slug", storeRef)).maybeSingle();
-        const loja = storeRes.data;
-        if (!loja) return ok({ status: "erro", message: "loja não encontrada" });
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeRef);
+  const q = supabaseAdmin.from("stores").select("*");
+  const storeRes = await (isUuid ? q.eq("id", storeRef) : q.eq("slug", storeRef)).maybeSingle();
+  const loja = storeRes.data;
+  if (!loja) return ok({ status: "erro", message: "loja não encontrada" });
 
-        const { getStoreSecrets } = await import("@/lib/store-secrets.server");
-        const storeSecrets = await getStoreSecrets(loja.id);
+  const { getStoreSecrets } = await import("@/lib/store-secrets.server");
+  const storeSecrets = await getStoreSecrets(loja.id);
 
-        // Helper para logar e responder em uma única linha.
-        const logAndRespond = async (
-          status: "sucesso" | "erro",
-          message: string,
-          _httpStatus: number,
-          extra: Record<string, unknown> = {},
-        ) => {
-          await supabaseAdmin.from("integration_logs").insert({
-            store_id: loja.id,
-            origem,
-            payload_recebido: payload as never,
-            status,
-            mensagem_erro: status === "erro" ? message : null,
-          });
-          if (status === "sucesso") {
-            await supabaseAdmin
-              .from("stores")
-              .update({ webhook_last_at: new Date().toISOString() })
-              .eq("id", loja.id);
-          } else {
-            // Alerta o lojista no painel — throttled 1x a cada 30 min
-            // por loja+origem para não gerar avalanche de notificações.
-            try {
-              const { checkRateLimit } = await import("@/lib/rate-limit.server");
-              const podeNotificar = await checkRateLimit(
-                `webhook_alert:${loja.id}:${origem}`,
-                1,
-                1800,
-              );
-              if (podeNotificar) {
-                const { notifyMerchant } = await import("@/lib/team-helpers.server");
-                await notifyMerchant({
-                  storeId: loja.id,
-                  tipo: "webhook_erro",
-                  titulo: `Erro no webhook (${origem})`,
-                  mensagem: message,
-                  metadata: { origem, ...extra },
-                });
-              }
-            } catch (e) {
-              console.warn("[webhook] falha ao criar alerta:", (e as Error).message);
-            }
-          }
-          // Sempre HTTP 200 para o ERP não desativar o webhook por
-          // "erros consecutivos". O status real vai no corpo.
-          void _httpStatus;
-          return json({ status, message, ...extra }, 200);
-        };
-
-        if (!secret || !safeEqual(secret, storeSecrets.webhook_secret ?? "")) {
-          return logAndRespond("erro", "segredo inválido", 401);
-        }
-
-        // Ping de conectividade (Olist às vezes envia POST vazio na configuração).
-        if (!raw || Object.keys(payload).length === 0) {
-          if (origem === "olist") {
-            const sync = await sincronizarPedidosRecentesOlist(request);
-            return logAndRespond("sucesso", "webhook validado e pedidos recentes verificados", 200, {
-              validation: true,
-              sync,
-            });
-          }
-          return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
-        }
-
-        // 4) Extração + gatilho configurado.
-        const { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento } = extrair(payload);
-        const gatilhoLoja = ((loja as { olist_gatilho_pontuacao?: string })
-          .olist_gatilho_pontuacao ?? "ambos") as Gatilho;
-        const evento = classificarEvento(tipoEvento);
-        if (!eventoAtendeGatilho(evento, gatilhoLoja)) {
-          if (origem === "olist" && eventoPodeSinalizarVenda(tipoEvento)) {
-            const sync = await sincronizarPedidosRecentesOlist(request);
-            return logAndRespond(
-              "sucesso",
-              `evento "${tipoEvento || "sem tipo"}" ignorado, pedidos recentes verificados pela API`,
-              200,
-              { ignored_event: tipoEvento, gatilho: gatilhoLoja, sync },
-            );
-          }
-          return logAndRespond(
-            "sucesso",
-            `evento "${tipoEvento || "sem tipo"}" ignorado — gatilho da loja é "${gatilhoLoja}"`,
-            200,
-            { ignored_event: tipoEvento, gatilho: gatilhoLoja },
-          );
-        }
-
-        if (!idVenda) {
-          return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
-        }
-
-        if (!cpf || cpf.length !== 11) {
-          return logAndRespond(
-            "erro",
-            "CPF do cliente é obrigatório (11 dígitos) — configure a Olist para enviar o documento do comprador",
-            400,
-          );
-        }
-        if (telefone && telefone.length < 8) {
-          return logAndRespond("erro", "telefone inválido", 400);
-        }
-
-        // 5) Idempotência.
-        const dup = await supabaseAdmin
-          .from("transactions")
-          .select("id")
-          .eq("store_id", loja.id)
-          .eq("id_venda_externa", idVenda)
-          .maybeSingle();
-        if (dup.data) {
-          return logAndRespond("sucesso", "venda já processada (idempotente)", 200, {
-            duplicated: true,
-          });
-        }
-
-        // 6) Cliente: busca por CPF, cria se necessário.
-        let clientProfile: { id: string } | null = null;
-        let clientJustCreated = false;
-        {
-          const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
-          if (p.data) clientProfile = p.data;
-        }
-        if (!clientProfile && telefone) {
-          const p = await supabaseAdmin
-            .from("profiles")
-            .select("id")
-            .eq("phone", telefone)
-            .maybeSingle();
-          if (p.data) clientProfile = p.data;
-        }
-        if (!clientProfile) {
-          const email = cpfToEmail(cpf);
-          const password = randomBytes(24).toString("hex");
-          const created = await supabaseAdmin.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-            user_metadata: { full_name: nome, phone: telefone || null, cpf },
-          });
-          if (created.error || !created.data.user) {
-            return logAndRespond(
-              "erro",
-              `falha criando cliente: ${created.error?.message ?? "?"}`,
-              500,
-            );
-          }
-          clientProfile = { id: created.data.user.id };
-          clientJustCreated = true;
-          await supabaseAdmin
-            .from("profiles")
-            .upsert({ id: clientProfile.id, full_name: nome, phone: telefone || null, cpf });
-          await supabaseAdmin
-            .from("user_roles")
-            .upsert(
-              { user_id: clientProfile.id, role: "cliente" as const },
-              { onConflict: "user_id,role" },
-            );
-        }
-
-        // 7) Vínculo com a loja (marca "cadastro pendente" se cliente novo).
-        const linkRes = await supabaseAdmin
-          .from("store_clients")
-          .upsert(
-            {
-              store_id: loja.id,
-              user_id: clientProfile.id,
-              ...(clientJustCreated ? { pending_registration: true } : {}),
-            },
-            { onConflict: "store_id,user_id", ignoreDuplicates: false },
-          )
-          .select("*")
-          .single();
-        if (linkRes.error) return logAndRespond("erro", linkRes.error.message, 500);
-        const link = linkRes.data;
-
-        // 8) Sem valor no payload → tenta enriquecer via API Tiny/Olist V2.
-        let valorFinal = valor;
-        let enriquecido = false;
-        let motivoApi = "";
-        if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
-          const totalApi = await buscarTotalPedidoOlist(idVenda, numeroPedido);
-          if (totalApi.valor && totalApi.valor > 0) {
-            valorFinal = totalApi.valor;
-            enriquecido = true;
-          } else {
-            motivoApi = totalApi.motivo ?? "sem detalhe da API";
-          }
-        }
-
-        if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
-          return logAndRespond(
-            "erro",
-            `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total e a API da Olist não retornou o total. Motivo: ${motivoApi || "não informado"}.`,
-            200,
-            { cliente_vinculado: true, aguardando_valor: true },
-          );
-        }
-
-        // 9) Calcula e credita.
-        const { pontos, cashback, novoPontos, novoCashback, nivel } = calcularRecompensa(
-          valorFinal,
-          loja,
-          link.pontos,
-          Number(link.cashback_saldo),
-        );
-
-        const tx = await supabaseAdmin.from("transactions").insert({
-          store_id: loja.id,
-          client_user_id: clientProfile.id,
-          tipo: "venda",
-          valor: valorFinal,
-          pontos_delta: pontos,
-          cashback_delta: cashback,
-          status: "entregue",
-          id_venda_externa: idVenda,
-          origem: enriquecido ? `${origem}:api_enriched` : origem,
-        });
-        if (tx.error) {
-          if (tx.error.code === "23505") {
-            return logAndRespond("sucesso", "venda já processada (idempotente)", 200, {
-              duplicated: true,
-            });
-          }
-          return logAndRespond("erro", tx.error.message, 500);
-        }
-        const upd = await supabaseAdmin
-          .from("store_clients")
-          .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel })
-          .eq("id", link.id);
-        if (upd.error) return logAndRespond("erro", upd.error.message, 500);
-
-        if (pontos > 0) {
-          const { notifyClient } = await import("@/lib/notify.server");
-          await notifyClient({
-            event: "pontos_ganhos",
+  // Helper para logar e responder em uma única linha.
+  const logAndRespond = async (
+    status: "sucesso" | "erro",
+    message: string,
+    _httpStatus: number,
+    extra: Record<string, unknown> = {},
+  ) => {
+    await supabaseAdmin.from("integration_logs").insert({
+      store_id: loja.id,
+      origem,
+      payload_recebido: payload as never,
+      status,
+      mensagem_erro: status === "erro" ? message : null,
+    });
+    if (status === "sucesso") {
+      await supabaseAdmin
+        .from("stores")
+        .update({ webhook_last_at: new Date().toISOString() })
+        .eq("id", loja.id);
+    } else {
+      // Alerta o lojista no painel — throttled 1x a cada 30 min
+      // por loja+origem para não gerar avalanche de notificações.
+      try {
+        const { checkRateLimit } = await import("@/lib/rate-limit.server");
+        const podeNotificar = await checkRateLimit(`webhook_alert:${loja.id}:${origem}`, 1, 1800);
+        if (podeNotificar) {
+          const { notifyMerchant } = await import("@/lib/team-helpers.server");
+          await notifyMerchant({
             storeId: loja.id,
-            clientUserId: clientProfile.id,
-            pontosGanhos: pontos,
+            tipo: "webhook_erro",
+            titulo: `Erro no webhook (${origem})`,
+            mensagem: message,
+            metadata: { origem, ...extra },
           });
         }
+      } catch (e) {
+        console.warn("[webhook] falha ao criar alerta:", (e as Error).message);
+      }
+    }
+    // Sempre HTTP 200 para o ERP não desativar o webhook por
+    // "erros consecutivos". O status real vai no corpo.
+    void _httpStatus;
+    return json({ status, message, ...extra }, 200);
+  };
 
-        return logAndRespond("sucesso", "venda processada", 200, {
-          pontos_creditados: pontos,
-          cashback_creditado: cashback,
-          novo_saldo_pontos: novoPontos,
-          novo_saldo_cashback: novoCashback,
-        });
+  if (!secret || !safeEqual(secret, storeSecrets.webhook_secret ?? "")) {
+    return logAndRespond("erro", "segredo inválido", 401);
+  }
+
+  // Ping de conectividade (Olist às vezes envia POST vazio na configuração).
+  if (!raw || Object.keys(payload).length === 0) {
+    if (origem === "olist") {
+      const sync = await sincronizarPedidosRecentesOlist(request);
+      return logAndRespond("sucesso", "webhook validado e pedidos recentes verificados", 200, {
+        validation: true,
+        sync,
+      });
+    }
+    return logAndRespond("sucesso", "webhook validado", 200, { validation: true });
+  }
+
+  // 4) Extração + gatilho configurado.
+  const { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento } = extrair(payload);
+  const gatilhoLoja = ((loja as { olist_gatilho_pontuacao?: string }).olist_gatilho_pontuacao ??
+    "ambos") as Gatilho;
+  const evento = classificarEvento(tipoEvento);
+  if (!eventoAtendeGatilho(evento, gatilhoLoja)) {
+    if (origem === "olist" && eventoPodeSinalizarVenda(tipoEvento)) {
+      const sync = await sincronizarPedidosRecentesOlist(request);
+      return logAndRespond(
+        "sucesso",
+        `evento "${tipoEvento || "sem tipo"}" ignorado, pedidos recentes verificados pela API`,
+        200,
+        { ignored_event: tipoEvento, gatilho: gatilhoLoja, sync },
+      );
+    }
+    return logAndRespond(
+      "sucesso",
+      `evento "${tipoEvento || "sem tipo"}" ignorado — gatilho da loja é "${gatilhoLoja}"`,
+      200,
+      { ignored_event: tipoEvento, gatilho: gatilhoLoja },
+    );
+  }
+
+  if (!idVenda) {
+    return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
+  }
+
+  if (!cpf || cpf.length !== 11) {
+    return logAndRespond(
+      "erro",
+      "CPF do cliente é obrigatório (11 dígitos) — configure a Olist para enviar o documento do comprador",
+      400,
+    );
+  }
+  if (telefone && telefone.length < 8) {
+    return logAndRespond("erro", "telefone inválido", 400);
+  }
+
+  // 5) Idempotência.
+  const dup = await supabaseAdmin
+    .from("transactions")
+    .select("id")
+    .eq("store_id", loja.id)
+    .eq("id_venda_externa", idVenda)
+    .maybeSingle();
+  if (dup.data) {
+    return logAndRespond("sucesso", "venda já processada (idempotente)", 200, {
+      duplicated: true,
+    });
+  }
+
+  // 6) Cliente: busca por CPF, cria se necessário.
+  let clientProfile: { id: string } | null = null;
+  let clientJustCreated = false;
+  {
+    const p = await supabaseAdmin.from("profiles").select("id").eq("cpf", cpf).maybeSingle();
+    if (p.data) clientProfile = p.data;
+  }
+  if (!clientProfile && telefone) {
+    const p = await supabaseAdmin.from("profiles").select("id").eq("phone", telefone).maybeSingle();
+    if (p.data) clientProfile = p.data;
+  }
+  if (!clientProfile) {
+    const email = cpfToEmail(cpf);
+    const password = randomBytes(24).toString("hex");
+    const created = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: nome, phone: telefone || null, cpf },
+    });
+    if (created.error || !created.data.user) {
+      return logAndRespond("erro", `falha criando cliente: ${created.error?.message ?? "?"}`, 500);
+    }
+    clientProfile = { id: created.data.user.id };
+    clientJustCreated = true;
+    await supabaseAdmin
+      .from("profiles")
+      .upsert({ id: clientProfile.id, full_name: nome, phone: telefone || null, cpf });
+    await supabaseAdmin
+      .from("user_roles")
+      .upsert(
+        { user_id: clientProfile.id, role: "cliente" as const },
+        { onConflict: "user_id,role" },
+      );
+  }
+
+  // 7) Vínculo com a loja (marca "cadastro pendente" se cliente novo).
+  const linkRes = await supabaseAdmin
+    .from("store_clients")
+    .upsert(
+      {
+        store_id: loja.id,
+        user_id: clientProfile.id,
+        ...(clientJustCreated ? { pending_registration: true } : {}),
+      },
+      { onConflict: "store_id,user_id", ignoreDuplicates: false },
+    )
+    .select("*")
+    .single();
+  if (linkRes.error) return logAndRespond("erro", linkRes.error.message, 500);
+  const link = linkRes.data;
+
+  // 8) Sem valor no payload → tenta enriquecer via API Tiny/Olist V2.
+  let valorFinal = valor;
+  let enriquecido = false;
+  let motivoApi = "";
+  if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
+    const totalApi = await buscarTotalPedidoOlist(idVenda, numeroPedido);
+    if (totalApi.valor && totalApi.valor > 0) {
+      valorFinal = totalApi.valor;
+      enriquecido = true;
+    } else {
+      motivoApi = totalApi.motivo ?? "sem detalhe da API";
+    }
+  }
+
+  if (!Number.isFinite(valorFinal) || valorFinal <= 0) {
+    return logAndRespond(
+      "erro",
+      `Cliente vinculado como pendente. Notificação "${tipoEvento || "sem tipo"}" do pedido ${idVenda} chegou sem valor total e a API da Olist não retornou o total. Motivo: ${motivoApi || "não informado"}.`,
+      200,
+      { cliente_vinculado: true, aguardando_valor: true },
+    );
+  }
+
+  // 9) Calcula e credita.
+  const { pontos, cashback, novoPontos, novoCashback, nivel } = calcularRecompensa(
+    valorFinal,
+    loja,
+    link.pontos,
+    Number(link.cashback_saldo),
+  );
+
+  const tx = await supabaseAdmin.from("transactions").insert({
+    store_id: loja.id,
+    client_user_id: clientProfile.id,
+    tipo: "venda",
+    valor: valorFinal,
+    pontos_delta: pontos,
+    cashback_delta: cashback,
+    status: "entregue",
+    id_venda_externa: idVenda,
+    origem: enriquecido ? `${origem}:api_enriched` : origem,
+  });
+  if (tx.error) {
+    if (tx.error.code === "23505") {
+      return logAndRespond("sucesso", "venda já processada (idempotente)", 200, {
+        duplicated: true,
+      });
+    }
+    return logAndRespond("erro", tx.error.message, 500);
+  }
+  const upd = await supabaseAdmin
+    .from("store_clients")
+    .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel })
+    .eq("id", link.id);
+  if (upd.error) return logAndRespond("erro", upd.error.message, 500);
+
+  if (pontos > 0) {
+    const { notifyClient } = await import("@/lib/notify.server");
+    await notifyClient({
+      event: "pontos_ganhos",
+      storeId: loja.id,
+      clientUserId: clientProfile.id,
+      pontosGanhos: pontos,
+    });
+  }
+
+  return logAndRespond("sucesso", "venda processada", 200, {
+    pontos_creditados: pontos,
+    cashback_creditado: cashback,
+    novo_saldo_pontos: novoPontos,
+    novo_saldo_cashback: novoCashback,
+  });
 }

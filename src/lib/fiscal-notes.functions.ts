@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./qsf-shared";
-import { sha256Hex } from "./qsf-helpers.server";
+import { calcularNivel } from "./loyalty-shared";
+import { sha256Hex } from "./loyalty-helpers.server";
 
 export const submitNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -108,7 +108,7 @@ export const submitNotaFiscal = createServerFn({ method: "POST" })
 
 export const aprovarNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         id: z.string().uuid(),
@@ -176,7 +176,7 @@ export const aprovarNotaFiscal = createServerFn({ method: "POST" })
 
 export const rejeitarNotaFiscal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z.object({ id: z.string().uuid(), motivo: z.string().max(300) }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -195,4 +195,3 @@ export const rejeitarNotaFiscal = createServerFn({ method: "POST" })
       .eq("id", data.id);
     return { ok: true };
   });
-

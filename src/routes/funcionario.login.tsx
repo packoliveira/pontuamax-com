@@ -8,7 +8,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Loader2, ShieldCheck } from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
-import { formatCPF, onlyDigits, isValidCPF } from "@/lib/qsf-shared";
+import { formatCPF, onlyDigits, isValidCPF } from "@/lib/loyalty-shared";
 import { resolveFuncionarioEmailByCpf, registrarLoginFuncionario } from "@/lib/team.functions";
 import { toast } from "sonner";
 

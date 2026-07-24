@@ -1,26 +1,35 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowRight, Award, Coins, Gift, QrCode, Sparkles, Users, Check, ShieldCheck, Zap,
-  TrendingUp, ShoppingBag, CreditCard, LayoutDashboard, Store
+  ArrowRight,
+  Award,
+  Coins,
+  Gift,
+  QrCode,
+  Sparkles,
+  Users,
+  Check,
+  ShieldCheck,
+  Zap,
+  TrendingUp,
+  ShoppingBag,
+  CreditCard,
+  LayoutDashboard,
+  Store,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    if (typeof window === "undefined") return;
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) return;
-    const target = "/dashboard";
-    throw redirect({ to: target });
-  },
   component: LandingPontuaMax,
   head: () => ({
     meta: [
       { title: "PontuaMax · Sistema de Fidelidade e Cashback para Lojas" },
-      { name: "description", content: "Plataforma SaaS Whitelabel de Fidelização e Cashback para Varejo e E-commerce. Pontuação automática via Olist, Bling, Tiny e Caixa." },
+      {
+        name: "description",
+        content:
+          "Plataforma SaaS Whitelabel de Fidelização e Cashback para Varejo e E-commerce. Pontuação automática via Olist, Bling, Tiny e Caixa.",
+      },
       { property: "og:title", content: "PontuaMax · Fidelidade & Cashback Whitelabel" },
       { property: "og:type", content: "website" },
     ],
@@ -40,17 +49,31 @@ function LandingPontuaMax() {
             <span className="font-extrabold text-xl tracking-tight text-white">
               Pontua<span className="text-indigo-400">Max</span>
             </span>
-            <Badge variant="outline" className="ml-2 border-indigo-500/30 text-indigo-300 bg-indigo-500/10 text-[10px]">
+            <Badge
+              variant="outline"
+              className="ml-2 border-indigo-500/30 text-indigo-300 bg-indigo-500/10 text-[10px]"
+            >
               SaaS Whitelabel
             </Badge>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button size="sm" variant="ghost" asChild className="text-xs text-slate-300 hover:text-white">
-              <Link to="/auth">Entrar</Link>
+            <Button
+              size="sm"
+              variant="ghost"
+              asChild
+              className="text-xs text-slate-300 hover:text-white"
+            >
+              <Link to="/lojista/login">Entrar</Link>
             </Button>
-            <Button size="sm" asChild className="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold shadow-lg shadow-indigo-600/20">
-              <Link to="/dashboard">Acessar Painel <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link>
+            <Button
+              size="sm"
+              asChild
+              className="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold shadow-lg shadow-indigo-600/20"
+            >
+              <Link to="/lojista">
+                Acessar Painel <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -64,24 +87,40 @@ function LandingPontuaMax() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-300">
-            <Sparkles className="h-4 w-4 text-indigo-400" /> Transforme Compras em Fidelidade e Vendas Recorrentes
+            <Sparkles className="h-4 w-4 text-indigo-400" /> Transforme Compras em Fidelidade e
+            Vendas Recorrentes
           </div>
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight max-w-4xl mx-auto leading-tight">
-            Programa de <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Fidelidade & Cashback</span> para sua Loja
+            Programa de{" "}
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+              Fidelidade & Cashback
+            </span>{" "}
+            para sua Loja
           </h1>
 
           <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-normal">
-            Substitua o cartão de papel por uma experiência digital 100% Whitelabel. O cliente compra no e-commerce ou caixa físico, acúmula pontos e cashback por CPF, e troca por prêmios.
+            Substitua o cartão de papel por uma experiência digital 100% Whitelabel. O cliente
+            compra no e-commerce ou caixa físico, acúmula pontos e cashback por CPF, e troca por
+            prêmios.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 pt-4">
-            <Button size="lg" asChild className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm h-12 px-8 shadow-xl shadow-indigo-600/30">
-              <Link to="/dashboard">
-                <LayoutDashboard className="mr-2 h-5 w-5" /> Abrir Painel do Lojista
+            <Button
+              size="lg"
+              asChild
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm h-12 px-8 shadow-xl shadow-indigo-600/30"
+            >
+              <Link to="/lojista/onboarding">
+                <LayoutDashboard className="mr-2 h-5 w-5" /> Criar minha loja
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm h-12 px-8">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm h-12 px-8"
+            >
               <Link to="/$slug" params={{ slug: "loja" }}>
                 <Store className="mr-2 h-5 w-5 text-indigo-400" /> Ver Vitrine do Cliente (/loja)
               </Link>
@@ -110,11 +149,20 @@ function LandingPontuaMax() {
                   <CreditCard className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-lg text-white">Frente de Caixa (/caixa)</h3>
-                  <p className="text-xs text-slate-400">Pontue clientes por CPF no balcão e dê baixa em vouchers com efeito sonoro.</p>
+                  <h3 className="font-bold text-lg text-white">Lançar venda</h3>
+                  <p className="text-xs text-slate-400">
+                    Pontue clientes por CPF no balcão e dê baixa em vouchers com efeito sonoro.
+                  </p>
                 </div>
-                <Button size="sm" variant="ghost" asChild className="w-full justify-between text-xs text-emerald-400 hover:text-emerald-300">
-                  <Link to="/caixa">Acessar Caixa <ArrowRight className="h-4 w-4" /></Link>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  asChild
+                  className="w-full justify-between text-xs text-emerald-400 hover:text-emerald-300"
+                >
+                  <Link to="/lojista/lancar-venda">
+                    Lançar venda <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -126,11 +174,20 @@ function LandingPontuaMax() {
                   <Gift className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-lg text-white">Catálogo (/premios)</h3>
-                  <p className="text-xs text-slate-400">Cadastre cupons de desconto, brindes e recompensas na moeda da sua loja.</p>
+                  <h3 className="font-bold text-lg text-white">Catálogo de recompensas</h3>
+                  <p className="text-xs text-slate-400">
+                    Cadastre cupons de desconto, brindes e recompensas na moeda da sua loja.
+                  </p>
                 </div>
-                <Button size="sm" variant="ghost" asChild className="w-full justify-between text-xs text-purple-400 hover:text-purple-300">
-                  <Link to="/premios">Gerenciar Prêmios <ArrowRight className="h-4 w-4" /></Link>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  asChild
+                  className="w-full justify-between text-xs text-purple-400 hover:text-purple-300"
+                >
+                  <Link to="/lojista/produtos">
+                    Gerenciar prêmios <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -142,11 +199,20 @@ function LandingPontuaMax() {
                   <TrendingUp className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-lg text-white">Dashboard (/dashboard)</h3>
-                  <p className="text-xs text-slate-400">Acompanhe KPIs de retenção, receita de fidelizados e ranking VIP.</p>
+                  <h3 className="font-bold text-lg text-white">Dashboard do lojista</h3>
+                  <p className="text-xs text-slate-400">
+                    Acompanhe KPIs de retenção, receita de fidelizados e ranking VIP.
+                  </p>
                 </div>
-                <Button size="sm" variant="ghost" asChild className="w-full justify-between text-xs text-indigo-400 hover:text-indigo-300">
-                  <Link to="/dashboard">Ver Analytics <ArrowRight className="h-4 w-4" /></Link>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  asChild
+                  className="w-full justify-between text-xs text-indigo-400 hover:text-indigo-300"
+                >
+                  <Link to="/lojista">
+                    Ver indicadores <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -159,10 +225,19 @@ function LandingPontuaMax() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-bold text-lg text-white">Vitrine Pública (/$slug)</h3>
-                  <p className="text-xs text-slate-400">Página whitelabel do cliente para resgate de prêmios com PWA e confetes.</p>
+                  <p className="text-xs text-slate-400">
+                    Página whitelabel do cliente para resgate de prêmios com PWA e confetes.
+                  </p>
                 </div>
-                <Button size="sm" variant="ghost" asChild className="w-full justify-between text-xs text-amber-400 hover:text-amber-300">
-                  <Link to="/$slug" params={{ slug: "loja" }}>Abrir Vitrine <ArrowRight className="h-4 w-4" /></Link>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  asChild
+                  className="w-full justify-between text-xs text-amber-400 hover:text-amber-300"
+                >
+                  <Link to="/$slug" params={{ slug: "loja" }}>
+                    Abrir Vitrine <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>

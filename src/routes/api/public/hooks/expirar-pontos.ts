@@ -1,17 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Cron hook: aplica validade / decaimento de pontos configurados por cada loja.
-// Autenticado por header apikey = SUPABASE_PUBLISHABLE_KEY.
+// Autenticado por x-cron-secret ou Authorization: Bearer <CRON_SECRET>.
 export const Route = createFileRoute("/api/public/hooks/expirar-pontos")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
-          return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
-        }
+        const { authorizeCronRequest } = await import("@/lib/cron-auth.server");
+        const auth = authorizeCronRequest(request);
+        if (!auth.ok) return auth.response;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { calcularNivel } = await import("@/lib/qsf-shared");
+        const { calcularNivel } = await import("@/lib/loyalty-shared");
 
         const stores = await supabaseAdmin
           .from("stores")

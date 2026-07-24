@@ -1,14 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  selecionarDestinatarios,
-  processarEnvioCampanha,
-} from "./qsf-helpers.server";
+import { selecionarDestinatarios, processarEnvioCampanha } from "./loyalty-helpers.server";
 
 export const criarCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         nome: z.string().min(1).max(100),
@@ -59,7 +56,7 @@ export const criarCampanha = createServerFn({ method: "POST" })
 
 export const enviarCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ campaign_id: z.string().uuid() }).parse(input))
+  .validator((input) => z.object({ campaign_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const camp = await supabaseAdmin
@@ -78,7 +75,7 @@ export const enviarCampanha = createServerFn({ method: "POST" })
 
 export const excluirCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("campaigns").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -87,7 +84,7 @@ export const excluirCampanha = createServerFn({ method: "POST" })
 
 export const previewDestinatarios = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         segmento: z.enum([

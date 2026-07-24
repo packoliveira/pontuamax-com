@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeProductsQuery } from "@/lib/queries";
-import { salvarProduto, removerProduto } from "@/lib/qsf.functions";
+import { salvarProduto, removerProduto } from "@/lib/loyalty.functions";
 import type { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

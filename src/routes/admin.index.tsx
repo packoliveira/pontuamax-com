@@ -436,7 +436,11 @@ function QuickLinksSection() {
       items: [
         { label: "Login Lojista", path: "/lojista/login", desc: "Donos de loja assinantes" },
         { label: "Painel Lojista", path: "/lojista", desc: "Dashboard da loja" },
-        { label: "Cadastro Lojista", path: "/lojista/cadastro", desc: "Nova loja / assinar plano" },
+        {
+          label: "Cadastro Lojista",
+          path: "/lojista/onboarding",
+          desc: "Nova loja / assinar plano",
+        },
       ],
     },
     {
@@ -455,8 +459,11 @@ function QuickLinksSection() {
       title: "Cliente Final",
       color: "text-emerald-600",
       items: [
-        { label: "Login / Cadastro Cliente", path: "/auth", desc: "Consumidor acumula pontos" },
-        { label: "Painel Cliente", path: "/cliente", desc: "Extrato e resgates" },
+        {
+          label: "Portal do Cliente",
+          path: "/",
+          desc: "Cada loja possui um endereço público próprio: /slug-da-loja",
+        },
       ],
     },
   ];

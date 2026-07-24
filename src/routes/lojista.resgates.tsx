@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeTransactionsQuery } from "@/lib/queries";
-import { confirmarResgate, validarVoucher, cancelarVoucher } from "@/lib/qsf.functions";
-import { formatBRL, formatDate } from "@/lib/qsf-shared";
+import { confirmarResgate, validarVoucher, cancelarVoucher } from "@/lib/loyalty.functions";
+import { formatBRL, formatDate } from "@/lib/loyalty-shared";
 import type { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -375,7 +375,7 @@ function ResgatesPage() {
             <Input
               value={codigo}
               onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-              placeholder="QSF-XXXXXX"
+              placeholder="PMX-XXXX-XXXX"
               className="h-11 rounded-xl border-[#E5E7EB] bg-white font-mono uppercase tracking-widest focus-visible:ring-[#2563EB]/30"
               autoComplete="off"
             />
@@ -426,10 +426,10 @@ function ResgatesPage() {
         items={expirados}
         limit={20}
         onConfirm={handleConfirm}
-          onCancel={handleCancel}
-          confirming={confirmar.isPending}
-          cancelling={cancelar.isPending}
-        />
+        onCancel={handleCancel}
+        confirming={confirmar.isPending}
+        cancelling={cancelar.isPending}
+      />
       <Section
         title="Utilizados"
         icon={CheckCircle2}
@@ -437,10 +437,10 @@ function ResgatesPage() {
         items={utilizados}
         limit={30}
         onConfirm={handleConfirm}
-          onCancel={handleCancel}
-          confirming={confirmar.isPending}
-          cancelling={cancelar.isPending}
-        />
+        onCancel={handleCancel}
+        confirming={confirmar.isPending}
+        cancelling={cancelar.isPending}
+      />
       <Section
         title="Cancelados"
         icon={XCircle}
@@ -448,10 +448,10 @@ function ResgatesPage() {
         items={cancelados}
         limit={20}
         onConfirm={handleConfirm}
-          onCancel={handleCancel}
-          confirming={confirmar.isPending}
-          cancelling={cancelar.isPending}
-        />
+        onCancel={handleCancel}
+        confirming={confirmar.isPending}
+        cancelling={cancelar.isPending}
+      />
 
       <Dialog
         open={!!comprovante}

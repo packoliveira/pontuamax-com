@@ -40,14 +40,13 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
-          return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
-        }
+        const { authorizeCronRequest } = await import("@/lib/cron-auth.server");
+        const auth = authorizeCronRequest(request);
+        if (!auth.ok) return auth.response;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { sendWhatsappRaw, formatBrazilPhone } = await import("@/lib/notify.server");
-        const { calcularNivel } = await import("@/lib/qsf-shared");
+        const { calcularNivel } = await import("@/lib/loyalty-shared");
 
         const today = todayInBrasilia();
 
@@ -69,8 +68,7 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
 
         for (const store of stores as StoreRow[]) {
           const s = await getStoreSecrets(store.id);
-          if (!s.evolution_url || !s.evolution_apikey || !s.evolution_instance)
-            continue;
+          if (!s.evolution_url || !s.evolution_apikey || !s.evolution_instance) continue;
           summary.stores += 1;
 
           const evo = {
