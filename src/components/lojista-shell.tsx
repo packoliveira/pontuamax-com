@@ -154,13 +154,29 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
   );
 
   const Brand = () => (
-    <div className="flex items-center gap-2 px-4 py-4 border-b border-white/10">
-      <PontuaMaxMark size={32} />
+    <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
+      {loja?.logo_url ? (
+        <img
+          src={loja.logo_url}
+          alt={loja?.nome_fantasia ?? "Logo"}
+          className="h-10 w-10 rounded-lg object-cover bg-white/10 shrink-0"
+        />
+      ) : (
+        <Link
+          to="/lojista/personalizacao"
+          className="h-10 w-10 rounded-lg border border-dashed border-white/20 bg-white/5 flex items-center justify-center text-[10px] text-white/50 hover:bg-white/10 shrink-0 text-center leading-tight px-1"
+          title="Adicionar logo"
+        >
+          + logo
+        </Link>
+      )}
       <div className="min-w-0">
-        <PontuaMaxWordmark variant="dark" size={15} />
-        <div className="text-xs text-white/50 truncate max-w-[140px]">
-          {loja?.nome_fantasia ?? "—"}
+        <div className="text-sm font-semibold text-white truncate max-w-[150px]">
+          {loja?.nome_fantasia ?? "Minha loja"}
         </div>
+        {loja?.slug && (
+          <div className="text-xs text-white/50 truncate max-w-[150px]">/{loja.slug}</div>
+        )}
       </div>
     </div>
   );
@@ -185,12 +201,27 @@ export function LojistaShell({ children }: { children: React.ReactNode }) {
           <NotificationsBell variant="dark" />
           <ThemeToggle />
         </div>
+        <div className="px-3 py-2 border-t border-white/10 flex items-center justify-center gap-1.5 opacity-60">
+          <span className="text-[10px] text-white/50">powered by</span>
+          <PontuaMaxMark size={14} />
+          <PontuaMaxWordmark variant="dark" size={10} />
+        </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 backdrop-blur px-3 py-2">
           <div className="flex items-center gap-2">
-            <PontuaMaxMark size={28} />
-            <PontuaMaxWordmark variant="light" size={16} />
+            {loja?.logo_url ? (
+              <img
+                src={loja.logo_url}
+                alt={loja?.nome_fantasia ?? "Logo"}
+                className="h-8 w-8 rounded-md object-cover"
+              />
+            ) : (
+              <PontuaMaxMark size={28} />
+            )}
+            <span className="text-sm font-semibold truncate max-w-[160px]">
+              {loja?.nome_fantasia ?? "Minha loja"}
+            </span>
           </div>
           <div className="flex items-center gap-0.5">
             <NotificationsBell />
