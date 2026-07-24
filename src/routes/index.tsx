@@ -70,10 +70,14 @@ function Index() {
           }}
         />
 
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 pb-24 pt-10 sm:px-8 md:grid-cols-12 md:gap-6 md:pb-32 md:pt-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-5 pb-20 pt-8 sm:px-8 md:grid-cols-12 md:gap-6 md:pb-32 md:pt-16">
           {/* Coluna texto */}
           <div className="md:col-span-7">
-            <h1 className="font-display text-[54px] leading-[0.92] tracking-[-0.035em] sm:text-[76px] md:text-[92px] lg:text-[108px]">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-white/70">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8]" />
+              Programa de fidelidade
+            </div>
+            <h1 className="font-display text-[42px] leading-[0.95] tracking-[-0.03em] sm:text-[64px] md:text-[92px] lg:text-[108px]">
               Fidelize clientes
               <br />
               <span className="text-white/70">e venda mais</span>
@@ -87,15 +91,15 @@ function Index() {
               </span>
             </h1>
 
-            <p className="mt-8 max-w-lg text-[15px] leading-relaxed text-white/60 sm:text-[17px]">
-              Crie um programa de fidelidade com pontos, cashback e campanhas
-              para aumentar a recorrência da sua loja.
+            <p className="mt-6 max-w-lg text-[15.5px] leading-relaxed text-white/60 sm:text-[17px]">
+              Pontos, cashback e campanhas para trazer o cliente de volta —
+              sem depender de promoção toda semana.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 to="/lojista/onboarding"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all hover:-translate-y-[1px] hover:shadow-[0_20px_40px_-15px_rgba(20,203,168,0.6)]"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-4 text-[15px] font-semibold text-[#0A0A0A] transition-all hover:-translate-y-[1px] hover:shadow-[0_20px_40px_-15px_rgba(20,203,168,0.6)] sm:w-auto sm:py-3.5 sm:text-sm"
               >
                 Criar minha loja grátis
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A0A0A] text-white transition-transform group-hover:translate-x-0.5">
@@ -104,18 +108,18 @@ function Index() {
               </Link>
               <Link
                 to="/como-funciona"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-medium text-white/80 transition-colors hover:border-white/50 hover:text-white"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3.5 text-[15px] font-medium text-white/80 transition-colors hover:border-white/50 hover:text-white sm:w-auto sm:py-3 sm:text-sm"
               >
                 Ver como funciona
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="mt-12 flex items-start gap-4 border-t border-white/10 pt-6">
+            <div className="mt-10 flex items-start gap-4 border-t border-white/10 pt-6">
               <div className="mt-1 h-8 w-[2px] bg-[#14CBA8]" />
-              <p className="max-w-md text-[13px] leading-relaxed text-white/55 sm:text-[14px]">
-                Feito pra quem cansou de dar desconto e ver o cliente sumir.
-                <span className="text-white/85"> Recorrência de verdade — no seu caixa, todo mês.</span>
+              <p className="max-w-md text-[13.5px] leading-relaxed text-white/55 sm:text-[14px]">
+                Pra quem cansou de dar desconto.
+                <span className="text-white/85"> Recorrência de verdade, todo mês.</span>
               </p>
             </div>
           </div>
@@ -143,36 +147,36 @@ function Index() {
 
         {/* Seção — Campanha em tempo real */}
         <div className="border-t border-white/10">
-          <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-20">
-            <div className="mb-10 flex flex-col gap-3 md:mb-12 md:flex-row md:items-end md:justify-between">
+          <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 md:py-24">
+            <div className="mb-10 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#14CBA8]">
                   Campanha em tempo real
                 </p>
-                <h2 className="mt-3 max-w-xl font-display text-3xl leading-[1.1] text-white sm:text-4xl md:text-[42px]">
-                  Do envio ao retorno em vendas — no mesmo dia.
+                <h2 className="mt-3 max-w-xl font-display text-[32px] leading-[1.05] text-white sm:text-4xl md:text-[46px]">
+                  Do envio ao retorno em vendas.
                 </h2>
               </div>
-              <p className="max-w-sm text-[13.5px] leading-relaxed text-white/55">
-                Um recorte real de uma campanha automática: quem recebeu, o que recebeu e o que voltou pro seu caixa.
+              <p className="max-w-sm text-[14px] leading-relaxed text-white/55">
+                Um exemplo real de campanha automática: quem recebeu, quem voltou e quanto isso gerou para a loja.
               </p>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6">
               {/* Card 1 — Campanha ativa */}
-              <div className="rounded-[22px] bg-[#0B1220] p-6 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]">
+              <div className="rounded-[22px] bg-[#0B1220] p-5 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)] sm:p-6">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#F5A623]">
                   <svg viewBox="0 0 32 32" className="h-4 w-4" fill="currentColor" aria-hidden>
                     <path d="M16 3C8.82 3 3 8.82 3 16c0 2.29.6 4.51 1.74 6.47L3 29l6.7-1.71A12.94 12.94 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.5 18.36c-.32.9-1.86 1.72-2.6 1.82-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.57-6.6-5.83-.19-.26-1.57-2.09-1.57-4 0-1.9.99-2.83 1.34-3.22.35-.39.77-.48 1.03-.48h.74c.24 0 .56-.09.87.66.32.77 1.09 2.67 1.19 2.86.09.19.16.42.03.68-.13.26-.19.42-.39.65-.19.23-.41.51-.58.68-.19.19-.4.4-.17.79.23.39 1.02 1.68 2.19 2.72 1.5 1.34 2.77 1.76 3.16 1.95.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.87-.19.35.13 2.24 1.06 2.62 1.25.39.19.65.29.75.45.09.16.09.94-.23 1.85z"/>
                   </svg>
                   WhatsApp · Sua marca
                 </div>
-                <p className="mt-4 text-[16px] font-semibold leading-snug text-white">
+                <p className="mt-4 text-[15.5px] font-semibold leading-snug text-white sm:text-[16px]">
                   "Oi Mariana! Você tem{" "}
-                  <span className="text-[#F5A623]">R$ 18 de cashback</span>{" "}
-                  esperando pra usar 🎁"
+                  <span className="text-[#F5A623]">R$ 18 em cashback</span>{" "}
+                  para usar na próxima compra 🎁"
                 </p>
-                <div className="mt-5 flex items-center gap-3 text-[11.5px] text-white/45">
+                <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-white/45">
                   <span>09:42</span>
                   <span className="text-white/25">·</span>
                   <span>Régua automática</span>
@@ -187,7 +191,7 @@ function Index() {
               </div>
 
               {/* Card 2 — Retorno da campanha */}
-              <div className="rounded-[22px] bg-white p-6 ring-1 ring-black/5 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.4)]">
+              <div className="rounded-[22px] bg-white p-5 ring-1 ring-black/5 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.4)] sm:p-6">
                 <div className="flex items-center justify-between">
                   <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-neutral-500">
                     Retorno da campanha
@@ -195,17 +199,17 @@ function Index() {
                   <span className="text-[11px] text-neutral-400">hoje</span>
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="font-display text-[44px] font-bold leading-none tracking-tight text-neutral-900">
+                  <span className="font-display text-[40px] font-bold leading-none tracking-tight text-neutral-900 sm:text-[44px]">
                     3
                   </span>
                   <span className="text-[13px] text-neutral-500">clientes voltaram</span>
                 </div>
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-neutral-50 px-3.5 py-3">
+                <div className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-3">
+                  <div className="rounded-xl bg-neutral-50 px-3 py-3 sm:px-3.5">
                     <p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Vendas</p>
                     <p className="mt-1 font-display text-lg font-semibold text-neutral-900">+R$ 312</p>
                   </div>
-                  <div className="rounded-xl bg-neutral-50 px-3.5 py-3">
+                  <div className="rounded-xl bg-neutral-50 px-3 py-3 sm:px-3.5">
                     <p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Ticket médio</p>
                     <p className="mt-1 font-display text-lg font-semibold text-emerald-600">+14%</p>
                   </div>
@@ -221,11 +225,11 @@ function Index() {
 
         {/* Faixa editorial — frase única de posicionamento */}
         <div className="border-t border-white/10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between md:py-12">
-            <p className="font-display text-2xl leading-tight text-white/85 sm:text-3xl md:text-[34px]">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-12 sm:px-8 md:flex-row md:items-center md:justify-between md:py-14">
+            <p className="font-display text-[22px] leading-tight text-white/85 sm:text-3xl md:text-[34px]">
               "A gente parou de dar desconto — e faturou mais."
             </p>
-            <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-white/40">
+            <div className="flex items-center gap-3 text-[10.5px] uppercase tracking-[0.28em] text-white/40">
               <span className="h-[1px] w-8 bg-white/30" />
               Lojistas PontuaMax · Brasil
             </div>
@@ -237,12 +241,12 @@ function Index() {
           MARQUEE — logos rolando sobre fundo cru, com nome editorial
          ============================================================ */}
       <section className="border-b border-black/10 bg-[#F5F2EA]">
-        <div className="mx-auto flex max-w-7xl items-center gap-10 px-5 py-6 sm:px-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-6 px-5 py-5 sm:gap-10 sm:px-8 sm:py-6">
           <p className="hidden shrink-0 max-w-[180px] text-[10px] uppercase tracking-[0.28em] text-[#0B0F1A]/45 md:block">
             Rodam PontuaMax
           </p>
-          <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
-            <div className="flex min-w-max animate-[marquee_28s_linear_infinite] gap-12">
+          <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
+            <div className="flex min-w-max animate-[marquee_28s_linear_infinite] gap-8 sm:gap-12">
               {[...Array(2)].flatMap((_, r) =>
                 [
                   "Quero Ser Fit",
@@ -256,7 +260,7 @@ function Index() {
                 ].map((n) => (
                   <span
                     key={`${r}-${n}`}
-                    className="font-display text-2xl tracking-tight text-[#0B0F1A]/55"
+                    className="font-display text-xl tracking-tight text-[#0B0F1A]/55 sm:text-2xl"
                   >
                     {n}
                   </span>
@@ -271,20 +275,24 @@ function Index() {
           MANIFESTO editorial — tipografia dominante, sem cards
          ============================================================ */}
       <section className="relative bg-[#FAF8F2]">
-        <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-36">
-          <div className="grid gap-12 md:grid-cols-12 md:gap-6">
-            <div className="md:col-span-3">
-              <div className="text-sm text-[#0B0F1A]/60">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 md:py-36">
+          <div className="grid gap-10 md:grid-cols-12 md:gap-6">
+            <div className="md:col-span-3 md:order-2">
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#0B0F1A]/45">
+                Manifesto
+              </p>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-[#0B0F1A]/65 md:text-sm">
                 Com pontos, cashback e campanhas, sua loja cria motivo para o
                 cliente comprar de novo — sem depender de promoção toda semana.
-              </div>
+              </p>
             </div>
-            <div className="md:col-span-9">
-              <h2 className="font-display text-[44px] leading-[1.02] tracking-[-0.02em] text-[#0B0F1A] sm:text-6xl md:text-[80px]">
-                Menos <span className="text-[#0B0F1A]/50">desconto.</span><br />
+            <div className="md:col-span-9 md:order-1">
+              <h2 className="font-display text-[40px] leading-[1.02] tracking-[-0.02em] text-[#0B0F1A] sm:text-6xl md:text-[80px]">
+                Menos <span className="text-[#0B0F1A]/50">desconto.</span>
+                <br />
                 Mais clientes <span className="text-[#14CBA8]">voltando.</span>
               </h2>
-              <div className="mt-10 grid gap-8 border-t border-black/10 pt-8 text-[15px] leading-relaxed text-[#0B0F1A]/70 sm:grid-cols-2 md:text-base">
+              <div className="mt-8 grid gap-6 border-t border-black/10 pt-8 text-[15px] leading-relaxed text-[#0B0F1A]/70 sm:gap-8 sm:grid-cols-2 md:mt-10 md:text-base">
                 <p>
                   Desconto atrai uma venda. Fidelização cria retorno. Em vez de
                   ensinar o cliente a esperar promoção, sua loja cria
@@ -355,27 +363,27 @@ function Index() {
               "radial-gradient(50% 60% at 80% 30%, rgba(20,203,168,0.10), transparent 60%)",
           }}
         />
-        <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8 md:py-40">
-          <div className="grid gap-12 md:grid-cols-12 md:items-end md:gap-6">
+        <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-40">
+          <div className="grid gap-10 md:grid-cols-12 md:items-end md:gap-6">
             <div className="md:col-span-8">
-              <h2 className="font-display text-[52px] leading-[0.98] tracking-[-0.03em] text-[#0B0F1A] sm:text-7xl md:text-[104px]">
+              <h2 className="font-display text-[44px] leading-[0.98] tracking-[-0.03em] text-[#0B0F1A] sm:text-7xl md:text-[104px]">
                 Comece <span className="text-[#0B0F1A]/50">hoje</span>.
                 <br />
                 Veja seu cliente <span className="text-[#14CBA8]">voltar</span>.
               </h2>
             </div>
             <div className="md:col-span-4 md:pb-4">
-              <div className="flex flex-col items-start gap-5">
+              <div className="flex flex-col items-stretch gap-5 sm:items-start">
                 <Link
                   to="/lojista/onboarding"
-                  className="group inline-flex items-center gap-2 rounded-full bg-[#0A0A0A] px-7 py-4 text-sm font-semibold text-white transition-all hover:-translate-y-[1px] hover:shadow-[0_20px_40px_-15px_rgba(10,10,10,0.4)]"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0A0A0A] px-7 py-4 text-[15px] font-semibold text-white transition-all hover:-translate-y-[1px] hover:shadow-[0_20px_40px_-15px_rgba(10,10,10,0.4)] sm:w-auto sm:text-sm"
                 >
                   Criar minha loja grátis
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#0A0A0A] transition-transform group-hover:translate-x-0.5">
                     <ArrowUpRight className="h-3 w-3" />
                   </span>
                 </Link>
-                <p className="max-w-xs text-sm text-[#0B0F1A]/55">
+                <p className="max-w-xs text-[14px] leading-relaxed text-[#0B0F1A]/55">
                   Crie sua página, ative pontos e cashback e comece a gerar
                   recorrência na sua loja.
                 </p>
@@ -410,18 +418,18 @@ function Chapter({
 }) {
   const imgFirst = side === "left";
   return (
-    <article className="grid grid-cols-1 items-center gap-10 border-b border-black/10 py-24 last:border-b-0 md:grid-cols-12 md:gap-8 md:py-32">
+    <article className="grid grid-cols-1 items-center gap-8 border-b border-black/10 py-16 last:border-b-0 sm:gap-10 sm:py-20 md:grid-cols-12 md:gap-8 md:py-32">
       <div
         className={`relative md:col-span-6 ${imgFirst ? "md:order-1" : "md:order-2"}`}
       >
-        <div className="relative overflow-hidden rounded-[28px] bg-[#F5F2EA]">
+        <div className="relative overflow-hidden rounded-[24px] bg-[#F5F2EA] sm:rounded-[28px]">
           <img
             src={image}
             alt={imageAlt}
             loading="lazy"
-            className="aspect-[4/5] w-full object-cover md:aspect-[5/6]"
+            className="aspect-[4/3] w-full object-cover sm:aspect-[4/5] md:aspect-[5/6]"
           />
-          <div className="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur">
+          <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur sm:left-5 sm:top-5">
             {highlight}
           </div>
         </div>
@@ -429,23 +437,23 @@ function Chapter({
       <div
         className={`md:col-span-6 ${imgFirst ? "md:order-2 md:pl-6" : "md:order-1 md:pr-6"}`}
       >
-        <div className="flex items-baseline gap-6">
-          <div className="font-display text-6xl leading-none tracking-tight text-[#0B0F1A]/15 sm:text-7xl md:text-[96px]">
+        <div className="flex items-baseline gap-4 sm:gap-6">
+          <div className="font-display text-5xl leading-none tracking-tight text-[#0B0F1A]/15 sm:text-7xl md:text-[96px]">
             {index}
           </div>
           <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
             {eyebrow}
           </div>
         </div>
-        <h3 className="mt-6 font-display text-[36px] leading-[1.05] tracking-[-0.015em] text-[#0B0F1A] sm:text-5xl md:text-[56px]">
+        <h3 className="mt-5 font-display text-[30px] leading-[1.05] tracking-[-0.015em] text-[#0B0F1A] sm:mt-6 sm:text-5xl md:text-[56px]">
           {title}
         </h3>
-        <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-[#0B0F1A]/65 md:text-base">
+        <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-[#0B0F1A]/65 sm:mt-6 md:text-base">
           {body}
         </p>
         <Link
           to="/como-funciona"
-          className="mt-8 inline-flex items-center gap-2 border-b border-[#0B0F1A]/40 pb-1 text-sm font-semibold text-[#0B0F1A] transition-colors hover:border-[#14CBA8] hover:text-[#0B0F1A]"
+          className="mt-7 inline-flex items-center gap-2 border-b border-[#0B0F1A]/40 pb-1 text-[14.5px] font-semibold text-[#0B0F1A] transition-colors hover:border-[#14CBA8] hover:text-[#0B0F1A]"
         >
           Ver detalhes <ArrowRight className="h-4 w-4" />
         </Link>
