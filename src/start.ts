@@ -1,10 +1,7 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
-// Project-specific attacher — replaces the generated one on purpose.
-// The generated `attachSupabaseAuth` called `supabase.auth.getSession()`
-// on every RPC, causing repeated `/.well-known/jwks.json` fetches.
-import { attachSupabaseAuth } from "@/integrations/supabase/bearer-attacher";
+import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -24,4 +21,8 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
   requestMiddleware: [errorMiddleware],
+  defaultSsrOptions: {
+    // CSRF é validado via bearer token JWT do Supabase (attachSupabaseAuth).
+    disableCsrfMiddlewareWarning: true,
+  },
 }));

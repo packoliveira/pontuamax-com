@@ -277,7 +277,7 @@ const SidebarTrigger = React.forwardRef<
       {...props}
     >
       <PanelLeft />
-      <span className="sr-only">Alternar menu lateral</span>
+      <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
 });
@@ -291,7 +291,7 @@ const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"bu
       <button
         ref={ref}
         data-sidebar="rail"
-        aria-label="Alternar menu lateral"
+        aria-label="Toggle Sidebar"
         tabIndex={-1}
         onClick={toggleSidebar}
         title="Toggle Sidebar"
