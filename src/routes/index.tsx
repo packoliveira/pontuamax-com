@@ -56,14 +56,12 @@ function Index() {
         {/* Grão + spotlight */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18]"
           style={{
             background:
               "radial-gradient(70% 55% at 72% 35%, rgba(20,203,168,0.18), transparent 60%), radial-gradient(50% 45% at 18% 15%, rgba(109,40,217,0.22), transparent 65%)",
           }}
         />
-        {/* Reduced overall opacity for a subtler hero background */}
-        {/* handled inline above */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 mix-blend-overlay opacity-[0.06]"
