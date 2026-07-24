@@ -196,28 +196,26 @@ function Index() {
         <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-36">
           <div className="grid gap-12 md:grid-cols-12 md:gap-6">
             <div className="md:col-span-3">
-              <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
-                — Ensaio 01
-              </div>
-              <div className="mt-4 text-sm text-[#0B0F1A]/60">
-                Por que desconto não fideliza mais ninguém.
+              <div className="text-sm text-[#0B0F1A]/60">
+                Com pontos, cashback e campanhas, sua loja cria motivo para o
+                cliente comprar de novo — sem depender de promoção toda semana.
               </div>
             </div>
             <div className="md:col-span-9">
               <h2 className="font-display text-[44px] leading-[1.02] tracking-[-0.02em] text-[#0B0F1A] sm:text-6xl md:text-[80px]">
-                Desconto <span className="text-[#0B0F1A]/50">gasta</span> caro.<br />
-                Fidelidade <span className="text-[#14CBA8]">rende</span> sempre.
+                Menos <span className="text-[#0B0F1A]/50">desconto.</span><br />
+                Mais clientes <span className="text-[#14CBA8]">voltando.</span>
               </h2>
               <div className="mt-10 grid gap-8 border-t border-black/10 pt-8 text-[15px] leading-relaxed text-[#0B0F1A]/70 sm:grid-cols-2 md:text-base">
                 <p>
-                  A maioria das lojas brasileiras dá desconto no impulso e
-                  nunca mais vê o cliente. Queima margem, treina o consumidor
-                  a esperar promoção e vira refém do preço.
+                  Desconto atrai uma venda. Fidelização cria retorno. Em vez de
+                  ensinar o cliente a esperar promoção, sua loja cria
+                  relacionamento e aumenta a recorrência.
                 </p>
                 <p>
-                  A gente inverte a conta. O cliente ganha um motivo pra
-                  voltar. A loja recupera margem, ticket médio e recorrência
-                  — sem depender de agência ou contrato longo.
+                  O cliente ganha um motivo para voltar, e sua loja vende com
+                  mais margem, mais frequência e mais previsibilidade ao longo
+                  do mês.
                 </p>
               </div>
             </div>
