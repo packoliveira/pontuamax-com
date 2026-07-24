@@ -206,6 +206,13 @@
   &:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--primary) 25%, transparent); }
 }
 
+/* Marketing site typography — Instrument Serif for display accents. */
+@utility font-display {
+  font-family: "Instrument Serif", ui-serif, Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
 /* ==========================================================================
  * QSF Midnight Indigo — tema escopado apenas para a página pública /{slug}.
  * Aplicado via <html class="qsf-midnight"> (montado em useEffect da rota)
