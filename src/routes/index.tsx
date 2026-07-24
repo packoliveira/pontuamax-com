@@ -142,7 +142,7 @@ function Index() {
             {/* Floating cards — mesma pegada da referência */}
             <div
               aria-hidden
-              className="pointer-events-none absolute -left-4 top-6 hidden w-[260px] rotate-[-4deg] rounded-2xl bg-[#111827] p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/10 md:block lg:-left-10 lg:w-[280px] animate-[float-slow_7s_ease-in-out_infinite]"
+              className="pointer-events-none absolute -left-4 top-6 hidden w-[260px] rounded-2xl bg-[#111827] p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/10 md:block lg:-left-10 lg:w-[280px] animate-[float-card-left_7s_ease-in-out_infinite]"
             >
               <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#F5A623]">
                 WhatsApp · Sua marca
@@ -161,7 +161,7 @@ function Index() {
 
             <div
               aria-hidden
-              className="pointer-events-none absolute -bottom-6 right-0 hidden w-[220px] rotate-[3deg] rounded-2xl bg-white p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.35)] ring-1 ring-black/5 md:block lg:-right-6 lg:w-[240px] animate-[float-slow_9s_ease-in-out_infinite_reverse]"
+              className="pointer-events-none absolute -bottom-6 right-0 hidden w-[220px] rounded-2xl bg-white p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.35)] ring-1 ring-black/5 md:block lg:-right-6 lg:w-[240px] animate-[float-card-right_9s_ease-in-out_infinite]"
             >
               <div className="text-[11px] font-medium text-neutral-500">
                 Cliente voltou
