@@ -1,1269 +1,805 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
-import {
-  storeBySlugQuery,
-  activeStoreProductsQuery,
-  myLinkAtStoreQuery,
-  myTransactionsAtStoreQuery,
-  myStoreQuery,
-  type StorePublic,
-} from "@/lib/queries";
-import {
-  vincularClienteALoja,
-  prepararLoginClientePorCpf,
-  reivindicarCadastroPendente,
-  resgatarProduto,
-  resgatarCashback,
-  criarClienteViaCpf,
-} from "@/lib/loyalty.functions";
-import {
-  formatBRL,
-  calcularNivel,
-  progressoNivel,
-  cpfToEmail,
-  legacyCpfToEmail,
-  formatCPF,
-  isValidCPF,
-  onlyDigits,
-} from "@/lib/loyalty-shared";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PasswordInput } from "@/components/ui/password-input";
-import {
-  traduzirErroAuth,
-  isCredenciaisInvalidas,
-  isUsuarioJaCadastrado,
-  validarCPF,
-  validarSenha,
-  validarConfirmacaoSenha,
-} from "@/lib/auth-errors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { money } from "@/lib/pos";
+import { formatDateTime } from "@/lib/erp";
 import {
-  Coins,
-  Wallet,
-  LogOut,
-  Trophy,
-  Ticket,
-  Share2,
-  Gift,
-  FileText,
-  Package,
+  Award, Coins, Gift, QrCode, Share2, Sparkles, UserCheck,
+  CheckCircle2, ArrowRight, Copy, ShoppingBag, LogOut,
+  HeartHandshake, RotateCcw, Download, Bell
 } from "lucide-react";
-import { RewardRain } from "@/components/reward-rain";
-import { HistoricoSection } from "@/components/portal/HistoricoSection";
-import { InstagramCard, MeusPostsInstagram } from "@/components/portal/InstagramSection";
-import { VouchersSection } from "@/components/portal/VouchersSection";
-
-const REF_KEY = "pontuamax_referrer_phone";
-function getStoredReferrer(): string | null {
-  try {
-    const p = new URLSearchParams(window.location.search).get("indicou");
-    if (p) {
-      const d = p.replace(/\D/g, "");
-      if (d.length >= 8) localStorage.setItem(REF_KEY, d);
-    }
-    return localStorage.getItem(REF_KEY);
-  } catch {
-    return null;
-  }
-}
-
-type Loja = StorePublic;
-type Link = Tables<"store_clients">;
+import { toast } from "sonner";
+import { triggerConfetti, playSuccessChime } from "@/lib/effects";
+import { subscribeUserToPush } from "@/lib/push";
+import { claimPendingPointsForCpf } from "@/services/pending-points-service";
 
 export const Route = createFileRoute("/$slug")({
-  ssr: false,
-  component: ClientePage,
+  component: VitrineClienteFinal,
 });
 
-function ClientePage() {
-  const { slug } = Route.useParams();
-  const { data: loja, isLoading } = useQuery(storeBySlugQuery(slug));
+// Mock de recompensas padrão (serão adaptadas dinamicamente com o nome da moeda do lojista)
+const DEFAULT_REWARDS = [
+  {
+    id: "r1",
+    title: "Voucher R$ 20,00 de Desconto",
+    description: "Válido para qualquer compra na loja física ou e-commerce acima de R$ 100",
+    points_cost: 200,
+    cashback_cost: 0,
+    category: "desconto",
+    image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&auto=format&fit=crop&q=80",
+    badge: "Mais Resgatado",
+  },
+  {
+    id: "r2",
+    title: "Camiseta Exclusiva da Loja",
+    description: "Edição limitada do programa de fidelidade. Retire no balcão da loja",
+    points_cost: 500,
+    cashback_cost: 0,
+    category: "brinde",
+    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80",
+    badge: "Exclusivo VIP",
+  },
+  {
+    id: "r3",
+    title: "Squeeze Térmica Inox 750ml",
+    description: "Mantenha sua bebida gelada por até 24h durante o dia a dia",
+    points_cost: 350,
+    cashback_cost: 0,
+    category: "brinde",
+    image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&auto=format&fit=crop&q=80",
+    badge: "Popular",
+  },
+  {
+    id: "r4",
+    title: "Voucher R$ 50,00 de Cashback Extra",
+    description: "Crédito direto no seu saldo para usar como quiser na próxima compra",
+    points_cost: 450,
+    cashback_cost: 0,
+    category: "cashback",
+    image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&auto=format&fit=crop&q=80",
+    badge: "Super Benefício",
+  },
+];
 
-  const bg = useMemo(() => resolveBg(loja), [loja]);
-  const style = useMemo(
-    () =>
-      loja
-        ? ({
-            ["--brand-primary" as string]: loja.brand_primary,
-            ["--brand-secondary" as string]: loja.brand_secondary,
-            backgroundColor: bg.base,
-            color: bg.text,
-          } as React.CSSProperties)
-        : {},
-    [loja, bg],
-  );
+function VitrineClienteFinal() {
+  const params = Route.useParams() as { slug?: string };
+  const slug = params.slug || "loja";
 
-  // Ativa o tema Midnight Indigo em <html> enquanto a página estiver montada,
-  // para que portais (Dialog, Sonner) também herdem os tokens escuros.
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add("pontuamax-midnight");
-    if (bg.isLight) root.classList.add("pontuamax-light");
-    return () => {
-      root.classList.remove("pontuamax-midnight");
-      root.classList.remove("pontuamax-light");
-    };
-  }, [bg.isLight]);
-
-  if (isLoading) {
-    return (
-      <div
-        className="min-h-dvh flex items-center justify-center"
-        style={{ backgroundColor: bg.base }}
-      >
-        <div className="flex flex-col items-center gap-3 text-sm text-slate-400">
-          <div className="h-8 w-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
-          Carregando...
-        </div>
-      </div>
-    );
-  }
-
-  if (!loja) {
-    return (
-      <div
-        className="min-h-dvh flex items-center justify-center p-6 text-center"
-        style={{ backgroundColor: bg.base }}
-      >
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: bg.text }}>
-            Loja não encontrada
-          </h1>
-          <p className="text-sm opacity-70 mt-2" style={{ color: bg.text }}>
-            Verifique o endereço com o lojista.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={style} className="min-h-dvh relative overflow-hidden">
-      {/* Aura de fundo derivada das cores da marca — bem sutil, fica atrás de tudo */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px]"
-        style={{
-          background: `radial-gradient(ellipse at top, color-mix(in oklab, ${bg.accent} 22%, transparent), transparent 60%)`,
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full blur-3xl"
-        style={{ backgroundColor: loja.brand_primary, opacity: bg.isLight ? 0.15 : 0.4 }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -right-32 h-96 w-96 rounded-full blur-3xl"
-        style={{ backgroundColor: loja.brand_secondary, opacity: bg.isLight ? 0.12 : 0.3 }}
-      />
-      <div className="relative">
-        <ClienteFlow loja={loja} />
-      </div>
-    </div>
-  );
-}
-
-/** Deriva o fundo da página pública a partir das preferências da loja. */
-function resolveBg(loja: Loja | null | undefined): {
-  base: string;
-  accent: string;
-  text: string;
-  isLight: boolean;
-} {
-  const DARK = { base: "#0a0a1a", text: "#e2e8f0" };
-  const LIGHT = { base: "#f8fafc", text: "#0f172a" };
-  if (!loja) return { ...DARK, accent: "#6366f1", isLight: false };
-  const mode = (loja.bg_mode as "dark" | "light" | "custom" | null) ?? "dark";
-  if (mode === "light") return { ...LIGHT, accent: loja.brand_primary, isLight: true };
-  if (mode === "custom") {
-    const base = loja.bg_color_1 || DARK.base;
-    const accent = loja.bg_color_2 || loja.brand_primary;
-    const isLight = isLightColor(base);
-    return { base, accent, text: isLight ? LIGHT.text : DARK.text, isLight };
-  }
-  return { ...DARK, accent: loja.brand_primary, isLight: false };
-}
-
-function isLightColor(hex: string): boolean {
-  const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);
-  if (!m) return false;
-  let h = m[1];
-  if (h.length === 3)
-    h = h
-      .split("")
-      .map((c) => c + c)
-      .join("");
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  // Luminância relativa aproximada
-  const l = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return l > 0.6;
-}
-
-function ClienteFlow({ loja }: { loja: Loja }) {
-  const qc = useQueryClient();
-  const { data: link, isLoading } = useQuery(myLinkAtStoreQuery(loja.id));
-  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
-  const [hydrating, setHydrating] = useState(false);
-  const [authenticating, setAuthenticating] = useState(false);
-  // Se o usuário logado é o próprio dono da loja (lojista visitando "minha
-  // página pública"), NUNCA vincula ele como cliente — apenas mostra o modo
-  // prévia com atalho pro painel.
-  const { data: minhaLoja, isLoading: isOwnerCheckLoading } = useQuery({
-    ...myStoreQuery(),
-    enabled: !!sessionUserId,
+  // 1. Busca dados públicos da loja pelo slug
+  const { data: org } = useQuery({
+    queryKey: ["public-org", slug],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("organizations")
+        .select("id, name, logo_url, currency")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      return data ?? { id: "demo-org", name: slug.toUpperCase().replace(/-/g, " "), logo_url: null };
+    },
   });
-  const isOwnerPreview = !!minhaLoja && minhaLoja.id === loja.id;
-  // Enquanto não sabemos se o usuário logado é o dono da loja, NÃO podemos
-  // renderizar VincularStore — senão criamos vínculo do próprio lojista.
-  const ownerCheckPending = !!sessionUserId && isOwnerCheckLoading;
+
+  // 2. Busca configurações de branding e regras dinâmicas salvas pelo lojista (Whitelabel)
+  const { data: storeConfig } = useQuery({
+    enabled: !!org?.id,
+    queryKey: ["store-branding-public", org?.id],
+    queryFn: async () => {
+      // Branding (logo, cores, nome da moeda, banner)
+      const { data: brandingRow } = await supabase
+        .from("integration_mappings")
+        .select("metadata")
+        .eq("organization_id", org!.id)
+        .eq("source", "olist")
+        .eq("entity_type", "store_branding")
+        .maybeSingle();
+
+      // Regras de fidelidade (cashback %, conversão de pontos)
+      const { data: rulesRow } = await supabase
+        .from("integration_mappings")
+        .select("metadata")
+        .eq("organization_id", org!.id)
+        .eq("source", "olist")
+        .eq("entity_type", "loyalty_settings")
+        .maybeSingle();
+
+      const brandingMeta = (brandingRow?.metadata as any) ?? {};
+      const rulesMeta = (rulesRow?.metadata as any) ?? {};
+
+      const defaultTiers = [
+        { name: "Bronze 🥉", min: 0, nextMin: 500, color: "text-amber-500 bg-amber-500/10 border-amber-500/30" },
+        { name: "Prata 🥈", min: 500, nextMin: 1000, color: "text-slate-300 bg-slate-500/10 border-slate-500/30" },
+        { name: "Ouro 🥇", min: 1000, nextMin: 2000, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30" },
+        { name: "Diamante 💎", min: 2000, nextMin: 5000, color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30" },
+      ];
+
+      return {
+        logoUrl: brandingMeta.logo_url ?? org?.logo_url ?? null,
+        bannerUrl: brandingMeta.banner_url ?? null,
+        primaryColor: brandingMeta.primary_color ?? "#6366f1", // Cor primária do lojista
+        currencyName: brandingMeta.currency_name ?? "Pontos", // Nome dinâmico da moeda de troca
+        cashbackPercent: Number(rulesMeta.cashback_percent ?? 5),
+        pointsRate: Number(rulesMeta.points_per_currency ?? 1),
+        vipTiers: (brandingMeta.vip_tiers as typeof defaultTiers) ?? defaultTiers,
+      };
+    },
+  });
+
+  const currencyName = storeConfig?.currencyName ?? "Pontos";
+  const primaryColor = storeConfig?.primaryColor ?? "#6366f1";
+
+  // 3. Busca prêmios dinâmicos ativos cadastrados pelo lojista no painel (/premios)
+  const { data: publicRewards } = useQuery({
+    enabled: !!org?.id,
+    queryKey: ["public-store-rewards", org?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("integration_mappings")
+        .select("external_id, metadata")
+        .eq("organization_id", org!.id)
+        .eq("source", "olist")
+        .eq("entity_type", "loyalty_rewards");
+
+      if (!data || data.length === 0) {
+        return DEFAULT_REWARDS;
+      }
+
+      const activeRewards = data
+        .map((row: any) => ({
+          id: row.external_id,
+          image: row.metadata?.image_url ?? row.metadata?.image ?? "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&auto=format&fit=crop&q=80",
+          ...(row.metadata as any),
+        }))
+        .filter((r: any) => r.active !== false && (r.stock === undefined || r.stock === -1 || r.stock > 0));
+
+      return activeRewards.length > 0 ? activeRewards : DEFAULT_REWARDS;
+    },
+  });
+
+  const rewards = publicRewards ?? DEFAULT_REWARDS;
+
+  // Estado de Login / Identificação do Cliente Final
+  const [cpfInput, setCpfInput] = useState("");
+  const [identifiedCpf, setIdentifiedCpf] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(`pm_client_cpf_${slug}`) || null;
+    }
+    return null;
+  });
+
+  // 4. Estado de Instalação do PWA & Web Push
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [pushSubscribed, setPushSubscribed] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSessionUserId(data.session?.user.id ?? null));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSessionUserId(s?.user.id ?? null);
-      qc.invalidateQueries();
-    });
-    return () => sub.subscription.unsubscribe();
-  }, [qc]);
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
 
-  const handleAuthSuccess = async () => {
-    setHydrating(true);
-    try {
-      // 1) Aguarda a sessão do Supabase estar realmente ativa
-      let uid: string | null = null;
-      for (let i = 0; i < 20; i++) {
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user.id) {
-          uid = data.session.user.id;
-          break;
-        }
-        await new Promise((r) => setTimeout(r, 100));
-      }
-      // 2) Força o estado local (não depende só do listener)
-      setSessionUserId(uid);
-      // 3) Invalida especificamente as queries relevantes e aguarda
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ["my-link", loja.id] }),
-        qc.invalidateQueries({ queryKey: ["my-transactions", loja.id] }),
-      ]);
-    } finally {
-      setHydrating(false);
-      setAuthenticating(false);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    if (typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches) {
+      setIsAppInstalled(true);
     }
-  };
 
-  return (
-    <>
-      <Header loja={loja} showLogout={!!sessionUserId} />
-      <BannerHero loja={loja} />
-      <div className="animate-panel-in">
-        {isOwnerPreview ? (
-          <OwnerPreviewBanner />
-        ) : isLoading || hydrating || authenticating || ownerCheckPending ? (
-          <div className="flex items-center justify-center gap-3 p-10 text-sm text-slate-400">
-            <div className="h-4 w-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
-            Carregando...
-          </div>
-        ) : sessionUserId && link ? (
-          <ClienteLogado loja={loja} link={link} />
-        ) : sessionUserId && !link ? (
-          <VincularStore loja={loja} />
-        ) : (
-          <div className="relative">
-            {loja.reward_rain_enabled && (
-              <RewardRain
-                colors={
-                  (loja.reward_rain_colors ?? []).length > 0
-                    ? loja.reward_rain_colors
-                    : [
-                        loja.brand_primary,
-                        loja.brand_secondary,
-                        loja.brand_accent_cashback || "#FBBF24",
-                        "#FFFFFF",
-                        "#F97316",
-                        "#F59E0B",
-                      ]
-                }
-                opacity={loja.reward_rain_opacity ?? 0.75}
-              />
-            )}
-            <div className="relative" style={{ zIndex: 1 }}>
-              <Auth
-                loja={loja}
-                onAuthStart={() => setAuthenticating(true)}
-                onAuthError={() => setAuthenticating(false)}
-                onAuthenticated={handleAuthSuccess}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
-
-function BannerHero({ loja }: { loja: Loja }) {
-  const desktop = loja.banner_url;
-  const mobile = loja.banner_url_mobile || loja.banner_url;
-  if (!desktop && !mobile) return null;
-  const fit: "cover" | "contain" = loja.banner_mobile_fit === "contain" ? "contain" : "cover";
-  const px = loja.banner_mobile_position_x ?? 50;
-  const py = loja.banner_mobile_position_y ?? 50;
-  const zoom = (loja.banner_mobile_zoom ?? 100) / 100;
-  return (
-    <div className="relative">
-      <div className="max-w-2xl mx-auto px-4 pt-4">
-        <div className="relative animate-in fade-in zoom-in-95 duration-500">
-          {mobile && (
-            <div className="w-full aspect-[2/1] sm:hidden">
-              <img
-                src={mobile}
-                alt={`Banner ${loja.nome_fantasia}`}
-                className="w-full h-full"
-                style={{
-                  objectFit: fit,
-                  objectPosition: `${px}% ${py}%`,
-                  transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-                  transformOrigin: `${px}% ${py}%`,
-                }}
-                loading="eager"
-              />
-            </div>
-          )}
-          {desktop && (
-            <img
-              src={desktop}
-              alt={`Banner ${loja.nome_fantasia}`}
-              className="w-full h-40 sm:h-48 md:h-56 object-contain hidden sm:block"
-              loading="eager"
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OwnerPreviewBanner() {
-  return (
-    <div className="max-w-2xl mx-auto p-4 -mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <Card className="border-indigo-500/20 bg-[#141432]/70 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-base text-slate-100">
-            Você está vendo sua loja como visitante
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-slate-400">
-          <p>
-            Esta é a página pública que seus clientes acessam. Como você está logado como dono da
-            loja, nada é criado nem vinculado ao clicar aqui.
-          </p>
-          <p>
-            Para testar como cliente, saia da sua conta de lojista (canto superior direito) ou abra
-            este link em uma janela anônima.
-          </p>
-          <Link to="/lojista">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-indigo-500/30 bg-transparent text-slate-200 hover:bg-indigo-500/10 hover:text-white"
-            >
-              Voltar ao painel
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function Header({ loja, showLogout }: { loja: Loja; showLogout: boolean }) {
-  const qc = useQueryClient();
-  const doLogout = async () => {
-    await supabase.auth.signOut();
-    qc.clear();
-  };
-  return (
-    <header className="px-4 py-6 border-b border-indigo-500/10 backdrop-blur-md bg-[#0a0a1a]/60 sticky top-0 z-20">
-      <div className="max-w-2xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative shrink-0">
-            {loja.logo_url ? (
-              <img
-                src={loja.logo_url}
-                alt={loja.nome_fantasia}
-                className="relative h-12 w-12 object-contain"
-              />
-            ) : (
-              <div
-                className="relative h-12 w-12 rounded-2xl flex items-center justify-center font-bold text-white text-lg shadow-lg border"
-                style={{
-                  background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                  borderColor: `color-mix(in oklab, ${loja.brand_primary} 50%, transparent)`,
-                  boxShadow: `0 8px 20px -6px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
-                }}
-              >
-                {loja.nome_fantasia.charAt(0)}
-              </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            {(loja.header_kicker_show ?? true) && (
-              <div
-                className="uppercase tracking-[0.2em] font-semibold"
-                style={{
-                  color: `color-mix(in oklab, ${loja.brand_primary} 60%, #cbd5e1)`,
-                  fontSize: { xs: "9px", sm: "10px", md: "12px" }[
-                    (loja.header_kicker_size ?? "sm") as "xs" | "sm" | "md"
-                  ],
-                }}
-              >
-                {loja.header_kicker_text || "Fidelidade"}
-              </div>
-            )}
-            <div
-              className={`leading-tight truncate ${
-                {
-                  sm: "text-sm",
-                  md: "text-base sm:text-lg",
-                  lg: "text-lg sm:text-xl",
-                  xl: "text-xl sm:text-2xl",
-                  "2xl": "text-2xl sm:text-3xl",
-                }[(loja.header_title_size ?? "md") as "sm" | "md" | "lg" | "xl" | "2xl"]
-              } ${
-                {
-                  normal: "font-normal",
-                  semibold: "font-semibold",
-                  bold: "font-bold",
-                  black: "font-black",
-                }[loja.header_title_weight ?? "bold"]
-              }`}
-              style={{ color: loja.text_on_dark || "#ffffff" }}
-            >
-              {loja.nome_fantasia}
-            </div>
-          </div>
-        </div>
-        {showLogout && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-slate-300 hover:bg-indigo-500/10 hover:text-white transition-colors"
-            onClick={doLogout}
-            aria-label="Sair"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    </header>
-  );
-}
-
-function Auth({
-  loja,
-  onAuthenticated,
-  onAuthStart,
-  onAuthError,
-}: {
-  loja: Loja;
-  onAuthenticated: () => Promise<void>;
-  onAuthStart?: () => void;
-  onAuthError?: () => void;
-}) {
-  const [mode, setMode] = useState<"login" | "signup">("login");
-  const [cpf, setCpf] = useState("");
-  const [phone, setPhone] = useState("");
-  const [senha, setSenha] = useState("");
-  const [senha2, setSenha2] = useState("");
-  const [nome, setNome] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
-  const [erroCpf, setErroCpf] = useState<string | null>(null);
-  const [erroNome, setErroNome] = useState<string | null>(null);
-  const [erroPhone, setErroPhone] = useState<string | null>(null);
-  const [erroSenha, setErroSenha] = useState<string | null>(null);
-  const [erroSenha2, setErroSenha2] = useState<string | null>(null);
-
-  const switchTo = (novo: "login" | "signup", msg: string) => {
-    setMode(novo);
-    setSenha("");
-    setSenha2("");
-    setAviso(msg);
-  };
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAviso(null);
-    setErroCpf(null);
-    setErroNome(null);
-    setErroPhone(null);
-    setErroSenha(null);
-    setErroSenha2(null);
-    const cpfDigits = onlyDigits(cpf);
-    const eC = validarCPF(cpfDigits);
-    // valida também pelo algoritmo local pra manter compatibilidade
-    const eCpfExtra =
-      !eC && !isValidCPF(cpfDigits) ? "CPF inválido. Confira os números digitados." : null;
-    const eS = validarSenha(senha);
-    let eN: string | null = null;
-    let eP: string | null = null;
-    let eS2: string | null = null;
-    if (mode === "signup") {
-      if (!nome.trim()) eN = "Informe seu nome.";
-      const phoneDigits = onlyDigits(phone);
-      if (!phoneDigits) eP = "Informe seu telefone com DDD.";
-      else if (phoneDigits.length < 10)
-        eP = `Telefone incompleto — precisa ter DDD + número (mín. 10 dígitos). Você digitou ${phoneDigits.length}.`;
-      eS2 = validarConfirmacaoSenha(senha, senha2);
-    }
-    if (eC || eCpfExtra || eS || eN || eP || eS2) {
-      setErroCpf(eC ?? eCpfExtra);
-      setErroSenha(eS);
-      setErroNome(eN);
-      setErroPhone(eP);
-      setErroSenha2(eS2);
-      return;
-    }
-    setLoading(true);
-    onAuthStart?.();
-    try {
-      const email = cpfToEmail(cpfDigits);
-      if (mode === "signup") {
-        const phoneDigits = onlyDigits(phone);
-        // Se já existe um profile "pendente" com este CPF (criado por venda
-        // do lojista ou webhook antes do cliente se cadastrar), REAPROVEITA
-        // essa conta em vez de criar uma nova — assim o cliente já entra
-        // vendo o saldo de pontos/cashback acumulado.
-        const claim = await reivindicarCadastroPendente({
-          data: { cpf: cpfDigits, senha, nome: nome.trim(), phone: phoneDigits || null },
-        });
-        if (!claim.claimed) {
-          // Cria via server (admin) com email_confirm=true — o email é
-          // sintético interno e não existe, então NÃO
-          // pode passar por confirmação do Supabase.
-          await criarClienteViaCpf({
-            data: { cpf: cpfDigits, senha, nome: nome.trim(), phone: phoneDigits || null },
-          });
-        }
-        // If session not returned (email confirm), sign in
-        const { data: s2 } = await supabase.auth.getSession();
-        if (!s2.session) {
-          const { error: liErr } = await supabase.auth.signInWithPassword({
-            email,
-            password: senha,
-          });
-          if (liErr) throw liErr;
-        }
-        try {
-          sessionStorage.setItem(`justSignedUp:${loja.id}`, "1");
-        } catch {
-          /* ignore */
-        }
-        await vincularClienteALoja({ data: { store_id: loja.id } });
-        toast.success(`Bem-vindo(a), ${nome}!`);
-      } else {
-        let { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-        if (error) {
-          // Compatibilidade transparente com contas criadas antes da marca PontuaMax.
-          const legacyLogin = await supabase.auth.signInWithPassword({
-            email: legacyCpfToEmail(cpfDigits),
-            password: senha,
-          });
-          error = legacyLogin.error;
-        }
-        if (error) {
-          const prepared = await prepararLoginClientePorCpf({
-            data: { store_id: loja.id, cpf: cpfDigits, senha },
-          });
-          if (!prepared.normalized) throw error;
-          const { error: retryError } = await supabase.auth.signInWithPassword({
-            email,
-            password: senha,
-          });
-          if (retryError) throw retryError;
-        }
-        // Ensure link exists (marca como "acabou de entrar" para evitar sign-out
-        // se a query my-link demorar 1 tick para refletir o vínculo)
-        try {
-          sessionStorage.setItem(`justSignedUp:${loja.id}`, "1");
-        } catch {
-          /* ignore */
-        }
-        await vincularClienteALoja({ data: { store_id: loja.id } });
-        toast.success("Bem-vindo(a) de volta!");
-      }
-      await onAuthenticated();
-    } catch (err) {
-      onAuthError?.();
-      // Auto-switch: cadastro com CPF já existente → login
-      if (mode === "signup" && isUsuarioJaCadastrado(err)) {
-        switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
-      } else if (mode === "login" && isCredenciaisInvalidas(err)) {
-        setAviso(
-          "CPF ou senha incorretos. Confira os dois campos. Se a loja cadastrou você, sua senha inicial é o CPF com apenas números.",
-        );
-      } else {
-        toast.error(traduzirErroAuth(err));
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="max-w-md mx-auto p-4 pt-8 animate-in fade-in slide-in-from-bottom-3 duration-500">
-      <div className="relative group">
-        <div
-          aria-hidden
-          className="absolute -inset-0.5 rounded-[2rem] opacity-60 blur-md group-focus-within:opacity-90 transition-opacity duration-500"
-          style={{
-            background: `linear-gradient(135deg, color-mix(in oklab, ${loja.brand_primary} 40%, transparent), color-mix(in oklab, ${loja.brand_secondary} 20%, transparent), color-mix(in oklab, ${loja.brand_primary} 40%, transparent))`,
-          }}
-        />
-        <Card
-          className="relative bg-[#141432]/95 backdrop-blur-xl shadow-2xl rounded-[2rem] border"
-          style={{ borderColor: `color-mix(in oklab, ${loja.brand_primary} 25%, transparent)` }}
-        >
-          <CardHeader className="pb-4">
-            <div
-              className="text-[10px] uppercase tracking-[0.25em] font-semibold mb-1"
-              style={{ color: `color-mix(in oklab, ${loja.brand_primary} 70%, #cbd5e1)` }}
-            >
-              {mode === "signup" ? "Novo por aqui" : "Bem-vindo(a) de volta"}
-            </div>
-            <CardTitle className="text-slate-100 text-xl">
-              {mode === "signup" ? "Criar minha conta" : "Entrar com meu CPF"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={submit} className="space-y-4">
-              {aviso && (
-                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 animate-in fade-in slide-in-from-top-1 duration-300">
-                  {aviso}
-                </div>
-              )}
-              <div className="space-y-1.5">
-                <Label className="text-slate-300 text-xs font-medium">
-                  CPF <span className="text-rose-400">*</span>
-                </Label>
-                <Input
-                  value={cpf}
-                  onChange={(e) => {
-                    setCpf(formatCPF(e.target.value));
-                    if (erroCpf) setErroCpf(null);
-                  }}
-                  placeholder="000.000.000-00"
-                  inputMode="numeric"
-                  autoComplete="username"
-                  required
-                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroCpf ? "border-rose-500/70 focus-visible:border-rose-400/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                />
-                {erroCpf && <p className="text-[11px] text-rose-400">{erroCpf}</p>}
-              </div>
-              {mode === "signup" && (
-                <>
-                  <div className="space-y-1.5">
-                    <Label className="text-slate-300 text-xs font-medium">
-                      Nome <span className="text-rose-400">*</span>
-                    </Label>
-                    <Input
-                      value={nome}
-                      onChange={(e) => {
-                        setNome(e.target.value);
-                        if (erroNome) setErroNome(null);
-                      }}
-                      placeholder="Como quer ser chamado"
-                      required
-                      className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroNome ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                    />
-                    {erroNome && <p className="text-[11px] text-rose-400">{erroNome}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-slate-300 text-xs font-medium">
-                      Telefone <span className="text-rose-400">*</span>
-                    </Label>
-                    <Input
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value);
-                        if (erroPhone) setErroPhone(null);
-                      }}
-                      placeholder="(11) 98765-4321"
-                      inputMode="tel"
-                      required
-                      className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroPhone ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                    />
-                    {erroPhone && <p className="text-[11px] text-rose-400">{erroPhone}</p>}
-                  </div>
-                </>
-              )}
-              <div className="space-y-1.5">
-                <Label className="text-slate-300 text-xs font-medium">
-                  Senha <span className="text-rose-400">*</span>
-                </Label>
-                <PasswordInput
-                  value={senha}
-                  onChange={(e) => {
-                    setSenha(e.target.value);
-                    if (erroSenha) setErroSenha(null);
-                  }}
-                  placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Sua senha"}
-                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  required
-                  className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                />
-                {erroSenha && <p className="text-[11px] text-rose-400">{erroSenha}</p>}
-              </div>
-              {mode === "signup" && (
-                <div className="space-y-1.5">
-                  <Label className="text-slate-300 text-xs font-medium">
-                    Confirmar senha <span className="text-rose-400">*</span>
-                  </Label>
-                  <PasswordInput
-                    value={senha2}
-                    onChange={(e) => {
-                      setSenha2(e.target.value);
-                      if (erroSenha2) setErroSenha2(null);
-                    }}
-                    placeholder="Repita a senha"
-                    autoComplete="new-password"
-                    required
-                    className={`bg-[#0a0a1a]/80 text-slate-100 placeholder:text-slate-600 focus-visible:ring-indigo-500/40 h-12 rounded-xl transition-colors ${erroSenha2 || (senha2.length > 0 && senha !== senha2) ? "border-rose-500/70" : "border-indigo-500/20 focus-visible:border-indigo-400/50"}`}
-                  />
-                  {(erroSenha2 || (senha2.length > 0 && senha !== senha2)) && (
-                    <p className="mt-1 text-[11px] text-rose-400">
-                      {erroSenha2 ?? "As senhas não coincidem"}
-                    </p>
-                  )}
-                </div>
-              )}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 rounded-full text-white font-semibold transition-all active:scale-[0.98] hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
-                style={{
-                  background: `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                  boxShadow: `0 10px 25px -8px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
-                }}
-              >
-                {loading ? (
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                    Entrando...
-                  </span>
-                ) : mode === "signup" ? (
-                  "Criar conta"
-                ) : (
-                  "Entrar"
-                )}
-              </Button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAviso(null);
-                  setSenha2("");
-                  setMode(mode === "login" ? "signup" : "login");
-                }}
-                className="text-xs text-center w-full transition-colors font-medium py-1 hover:opacity-80"
-                style={{ color: `color-mix(in oklab, ${loja.brand_primary} 70%, #cbd5e1)` }}
-              >
-                {mode === "login" ? "Ainda não tenho conta →" : "← Já tenho conta, entrar"}
-              </button>
-              {mode === "login" && (
-                <p className="text-[11px] text-center text-slate-500 leading-relaxed">
-                  Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
-                </p>
-              )}
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function VincularStore({ loja }: { loja: Loja }) {
-  const qc = useQueryClient();
-  // A operação de vínculo é idempotente no backend (retorna o link se já existir).
-  // Sempre tenta vincular; só sinaliza erro se falhar de verdade — nunca faz signOut
-  // implícito, que causava loop de "voltar ao login" logo após "Bem-vindo(a)".
-  const started = useRef(false);
-  const [erro, setErro] = useState<string | null>(null);
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    (async () => {
-      try {
-        const link = await vincularClienteALoja({
-          data: { store_id: loja.id, referrer_phone: getStoredReferrer() },
-        });
-        try {
-          localStorage.removeItem(REF_KEY);
-        } catch {
-          /* ignore */
-        }
-        try {
-          sessionStorage.removeItem(`justSignedUp:${loja.id}`);
-        } catch {
-          /* ignore */
-        }
-        if (!link || link.store_id !== loja.id) {
-          throw new Error("Não foi possível confirmar seu cadastro nesta loja.");
-        }
-        await qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
-      } catch (e) {
-        setErro((e as Error).message);
-      }
-    })();
-  }, [loja.id, qc]);
-
-  if (erro) {
-    return (
-      <div className="p-8 text-center space-y-3 max-w-md mx-auto">
-        <p className="text-sm text-rose-400">{erro}</p>
-        <Button
-          onClick={async () => {
-            await qc.cancelQueries();
-            qc.clear();
-            await supabase.auth.signOut();
-          }}
-          className="bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white"
-        >
-          Voltar ao login
-        </Button>
-      </div>
-    );
-  }
-  return (
-    <div className="p-8 text-center max-w-md mx-auto">
-      <div className="inline-flex items-center gap-3 text-sm text-slate-400">
-        <div className="h-4 w-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-400 animate-spin" />
-        Preparando sua conta nesta loja...
-      </div>
-    </div>
-  );
-}
-
-function ClienteLogado({ loja, link }: { loja: Loja; link: Link }) {
-  const qc = useQueryClient();
-  const { data: produtos = [] } = useQuery(activeStoreProductsQuery(loja.id));
-  const { data: txs = [] } = useQuery(myTransactionsAtStoreQuery(loja.id));
-
-  const [voucher, setVoucher] = useState<string | null>(null);
-  const [cashbackModal, setCashbackModal] = useState(false);
-  const [cashbackValor, setCashbackValor] = useState("");
-
-  const inclP = loja.modalidade !== "cashback";
-  const inclC = loja.modalidade !== "pontos";
-  const nivel = calcularNivel(link.pontos);
-  const prog = progressoNivel(link.pontos);
-
-  const [nome, setNome] = useState("Cliente");
-  const [meuTelefone, setMeuTelefone] = useState<string | null>(null);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const meta = data.user?.user_metadata as { full_name?: string } | undefined;
-      setNome(meta?.full_name ?? "Cliente");
-      const phone = (data.user?.user_metadata as { phone?: string } | undefined)?.phone;
-      setMeuTelefone(phone ?? null);
-    });
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
   }, []);
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["my-link", loja.id] });
-    qc.invalidateQueries({ queryKey: ["my-transactions", loja.id] });
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) {
+      toast.info("Para instalar no iPhone/iPad: Toque em Compartilhar e 'Adicionar à Tela de Início'.");
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setIsAppInstalled(true);
+      toast.success("App adicionado à Tela de Início!");
+    }
+    setDeferredPrompt(null);
   };
 
-  const resgatarP = useMutation({
-    mutationFn: (product_id: string) =>
-      resgatarProduto({ data: { store_id: loja.id, product_id } }),
-    onSuccess: (r) => {
-      setVoucher(r.voucher);
-      invalidate();
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
-
-  const resgatarC = useMutation({
-    mutationFn: (valor: number) => resgatarCashback({ data: { store_id: loja.id, valor } }),
-    onSuccess: (r) => {
-      setVoucher(r.voucher);
-      setCashbackModal(false);
-      setCashbackValor("");
-      invalidate();
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
-
-  const usarCashback = () => {
-    const v = parseFloat(cashbackValor.replace(",", "."));
-    if (!v || v <= 0) return toast.error("Valor inválido");
-    const saldo = Number(link.cashback_saldo);
-    const minimo = Number(loja.cashback_valor_minimo || 0);
-    if (minimo > 0 && saldo < minimo)
-      return toast.error(
-        `É preciso acumular ${formatBRL(minimo)} de cashback para resgatar. Saldo atual: ${formatBRL(saldo)}.`,
-      );
-    if (v > saldo)
-      return toast.error(`Cashback insuficiente. Saldo disponível: ${formatBRL(saldo)}.`);
-    resgatarC.mutate(+v.toFixed(2));
+  const handleTogglePush = async () => {
+    const ok = await subscribeUserToPush(org?.id, identifiedCpf || undefined);
+    if (ok) {
+      setPushSubscribed(true);
+    }
   };
+
+  // Consulta saldo e dados do cliente identificado
+  const { data: clientData, refetch: refetchClient } = useQuery({
+    enabled: !!identifiedCpf && !!org?.id,
+    queryKey: ["public-client", org?.id, identifiedCpf, storeConfig?.pointsRate],
+    queryFn: async () => {
+      const cleanCpf = identifiedCpf!.replace(/\D+/g, "");
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("organization_id", org!.id)
+        .eq("cpf", cleanCpf)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      let client = existingClient;
+      if (!client) {
+        // Auto-cria o cadastro do cliente para resgate de pontos pendentes por CPF
+        const { data: newClient } = await supabase
+          .from("clients")
+          .insert({
+            organization_id: org!.id,
+            cpf: cleanCpf,
+            full_name: "Cliente Fidelidade",
+          })
+          .select("*")
+          .single();
+        client = newClient;
+      }
+
+      if (!client) return null;
+
+      // Resgata automaticamente os pontos/cashback pendentes vinculados ao CPF (gerados por Olist, Bling, Tiny, etc.)
+      const claimResult = await claimPendingPointsForCpf(org!.id, cleanCpf, client.id);
+      if (claimResult.claimedPoints > 0 || claimResult.claimedCashback > 0) {
+        triggerConfetti();
+        playSuccessChime();
+        toast.success(`🎉 Encontramos ${claimResult.claimedPoints} pontos e ${money(claimResult.claimedCashback)} de ${claimResult.ordersCount} compra(s) anterior(es) te esperando!`);
+      }
+
+      // Busca conta de saldo / cashback
+      const { data: sca } = await supabase
+        .from("store_credit_accounts")
+        .select("balance")
+        .eq("organization_id", org!.id)
+        .eq("client_id", client.id)
+        .maybeSingle();
+
+      // Busca histórico de compras / vendas
+      const { data: sales } = await supabase
+        .from("sales")
+        .select("id, total, created_at, sale_number")
+        .eq("organization_id", org!.id)
+        .eq("client_id", client.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      // Busca histórico de cashback / movimentações
+      const { data: creditTxs } = await supabase
+        .from("store_credit_transactions")
+        .select("*")
+        .eq("organization_id", org!.id)
+        .eq("client_id", client.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      const totalSpent = (sales ?? []).reduce((acc, s) => acc + Number(s.total || 0), 0);
+      const pointsRate = storeConfig?.pointsRate ?? 1;
+      const pointsBalance = Math.floor(totalSpent * pointsRate); // Dinâmico por lojista
+      const cashbackBalance = Number(sca?.balance ?? 0);
+
+      // Determinar Nível VIP dinamicamente pelas regras salvas pelo lojista
+      const vipTiers = storeConfig?.vipTiers ?? [
+        { name: "Bronze 🥉", min: 0, nextMin: 500, color: "text-amber-500 bg-amber-500/10 border-amber-500/30" },
+        { name: "Prata 🥈", min: 500, nextMin: 1000, color: "text-slate-300 bg-slate-500/10 border-slate-500/30" },
+        { name: "Ouro 🥇", min: 1000, nextMin: 2000, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30" },
+        { name: "Diamante 💎", min: 2000, nextMin: 5000, color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30" },
+      ];
+
+      let tier = vipTiers[0];
+      for (let i = vipTiers.length - 1; i >= 0; i--) {
+        if (totalSpent >= vipTiers[i].min) {
+          tier = vipTiers[i];
+          break;
+        }
+      }
+
+      return {
+        client,
+        cashbackBalance,
+        pointsBalance,
+        totalSpent,
+        tier,
+        sales: sales ?? [],
+        transactions: creditTxs ?? [],
+      };
+    },
+  });
+
+  // Modal de Voucher Gerado
+  const [selectedReward, setSelectedReward] = useState<any | null>(null);
+  const [generatedVoucher, setGeneratedVoucher] = useState<{ code: string; reward: any } | null>(null);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = cpfInput.replace(/\D+/g, "");
+    if (clean.length !== 11) {
+      toast.error("Por favor, digite um CPF válido com 11 dígitos.");
+      return;
+    }
+    setIdentifiedCpf(clean);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`pm_client_cpf_${slug}`, clean);
+    }
+    toast.success("CPF identificado com sucesso!");
+  };
+
+  const handleLogout = () => {
+    setIdentifiedCpf(null);
+    setCpfInput("");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(`pm_client_cpf_${slug}`);
+    }
+    toast.info("Você saiu da sua conta.");
+  };
+
+  const handleRedeemReward = (reward: any) => {
+    if (!identifiedCpf || !clientData?.client) {
+      toast.error(`Identifique-se com seu CPF para resgatar este prêmio.`);
+      return;
+    }
+    if ((clientData.pointsBalance ?? 0) < reward.points_cost) {
+      toast.error(`Saldo insuficiente. Você precisa de ${reward.points_cost} ${currencyName.toLowerCase()} para este prêmio.`);
+      return;
+    }
+    // Gerar código único de Voucher
+    const code = `PM-${Math.floor(1000 + Math.random() * 9000)}-${slug.slice(0, 3).toUpperCase()}`;
+    setGeneratedVoucher({ code, reward });
+    setSelectedReward(null);
+    triggerConfetti();
+    playSuccessChime();
+    toast.success("Prêmio resgatado com sucesso! Apresente o QR Code no caixa da loja.");
+  };
+
+  const storeName = org?.name ?? "Nossa Loja";
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="pt-2">
-        <div className="text-xs uppercase tracking-[0.2em] text-indigo-300/70 font-semibold">
-          Olá,
-        </div>
-        <div className="text-2xl font-bold text-white mt-0.5">{nome}</div>
+    <div className="min-h-screen bg-[#0d0f14] text-slate-100 antialiased pb-12 selection:bg-primary selection:text-primary-foreground">
+      {/* Dynamic Background Glow baseada na Cor Primária do Lojista */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div
+          className="absolute -top-40 -left-40 h-96 w-96 rounded-full opacity-20 blur-[120px]"
+          style={{ backgroundColor: primaryColor }}
+        />
+        <div className="absolute top-1/3 -right-40 h-96 w-96 rounded-full bg-emerald-500/10 blur-[120px]" />
       </div>
 
-      <div className={`grid gap-4 ${inclP && inclC ? "sm:grid-cols-2" : ""}`}>
-        {inclP && (
-          <Card className="overflow-hidden border-indigo-500/25 bg-[#141432] pontuamax-glow relative">
-            <div
-              aria-hidden
-              className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl"
-            />
-            <div className="relative p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                  <Coins
-                    className="h-3.5 w-3.5"
-                    style={{ color: loja.brand_accent_points || "#818cf8" }}
-                  />{" "}
-                  Seus pontos
-                </div>
-                <div
-                  className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1 rounded-full px-2 py-0.5 border"
-                  style={{
-                    background: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 18%, transparent)`,
-                    borderColor: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 40%, transparent)`,
-                    color: `color-mix(in oklab, ${loja.brand_vip || "#a78bfa"} 30%, #f1f5f9)`,
-                  }}
-                >
-                  <Trophy className="h-3 w-3" /> {nivel}
-                </div>
-              </div>
+      {/* Top Header / Brand Bar Dinâmica */}
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0d0f14]/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            {storeConfig?.logoUrl ? (
+              <img src={storeConfig.logoUrl} alt={storeName} className="h-10 w-10 rounded-xl object-cover border border-white/10" />
+            ) : (
               <div
-                className="text-5xl font-bold mt-3 tabular-nums tracking-tight"
-                style={{ color: loja.text_on_dark || "#ffffff" }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-white font-bold text-lg shadow-lg"
+                style={{ backgroundColor: primaryColor }}
               >
-                {link.pontos.toLocaleString("pt-BR")}
-                <span
-                  className="text-base font-semibold ml-2"
-                  style={{ color: loja.brand_accent_points || "#818cf8" }}
-                >
-                  pts
-                </span>
+                {storeName.slice(0, 2).toUpperCase()}
               </div>
-              {loja.pontos_expiracao_modo === "validade" && (
-                <div className="text-[11px] mt-2 text-slate-500">
-                  Pontos expiram após {loja.pontos_validade_dias} dias
-                </div>
-              )}
-              {loja.pontos_expiracao_modo === "decaimento" && (
-                <div className="text-[11px] mt-2 text-slate-500">
-                  Você perde {loja.pontos_decaimento_valor} pts a cada {loja.pontos_decaimento_dias}{" "}
-                  dias
-                </div>
-              )}
-              {prog.proximo && (
-                <div className="mt-5">
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-400">
-                      Próximo: <span className="text-slate-200 font-medium">{prog.proximo}</span>
-                    </span>
-                    <span className="text-indigo-300 font-semibold">{Math.round(prog.pct)}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-[#0a0a1a] border border-white/5 overflow-hidden">
-                    <div
-                      className="h-full transition-all duration-1000"
-                      style={{
-                        width: `${Math.min(100, prog.pct)}%`,
-                        background: `linear-gradient(90deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                        boxShadow: `0 0 12px color-mix(in oklab, ${loja.brand_primary} 60%, transparent)`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
+            )}
+            <div>
+              <h1 className="text-base font-bold text-white tracking-tight flex items-center gap-1.5">
+                {storeName}
+                <Badge variant="outline" className="text-[10px] font-medium border-emerald-500/30 text-emerald-400 bg-emerald-500/10">
+                  Clube de Fidelidade
+                </Badge>
+              </h1>
+              <p className="text-[11px] text-slate-400">Programa de {currencyName} & Cashback</p>
             </div>
-          </Card>
-        )}
-        {inclC && (
-          <Card className="overflow-hidden border-emerald-500/25 bg-[#0d1a1a] relative">
-            <div
-              aria-hidden
-              className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/15 blur-3xl"
-            />
-            <div className="relative p-5">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                <Wallet
-                  className="h-3.5 w-3.5"
-                  style={{ color: loja.brand_accent_cashback || "#34d399" }}
-                />{" "}
-                Seu cashback
+          </div>
+
+          {identifiedCpf ? (
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-slate-400 hover:text-white">
+              <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair
+            </Button>
+          ) : (
+            <Badge variant="outline" className="text-xs border-white/10 bg-white/5 text-slate-300">
+              <UserCheck className="mr-1 h-3.5 w-3.5 text-emerald-400" /> Acesso Seguro
+            </Badge>
+          )}
+        </div>
+      </header>
+
+      <main className="relative mx-auto max-w-4xl px-4 pt-6 sm:px-6 space-y-6">
+        {/* Banner PWA de Instalação do App */}
+        {!isAppInstalled && (
+          <Card className="border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-slate-900 to-purple-950/40 p-4 flex flex-row items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20 text-primary border border-primary/30">
+                <Download className="h-5 w-5" />
               </div>
-              <div
-                className="text-4xl font-bold mt-3 tabular-nums tracking-tight"
-                style={{ color: loja.brand_price || loja.text_on_dark || "#ffffff" }}
-              >
-                {formatBRL(Number(link.cashback_saldo))}
+              <div>
+                <div className="text-sm font-bold text-white flex items-center gap-2">
+                  Instalar App da {storeName}
+                  <Badge variant="outline" className="text-[9px] border-emerald-500/40 text-emerald-300 bg-emerald-500/10">PWA</Badge>
+                </div>
+                <div className="text-xs text-slate-300">Instale na Tela de Início para acessar seu saldo em 1-clique sem digitar URL.</div>
               </div>
-              <Button
-                size="sm"
-                className="mt-4 border transition-all hover:brightness-110"
-                style={{
-                  background: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 18%, transparent)`,
-                  borderColor: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 40%, transparent)`,
-                  color: `color-mix(in oklab, ${loja.brand_accent_cashback || "#22c55e"} 25%, #ecfeff)`,
-                }}
-                disabled={
-                  Number(link.cashback_saldo) <= 0 ||
-                  (Number(loja.cashback_valor_minimo || 0) > 0 &&
-                    Number(link.cashback_saldo) < Number(loja.cashback_valor_minimo))
-                }
-                onClick={() => setCashbackModal(true)}
-              >
-                {Number(loja.cashback_valor_minimo || 0) > 0 &&
-                Number(link.cashback_saldo) < Number(loja.cashback_valor_minimo)
-                  ? `Resgate a partir de ${formatBRL(Number(loja.cashback_valor_minimo))}`
-                  : "Usar no próximo pagamento"}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={handleInstallPWA} className="bg-primary hover:bg-primary/90 text-xs font-semibold whitespace-nowrap shadow">
+                Instalar App
               </Button>
             </div>
           </Card>
         )}
-      </div>
 
-      {inclP && produtos.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Gift className="h-4 w-4 text-indigo-400" />
-            <h2 className="font-semibold text-slate-100">Trocar pontos por produtos</h2>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {produtos.map((p) => {
-              const podeResgatar = link.pontos >= p.custo_pontos;
-              return (
-                <Card
-                  key={p.id}
-                  className={`border-indigo-500/20 bg-[#141432] transition-all hover:border-indigo-400/40 hover:-translate-y-0.5 ${podeResgatar ? "hover:shadow-lg hover:shadow-indigo-500/10" : "opacity-70"}`}
+        {/* Banner de Boas-Vindas & Status de Login */}
+        {!identifiedCpf ? (
+          <Card className="border-white/10 bg-gradient-to-br from-slate-900 via-[#131722] to-[#181e2e] shadow-2xl overflow-hidden relative">
+            {storeConfig?.bannerUrl && (
+              <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <img src={storeConfig.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <CardContent className="p-6 sm:p-8 space-y-6 relative">
+              <div className="space-y-2 max-w-xl">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold"
+                  style={{ borderColor: `${primaryColor}40`, backgroundColor: `${primaryColor}15`, color: primaryColor }}
                 >
-                  <CardContent className="p-3 space-y-2">
-                    <div className="aspect-video w-full overflow-hidden rounded-md bg-[#0a0a1a] border border-indigo-500/10 flex items-center justify-center">
-                      {p.foto_url ? (
-                        <img src={p.foto_url} alt={p.nome} className="h-full w-full object-cover" />
-                      ) : (
-                        <Package className="h-8 w-8 text-indigo-500/30" />
-                      )}
+                  <Sparkles className="h-3.5 w-3.5" /> Ganhe {currencyName} e Cashback em cada compra!
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                  Bem-vindo ao Clube da <span style={{ color: primaryColor }}>{storeName}</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Consulte seu saldo de {currencyName.toLowerCase()}, cashback acumulado e resgate prêmios exclusivos digitando apenas o seu CPF.
+                </p>
+              </div>
+
+              {/* Form de Identificação */}
+              <form onSubmit={handleLogin} className="flex flex-col sm:flex-row gap-3 max-w-md">
+                <div className="relative flex-1">
+                  <UserCheck className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    type="text"
+                    value={cpfInput}
+                    onChange={(e) => setCpfInput(e.target.value)}
+                    placeholder="Digite seu CPF (ex: 000.000.000-00)"
+                    className="pl-9 bg-black/40 border-white/15 text-white placeholder:text-slate-500 h-11 text-sm rounded-xl"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="h-11 rounded-xl text-white font-semibold shadow-lg hover:opacity-95"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  Ver Meu Saldo <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </form>
+
+              <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/10 text-center text-xs text-slate-400">
+                <div className="flex items-center justify-center gap-1.5">
+                  <Coins className="h-4 w-4 text-emerald-400" /> Cashback em R$
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <Award className="h-4 w-4" style={{ color: primaryColor }} /> {currencyName} no Caixa
+                </div>
+                <div className="flex items-center justify-center gap-1.5">
+                  <Gift className="h-4 w-4 text-purple-400" /> Prêmios Exclusivos
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          /* PAINEL DO CLIENTE LOGADO */
+          <div className="space-y-6">
+            {/* Header do Cliente & Cards de Saldo */}
+            <Card className="border-white/10 bg-gradient-to-r from-slate-900 to-[#131726] shadow-xl overflow-hidden relative">
+              <CardContent className="p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-12 w-12 rounded-full border flex items-center justify-center font-extrabold text-xl"
+                      style={{ backgroundColor: `${primaryColor}20`, borderColor: `${primaryColor}40`, color: primaryColor }}
+                    >
+                      {clientData?.client?.full_name?.slice(0, 1) ?? "C"}
                     </div>
-                    <div className="font-medium text-sm text-slate-100">{p.nome}</div>
-                    <div className="text-xs text-slate-400 line-clamp-2">{p.descricao}</div>
-                    <div className="flex items-center justify-between pt-1">
-                      <span
-                        className="font-bold text-sm"
-                        style={{ color: loja.brand_accent_points || "#a5b4fc" }}
-                      >
-                        {p.custo_pontos} pts
+                    <div>
+                      <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        Olá, {clientData?.client?.full_name ?? "Cliente VIP"}!
+                        {clientData?.tier && (
+                          <Badge variant="outline" className={`text-xs ${clientData.tier.color}`}>
+                            {clientData.tier.name}
+                          </Badge>
+                        )}
+                      </h2>
+                      <p className="text-xs text-slate-400">CPF: ***.***.{(identifiedCpf || "").slice(-4)}-**</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-start sm:self-center">
+                    <Button variant="outline" size="sm" onClick={handleTogglePush} className="border-white/10 text-xs text-slate-300">
+                      <Bell className="mr-1.5 h-3.5 w-3.5 text-amber-400" />
+                      {pushSubscribed ? "Push Ativo" : "Ativar Alertas Push"}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => refetchClient()} className="border-white/10 text-xs">
+                      <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Atualizar Saldo
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Duplo Card de Saldo */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Card de Cashback */}
+                  <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-emerald-900/20 to-slate-900 p-5 space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Coins className="h-4 w-4" /> Saldo de Cashback
                       </span>
-                      <Button
-                        size="sm"
-                        disabled={!podeResgatar || resgatarP.isPending}
-                        onClick={() => resgatarP.mutate(p.id)}
-                        className={
-                          podeResgatar
-                            ? "text-white shadow-md transition-all active:scale-95 hover:opacity-90"
-                            : "bg-[#0a0a1a] text-slate-500 border border-white/5 cursor-not-allowed"
-                        }
-                        style={
-                          podeResgatar
-                            ? {
-                                background: loja.brand_cta
-                                  ? loja.brand_cta
-                                  : `linear-gradient(135deg, ${loja.brand_primary}, ${loja.brand_secondary})`,
-                                boxShadow: `0 6px 16px -6px color-mix(in oklab, ${loja.brand_cta || loja.brand_primary} 60%, transparent)`,
-                                color: loja.text_on_dark || "#ffffff",
-                              }
-                            : undefined
-                        }
-                      >
-                        {podeResgatar ? "Resgatar" : "Faltam pontos"}
-                      </Button>
+                      <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px]">
+                        Dinheiro de Volta
+                      </Badge>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-black text-white">
+                      {money(clientData?.cashbackBalance ?? 0)}
+                    </div>
+                    <p className="text-[11px] text-emerald-300/80">
+                      Disponível para abater nas suas próximas compras na loja.
+                    </p>
+                  </div>
+
+                  {/* Card de Moeda Dinâmica (ex: Pontos, FitCoins, Estrelas) */}
+                  <div
+                    className="rounded-2xl border p-5 space-y-2 relative overflow-hidden"
+                    style={{ borderColor: `${primaryColor}40`, background: `linear-gradient(to bottom right, ${primaryColor}15, rgba(15, 23, 42, 0.9))` }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: primaryColor }}>
+                        <Award className="h-4 w-4" /> Saldo de {currencyName}
+                      </span>
+                      <Badge className="border text-[10px]" style={{ backgroundColor: `${primaryColor}20`, borderColor: `${primaryColor}40`, color: primaryColor }}>
+                        Clube VIP
+                      </Badge>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-black text-white">
+                      {(clientData?.pointsBalance ?? 0).toLocaleString("pt-BR")} <span className="text-lg font-normal opacity-80" style={{ color: primaryColor }}>{currencyName.toLowerCase()}</span>
+                    </div>
+                    <div className="space-y-1 pt-1">
+                      <div className="flex justify-between text-[10px] text-slate-400">
+                        <span>Progresso Nível {clientData?.tier?.name}</span>
+                        <span>{clientData?.totalSpent ? money(clientData.totalSpent) : "R$ 0"} / {money(clientData?.tier?.nextMin ?? 1000)}</span>
+                      </div>
+                      <Progress
+                        value={Math.min(100, Math.round(((clientData?.totalSpent ?? 0) / (clientData?.tier?.nextMin ?? 1000)) * 100))}
+                        className="h-1.5 bg-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Navegação por Abas da Vitrine */}
+            <Tabs defaultValue="rewards" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto bg-slate-900/80 p-1 border border-white/10 rounded-xl">
+                <TabsTrigger value="rewards" className="text-xs flex items-center gap-1.5">
+                  <Gift className="h-3.5 w-3.5" /> Prêmios
+                </TabsTrigger>
+                <TabsTrigger value="history" className="text-xs flex items-center gap-1.5">
+                  <ShoppingBag className="h-3.5 w-3.5" /> Histórico
+                </TabsTrigger>
+                <TabsTrigger value="referral" className="text-xs flex items-center gap-1.5">
+                  <Share2 className="h-3.5 w-3.5" /> Indicar Amigo
+                </TabsTrigger>
+              </TabsList>
+
+              {/* ABA 1: CATÁLOGO DE PRÊMIOS */}
+              <TabsContent value="rewards" className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <Gift className="h-4 w-4" style={{ color: primaryColor }} /> Catálogo de Prêmios & Vouchers
+                    </h3>
+                    <p className="text-xs text-slate-400">Troque seus {currencyName.toLowerCase()} acumulados por cupons de desconto e brindes na loja.</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {rewards.map((item) => {
+                    const canAfford = (clientData?.pointsBalance ?? 0) >= item.points_cost;
+                    return (
+                      <Card key={item.id} className="border-white/10 bg-slate-900/60 overflow-hidden hover:border-white/20 transition-all flex flex-col justify-between group">
+                        <div className="relative h-44 w-full overflow-hidden bg-slate-800">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <Badge className="absolute top-3 right-3 bg-black/60 backdrop-blur text-white border-white/20 text-[10px]">
+                            {item.badge}
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                          <div>
+                            <h4 className="text-base font-bold text-white leading-snug">{item.title}</h4>
+                            <p className="text-xs text-slate-400 mt-1">{item.description}</p>
+                          </div>
+
+                          <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Custo em {currencyName}</span>
+                              <span className="text-lg font-black" style={{ color: primaryColor }}>{item.points_cost} {currencyName.toLowerCase()}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => setSelectedReward(item)}
+                              className="rounded-lg text-xs font-semibold text-white"
+                              style={{ backgroundColor: canAfford ? primaryColor : "#334155" }}
+                            >
+                              {canAfford ? "Resgatar Prêmio" : `Faltam ${currencyName}`}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+
+              {/* ABA 2: HISTÓRICO DE COMPRAS E EXTRATO */}
+              <TabsContent value="history" className="space-y-4">
+                <Card className="border-white/10 bg-slate-900/60">
+                  <CardHeader className="py-4">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <ShoppingBag className="h-4 w-4 text-emerald-400" /> Histórico de Compras e Movimentações
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-white/5 text-xs">
+                      {clientData?.sales?.length === 0 && clientData?.transactions?.length === 0 ? (
+                        <div className="p-6 text-center text-slate-400">Nenhuma compra ou movimentação registrada ainda.</div>
+                      ) : (
+                        (clientData?.sales ?? []).map((s: any) => (
+                          <div key={s.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                            <div className="space-y-1">
+                              <div className="font-semibold text-white">Venda #{s.sale_number}</div>
+                              <div className="text-slate-400 text-[11px]">{formatDateTime(s.created_at)}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-white">{money(s.total)}</div>
+                              <div className="text-emerald-400 text-[11px] font-medium">+ {Math.floor(Number(s.total) * (storeConfig?.pointsRate ?? 1))} {currencyName.toLowerCase()}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
-              );
-            })}
+              </TabsContent>
+
+              {/* ABA 3: INDIQUE E GANHE */}
+              <TabsContent value="referral" className="space-y-4">
+                <Card className="border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-900">
+                  <CardContent className="p-6 space-y-5">
+                    <div className="space-y-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-300">
+                        <HeartHandshake className="h-3.5 w-3.5" /> Programa Indique & Ganhe
+                      </span>
+                      <h3 className="text-xl font-bold text-white">Convide amigos e ganhe bônus!</h3>
+                      <p className="text-xs text-slate-300">
+                        Compartilhe seu código exclusivo. Quando seu amigo fizer a primeira compra na loja, vocês dois ganham <strong>+50 {currencyName} de Bônus</strong>!
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-3">
+                      <span className="text-xs text-slate-400 block font-medium">Seu Link de Indicação Pessoal</span>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          readOnly
+                          value={`https://pontuamax.com/${slug}?ref=${(identifiedCpf || "").slice(-6)}`}
+                          className="bg-slate-900 border-white/15 text-xs font-mono text-white h-10"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`https://pontuamax.com/${slug}?ref=${(identifiedCpf || "").slice(-6)}`);
+                            toast.success("Link de indicação copiado!");
+                          }}
+                          className="h-10 text-xs text-white"
+                          style={{ backgroundColor: primaryColor }}
+                        >
+                          <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
-        </section>
-      )}
+        )}
 
-      {loja.indicacao_ativa && meuTelefone && (
-        <IndicacaoCard
-          loja={loja}
-          telefone={meuTelefone}
-          bonusIndicado={loja.bonus_indicado}
-          bonusIndicador={loja.bonus_indicador}
-        />
-      )}
+        {/* Modal de Confirmação de Resgate */}
+        <Dialog open={!!selectedReward} onOpenChange={(o) => !o && setSelectedReward(null)}>
+          <DialogContent className="max-w-md border-white/10 bg-slate-900 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold">Confirmar Resgate do Prêmio</DialogTitle>
+              <DialogDescription className="text-xs text-slate-400">
+                Você está prestes a utilizar seus {currencyName.toLowerCase()} para resgatar este voucher.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedReward && (
+              <div className="space-y-4 text-sm pt-2">
+                <div className="rounded-xl border border-white/10 bg-slate-800/50 p-4 space-y-2">
+                  <div className="font-bold text-white text-base">{selectedReward.title}</div>
+                  <div className="text-xs text-slate-300">{selectedReward.description}</div>
+                  <div className="pt-2 flex justify-between items-center text-xs font-semibold">
+                    <span className="text-slate-400">Custo:</span>
+                    <span className="font-bold" style={{ color: primaryColor }}>{selectedReward.points_cost} {currencyName}</span>
+                  </div>
+                </div>
 
-      <HistoricoSection txs={txs} inclP={inclP} inclC={inclC} />
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => setSelectedReward(null)} className="border-white/10 text-xs">
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleRedeemReward(selectedReward)}
+                    className="text-xs font-semibold text-white"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    Confirmar e Gerar Voucher
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
-      <VouchersSection loja={loja} txs={txs} nome={nome} telefone={meuTelefone} />
+        {/* Modal de Voucher com QR Code Gerado */}
+        <Dialog open={!!generatedVoucher} onOpenChange={(o) => !o && setGeneratedVoucher(null)}>
+          <DialogContent className="max-w-md border-emerald-500/30 bg-gradient-to-br from-slate-900 via-[#111625] to-[#0f1b1a] text-white">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-emerald-400">
+                <CheckCircle2 className="h-5 w-5" /> Voucher Gerado com Sucesso!
+              </DialogTitle>
+            </DialogHeader>
+            {generatedVoucher && (
+              <div className="space-y-5 text-sm text-center pt-2">
+                <div className="rounded-2xl border border-emerald-500/30 bg-black/60 p-6 space-y-4">
+                  <div className="text-xs text-emerald-300 font-semibold uppercase tracking-wider">
+                    {generatedVoucher.reward.title}
+                  </div>
 
-      {loja.instagram_program_active && loja.instagram_handle && <InstagramCard loja={loja} />}
+                  {/* QR Code Simulado com Design Elegante */}
+                  <div className="mx-auto h-44 w-44 rounded-xl bg-white p-3 shadow-xl flex items-center justify-center">
+                    <QrCode className="h-36 w-36 text-slate-900" />
+                  </div>
 
-      {loja.instagram_program_active && <MeusPostsInstagram loja={loja} />}
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-slate-400 uppercase tracking-widest block">Código do Voucher</span>
+                    <div className="font-mono text-xl font-black text-white tracking-widest bg-white/10 py-1.5 px-3 rounded-lg border border-white/15 inline-block">
+                      {generatedVoucher.code}
+                    </div>
+                  </div>
+                </div>
 
-      <section>
-        <Link
-          to="/nota/$slug"
-          params={{ slug: loja.slug }}
-          className="group flex items-center justify-center gap-2 rounded-xl border border-dashed border-indigo-500/30 bg-[#141432]/50 p-4 text-sm text-slate-300 hover:border-indigo-400/60 hover:bg-indigo-500/10 hover:text-white transition-all"
-        >
-          <FileText className="h-4 w-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-          Enviar foto de nota fiscal para ganhar pontos
-        </Link>
-      </section>
+                <p className="text-xs text-slate-300">
+                  Apresente este QR Code no caixa da <strong>{storeName}</strong> no momento da compra para receber o benefício.
+                </p>
 
-      <Dialog open={!!voucher} onOpenChange={(v) => !v && setVoucher(null)}>
-        <DialogContent className="text-center">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-center gap-2">
-              <Ticket className="h-5 w-5" /> Seu voucher
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">Apresente este código no caixa:</p>
-          <div
-            key={voucher ?? "empty"}
-            className="mx-2 select-all text-3xl sm:text-4xl font-mono font-black tracking-widest py-6 px-3 rounded-lg break-all bg-slate-900 text-white border-2 border-slate-700 shadow-inner"
-            aria-label="Código do voucher"
-          >
-            {voucher}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Válido por alguns dias — você também pode conferir em "Meus vouchers" abaixo.
-          </p>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={cashbackModal} onOpenChange={setCashbackModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Usar cashback</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Você tem <strong>{formatBRL(Number(link.cashback_saldo))}</strong> disponível.
-          </p>
-          {Number(loja.cashback_valor_minimo || 0) > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Valor mínimo para resgate:{" "}
-              <strong>{formatBRL(Number(loja.cashback_valor_minimo))}</strong>
-            </p>
-          )}
-          {Number(loja.cashback_compra_minima || 0) > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Só pode ser usado em compras a partir de{" "}
-              <strong>{formatBRL(Number(loja.cashback_compra_minima))}</strong>.
-            </p>
-          )}
-          <div>
-            <Label>Quanto usar (R$)</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              max={Number(link.cashback_saldo)}
-              value={cashbackValor}
-              onChange={(e) => setCashbackValor(e.target.value)}
-            />
-          </div>
-          <Button
-            onClick={usarCashback}
-            disabled={resgatarC.isPending}
-            className="text-white"
-            style={{ backgroundColor: "var(--brand-secondary)" }}
-          >
-            Gerar voucher
-          </Button>
-        </DialogContent>
-      </Dialog>
+                <Button onClick={() => setGeneratedVoucher(null)} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
+                  Concluído
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </main>
     </div>
-  );
-}
-
-function IndicacaoCard({
-  loja,
-  telefone,
-  bonusIndicado,
-  bonusIndicador,
-}: {
-  loja: Loja;
-  telefone: string;
-  bonusIndicado: number;
-  bonusIndicador: number;
-}) {
-  const link = `${window.location.origin}/${loja.slug}?indicou=${telefone}`;
-  const msg = `Oi! 👋 Sou cliente da ${loja.nome_fantasia} e quero te indicar. Cadastre-se pelo meu link e ganhe ${bonusIndicado} pontos na sua 1ª compra: ${link}`;
-  const share = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: loja.nome_fantasia, text: msg, url: link });
-        return;
-      } catch {
-        /* fallback */
-      }
-    }
-    await navigator.clipboard.writeText(link);
-    toast.success("Link copiado!");
-  };
-  const whats = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
-  };
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Gift className="h-4 w-4" /> Indique amigos e ganhe pontos
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Seu amigo ganha <strong>{bonusIndicado} pts</strong> na 1ª compra. Você ganha{" "}
-          <strong>{bonusIndicador} pts</strong> quando ele comprar.
-        </p>
-        <div className="flex gap-2">
-          <Input
-            readOnly
-            value={link}
-            className="text-xs"
-            onFocus={(e) => e.currentTarget.select()}
-          />
-          <Button
-            size="sm"
-            onClick={share}
-            style={{ backgroundColor: "var(--brand-primary)" }}
-            className="text-white"
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-        </div>
-        <Button variant="outline" size="sm" onClick={whats} className="w-full">
-          Enviar por WhatsApp
-        </Button>
-      </CardContent>
-    </Card>
   );
 }

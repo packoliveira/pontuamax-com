@@ -4,36 +4,38 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius scale — retangular, próximo de Linear/Vercel */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* Shadows — sutis, para um look de software premium */
+  --shadow-xs: 0 1px 2px rgba(15, 15, 20, 0.04);
+  --shadow-sm: 0 1px 2px rgba(15, 15, 20, 0.05), 0 1px 1px rgba(15, 15, 20, 0.03);
+  --shadow: 0 2px 8px rgba(15, 15, 20, 0.05);
+  --shadow-md: 0 6px 20px rgba(15, 15, 20, 0.06);
+  --shadow-lg: 0 12px 32px rgba(15, 15, 20, 0.08);
+  --shadow-xl: 0 20px 48px rgba(15, 15, 20, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(139, 92, 246, 0.16), 0 8px 32px -12px rgba(139, 92, 246, 0.35);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-glow: var(--primary-glow);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -42,15 +44,13 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -61,82 +61,109 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ============ LIGHT — ERP interno (área autenticada) ============ */
 :root {
-  --radius: 0.625rem;
-  /* Tema claro do painel interno (Lojista + Admin).
-     Identidade visual PontuaMax: azul profundo (#2563EB) como primária,
-     verde crescimento (#22C55E) como accent/sucesso e laranja (#F59E0B)
-     reservado para avisos/promoções. Fonte: Inter. */
-  --background: #f8fafc;
+  --radius: 0.875rem;
+
+  --background: #f1f5f9;
   --foreground: #0f172a;
+
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+
   --card: #ffffff;
   --card-foreground: #0f172a;
+
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #2563eb;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
+  --primary-glow: #818cf8;
+
+  --secondary: #e2e8f0;
   --secondary-foreground: #0f172a;
+
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #22c55e;
-  --accent-foreground: #ffffff;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: #2563eb;
-  --chart-1: #2563eb;
-  --chart-2: #22c55e;
-  --chart-3: #f59e0b;
-  --chart-4: #14cba8;
-  --chart-5: #6d28d9;
-  /* Sidebar interna do painel: fundo escuro premium (SaaS moderno) */
-  --sidebar: #0b132b;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.08);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #2563eb;
-}
 
-.dark {
-  /* Tema escuro do painel PontuaMax. Páginas públicas da loja continuam claras
-     e sobrescrevem as cores da marca dinamicamente por loja. */
-  --background: #0b1220;
-  --foreground: #f5f5f5;
-  --card: #111827;
-  --card-foreground: #f5f5f5;
-  --popover: #111827;
-  --popover-foreground: #f5f5f5;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #111827;
-  --secondary-foreground: #f5f5f5;
-  --muted: #111827;
-  --muted-foreground: #94a3b8;
-  --accent: #22c55e;
-  --accent-foreground: #0b1220;
+  --accent: #eef2ff;
+  --accent-foreground: #312e81;
+
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #1f2937;
-  --input: #1f2937;
-  --ring: #3b82f6;
-  --chart-1: #3b82f6;
-  --chart-2: #22c55e;
-  --chart-3: #f59e0b;
-  --chart-4: #a78bfa;
-  --chart-5: #f472b6;
-  --sidebar: #111827;
-  --sidebar-foreground: #f5f5f5;
-  --sidebar-primary: #3b82f6;
+
+  --success: #059669;
+  --success-foreground: #ffffff;
+
+  --warning: #f59e0b;
+  --warning-foreground: #0f172a;
+
+  --border: #e2e8f0;
+  --input: #cbd5e1;
+  --ring: #6366f1;
+
+  /* Sidebar limpa e clara no padrao Premium Clean */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #4f46e5;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1f2937;
-  --sidebar-accent-foreground: #f5f5f5;
-  --sidebar-border: #1f2937;
-  --sidebar-ring: #3b82f6;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #6366f1;
+}
+
+/* ============ DARK — Landing e Login ============ */
+.dark {
+  --background: #0D0D10;
+  --foreground: #FFFFFF;
+
+  --surface: #1E1E24;
+  --surface-elevated: #1E1E24;
+
+  --card: #17171B;
+  --card-foreground: #FFFFFF;
+
+  --popover: #17171B;
+  --popover-foreground: #FFFFFF;
+
+  --primary: #8B5CF6;
+  --primary-hover: #7C3AED;
+  --primary-foreground: #FFFFFF;
+  --primary-glow: #A78BFA;
+
+  --secondary: #17171B;
+  --secondary-foreground: #FFFFFF;
+
+  --muted: #17171B;
+  --muted-foreground: #A5A5B2;
+
+  --accent: #1E1E24;
+  --accent-foreground: #FFFFFF;
+
+  --destructive: #F87171;
+  --destructive-foreground: #FFFFFF;
+
+  --success: #34D399;
+  --success-foreground: #0D0D10;
+
+  --warning: #FBBF24;
+  --warning-foreground: #0D0D10;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #8B5CF6;
+
+  --sidebar: #0D0D10;
+  --sidebar-foreground: #E6E6EA;
+  --sidebar-primary: #8B5CF6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(139, 92, 246, 0.14);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #8B5CF6;
 }
 
 @layer base {
@@ -144,198 +171,385 @@
     border-color: var(--color-border);
   }
 
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family:
-      "Inter",
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      "Segoe UI",
-      Roboto,
-      sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
-  /* Foco visível consistente em todos elementos interativos do painel */
-  :where(button, a, [role="button"], input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--color-ring);
-    outline-offset: 2px;
-    border-radius: 6px;
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    letter-spacing: -0.011em;
   }
 
-  /* Scrollbar refinada (WebKit) para o painel interno */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    border-radius: 8px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
-    background-clip: padding-box;
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+    font-feature-settings: "ss01", "cv11";
   }
 
-  /* Seleção de texto na cor da marca */
-  ::selection {
-    background: color-mix(in oklab, var(--primary) 22%, transparent);
-    color: var(--foreground);
+  h1, h2, h3, h4 {
+    letter-spacing: -0.022em;
   }
+}
+
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* ============ FitGestor LIQUID GLASS — tokens globais ============ */
+:root {
+  --fit-background: #F6F6FB;
+  --fit-surface: #FFFFFF;
+  --fit-surface-solid: #FFFFFF;
+  --fit-surface-glass: rgba(255, 255, 255, 0.68);
+  --fit-glass-border: rgba(255, 255, 255, 0.62);
+  --fit-glass-border-dim: rgba(255, 255, 255, 0.35);
+  --fit-glass-highlight: rgba(255, 255, 255, 0.92);
+  --fit-glass-reflection: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 42%, rgba(255,255,255,0) 60%);
+  --fit-text: #0D0D10;
+  --fit-text-muted: #64646E;
+  --fit-primary: #8B5CF6;
+  --fit-primary-hover: #7C3AED;
+  --fit-danger: #E5484D;
+  --fit-warning: #F5A524;
+  --fit-success: #10B981;
+  --fit-info: #3B82F6;
+  --fit-shadow-sm: 0 4px 14px rgba(44, 38, 70, 0.06);
+  --fit-shadow-md: 0 18px 40px rgba(44, 38, 70, 0.09);
+  --fit-shadow-lg: 0 28px 64px rgba(44, 38, 70, 0.14);
+  --fit-blur-sm: 14px;
+  --fit-blur-md: 22px;
+  --fit-blur-lg: 32px;
+  --fit-radius-sm: 10px;
+  --fit-radius-md: 14px;
+  --fit-radius-lg: 18px;
+  --fit-radius-xl: 24px;
+  --fit-liquid-depth-1: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(30,20,60,0.05), 0 8px 24px rgba(44,38,70,0.06);
+  --fit-liquid-depth-2: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(30,20,60,0.06), 0 18px 40px rgba(44,38,70,0.10);
+  --fit-liquid-depth-3: inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(30,20,60,0.08), 0 32px 72px rgba(44,38,70,0.18);
+}
+
+.dark {
+  --fit-background: #08080D;
+  --fit-surface: #17171B;
+  --fit-surface-solid: #1B1B21;
+  --fit-surface-glass: rgba(24, 24, 32, 0.62);
+  --fit-glass-border: rgba(255, 255, 255, 0.12);
+  --fit-glass-border-dim: rgba(255, 255, 255, 0.06);
+  --fit-glass-highlight: rgba(255, 255, 255, 0.08);
+  --fit-glass-reflection: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 42%, rgba(255,255,255,0) 60%);
+  --fit-text: #FFFFFF;
+  --fit-text-muted: #A5A5B2;
+  --fit-shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.35);
+  --fit-shadow-md: 0 20px 48px rgba(0, 0, 0, 0.45);
+  --fit-shadow-lg: 0 36px 80px rgba(0, 0, 0, 0.60);
+  --fit-liquid-depth-1: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --fit-liquid-depth-2: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.5), 0 18px 40px rgba(0,0,0,0.45);
+  --fit-liquid-depth-3: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.6), 0 32px 72px rgba(0,0,0,0.65);
+}
+
+/* Fundo global do ERP com iluminação difusa */
+body {
+  background-color: var(--fit-background);
+  background-image:
+    radial-gradient(1100px 700px at 12% -8%, rgba(139, 92, 246, 0.10), transparent 55%),
+    radial-gradient(900px 600px at 105% 8%, rgba(96, 165, 250, 0.09), transparent 55%),
+    radial-gradient(700px 600px at 50% 115%, rgba(167, 139, 250, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+.dark body {
+  background-image:
+    radial-gradient(1200px 800px at 10% -10%, rgba(139, 92, 246, 0.26), transparent 55%),
+    radial-gradient(900px 700px at 110% 5%, rgba(59, 130, 246, 0.18), transparent 55%),
+    radial-gradient(800px 700px at 50% 120%, rgba(167, 139, 250, 0.20), transparent 60%);
+}
+
+/* ===== Níveis Glass reutilizáveis ===== */
+@utility glass-soft {
+  position: relative;
+  background: color-mix(in oklab, var(--fit-surface) 82%, transparent);
+  backdrop-filter: blur(var(--fit-blur-sm)) saturate(150%);
+  border: 1px solid var(--fit-glass-border);
+  box-shadow: var(--fit-liquid-depth-1);
+}
+@utility glass-medium {
+  position: relative;
+  background: var(--fit-surface-glass);
+  backdrop-filter: blur(var(--fit-blur-md)) saturate(160%);
+  border: 1px solid var(--fit-glass-border);
+  box-shadow: var(--fit-liquid-depth-2);
+}
+@utility glass-strong {
+  position: relative;
+  background: var(--fit-surface-glass);
+  backdrop-filter: blur(var(--fit-blur-lg)) saturate(170%);
+  border: 1px solid var(--fit-glass-border);
+  box-shadow: var(--fit-liquid-depth-3);
+}
+
+/* ===== LIQUID GLASS iOS — refração, reflexo especular e borda cromática ===== */
+@utility liquid-surface {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.22) 45%, rgba(255,255,255,0.38));
+  backdrop-filter: blur(28px) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.05);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 1px rgba(255,255,255,0.15),
+    inset 0 -12px 24px -12px rgba(139,92,246,0.14),
+    0 24px 60px -18px rgba(30,20,60,0.28),
+    0 8px 20px -8px rgba(30,20,60,0.15);
+  isolation: isolate;
+  border-radius: 22px;
+}
+@utility liquid-card {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.68), rgba(255,255,255,0.28) 55%, rgba(255,255,255,0.44));
+  backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 0 0 1px rgba(255,255,255,0.12),
+    inset 0 -10px 22px -14px rgba(139,92,246,0.16),
+    0 18px 44px -16px rgba(30,20,60,0.22),
+    0 6px 16px -6px rgba(30,20,60,0.10);
+  isolation: isolate;
+  transition: transform 260ms cubic-bezier(.2,.7,.2,1), box-shadow 260ms;
+}
+@utility liquid-btn {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.45));
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid rgba(255,255,255,0.75);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(139,92,246,0.15),
+    0 8px 20px -6px rgba(35,30,60,0.18);
+  transition: transform 180ms, box-shadow 180ms, background 180ms;
+}
+.liquid-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(139,92,246,0.22),
+    0 14px 28px -8px rgba(35,30,60,0.24);
+}
+.dark .liquid-surface {
+  background: linear-gradient(135deg, rgba(38,38,52,0.55), rgba(22,22,32,0.30) 55%, rgba(30,30,44,0.42));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 -12px 24px -12px rgba(139,92,246,0.18),
+    0 32px 72px -20px rgba(0,0,0,0.6),
+    0 10px 24px -10px rgba(0,0,0,0.4);
+}
+.dark .liquid-card {
+  background: linear-gradient(135deg, rgba(34,34,48,0.55), rgba(18,18,28,0.28) 55%, rgba(26,26,38,0.42));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 -10px 22px -14px rgba(139,92,246,0.20),
+    0 24px 56px -18px rgba(0,0,0,0.55),
+    0 8px 18px -8px rgba(0,0,0,0.35);
+}
+/* Reflexo especular no topo — arco de luz iOS */
+.liquid-card::before,
+.liquid-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 60% at 50% -20%, rgba(255,255,255,0.55), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 22%);
+  z-index: 1;
+  border-radius: inherit;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+.dark .liquid-card::before,
+.dark .liquid-surface::before {
+  background:
+    radial-gradient(120% 60% at 50% -20%, rgba(255,255,255,0.18), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 22%);
+  opacity: 0.8;
+}
+/* Refração / halo cromático nas bordas */
+.liquid-card::after,
+.liquid-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.9) 0%,
+    rgba(196,181,253,0.5) 25%,
+    rgba(147,197,253,0.4) 50%,
+    rgba(255,255,255,0.85) 75%,
+    rgba(196,181,253,0.35) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 2;
+  opacity: 0.7;
+}
+.dark .liquid-card::after,
+.dark .liquid-surface::after {
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.35) 0%,
+    rgba(196,181,253,0.35) 25%,
+    rgba(147,197,253,0.28) 50%,
+    rgba(255,255,255,0.30) 75%,
+    rgba(196,181,253,0.25) 100%);
+  opacity: 0.55;
+}
+.liquid-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 0 0 1px rgba(255,255,255,0.18),
+    inset 0 -10px 22px -14px rgba(139,92,246,0.22),
+    0 28px 60px -18px rgba(30,20,60,0.30),
+    0 10px 24px -8px rgba(30,20,60,0.14);
+}
+
+/* ===== SIDEBAR — Liquid Glass escuro estilo iOS ===== */
+[data-sidebar="sidebar"] {
+  position: relative;
+  background: linear-gradient(180deg, rgba(12, 12, 18, 0.94), rgba(8, 8, 14, 0.92)) !important;
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset -1px 0 0 rgba(255,255,255,0.04),
+    inset 1px 0 0 rgba(255,255,255,0.05),
+    10px 0 40px rgba(0,0,0,0.25);
+}
+[data-sidebar="sidebar"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(500px 320px at 50% -10%, rgba(139,92,246,0.28), transparent 60%),
+    radial-gradient(400px 260px at 30% 110%, rgba(96,165,250,0.14), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 30%);
+}
+[data-sidebar="sidebar"] > * { position: relative; z-index: 1; }
+
+/* Item ativo — cápsula líquida iOS */
+[data-sidebar="menu-button"] {
+  border-radius: 12px !important;
+  transition: background 200ms, box-shadow 200ms !important;
+}
+[data-sidebar="menu-button"]:hover {
+  background: rgba(255,255,255,0.05) !important;
+}
+[data-sidebar="menu-button"][data-active="true"] {
+  background:
+    linear-gradient(135deg, rgba(167,139,250,0.42), rgba(124,58,237,0.22) 60%, rgba(96,165,250,0.20)) !important;
+  border: 1px solid rgba(196,181,253,0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.30),
+    inset 0 -1px 0 rgba(124,58,237,0.30),
+    inset 0 0 20px rgba(167,139,250,0.20),
+    0 8px 24px -6px rgba(124,58,237,0.35) !important;
+  color: #fff !important;
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+/* Aurora / iluminação difusa para landing e login */
+@utility fit-aurora {
+  background:
+    radial-gradient(1200px 800px at 15% -10%, rgba(139, 92, 246, 0.32), transparent 60%),
+    radial-gradient(900px 700px at 110% 10%, rgba(59, 130, 246, 0.22), transparent 55%),
+    radial-gradient(700px 600px at 50% 120%, rgba(167, 139, 250, 0.26), transparent 60%),
+    #08080D;
+}
+@utility fit-aurora-grid {
+  background-image: linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Fallback sem backdrop-filter */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-soft, .glass-medium, .glass-strong,
+  .liquid-surface, .liquid-card, .liquid-btn {
+    background: var(--fit-surface-solid) !important;
+  }
+  [data-sidebar="sidebar"] { background: #0D0D10 !important; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============ Print styles (Sub-fatia 3) ============ */
+@media screen {
+  #print-root { display: none; }
+}
+
+@media print {
+  @page { margin: 12mm; }
+
+
+  body * { visibility: hidden !important; }
+  #print-root, #print-root * { visibility: visible !important; }
+  #print-root {
+    position: absolute; inset: 0; display: block;
+    background: #fff; color: #000;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+
+  html.print-80mm #print-root {
+    width: 74mm; font-size: 11px; line-height: 1.35;
+  }
+  html.print-80mm #print-root .receipt-title { font-size: 13px; font-weight: 700; text-align: center; }
+  html.print-80mm #print-root table { width: 100%; border-collapse: collapse; }
+  html.print-80mm #print-root th, html.print-80mm #print-root td { padding: 2px 0; font-size: 10.5px; }
+  html.print-80mm #print-root .a4-only { display: none !important; }
+  html.print-80mm #print-root .item-row { page-break-inside: avoid; break-inside: avoid; }
+
+  html.print-a4 #print-root { width: 100%; font-size: 12px; line-height: 1.45; }
+  html.print-a4 #print-root .thermal-only { display: none !important; }
+  html.print-a4 #print-root .receipt-title { font-size: 20px; font-weight: 700; }
+  html.print-a4 #print-root table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  html.print-a4 #print-root th, html.print-a4 #print-root td { padding: 4px 6px; border-bottom: 1px solid #ddd; font-size: 11px; text-align: left; }
+  html.print-a4 #print-root th { background: #f4f4f4; }
+  html.print-a4 #print-root .doc-footer { position: running(footer); text-align: center; font-size: 10px; color: #555; }
+  html.print-a4 #print-root .page-break { page-break-after: always; }
 }
 
 #lovable-badge {
   display: none !important;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-/* Animação leve de entrada usada em páginas do painel */
-@keyframes panel-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@utility animate-panel-in {
-  animation: panel-fade-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@utility hover-lift {
-  transition:
-    transform 200ms ease,
-    box-shadow 200ms ease;
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px -12px color-mix(in oklab, var(--primary) 25%, transparent);
-  }
-}
-
-/* ==========================================================================
- * PontuaMax Midnight Indigo — tema escopado apenas para a página pública /{slug}.
- * Aplicado via <html class="pontuamax-midnight"> (montado em useEffect da rota)
- * para que portais (Dialog, Popover, Sonner) também herdem os tokens.
- * ========================================================================== */
-.pontuamax-midnight {
-  --background: #0a0a1a;
-  --foreground: #e2e8f0;
-  --card: #141432;
-  --card-foreground: #f8fafc;
-  --popover: #141432;
-  --popover-foreground: #f8fafc;
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --secondary: #1e1e5a;
-  --secondary-foreground: #f8fafc;
-  --muted: #1a1a3a;
-  --muted-foreground: #94a3b8;
-  --accent: #4f46e5;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #1e1e5a;
-  --input: #1e1e5a;
-  --ring: #4f46e5;
-  color-scheme: dark;
-}
-
-/* Glow suave nos cards de destaque do Midnight */
-.pontuamax-glow {
-  box-shadow:
-    0 0 0 1px rgba(79, 70, 229, 0.15),
-    0 10px 30px -10px rgba(79, 70, 229, 0.35),
-    0 0 40px -20px rgba(129, 140, 248, 0.4);
-}
-
-/* Refinamentos escopados na loja pública (Midnight Indigo) */
-.pontuamax-midnight ::selection {
-  background: rgba(129, 140, 248, 0.35);
-  color: #ffffff;
-}
-
-.pontuamax-midnight
-  :where(button, a, [role="button"], input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid rgba(129, 140, 248, 0.75);
-  outline-offset: 2px;
-  border-radius: 8px;
-}
-
-.pontuamax-midnight ::-webkit-scrollbar-thumb {
-  background: rgba(129, 140, 248, 0.28);
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-.pontuamax-midnight ::-webkit-scrollbar-thumb:hover {
-  background: rgba(129, 140, 248, 0.5);
-  background-clip: padding-box;
-}
-
-/* Variante Light — quando o lojista escolhe fundo claro (bg_mode = "light"
- * ou "custom" com cor clara). Ajusta os tokens shadcn e sobrescreve as
- * classes utilitárias `text-slate-*` mais usadas para manter contraste. */
-.pontuamax-midnight.pontuamax-light {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --secondary: #e2e8f0;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  color-scheme: light;
-}
-.pontuamax-light :where(.text-slate-100, .text-slate-200) {
-  color: #0f172a;
-}
-.pontuamax-light :where(.text-slate-300, .text-slate-400) {
-  color: #475569;
-}
-.pontuamax-light :where(.text-slate-500) {
-  color: #64748b;
-}
-.pontuamax-light ::selection {
-  background: rgba(79, 70, 229, 0.22);
-  color: #0f172a;
-}
-
-@keyframes pontuamax-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-.pontuamax-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(129, 140, 248, 0.15), transparent);
-  background-size: 200% 100%;
-  animation: pontuamax-shimmer 2.5s ease-in-out infinite;
 }
