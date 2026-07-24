@@ -160,32 +160,29 @@ function Index() {
 
             <div className="grid gap-5 md:grid-cols-2 md:gap-6">
               {/* Card 1 — Campanha ativa */}
-              <div className="rounded-[22px] border border-white/10 bg-[#0B1220]/80 p-6 backdrop-blur">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#14CBA8]/12 px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#14CBA8]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8]" />
-                    Campanha ativa
+              <div className="rounded-[22px] bg-[#0B1220] p-6 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.6)]">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#F5A623]">
+                  <svg viewBox="0 0 32 32" className="h-4 w-4" fill="currentColor" aria-hidden>
+                    <path d="M16 3C8.82 3 3 8.82 3 16c0 2.29.6 4.51 1.74 6.47L3 29l6.7-1.71A12.94 12.94 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3zm7.5 18.36c-.32.9-1.86 1.72-2.6 1.82-.66.1-1.5.14-2.42-.15-.56-.18-1.28-.42-2.2-.82-3.87-1.67-6.4-5.57-6.6-5.83-.19-.26-1.57-2.09-1.57-4 0-1.9.99-2.83 1.34-3.22.35-.39.77-.48 1.03-.48h.74c.24 0 .56-.09.87.66.32.77 1.09 2.67 1.19 2.86.09.19.16.42.03.68-.13.26-.19.42-.39.65-.19.23-.41.51-.58.68-.19.19-.4.4-.17.79.23.39 1.02 1.68 2.19 2.72 1.5 1.34 2.77 1.76 3.16 1.95.39.19.62.16.85-.1.23-.26.98-1.14 1.24-1.53.26-.39.52-.32.87-.19.35.13 2.24 1.06 2.62 1.25.39.19.65.29.75.45.09.16.09.94-.23 1.85z"/>
+                  </svg>
+                  WhatsApp · Sua marca
+                </div>
+                <p className="mt-4 text-[16px] font-semibold leading-snug text-white">
+                  "Oi Mariana! Você tem{" "}
+                  <span className="text-[#F5A623]">R$ 18 de cashback</span>{" "}
+                  esperando pra usar 🎁"
+                </p>
+                <div className="mt-5 flex items-center gap-3 text-[11.5px] text-white/45">
+                  <span>09:42</span>
+                  <span className="text-white/25">·</span>
+                  <span>Régua automática</span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-[#14CBA8]">
+                    <svg viewBox="0 0 16 12" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M1 6l3.5 3.5L11 3" />
+                      <path d="M6 9.5L9.5 13 15 5.5" />
+                    </svg>
+                    Entregue
                   </span>
-                  <span className="text-[11px] text-white/40">agora</span>
-                </div>
-                <div className="mt-5 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-[13px] font-semibold text-white/80">
-                    MC
-                  </div>
-                  <div className="leading-tight">
-                    <p className="text-[15px] font-semibold text-white">Mariana C.</p>
-                    <p className="text-[11.5px] text-white/45">cliente há 4 meses</p>
-                  </div>
-                </div>
-                <div className="mt-5 rounded-xl bg-white/[0.04] px-4 py-3.5">
-                  <p className="text-[10.5px] uppercase tracking-[0.16em] text-white/40">Benefício enviado</p>
-                  <p className="mt-1 font-display text-xl font-semibold text-white">
-                    Cashback de <span className="text-[#14CBA8]">R$ 18</span>
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5 text-[11.5px] text-white/45">
-                  <span className="h-1 w-1 rounded-full bg-white/40" />
-                  Entregue há 12 min
                 </div>
               </div>
 
