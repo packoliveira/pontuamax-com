@@ -1,1 +1,0 @@
-ALTER TYPE public.integration_event_status ADD VALUE IF NOT EXISTS 'cancelado';

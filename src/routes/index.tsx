@@ -1,648 +1,818 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
-  ArrowRight, Boxes, ScanBarcode, Tag, ShoppingCart, RefreshCw, BarChart3,
-  Truck, Users, Check, ShieldCheck, Zap, Database,
+  Store,
+  Star,
+  Wallet,
+  Palette,
+  Coins,
+  Gift,
+  Users,
+  ArrowRight,
+  Check,
+  Home,
+  ShoppingBag,
+  Sparkles,
+  User,
+  Ticket,
+  Zap,
+  ChevronRight,
+  Bell,
+  Signal,
+  Wifi,
+  BatteryFull,
+  Percent,
+  Crown,
+  Flame,
+  ArrowUpRight,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import type { ReactNode } from "react";
-import { BrandMark } from "@/components/brand-logo";
+import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    if (typeof window === "undefined") return;
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) return;
-    const { data: workspace } = await supabase.rpc("default_workspace_for_current_user");
-    const target =
-      workspace === "operational" ? "/trabalho" :
-      workspace === "motoboy" ? "/motoboy" :
-      workspace === "setup" ? "/setup" :
-      "/dashboard";
-    throw redirect({ to: target });
-  },
-  component: Landing,
   head: () => ({
     meta: [
-      { title: "FitGestor · ERP para varejo de moda fitness" },
-      { name: "description", content: "ERP completo para lojas de moda e fitness: PDV, estoque, recebimento, etiquetas, trocas, expedição e relatórios em um único sistema." },
-      { property: "og:title", content: "FitGestor · ERP para varejo de moda fitness" },
-      { property: "og:description", content: "PDV, estoque, recebimento, etiquetas, trocas, expedição e relatórios em um único sistema." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { title: "PontuaMax | Programa de Fidelidade para Empresas" },
+      {
+        name: "description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
+      { property: "og:title", content: "PontuaMax | Programa de Fidelidade para Empresas" },
+      {
+        property: "og:description",
+        content:
+          "Fidelize clientes com pontos, cashback, campanhas e benefícios. Aumente a recorrência e faça seu negócio crescer com a PontuaMax.",
+      },
     ],
   }),
+  component: Index,
 });
 
-function Landing() {
+function Index() {
   return (
-    <div className="min-h-screen bg-[#0b0d10] text-slate-100 antialiased">
-      <SiteHeader />
-      <main>
-        <Hero />
-        <TrustBar />
-        <Modules />
-        <PreviewSection />
-        <WhyErp />
-        <Testimonials />
-        <FaqSection />
-        <ClosingCta />
-      </main>
-      <SiteFooter />
-    </div>
-  );
-}
-
-/* -------------------------------- Header --------------------------------- */
-
-function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0b0d10]/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <BrandMark size={28} />
-          <span className="text-[15px] font-semibold tracking-tight text-white">FitGestor</span>
-          <span className="ml-2 hidden rounded border border-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:inline">ERP</span>
-        </Link>
-        <nav className="hidden items-center gap-7 md:flex">
-          <a href="#modulos" className="text-[13px] text-slate-300 transition-colors hover:text-white">Módulos</a>
-          <a href="#preview" className="text-[13px] text-slate-300 transition-colors hover:text-white">Sistema</a>
-          <a href="#depoimentos" className="text-[13px] text-slate-300 transition-colors hover:text-white">Clientes</a>
-          <a href="#faq" className="text-[13px] text-slate-300 transition-colors hover:text-white">FAQ</a>
-        </nav>
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <Link to="/auth" className="hidden rounded-md px-3 py-1.5 text-[13px] font-medium text-slate-300 transition-colors hover:text-white sm:inline-block">
-            Entrar
-          </Link>
-          <Link
-            to="/auth"
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-1.5 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Acessar o sistema <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          <PontuaMaxMark size={36} />
+          <PontuaMaxWordmark variant="light" size={18} />
         </div>
-      </div>
-    </header>
-  );
-}
+        <Link to="/lojista/login">
+          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">
+            Entrar como lojista
+          </Button>
+        </Link>
+      </header>
 
-/* --------------------------------- Hero ---------------------------------- */
-
-function Hero() {
-  return (
-    <section className="relative overflow-hidden border-b border-white/5">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.10),transparent_60%)]" />
-      <div className="relative mx-auto max-w-[1200px] px-6 pb-16 pt-16 lg:pb-24 lg:pt-24">
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-slate-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Sistema operacional para lojas de moda fitness
-            </span>
-            <h1 className="mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-[46px] lg:text-[52px]">
-              Da entrada da mercadoria à venda, tudo sob controle.
-            </h1>
-            <p className="mt-5 max-w-[52ch] text-[15px] leading-relaxed text-slate-400">
-              ERP web unificado com PDV, estoque por variação, recebimento com bipagem,
-              etiquetas, trocas, expedição de motoboy e relatórios — sem planilha paralela.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link to="/auth" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-5 py-2.5 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-                Acessar o sistema <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a href="#preview" className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-white/10">
-                Ver o sistema
-              </a>
+      {/* HERO */}
+      <section className="mx-auto flex min-h-[calc(100dvh-96px)] max-w-6xl items-center px-4 sm:px-6 py-12 sm:py-16 md:py-28">
+        <div className="grid w-full items-center gap-16 md:grid-cols-2">
+          <div className="text-center md:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-xs font-medium text-[#0F172A] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
+              Fidelização • Cashback • Campanhas
             </div>
-            <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-slate-400">
-              {["100% web", "Multi-loja", "Auditoria completa", "Integração Olist / Tiny"].map((f) => (
-                <li key={f} className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />{f}</li>
+            <h1 className="mt-6 text-3xl font-bold tracking-tight [text-wrap:balance] sm:text-4xl md:text-5xl lg:text-6xl">
+              Fidelize clientes e faça{" "}
+              <span className="bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] bg-clip-text text-transparent">
+                seu negócio crescer
+              </span>
+              .
+            </h1>
+            <p className="mt-5 text-base sm:text-lg text-[#64748B] md:text-xl [text-wrap:pretty]">
+              Programa de fidelidade com pontos, cashback e campanhas para aumentar a recorrência
+              dos seus clientes e vender mais todos os meses.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+              <Link to="/lojista/onboarding">
+                <Button
+                  size="lg"
+                  className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto"
+                >
+                  <Store className="h-4 w-4" /> Criar minha loja gratuitamente
+                </Button>
+              </Link>
+              <Link to="/lojista/login">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full border-[#2563EB]/30 text-[#2563EB] hover:bg-[#2563EB]/5 rounded-xl sm:w-auto"
+                >
+                  Entrar como lojista
+                </Button>
+              </Link>
+            </div>
+            <ul className="mt-6 flex flex-col items-center gap-2 text-sm text-[#475569] sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 md:justify-start">
+              {[
+                "Implantação em poucos minutos",
+                "Link personalizado para sua empresa",
+                "Sem limite de clientes cadastrados",
+              ].map((item) => (
+                <li key={item} className="inline-flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#22C55E]/15 text-[#16A34A]">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                  {item}
+                </li>
               ))}
             </ul>
           </div>
-          <div className="lg:col-span-6">
-            <div className="rounded-xl border border-white/10 bg-[#0f1116] shadow-2xl shadow-black/40">
-              <HeroMockup />
-            </div>
+
+          <div className="flex justify-center md:justify-end">
+            <PhoneMockup />
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-/* ------------------------------ Trust bar -------------------------------- */
+      {/* BENEFÍCIOS */}
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid gap-6 md:grid-cols-3">
+          <FeatureCard
+            icon={<Star className="h-5 w-5" />}
+            title="Pontos por compra"
+            desc="Cliente acumula a cada compra e troca por prêmios no seu catálogo."
+          />
+          <FeatureCard
+            icon={<Wallet className="h-5 w-5" />}
+            title="Cashback automático"
+            desc="Devolva uma % em crédito e traga o cliente de volta pra gastar."
+          />
+          <FeatureCard
+            icon={<Palette className="h-5 w-5" />}
+            title="Página com sua marca"
+            desc="Logo, cores e catálogo próprios num link exclusivo da sua loja."
+          />
+        </div>
+      </section>
 
-function TrustBar() {
-  const stats = [
-    { v: "24/7", l: "Disponibilidade" },
-    { v: "< 200 ms", l: "Resposta do PDV" },
-    { v: "99,9%", l: "SLA operacional" },
-    { v: "AES-256", l: "Dados em repouso" },
-  ];
-  return (
-    <section className="border-b border-white/5 bg-[#0d1015]">
-      <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-y-6 px-6 py-8 sm:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.l} className="border-l border-white/10 px-4 first:border-l-0">
-            <p className="text-[18px] font-semibold text-white">{s.v}</p>
-            <p className="mt-1 text-[11px] uppercase tracking-wider text-slate-500">{s.l}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------------- Modules -------------------------------- */
-
-function Modules() {
-  const items = [
-    { icon: ScanBarcode, t: "Recebimento", d: "Bipagem, conferência por variação e entrada em lote com rastreabilidade completa." },
-    { icon: Boxes, t: "Estoque", d: "Saldos por SKU, mínimos, reservado e disponível. Alertas de ruptura e curva ABC." },
-    { icon: Tag, t: "Etiquetas", d: "Lotes com CODE128, geração em PDF pronta para impressora térmica." },
-    { icon: ShoppingCart, t: "PDV", d: "Venda de balcão com cliente, vendedor, formas de pagamento e recibo." },
-    { icon: RefreshCw, t: "Trocas", d: "Vale-troca e crédito por cliente, aplicados automaticamente no PDV." },
-    { icon: Truck, t: "Expedição", d: "Fila de entregas, rotas, motoboy e comprovante digital do cliente." },
-    { icon: Users, t: "Funcionários", d: "Cargos, permissões granulares e trilha de auditoria por ação." },
-    { icon: BarChart3, t: "Relatórios", d: "Vendas, ticket médio, mais vendidos, trocas e desempenho por vendedor." },
-  ];
-  return (
-    <section id="modulos" className="border-b border-white/5">
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-glow">Módulos</p>
-          <h2 className="mt-3 text-[30px] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[36px]">
-            Um sistema, oito operações — uma única fonte de verdade.
+      {/* MOCKUP DASHBOARD */}
+      <section className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Um painel completo pro lojista
           </h2>
-          <p className="mt-3 text-[14px] leading-relaxed text-slate-400">
-            Cada módulo do FitGestor conversa com os demais em tempo real: o estoque cai na venda, a troca gera crédito, a etiqueta sai do recebimento.
+          <p className="mt-4 text-[#64748B] md:text-lg">
+            Acompanhe clientes, pontos distribuídos e resgates em tempo real.
           </p>
         </div>
-        <div className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/5 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map(({ icon: Icon, t, d }) => (
-            <div key={t} className="flex flex-col gap-3 bg-[#0f1116] p-5 transition-colors hover:bg-[#12151b]">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-primary-glow">
-                <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
-              </div>
-              <div>
-                <p className="text-[14px] font-semibold text-white">{t}</p>
-                <p className="mt-1 text-[12.5px] leading-relaxed text-slate-400">{d}</p>
-              </div>
-            </div>
-          ))}
+        <div className="mt-12">
+          <DashboardMockup />
         </div>
-      </div>
-    </section>
-  );
-}
 
-/* ----------------------------- Preview section --------------------------- */
-
-function PreviewSection() {
-  return (
-    <section id="preview" className="border-b border-white/5 bg-[#0d1015]">
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-glow">O sistema por dentro</p>
-          <h2 className="mt-3 text-[30px] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[36px]">
-            Interface pensada para quem opera no dia a dia.
-          </h2>
-        </div>
-        <div className="mt-10 space-y-6">
-          <ModuleRow eyebrow="01 · Recebimento" title="Bipe o código de barras, confira por variação, encerre o lote." body="Substitua a planilha de conferência. O rascunho salva a cada bipagem, e o encerramento gera o movimento de entrada com rastreabilidade." mockup={<ReceivingMockup />} />
-          <ModuleRow eyebrow="02 · Estoque" reverse title="Saldos por SKU, com alerta de ruptura e mínimo." body="Filtre por marca, categoria, cor, tamanho ou situação. Exporte para conferência ou dispare recontagem de inventário." mockup={<StockMockup />} />
-          <ModuleRow eyebrow="03 · PDV" title="Venda em segundos, com cliente, crédito e trocas integrados." body="Atalhos de teclado, formas de pagamento múltiplas e recibo pronto para impressão em térmica ou envio por WhatsApp." mockup={<PdvMockup />} />
-          <ModuleRow eyebrow="04 · Relatórios" reverse title="Números que dão base para decisão — não para achismo." body="Vendas por período, ticket médio, mais vendidos, desempenho por vendedor e giro de estoque com comparativo." mockup={<ReportsMockup />} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ModuleRow({ eyebrow, title, body, reverse, mockup }: { eyebrow: string; title: string; body: string; reverse?: boolean; mockup: ReactNode }) {
-  return (
-    <div className="grid grid-cols-1 items-center gap-8 rounded-xl border border-white/10 bg-[#0f1116] p-6 lg:grid-cols-12 lg:gap-10 lg:p-8">
-      <div className={`lg:col-span-4 ${reverse ? "lg:order-2" : ""}`}>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-glow">{eyebrow}</p>
-        <h3 className="mt-3 text-[22px] font-semibold leading-tight tracking-[-0.015em] text-white">{title}</h3>
-        <p className="mt-3 text-[13.5px] leading-relaxed text-slate-400">{body}</p>
-      </div>
-      <div className={`lg:col-span-8 ${reverse ? "lg:order-1" : ""}`}>
-        <div className="overflow-hidden rounded-lg border border-white/10 bg-background">
-          {mockup}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------- Why ERP -------------------------------- */
-
-function WhyErp() {
-  const items = [
-    { icon: Database, t: "Dado único", d: "Cadastro, estoque, venda e cliente centralizados — sem planilhas paralelas." },
-    { icon: ShieldCheck, t: "Controle real", d: "Permissões por cargo, aprovações e trilha completa de auditoria." },
-    { icon: Zap, t: "Operação rápida", d: "Fluxos otimizados para balcão, sem cliques desnecessários." },
-  ];
-  return (
-    <section className="border-b border-white/5">
-      <div className="mx-auto grid max-w-[1200px] gap-10 px-6 py-20 lg:grid-cols-3">
-        {items.map(({ icon: Icon, t, d }) => (
-          <div key={t}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-white/5 text-primary-glow">
-              <Icon className="h-5 w-5" strokeWidth={1.75} />
-            </div>
-            <p className="mt-4 text-[16px] font-semibold text-white">{t}</p>
-            <p className="mt-1 text-[13.5px] leading-relaxed text-slate-400">{d}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ----------------------------- Testimonials ----------------------------- */
-
-function Testimonials() {
-  const items = [
-    { quote: "Reduzimos em 70% o tempo do recebimento. A conciliação virou parte natural do fluxo.", name: "Amanda Ribeiro", role: "Gerente de operações" },
-    { quote: "O PDV com trocas e crédito resolveu a maior dor do balcão. Qualquer vendedor fecha sozinho.", name: "Rafael Nunes", role: "Supervisor de loja" },
-    { quote: "Estoque, etiquetas e vendas na mesma plataforma acabou com as planilhas paralelas.", name: "Camila Duarte", role: "Diretora comercial" },
-  ];
-  return (
-    <section id="depoimentos" className="border-b border-white/5 bg-[#0d1015]">
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-glow">Clientes</p>
-          <h2 className="mt-3 text-[30px] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[36px]">
-            Times que trocaram planilhas por uma fonte de verdade.
-          </h2>
-        </div>
-        <ul className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-          {items.map((t) => (
-            <li key={t.name} className="flex flex-col rounded-lg border border-white/10 bg-[#0f1116] p-6">
-              <p className="text-[14px] leading-relaxed text-slate-200">"{t.quote}"</p>
-              <div className="mt-6 flex items-center gap-3 border-t border-white/10 pt-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-[12px] font-semibold text-primary-glow">
-                  {t.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                </div>
-                <div>
-                  <p className="text-[13px] font-medium text-white">{t.name}</p>
-                  <p className="text-[11.5px] text-slate-400">{t.role}</p>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------- FAQ ---------------------------------- */
-
-function FaqSection() {
-  const faqs = [
-    { q: "O FitGestor substitui meu ERP atual?", a: "Sim. Para lojas de varejo de moda e itens fitness ele cobre recebimento, estoque, etiquetas, PDV, trocas, entregas, funcionários e pós-venda em um único sistema, dispensando planilhas paralelas." },
-    { q: "Precisa instalar algo na loja?", a: "Não. É 100% web em qualquer navegador moderno. Balança, leitor de código de barras e impressora de etiquetas funcionam nativamente via USB/serial." },
-    { q: "Como funciona o controle de trocas e crédito?", a: "Toda troca gera vale ou crédito vinculado ao cliente. No PDV o crédito aparece na hora do pagamento, com histórico completo e regras de expiração configuráveis." },
-    { q: "Consigo controlar entregas e motoboys?", a: "Sim. O módulo de expedição organiza fila, rotas e motoboys, com comprovantes digitais e rastreio por cliente." },
-    { q: "Meus dados ficam seguros?", a: "Todo acesso é autenticado, com perfis de permissão por cargo, trilha de auditoria e backups automáticos em ambiente corporativo." },
-    { q: "Integra com Olist / Tiny?", a: "Sim. Sincronização automática de produtos, variações, fotos e saldo de estoque, com webhook para atualizações em tempo real." },
-  ];
-  return (
-    <section id="faq" className="border-b border-white/5">
-      <div className="mx-auto grid max-w-[1200px] gap-10 px-6 py-20 lg:grid-cols-12">
-        <div className="lg:col-span-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-glow">FAQ</p>
-          <h2 className="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[32px]">
-            Perguntas frequentes.
-          </h2>
-          <p className="mt-3 text-[13.5px] leading-relaxed text-slate-400">
-            Não achou o que precisa? Fale com o time da Quero Ser Fit<sup className="text-[0.6em]">®</sup>.
-          </p>
-        </div>
-        <ul className="divide-y divide-white/10 lg:col-span-8">
-          {faqs.map((f) => (
-            <li key={f.q}>
-              <details className="group">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5">
-                  <span className="text-[14.5px] font-medium text-white">{f.q}</span>
-                  <span aria-hidden className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/15 text-slate-400 transition-transform group-open:rotate-45 group-open:border-primary/60 group-open:text-primary-glow">+</span>
-                </summary>
-                <p className="pb-5 pr-10 text-[13.5px] leading-relaxed text-slate-400">{f.a}</p>
-              </details>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ Closing CTA ----------------------------- */
-
-function ClosingCta() {
-  return (
-    <section className="border-b border-white/5 bg-[#0d1015]">
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-white/10 bg-[#0f1116] p-8 lg:flex-row lg:items-center lg:p-10">
-          <div className="max-w-xl">
-            <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[30px]">
-              Pronto para operar tudo em um só sistema?
-            </h2>
-            <p className="mt-3 text-[14px] leading-relaxed text-slate-400">
-              Acesso restrito à equipe autorizada da Quero Ser Fit<sup className="text-[0.6em]">®</sup>. Solicite credenciais ao administrador.
-            </p>
-          </div>
-          <Link to="/auth" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-5 py-2.5 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-            Acessar o sistema <ArrowRight className="h-4 w-4" />
+        <div className="mt-16 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link to="/lojista/onboarding">
+            <Button
+              size="lg"
+              className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto"
+            >
+              Criar minha loja grátis <ArrowRight className="h-4 w-4" />
+            </Button>
           </Link>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-/* -------------------------------- Footer -------------------------------- */
-
-function SiteFooter() {
-  return (
-    <footer className="bg-[#0b0d10]">
-      <div className="mx-auto flex max-w-[1200px] flex-col items-start justify-between gap-4 px-6 py-8 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-2">
-          <BrandMark size={28} />
-          <span className="text-[13.5px] font-semibold text-white">FitGestor</span>
-          <span className="text-[11.5px] text-slate-500">· ERP para varejo de moda fitness</span>
-        </div>
-        <p className="text-[11.5px] text-slate-500">
-          © {new Date().getFullYear()} Quero Ser Fit<sup className="text-[0.6em]">®</sup> — Todos os direitos reservados.
-        </p>
-      </div>
-    </footer>
-  );
-}
-
-/* =============================== Mockups ================================ */
-
-function BrowserChrome({ path, children }: { path: string; children: ReactNode }) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 border-b border-border bg-background/80 px-4 py-2.5">
-        <span className="h-2 w-2 rounded-full bg-white/15" />
-        <span className="h-2 w-2 rounded-full bg-white/15" />
-        <span className="h-2 w-2 rounded-full bg-white/15" />
-        <span className="ml-3 truncate text-[11px] text-muted-foreground">fitgestor.app{path}</span>
-      </div>
-      <div className="overflow-x-auto bg-background">{children}</div>
+      <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-xs text-[#64748B]">
+        © {new Date().getFullYear()} PontuaMax. Fidelização, cashback e CRM em uma plataforma só.
+      </footer>
     </div>
   );
 }
 
-function AppFrame({ active, children }: { active: string; children: ReactNode }) {
-  const nav = ["Dashboard", "PDV", "Produtos", "Estoque", "Recebimentos", "Etiquetas", "Trocas", "Relatórios"];
+function FeatureCard({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) {
   return (
-    <div className="grid grid-cols-12">
-      <aside className="col-span-3 hidden border-r border-border bg-[#0D0D10] p-3 text-[11px] sm:block">
-        <div className="mb-3 flex items-center gap-2 px-2 py-2">
-          <BrandMark size={22} />
-          <span className="text-[12px] font-semibold text-white/90">FitGestor</span>
+    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition duration-200 hover:shadow-md hover:-translate-y-0.5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563EB] text-white">
+        {icon}
+      </div>
+      <h3 className="mt-4 text-base font-semibold">{title}</h3>
+      <p className="mt-2 text-sm text-[#64748B]">{desc}</p>
+    </div>
+  );
+}
+
+function PhoneMockup() {
+  const [screen, setScreen] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setScreen((s) => (s + 1) % 3), 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="relative">
+      {/* soft ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-10 -z-10 rounded-[4rem] opacity-60 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(60% 60% at 50% 40%, rgba(109,40,217,0.25), transparent 60%), radial-gradient(50% 50% at 70% 70%, rgba(20,203,168,0.25), transparent 60%)",
+        }}
+      />
+
+      <div className="relative animate-[float_6s_ease-in-out_infinite]">
+        {/* Phone bezel */}
+        <div
+          className="relative w-[320px] rounded-[3rem] p-[3px] shadow-[0_40px_80px_-20px_rgba(15,23,42,0.55)]"
+          style={{
+            background:
+              "linear-gradient(160deg, #1e293b 0%, #334155 30%, #0f172a 60%, #1e293b 100%)",
+          }}
+        >
+          <div className="rounded-[calc(3rem-3px)] bg-[#0F172A] p-[2px]">
+            <div className="relative overflow-hidden rounded-[calc(3rem-5px)] bg-[#F8FAFC]">
+              {/* Dynamic Island */}
+              <div className="absolute left-1/2 top-2.5 z-30 flex h-6 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#334155]" />
+              </div>
+
+              {/* Status bar */}
+              <div className="flex items-center justify-between px-6 pt-3 pb-1 text-[10px] font-semibold text-[#0F172A]">
+                <span>9:41</span>
+                <span className="flex items-center gap-1 text-[#0F172A]">
+                  <Signal className="h-3 w-3" />
+                  <Wifi className="h-3 w-3" />
+                  <BatteryFull className="h-3.5 w-3.5" />
+                </span>
+              </div>
+
+              {/* Screen viewport */}
+              <div className="relative h-[560px] overflow-hidden">
+                <AppScreen1 active={screen === 0} />
+                <AppScreen2 active={screen === 1} />
+                <AppScreen3 active={screen === 2} />
+              </div>
+
+              {/* Bottom nav */}
+              <BottomNav active={screen} />
+            </div>
+          </div>
+
+          {/* Side buttons */}
+          <div className="absolute -left-[3px] top-24 h-8 w-[3px] rounded-l-md bg-[#0f172a]" />
+          <div className="absolute -left-[3px] top-36 h-14 w-[3px] rounded-l-md bg-[#0f172a]" />
+          <div className="absolute -left-[3px] top-52 h-14 w-[3px] rounded-l-md bg-[#0f172a]" />
+          <div className="absolute -right-[3px] top-32 h-20 w-[3px] rounded-r-md bg-[#0f172a]" />
         </div>
-        <nav className="space-y-0.5">
-          {nav.map((l) => (
-            <div key={l} className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 ${l === active ? "bg-primary/15 text-white" : "text-white/55"}`}>
-              <span className={`h-1 w-1 rounded-full ${l === active ? "bg-primary-glow" : "bg-white/20"}`} />
-              {l}
+
+        {/* Screen indicator dots */}
+        <div className="mt-5 flex items-center justify-center gap-2">
+          {[0, 1, 2].map((i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Tela ${i + 1}`}
+              onClick={() => setScreen(i)}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                screen === i
+                  ? "w-6 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]"
+                  : "w-1.5 bg-[#CBD5E1] hover:bg-[#94A3B8]"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScreenWrapper({ active, children }: { active: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className={`absolute inset-0 overflow-y-auto px-5 pt-3 pb-4 transition-all duration-700 ease-out ${
+        active ? "opacity-100 translate-x-0" : "pointer-events-none opacity-0 translate-x-4"
+      }`}
+      style={{ scrollbarWidth: "none" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ---------- SCREEN 1: HOME ---------- */
+function AppScreen1({ active }: { active: boolean }) {
+  return (
+    <ScreenWrapper active={active}>
+      {/* Greeting */}
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-sm font-bold text-white shadow-md">
+            M
+          </div>
+          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#22C55E]" />
+        </div>
+        <div className="flex-1">
+          <div className="text-[11px] text-[#64748B]">Boa tarde,</div>
+          <div className="text-sm font-semibold text-[#0F172A]">Maria Silva ✨</div>
+        </div>
+        <button className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-[#E2E8F0]">
+          <Bell className="h-4 w-4 text-[#0F172A]" />
+          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#EF4444]" />
+        </button>
+      </div>
+
+      {/* Points balance card */}
+      <div
+        className="relative mt-4 overflow-hidden rounded-3xl p-5 text-white shadow-xl"
+        style={{
+          background: "linear-gradient(135deg, #6D28D9 0%, #2563EB 55%, #14CBA8 100%)",
+        }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-30"
+          style={{ background: "radial-gradient(circle, #ffffff 0%, transparent 70%)" }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-6 -bottom-10 h-28 w-28 rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle, #ffffff 0%, transparent 70%)" }}
+        />
+        <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.14em] text-white/80">
+          <span className="inline-flex items-center gap-1.5">
+            <Coins className="h-3 w-3" /> Saldo de pontos
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[9px] backdrop-blur">
+            <Crown className="h-2.5 w-2.5" /> Prata
+          </span>
+        </div>
+        <div className="mt-2 flex items-baseline gap-1.5">
+          <div className="text-4xl font-bold tracking-tight tabular-nums">2.480</div>
+          <div className="text-xs font-medium text-white/80">pts</div>
+        </div>
+        <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-white/80">
+          <ArrowUpRight className="h-3 w-3" /> +180 pts esta semana
+        </div>
+
+        {/* Progress */}
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-center justify-between text-[10px] text-white/85">
+            <span className="font-medium">Nível Prata</span>
+            <span>520 pts p/ Ouro</span>
+          </div>
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/20">
+            <div
+              className="h-full rounded-full shadow-[0_0_10px_rgba(255,255,255,0.6)]"
+              style={{
+                width: "72%",
+                background: "linear-gradient(90deg, #ffffff 0%, #E0F2FE 40%, #14CBA8 100%)",
+              }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-[9px] font-medium text-white/70">
+            <span>Bronze</span>
+            <span>Prata</span>
+            <span>Ouro</span>
+            <span>Diamante</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Cashback + Ações rápidas */}
+      <div className="mt-3 grid grid-cols-5 gap-2">
+        <div className="col-span-3 rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#64748B]">
+            <Wallet className="h-3 w-3 text-[#14CBA8]" /> Cashback
+          </div>
+          <div className="mt-1 text-lg font-bold text-[#0F172A]">R$ 47,80</div>
+          <button
+            className="mt-1.5 inline-flex w-full items-center justify-center gap-1 rounded-lg py-1 text-[10px] font-semibold text-white shadow-sm"
+            style={{ background: "linear-gradient(90deg, #14CBA8, #2563EB)" }}
+          >
+            Usar agora <ChevronRight className="h-3 w-3" />
+          </button>
+        </div>
+        <div className="col-span-2 flex flex-col items-start justify-between rounded-2xl border border-[#F59E0B]/30 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] p-3 shadow-sm">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#F59E0B] text-white">
+            <Flame className="h-3.5 w-3.5" />
+          </div>
+          <div>
+            <div className="text-[9px] font-semibold uppercase tracking-wider text-[#92400E]">
+              Streak
+            </div>
+            <div className="text-sm font-bold text-[#78350F]">7 dias 🔥</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Atividade recente mini */}
+      <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="text-[11px] font-semibold text-[#0F172A]">Últimas atividades</div>
+          <button className="text-[9px] font-medium text-[#2563EB]">Ver tudo</button>
+        </div>
+        <div className="mt-2 space-y-2">
+          {[
+            { i: <Coins className="h-3 w-3" />, t: "Compra em loja", v: "+180 pts", c: "#22C55E" },
+            {
+              i: <Gift className="h-3 w-3" />,
+              t: "Voucher resgatado",
+              v: "-500 pts",
+              c: "#6D28D9",
+            },
+          ].map((x, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded-full text-white"
+                style={{ background: x.c }}
+              >
+                {x.i}
+              </div>
+              <div className="flex-1 text-[10px] text-[#0F172A]">{x.t}</div>
+              <div className="text-[10px] font-semibold text-[#0F172A]">{x.v}</div>
             </div>
           ))}
-        </nav>
-      </aside>
-      <div className="col-span-12 sm:col-span-9">{children}</div>
+        </div>
+      </div>
+    </ScreenWrapper>
+  );
+}
+
+/* ---------- SCREEN 2: CATÁLOGO ---------- */
+const PRODUCTS = [
+  {
+    name: "Fone Bluetooth",
+    pts: 1200,
+    tag: "Popular",
+    img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=70",
+  },
+  {
+    name: "Café Especial",
+    pts: 450,
+    tag: "Novo",
+    img: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=400&q=70",
+  },
+  {
+    name: "Tênis Runner",
+    pts: 2800,
+    tag: "Top",
+    img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=70",
+  },
+  {
+    name: "Perfume 50ml",
+    pts: 1850,
+    tag: "-20%",
+    img: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=400&q=70",
+  },
+];
+
+function AppScreen2({ active }: { active: boolean }) {
+  return (
+    <ScreenWrapper active={active}>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-[11px] text-[#64748B]">Recompensas</div>
+          <div className="text-lg font-bold text-[#0F172A]">Catálogo</div>
+        </div>
+        <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#6D28D9]/10 to-[#14CBA8]/10 px-2.5 py-1 text-[10px] font-semibold text-[#0F172A] ring-1 ring-[#E2E8F0]">
+          <Coins className="h-3 w-3 text-[#F59E0B]" /> 2.480
+        </div>
+      </div>
+
+      {/* Search bar */}
+      <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-sm ring-1 ring-[#E2E8F0]">
+        <div className="h-3.5 w-3.5 rounded-full border-2 border-[#94A3B8]" />
+        <div className="text-[10px] text-[#94A3B8]">Buscar recompensas...</div>
+      </div>
+
+      {/* Filters */}
+      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
+        {["Todos", "Descontos", "Produtos", "Serviços", "Cupons"].map((f, i) => (
+          <span
+            key={f}
+            className={`whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-semibold ${
+              i === 0 ? "bg-[#0F172A] text-white" : "bg-white text-[#64748B] ring-1 ring-[#E2E8F0]"
+            }`}
+          >
+            {f}
+          </span>
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div className="mt-3 grid grid-cols-2 gap-2.5">
+        {PRODUCTS.map((p) => (
+          <div
+            key={p.name}
+            className="group overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm transition-transform duration-200 hover:-translate-y-0.5"
+          >
+            <div className="relative h-24 w-full overflow-hidden bg-[#F1F5F9]">
+              <img src={p.img} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
+              <span className="absolute left-1.5 top-1.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[8px] font-bold text-[#0F172A] backdrop-blur">
+                {p.tag}
+              </span>
+            </div>
+            <div className="p-2">
+              <div className="truncate text-[10px] font-semibold text-[#0F172A]">{p.name}</div>
+              <div className="mt-0.5 flex items-center gap-1 text-[9px] text-[#64748B]">
+                <Coins className="h-2.5 w-2.5 text-[#F59E0B]" />
+                <span className="font-semibold text-[#0F172A]">
+                  {p.pts.toLocaleString("pt-BR")}
+                </span>{" "}
+                pts
+              </div>
+              <button
+                className="mt-1.5 w-full rounded-lg py-1 text-[9px] font-bold text-white shadow-sm"
+                style={{ background: "linear-gradient(90deg, #6D28D9, #2563EB)" }}
+              >
+                Resgatar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScreenWrapper>
+  );
+}
+
+/* ---------- SCREEN 3: CAMPANHAS ---------- */
+function AppScreen3({ active }: { active: boolean }) {
+  return (
+    <ScreenWrapper active={active}>
+      <div>
+        <div className="text-[11px] text-[#64748B]">Para você</div>
+        <div className="text-lg font-bold text-[#0F172A]">Campanhas ativas</div>
+      </div>
+
+      {/* Promoção da semana */}
+      <div
+        className="relative mt-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg"
+        style={{
+          background: "linear-gradient(135deg, #F59E0B 0%, #EF4444 55%, #6D28D9 100%)",
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider backdrop-blur">
+            <Zap className="h-2.5 w-2.5" /> Promo da semana
+          </div>
+          <span className="text-[9px] text-white/85">2d restantes</span>
+        </div>
+        <div className="mt-2 text-xl font-bold leading-tight">Ganhe 3× pontos</div>
+        <div className="text-[11px] text-white/90">em toda compra acima de R$ 100</div>
+        <button className="mt-3 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#0F172A]">
+          Participar <ArrowRight className="h-3 w-3" />
+        </button>
+      </div>
+
+      {/* Voucher */}
+      <div className="mt-3 flex items-stretch overflow-hidden rounded-2xl border border-dashed border-[#2563EB]/40 bg-gradient-to-r from-white to-[#EFF6FF] shadow-sm">
+        <div className="flex flex-col items-center justify-center bg-[#2563EB] px-3 text-white">
+          <Ticket className="h-4 w-4" />
+          <div className="mt-1 text-[8px] font-bold uppercase tracking-wider">Ativo</div>
+        </div>
+        <div className="flex-1 p-2.5">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-semibold text-[#0F172A]">
+              R$ 25 OFF na próxima compra
+            </div>
+            <Percent className="h-3 w-3 text-[#2563EB]" />
+          </div>
+          <div className="mt-0.5 text-[9px] text-[#64748B]">
+            Válido até 30/nov · código FIDELI25
+          </div>
+        </div>
+      </div>
+
+      {/* Histórico */}
+      <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-sm">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="text-[11px] font-semibold text-[#0F172A]">Últimas compras</div>
+          <button className="text-[9px] font-medium text-[#2563EB]">Ver histórico</button>
+        </div>
+        <div className="divide-y divide-[#F1F5F9]">
+          {[
+            { d: "Hoje", loja: "Café da Manhã", v: "R$ 42,00", p: "+42" },
+            { d: "Ontem", loja: "Loja Fashion", v: "R$ 189,90", p: "+190" },
+            { d: "3 dias", loja: "Mercado Bom", v: "R$ 76,50", p: "+77" },
+          ].map((x, i) => (
+            <div key={i} className="flex items-center justify-between py-1.5">
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)",
+                  }}
+                >
+                  <ShoppingBag className="h-3 w-3" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-semibold text-[#0F172A]">{x.loja}</div>
+                  <div className="text-[9px] text-[#64748B]">
+                    {x.d} · {x.v}
+                  </div>
+                </div>
+              </div>
+              <span className="rounded-full bg-[#22C55E]/10 px-2 py-0.5 text-[9px] font-bold text-[#15803D]">
+                {x.p} pts
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Benefícios do nível */}
+      <div className="mt-3 rounded-2xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] p-3 text-white shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#E5E7EB] to-[#94A3B8] text-[#0F172A]">
+            <Crown className="h-3.5 w-3.5" />
+          </div>
+          <div className="text-[11px] font-semibold">Benefícios Prata</div>
+        </div>
+        <ul className="mt-2 space-y-1 text-[10px] text-white/85">
+          <li className="flex items-center gap-1.5">
+            <Check className="h-3 w-3 text-[#14CBA8]" /> 1.5× pontos em compras
+          </li>
+          <li className="flex items-center gap-1.5">
+            <Check className="h-3 w-3 text-[#14CBA8]" /> Vouchers exclusivos
+          </li>
+          <li className="flex items-center gap-1.5">
+            <Check className="h-3 w-3 text-[#14CBA8]" /> Acesso antecipado a promos
+          </li>
+        </ul>
+      </div>
+    </ScreenWrapper>
+  );
+}
+
+/* ---------- BOTTOM NAV ---------- */
+function BottomNav({ active }: { active: number }) {
+  // Map screen → active tab index. Perfil never auto-active.
+  const activeMap = [0, 1, 3];
+  const current = activeMap[active];
+  const items = [
+    { icon: Home, label: "Home" },
+    { icon: Sparkles, label: "Recompensas" },
+    { icon: Wallet, label: "Cashback" },
+    { icon: Zap, label: "Campanhas" },
+    { icon: User, label: "Perfil" },
+  ];
+  return (
+    <div className="border-t border-[#E2E8F0] bg-white/95 px-2 pt-2 pb-3 backdrop-blur">
+      <div className="flex items-center justify-around">
+        {items.map((it, i) => {
+          const Icon = it.icon;
+          const isActive = i === current;
+          return (
+            <div key={it.label} className="flex flex-1 flex-col items-center gap-0.5">
+              <div
+                className={`flex h-8 w-10 items-center justify-center rounded-xl transition-all duration-300 ${
+                  isActive ? "text-white shadow-md" : "text-[#64748B]"
+                }`}
+                style={
+                  isActive
+                    ? {
+                        background: "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)",
+                      }
+                    : undefined
+                }
+              >
+                <Icon className="h-3.5 w-3.5" strokeWidth={isActive ? 2.5 : 2} />
+              </div>
+              <span
+                className={`text-[8px] font-semibold ${
+                  isActive ? "text-[#0F172A]" : "text-[#94A3B8]"
+                }`}
+              >
+                {it.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {/* Home indicator */}
+      <div className="mx-auto mt-2 h-1 w-24 rounded-full bg-[#0F172A]" />
     </div>
   );
 }
 
-function HeroMockup() {
+function DashboardMockup() {
   return (
-    <BrowserChrome path="/dashboard">
-      <AppFrame active="Dashboard">
-        <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Visão geral</p>
-              <p className="mt-1 text-[18px] font-semibold tracking-[-0.02em]">Hoje, 19 de julho</p>
-            </div>
-            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">Loja Centro</span>
+    <div className="overflow-hidden rounded-2xl border border-[#0F172A]/10 bg-white shadow-xl">
+      {/* browser bar */}
+      <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
+        <div className="flex gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
+          <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+          <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
+        </div>
+        <div className="mx-auto rounded-md bg-white px-3 py-1 text-[10px] text-[#0F172A]/60">
+          pontuamax.com.br/lojista
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* sidebar */}
+        <aside className="hidden w-52 shrink-0 border-r border-slate-100 bg-white p-3 md:block">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <PontuaMaxMark size={22} />
+            <PontuaMaxWordmark variant="light" size={14} />
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {[
-              { l: "Vendas do dia", v: "R$ 4.820", d: "+12%" },
-              { l: "Ticket médio", v: "R$ 187", d: "26 vendas" },
-              { l: "Estoque baixo", v: "8", d: "SKUs" },
-            ].map((k) => (
-              <div key={k.l} className="rounded-md border border-border bg-background p-3">
-                <p className="text-[10px] text-muted-foreground">{k.l}</p>
-                <p className="mt-1.5 text-[18px] font-semibold leading-none tracking-[-0.02em] text-foreground">{k.v}</p>
-                <p className="mt-1.5 text-[10px] text-primary-glow">{k.d}</p>
+          <nav className="mt-3 space-y-1 text-xs">
+            <div className="flex items-center gap-2 rounded-md bg-[#0F172A] px-2.5 py-2 font-medium text-white">
+              <Users className="h-3.5 w-3.5" /> Dashboard
+            </div>
+            {["Lançar venda", "Clientes", "Produtos", "Resgates", "Configurações"].map((l) => (
+              <div
+                key={l}
+                className="flex items-center gap-2 rounded-md px-2.5 py-2 text-[#0F172A]/70 hover:bg-slate-50"
+              >
+                <div className="h-3.5 w-3.5 rounded bg-[#0F172A]/10" /> {l}
               </div>
             ))}
-          </div>
-          <div className="rounded-md border border-border bg-background p-3">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-medium text-foreground">Últimos recebimentos</p>
-              <span className="text-[10px] text-muted-foreground">RC-0128 · RC-0127 · RC-0126</span>
-            </div>
-            <div className="mt-3 space-y-2">
-              {[
-                ["Fornecedor Alfa", "142 peças", "Concluído"],
-                ["Fornecedor Nova", "38 peças", "Rascunho"],
-                ["Fornecedor Sul", "96 peças", "Concluído"],
-              ].map(([f, q, s]) => (
-                <div key={f} className="flex items-center justify-between text-[11px]">
-                  <span className="text-foreground">{f}</span>
-                  <span className="text-muted-foreground">{q}</span>
-                  <span className={s === "Rascunho" ? "text-primary-glow" : "text-muted-foreground"}>{s}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </AppFrame>
-    </BrowserChrome>
-  );
-}
+          </nav>
+        </aside>
 
-function ReceivingMockup() {
-  return (
-    <BrowserChrome path="/estoque/recebimentos/novo">
-      <AppFrame active="Recebimentos">
-        <div className="p-5">
-          <div className="flex items-center justify-between">
+        {/* main */}
+        <div className="flex-1 space-y-4 bg-slate-50 p-4 md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Recebimento</p>
-              <p className="mt-1 text-[18px] font-semibold tracking-[-0.02em]">RC-0128 · Fornecedor Alfa</p>
-            </div>
-            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] text-primary-glow">Rascunho v3</span>
-          </div>
-          <div className="mt-4 grid grid-cols-5 gap-3">
-            <div className="col-span-2 space-y-2 rounded-md border border-border bg-background p-3">
-              <p className="text-[10px] text-muted-foreground">Bipar código de barras</p>
-              <div className="rounded-md border border-dashed border-border p-3 text-center font-mono text-[12px] text-foreground">
-                7898·23140·00218
+              <h3 className="text-lg font-bold text-[#0F172A]">Olá, Loja Exemplo</h3>
+              <div className="text-xs text-[#64748B]">
+                Sua página: <span className="font-mono">pontuamax.com.br/loja-exemplo</span>
               </div>
-              <p className="text-[10px] text-primary-glow">+1 unidade · Camiseta Slim · Preto · M</p>
             </div>
-            <div className="col-span-3 rounded-md border border-border bg-background">
-              <div className="grid grid-cols-6 border-b border-border px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                <span className="col-span-3">Produto</span><span>P</span><span>M</span><span>G</span>
-              </div>
-              {[
-                ["Camiseta Slim · Preto", 4, 6, 3],
-                ["Camiseta Slim · Marinho", 2, 5, 4],
-                ["Legging Alta · Grafite", 3, 4, 2],
-              ].map(([n, a, b, c]) => (
-                <div key={String(n)} className="grid grid-cols-6 border-b border-border/60 px-3 py-2 text-[11px] last:border-0">
-                  <span className="col-span-3 text-foreground">{n as string}</span>
-                  <span className="text-muted-foreground">{a as number}</span>
-                  <span className="text-muted-foreground">{b as number}</span>
-                  <span className="text-muted-foreground">{c as number}</span>
-                </div>
-              ))}
+            <div className="rounded-md bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-white">
+              Lançar venda →
             </div>
           </div>
-        </div>
-      </AppFrame>
-    </BrowserChrome>
-  );
-}
 
-function StockMockup() {
-  const rows = [
-    ["Camiseta Slim", "Preto", "PP", "SKU-CS-PT-PP", 4, "OK"],
-    ["Camiseta Slim", "Preto", "P", "SKU-CS-PT-P", 12, "OK"],
-    ["Camiseta Slim", "Preto", "M", "SKU-CS-PT-M", 2, "Baixo"],
-    ["Camiseta Slim", "Preto", "G", "SKU-CS-PT-G", 7, "OK"],
-    ["Camiseta Slim", "Marinho", "M", "SKU-CS-MN-M", 0, "Zerado"],
-    ["Legging Alta", "Grafite", "P", "SKU-LA-GR-P", 5, "OK"],
-  ] as const;
-  return (
-    <BrowserChrome path="/estoque">
-      <AppFrame active="Estoque">
-        <div className="p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Estoque por variação</p>
-              <p className="mt-1 text-[18px] font-semibold tracking-[-0.02em]">248 SKUs ativos</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">Todos</span>
-              <span className="rounded-full border border-border bg-white/5 px-2 py-0.5 text-[10px] text-foreground">Baixo (8)</span>
-            </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <MetricCard icon={<Users className="h-3.5 w-3.5" />} label="Clientes" value="284" />
+            <MetricCard
+              icon={<Coins className="h-3.5 w-3.5" />}
+              label="Pontos no mês"
+              value="12.480"
+            />
+            <MetricCard
+              icon={<Wallet className="h-3.5 w-3.5" />}
+              label="Cashback do mês"
+              value="R$ 1.230"
+            />
+            <MetricCard
+              icon={<Gift className="h-3.5 w-3.5" />}
+              label="Resgates pendentes"
+              value="7"
+              highlight
+            />
           </div>
-          <div className="mt-4 overflow-hidden rounded-md border border-border">
-            <div className="grid grid-cols-12 border-b border-border bg-background/60 px-4 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-              <span className="col-span-4">Produto</span>
-              <span className="col-span-2">Cor</span>
-              <span className="col-span-1">Tam</span>
-              <span className="col-span-3">SKU</span>
-              <span className="col-span-1 text-right">Qtd</span>
-              <span className="col-span-1 text-right">Status</span>
-            </div>
-            {rows.map((r) => (
-              <div key={r[3]} className="grid grid-cols-12 border-b border-border/60 px-4 py-2.5 text-[11px] last:border-0">
-                <span className="col-span-4 text-foreground">{r[0]}</span>
-                <span className="col-span-2 text-muted-foreground">{r[1]}</span>
-                <span className="col-span-1 text-muted-foreground">{r[2]}</span>
-                <span className="col-span-3 font-mono text-[10.5px] text-muted-foreground">{r[3]}</span>
-                <span className="col-span-1 text-right text-foreground">{r[4]}</span>
-                <span className={`col-span-1 text-right text-[10px] ${r[5] === "OK" ? "text-muted-foreground" : r[5] === "Baixo" ? "text-primary-glow" : "text-destructive"}`}>{r[5]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </AppFrame>
-    </BrowserChrome>
-  );
-}
 
-function PdvMockup() {
-  return (
-    <BrowserChrome path="/pdv">
-      <AppFrame active="PDV">
-        <div className="grid grid-cols-5 gap-4 p-5">
-          <div className="col-span-3 rounded-md border border-border bg-background p-3">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Carrinho</p>
-            <div className="mt-3 space-y-2">
+          <div className="rounded-xl border border-slate-100 bg-white p-4">
+            <div className="mb-3 text-xs font-semibold text-[#0F172A]">Últimas transações</div>
+            <ul className="divide-y divide-slate-100 text-xs">
               {[
-                ["Camiseta Slim · Preto · M", 2, "R$ 79,90"],
-                ["Legging Alta · Grafite · P", 1, "R$ 149,90"],
-                ["Top Cropped · Rosa · G", 1, "R$ 89,90"],
-              ].map((it) => (
-                <div key={it[0] as string} className="flex items-center justify-between text-[11px]">
-                  <span className="text-foreground">{it[0]}</span>
-                  <span className="text-muted-foreground">×{it[1]}</span>
-                  <span className="font-mono text-foreground">{it[2]}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 border-t border-border pt-3 text-[11px]">
-              <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span className="font-mono">R$ 399,60</span></div>
-              <div className="mt-1 flex justify-between text-muted-foreground"><span>Desconto</span><span className="font-mono">— R$ 10,00</span></div>
-              <div className="mt-2 flex justify-between text-[16px] font-semibold tracking-[-0.02em] text-foreground"><span>Total</span><span>R$ 389,60</span></div>
-            </div>
-          </div>
-          <div className="col-span-2 space-y-3">
-            <div className="rounded-md border border-border bg-background p-3">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Pagamento</p>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-                {["Dinheiro", "Pix", "Débito", "Crédito"].map((p, i) => (
-                  <div key={p} className={`rounded-md border px-2 py-2 text-center ${i === 1 ? "border-primary/60 bg-primary/10 text-foreground" : "border-border text-muted-foreground"}`}>
-                    {p}
+                ["Maria S.", "Compra", "+120 pts"],
+                ["João P.", "Resgate de produto", "-500 pts"],
+                ["Ana L.", "Compra", "+80 pts"],
+                ["Carla M.", "Voucher cashback", "-R$ 25"],
+              ].map(([nome, tipo, valor], i) => (
+                <li key={i} className="flex items-center justify-between py-2">
+                  <div>
+                    <div className="font-medium text-[#0F172A]">{nome}</div>
+                    <div className="text-[10px] text-[#0F172A]/50">{tipo}</div>
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-md bg-primary p-3 text-center text-[12px] font-semibold text-primary-foreground">
-              Finalizar venda
-            </div>
+                  <div className="font-semibold text-[#0F172A]">{valor}</div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </AppFrame>
-    </BrowserChrome>
+      </div>
+    </div>
   );
 }
 
-function ReportsMockup() {
-  const bars = [42, 58, 36, 71, 49, 64, 82, 55, 60, 74, 68, 90];
+function MetricCard({
+  icon,
+  label,
+  value,
+  highlight,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
   return (
-    <BrowserChrome path="/relatorios">
-      <AppFrame active="Relatórios">
-        <div className="p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Vendas · últimos 12 dias</p>
-              <p className="mt-1 text-[18px] font-semibold tracking-[-0.02em]">R$ 48.310</p>
-            </div>
-            <div className="flex gap-1.5 text-[10px]">
-              {["7d", "12d", "30d"].map((p, i) => (
-                <span key={p} className={`rounded-full border px-2 py-0.5 ${i === 1 ? "border-primary/60 bg-primary/10 text-foreground" : "border-border text-muted-foreground"}`}>{p}</span>
-              ))}
-            </div>
-          </div>
-          <div className="mt-6 flex h-40 items-end gap-2">
-            {bars.map((h, i) => (
-              <div key={i} className="flex-1 rounded-t bg-white/8" style={{ height: `${h}%` }}>
-                <div className="h-full w-full rounded-t bg-primary/70" style={{ opacity: i === bars.length - 1 ? 1 : 0.55 }} />
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 text-[11px]">
-            <div><p className="text-muted-foreground">Peças vendidas</p><p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">312</p></div>
-            <div><p className="text-muted-foreground">Trocas</p><p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">14</p></div>
-            <div><p className="text-muted-foreground">Crédito em aberto</p><p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">R$ 486</p></div>
-          </div>
-        </div>
-      </AppFrame>
-    </BrowserChrome>
+    <div className="rounded-xl border border-slate-100 bg-white p-3">
+      <div className="flex items-center justify-between text-[10px] font-medium text-[#0F172A]/60">
+        <span>{label}</span>
+        <span className="text-[#0F172A]/40">{icon}</span>
+      </div>
+      <div className="mt-1.5 flex items-center gap-2">
+        <div className="text-lg font-bold text-[#0F172A]">{value}</div>
+        {highlight && (
+          <span className="rounded bg-[#14CBA8] px-1.5 py-0.5 text-[9px] font-bold text-[#0F172A]">
+            novo
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
