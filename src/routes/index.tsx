@@ -111,16 +111,12 @@ function Index() {
               </Link>
             </div>
 
-            <div className="mt-12 flex items-center gap-8 border-t border-white/10 pt-6 text-[11px] text-white/45">
-              <div className="flex items-center gap-2">
-                <Check className="h-3.5 w-3.5 text-[#14CBA8]" /> Sem cartão de crédito
-              </div>
-              <div className="hidden items-center gap-2 sm:flex">
-                <Check className="h-3.5 w-3.5 text-[#14CBA8]" /> No ar em 12 minutos
-              </div>
-              <div className="hidden items-center gap-2 md:flex">
-                <Check className="h-3.5 w-3.5 text-[#14CBA8]" /> Suporte humano em português
-              </div>
+            <div className="mt-12 flex items-start gap-4 border-t border-white/10 pt-6">
+              <div className="mt-1 h-8 w-[2px] bg-[#14CBA8]" />
+              <p className="max-w-md text-[13px] leading-relaxed text-white/55 sm:text-[14px]">
+                Feito pra quem cansou de dar desconto e ver o cliente sumir.
+                <span className="text-white/85"> Recorrência de verdade — no seu caixa, todo mês.</span>
+              </p>
             </div>
           </div>
 
@@ -250,7 +246,7 @@ function Index() {
             eyebrow="Retorno"
             title="Cashback automático — dinheiro que só volta pra você"
             body="Devolve uma % em crédito na hora, usável apenas na sua loja. Cliente compra hoje, volta amanhã pra queimar o saldo — e leva mais do que pretendia."
-            image="https://images.unsplash.com/photo-1556742526-fc51ed7c9e19?auto=format&fit=crop&w=1200&q=70"
+            image="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1200&q=70"
             imageAlt="Cliente pagando no caixa"
             side="left"
             highlight="R$ 47,80 saldo médio"
