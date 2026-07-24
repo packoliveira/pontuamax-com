@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { criarLoja, atualizarLoja } from "@/lib/qsf.functions";
-import { slugify, type Modalidade } from "@/lib/qsf-shared";
+import { criarLoja, atualizarLoja } from "@/lib/loyalty.functions";
+import { slugify, type Modalidade } from "@/lib/loyalty-shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

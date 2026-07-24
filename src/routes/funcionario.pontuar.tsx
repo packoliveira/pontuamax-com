@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEmployeeContext } from "@/hooks/use-employee-context";
 import { myEmployeeContextQuery } from "@/lib/team-queries";
 import { storeClientsQuery, storePromotionsQuery, storeTransactionsQuery } from "@/lib/queries";
-import { cadastrarClientePorTelefone, estornarVenda, lancarVenda } from "@/lib/qsf.functions";
-import { formatBRL, formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
+import { cadastrarClientePorTelefone, estornarVenda, lancarVenda } from "@/lib/loyalty.functions";
+import { formatBRL, formatCPF, isValidCPF, onlyDigits } from "@/lib/loyalty-shared";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,7 +131,7 @@ function Pontuar() {
       return p && (onlyDigits(p.phone ?? "") === norm || onlyDigits(p.cpf ?? "") === norm);
     });
   };
-  const sugestoes = useMemo(() => {
+  const sugestoes = (() => {
     const q = contato.trim().toLowerCase();
     if (q.length < 2) return [] as any[];
     const norm = onlyDigits(contato);
@@ -150,24 +150,21 @@ function Pontuar() {
         );
       })
       .slice(0, 6);
-  }, [contato, clientes]);
+  })();
   const clienteSelecionado = findClient();
-  const ultimasVendas = useMemo(
-    () => (transacoes as any[]).filter((t) => t.tipo === "venda").slice(0, 5),
-    [transacoes],
-  );
-  const estornosIds = useMemo(() => {
+  const ultimasVendas = (transacoes as any[]).filter((t) => t.tipo === "venda").slice(0, 5);
+  const estornosIds = (() => {
     const set = new Set<string>();
     for (const t of transacoes as any[])
       if (typeof t.origem === "string" && t.origem.startsWith("estorno:"))
         set.add(t.origem.split(":")[1]);
     return set;
-  }, [transacoes]);
+  })();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!storeId || !contato || !valorNum || valorNum <= 0) return;
-    let cli = findClient();
+    const cli = findClient();
     let userId = cli?.user_id;
     let nomeCli = (cli?.profiles as { full_name: string | null } | null)?.full_name ?? "";
     if (!cli) {

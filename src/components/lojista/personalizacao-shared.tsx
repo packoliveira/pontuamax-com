@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { Modalidade } from "@/lib/qsf-shared";
+import type { Modalidade } from "@/lib/loyalty-shared";
 
 export function isLightHex(hex: string): boolean {
   const m = hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i);

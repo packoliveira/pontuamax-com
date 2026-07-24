@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { formatBRL } from "@/lib/qsf-shared";
+import { formatBRL } from "@/lib/loyalty-shared";
 import { myStoreQuery, storeClientsQuery, storeTransactionsQuery } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import {

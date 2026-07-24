@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./qsf-shared";
+import { calcularNivel } from "./loyalty-shared";
 
 const IG_URL_RE = /^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[A-Za-z0-9_-]+/i;
 
 // -------- CLIENTE: enviar link do post do Instagram --------
 export const submitInstagramPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -76,7 +76,7 @@ export const submitInstagramPost = createServerFn({ method: "POST" })
 // -------- CLIENTE: minhas submissões numa loja --------
 export const listMyInstagramSubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ store_id: z.string().uuid() }).parse(input))
+  .validator((input) => z.object({ store_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const r = await supabaseAdmin
@@ -91,7 +91,7 @@ export const listMyInstagramSubmissions = createServerFn({ method: "GET" })
     if (r.error) throw new Error(r.error.message);
     const rows = r.data ?? [];
     const txIds = rows.map((r) => r.transaction_id).filter((x): x is string => !!x);
-    let cashbackMap = new Map<string, number>();
+    const cashbackMap = new Map<string, number>();
     if (txIds.length > 0) {
       const txs = await supabaseAdmin
         .from("transactions")
@@ -108,7 +108,7 @@ export const listMyInstagramSubmissions = createServerFn({ method: "GET" })
 // -------- LOJISTA: fila de submissões --------
 export const listStoreInstagramSubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         status: z
@@ -168,7 +168,7 @@ async function requireOwnerOfSubmission(userId: string, submissionId: string) {
 // -------- LOJISTA: aprovar --------
 export const approveInstagramSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         id: z.string().uuid(),
@@ -234,7 +234,7 @@ export const approveInstagramSubmission = createServerFn({ method: "POST" })
 // -------- LOJISTA: rejeitar --------
 export const rejectInstagramSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         id: z.string().uuid(),
@@ -261,7 +261,7 @@ export const rejectInstagramSubmission = createServerFn({ method: "POST" })
 // -------- LOJISTA: estornar (cliente apagou o post) --------
 export const revokeInstagramSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         id: z.string().uuid(),

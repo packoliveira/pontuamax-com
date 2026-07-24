@@ -21,7 +21,7 @@ import {
   X,
   Printer,
 } from "lucide-react";
-import { formatBRL } from "@/lib/qsf-shared";
+import { formatBRL } from "@/lib/loyalty-shared";
 import type { StorePublic } from "@/lib/queries";
 import { type VoucherTx, formatDateTime } from "./portal-types";
 import { QRCodeImage } from "@/components/qr-code";

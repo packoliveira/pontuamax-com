@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowUpRight, ArrowDownRight, Sparkles } from "lucide-react";
-import { formatBRL } from "@/lib/qsf-shared";
+import { formatBRL } from "@/lib/loyalty-shared";
 import { type TxRow, describeTx, formatDateTime } from "./portal-types";
 
 function TxRowItem({ t }: { t: TxRow }) {

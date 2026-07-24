@@ -86,7 +86,7 @@ const planSchema = z.object({
 
 export const upsertPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => planSchema.parse(input))
+  .validator((input: unknown) => planSchema.parse(input))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const { data: row, error } = await context.supabase
@@ -100,7 +100,7 @@ export const upsertPlan = createServerFn({ method: "POST" })
 
 export const deletePlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const { error } = await context.supabase.from("subscription_plans").delete().eq("id", data.id);

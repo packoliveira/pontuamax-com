@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./qsf-shared";
-import { randomGiftCode } from "./qsf-helpers.server";
+import { calcularNivel } from "./loyalty-shared";
+import { randomGiftCode } from "./loyalty-helpers.server";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const criarGiftCards = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z
       .object({
         pontos: z.number().int().positive().max(100000),
@@ -35,7 +35,7 @@ export const criarGiftCards = createServerFn({ method: "POST" })
 
 export const removerGiftCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const gc = await supabaseAdmin
@@ -54,7 +54,7 @@ export const removerGiftCard = createServerFn({ method: "POST" })
 
 export const resgatarGiftCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
+  .validator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
     await rateLimitByIp(`gift-card:${context.userId}`, 10, 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -130,7 +130,7 @@ export const resgatarGiftCard = createServerFn({ method: "POST" })
 // ============================================================
 
 export const lookupGiftCardByCodigo = createServerFn({ method: "GET" })
-  .inputValidator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
+  .validator((input) => z.object({ codigo: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const r = await supabaseAdmin
@@ -141,4 +141,3 @@ export const lookupGiftCardByCodigo = createServerFn({ method: "GET" })
     if (r.error) throw new Error(r.error.message);
     return r.data;
   });
-

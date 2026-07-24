@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Cron hook: anonimiza PII em `integration_logs` mais antigos que 90 dias.
-// Autenticado por header apikey = SUPABASE_PUBLISHABLE_KEY.
+// Autenticado por x-cron-secret ou Authorization: Bearer <CRON_SECRET>.
 // Registrar em pg_cron para rodar diariamente.
 
 type Json = Record<string, unknown> | unknown[] | string | number | boolean | null;
@@ -46,10 +46,9 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
-          return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
-        }
+        const { authorizeCronRequest } = await import("@/lib/cron-auth.server");
+        const auth = authorizeCronRequest(request);
+        if (!auth.ok) return auth.response;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -120,10 +119,10 @@ export const Route = createFileRoute("/api/public/hooks/anonimizar-logs-antigos"
             { status: 200, headers: { "Content-Type": "application/json" } },
           );
         } catch (e) {
-          return new Response(
-            JSON.stringify({ error: (e as Error).message }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
-          );
+          return new Response(JSON.stringify({ error: (e as Error).message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
       },
     },

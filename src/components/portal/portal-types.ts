@@ -1,4 +1,4 @@
-import { formatDate } from "@/lib/qsf-shared";
+import { formatDate } from "@/lib/loyalty-shared";
 
 export type TxRow = {
   id: string;

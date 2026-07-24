@@ -1,5 +1,5 @@
 import { Coins, Wallet } from "lucide-react";
-import type { Modalidade } from "@/lib/qsf-shared";
+import type { Modalidade } from "@/lib/loyalty-shared";
 
 export function BrandPreview({
   nome,

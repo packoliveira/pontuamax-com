@@ -16,13 +16,11 @@ export const Route = createFileRoute("/admin")({
       { name: "apple-mobile-web-app-title", content: "PM Admin" },
       { name: "theme-color", content: "#0B132B" },
     ],
-    links: [
-      { rel: "manifest", href: "/manifest-admin.webmanifest" },
-    ],
+    links: [{ rel: "manifest", href: "/manifest-admin.webmanifest" }],
   }),
   beforeLoad: async ({ location }) => {
     // /admin/login é público
-    if (location.pathname === "/admin/login") return;
+    if (location.pathname === "/admin/login") return { accessDenied: false as const };
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/admin/login" });
     const { data: roles } = await supabase
