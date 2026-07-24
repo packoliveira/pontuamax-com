@@ -392,8 +392,7 @@ function Chapter({
   eyebrow,
   title,
   body,
-  image,
-  imageAlt,
+  visual,
   side,
   highlight,
 }: {
@@ -401,8 +400,7 @@ function Chapter({
   eyebrow: string;
   title: string;
   body: string;
-  image: string;
-  imageAlt: string;
+  visual: ReactNode;
   side: "left" | "right";
   highlight: string;
 }) {
@@ -412,14 +410,9 @@ function Chapter({
       <div
         className={`relative md:col-span-6 ${imgFirst ? "md:order-1" : "md:order-2"}`}
       >
-        <div className="relative overflow-hidden rounded-[24px] bg-[#F5F2EA] sm:rounded-[28px]">
-          <img
-            src={image}
-            alt={imageAlt}
-            loading="lazy"
-            className="aspect-[4/3] w-full object-cover sm:aspect-[4/5] md:aspect-[5/6]"
-          />
-          <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur sm:left-5 sm:top-5">
+        <div className="relative overflow-hidden rounded-[24px] bg-[#F5F2EA] p-5 shadow-[0_30px_60px_-30px_rgba(15,23,42,0.35)] sm:rounded-[28px] sm:p-7">
+          {visual}
+          <div className="absolute left-4 top-4 z-10 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur sm:left-5 sm:top-5">
             {highlight}
           </div>
         </div>
