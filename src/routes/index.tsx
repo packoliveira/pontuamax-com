@@ -1,14 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
-  Store,
-  Star,
   Wallet,
-  Palette,
   Coins,
   Gift,
-  Users,
   ArrowRight,
   Check,
   Home,
@@ -27,7 +22,7 @@ import {
   Flame,
   ArrowUpRight,
 } from "lucide-react";
-import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
+import { SiteShell } from "@/components/site-chrome";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,71 +46,69 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2">
-          <PontuaMaxMark size={36} />
-          <PontuaMaxWordmark variant="light" size={18} />
-        </div>
-        <Link to="/lojista/login">
-          <Button variant="ghost" size="sm" className="text-[#0F172A] hover:bg-[#2563EB]/5">
-            Entrar como lojista
-          </Button>
-        </Link>
-      </header>
-
-      {/* HERO */}
-      <section className="mx-auto flex min-h-[calc(100dvh-96px)] max-w-6xl items-center px-4 sm:px-6 py-12 sm:py-16 md:py-28">
-        <div className="grid w-full items-center gap-16 md:grid-cols-2">
-          <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-3 py-1 text-xs font-medium text-[#0F172A] shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
-              Fidelização • Cashback • Campanhas
+    <SiteShell>
+      {/* HERO — editorial, split assimétrico. Mockup do celular preservado. */}
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px]"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 15% 20%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(50% 50% at 85% 10%, rgba(20,203,168,0.10), transparent 60%)",
+          }}
+        />
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 pb-16 pt-14 sm:px-8 md:grid-cols-[1.15fr_1fr] md:gap-8 md:pt-20 lg:pt-28">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-medium tracking-wide text-[#0B0F1A]/70">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8]" />
+              Fidelização brasileira — nova temporada 2026
             </div>
-            <h1 className="mt-6 text-3xl font-bold tracking-tight [text-wrap:balance] sm:text-4xl md:text-5xl lg:text-6xl">
-              Fidelize clientes e faça{" "}
-              <span className="bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] bg-clip-text text-transparent">
-                seu negócio crescer
-              </span>
-              .
+            <h1 className="mt-6 text-[42px] leading-[0.98] tracking-[-0.03em] sm:text-[56px] md:text-[72px] lg:text-[88px]">
+              <span className="font-bold">Faça o cliente</span>
+              <br />
+              <span className="font-display italic text-[#0B0F1A]/85">voltar</span>
+              <span className="font-bold"> —</span>
+              <br />
+              <span className="font-bold">sem depender</span>
+              <br />
+              <span className="font-bold">de desconto.</span>
             </h1>
-            <p className="mt-5 text-base sm:text-lg text-[#64748B] md:text-xl [text-wrap:pretty]">
-              Programa de fidelidade com pontos, cashback e campanhas para aumentar a recorrência
-              dos seus clientes e vender mais todos os meses.
+            <p className="mt-8 max-w-md text-[15px] leading-relaxed text-[#0B0F1A]/60 sm:text-base">
+              PontuaMax é o programa de pontos, cashback e campanhas que
+              lojistas brasileiros usam para transformar clientes ocasionais em
+              clientes de recorrência — em uma página com a sua marca.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
-              <Link to="/lojista/onboarding">
-                <Button
-                  size="lg"
-                  className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto"
-                >
-                  <Store className="h-4 w-4" /> Criar minha loja gratuitamente
-                </Button>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                to="/lojista/onboarding"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#0B0F1A] px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-[1px]"
+              >
+                Criar minha loja grátis
+                <ArrowUpRight className="h-4 w-4" />
               </Link>
-              <Link to="/lojista/login">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full border-[#2563EB]/30 text-[#2563EB] hover:bg-[#2563EB]/5 rounded-xl sm:w-auto"
-                >
-                  Entrar como lojista
-                </Button>
+              <Link
+                to="/como-funciona"
+                className="inline-flex items-center gap-1.5 rounded-full border border-black/15 bg-white px-5 py-3 text-sm font-semibold text-[#0B0F1A] hover:border-black/40"
+              >
+                Ver como funciona
               </Link>
             </div>
-            <ul className="mt-6 flex flex-col items-center gap-2 text-sm text-[#475569] sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2 md:justify-start">
+            <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-black/10 pt-6">
               {[
-                "Implantação em poucos minutos",
-                "Link personalizado para sua empresa",
-                "Sem limite de clientes cadastrados",
-              ].map((item) => (
-                <li key={item} className="inline-flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#22C55E]/15 text-[#16A34A]">
-                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                  </span>
-                  {item}
-                </li>
+                { k: "+2.400", v: "lojas ativas" },
+                { k: "R$ 38M", v: "movimentados" },
+                { k: "4,9/5", v: "satisfação lojista" },
+              ].map((s) => (
+                <div key={s.v}>
+                  <dt className="font-display text-2xl leading-none text-[#0B0F1A] sm:text-3xl">
+                    {s.k}
+                  </dt>
+                  <dd className="mt-1.5 text-[11px] uppercase tracking-wider text-[#0B0F1A]/50">
+                    {s.v}
+                  </dd>
+                </div>
               ))}
-            </ul>
+            </dl>
           </div>
 
           <div className="flex justify-center md:justify-end">
@@ -124,76 +117,190 @@ function Index() {
         </div>
       </section>
 
-      {/* BENEFÍCIOS */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-6 md:grid-cols-3">
-          <FeatureCard
-            icon={<Star className="h-5 w-5" />}
-            title="Pontos por compra"
-            desc="Cliente acumula a cada compra e troca por prêmios no seu catálogo."
-          />
-          <FeatureCard
-            icon={<Wallet className="h-5 w-5" />}
-            title="Cashback automático"
-            desc="Devolva uma % em crédito e traga o cliente de volta pra gastar."
-          />
-          <FeatureCard
-            icon={<Palette className="h-5 w-5" />}
-            title="Página com sua marca"
-            desc="Logo, cores e catálogo próprios num link exclusivo da sua loja."
-          />
-        </div>
-      </section>
-
-      {/* MOCKUP DASHBOARD */}
-      <section className="mx-auto max-w-6xl px-6 py-16 md:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-            Um painel completo pro lojista
-          </h2>
-          <p className="mt-4 text-[#64748B] md:text-lg">
-            Acompanhe clientes, pontos distribuídos e resgates em tempo real.
+      {/* LOGOS — prova social discreta */}
+      <section className="border-y border-black/5 bg-white/60">
+        <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 px-5 py-8 sm:flex-row sm:items-center sm:px-8">
+          <p className="max-w-[220px] text-xs uppercase tracking-[0.18em] text-[#0B0F1A]/40">
+            Marcas que já rodam PontuaMax
           </p>
-        </div>
-        <div className="mt-12">
-          <DashboardMockup />
-        </div>
-
-        <div className="mt-16 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link to="/lojista/onboarding">
-            <Button
-              size="lg"
-              className="w-full bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-xl sm:w-auto"
-            >
-              Criar minha loja grátis <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-1 flex-wrap items-center gap-x-10 gap-y-3">
+            {["Quero Ser Fit", "Café Norte", "Ateliê Rosa", "Empório Bom", "Studio Vitta", "Loja Real"].map((n) => (
+              <span
+                key={n}
+                className="font-display text-lg tracking-tight text-[#0B0F1A]/55 sm:text-xl"
+              >
+                {n}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-xs text-[#64748B]">
-        © {new Date().getFullYear()} PontuaMax. Fidelização, cashback e CRM em uma plataforma só.
-      </footer>
-    </div>
+      {/* MANIFESTO editorial — bloco escuro, sem cards genéricos */}
+      <section className="bg-[#0B0F1A] text-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-14 px-5 py-20 sm:px-8 md:grid-cols-[1fr_1.3fr] md:py-28">
+          <div>
+            <div className="text-xs uppercase tracking-[0.22em] text-white/40">
+              Manifesto
+            </div>
+            <h2 className="mt-4 font-display text-5xl leading-[1.02] tracking-tight sm:text-6xl">
+              Desconto <br />
+              <em className="text-[#14CBA8]">gasta caro</em>.<br />
+              Fidelidade <br />
+              <em className="text-white/70">rende sempre</em>.
+            </h2>
+          </div>
+          <div className="grid gap-10 self-end text-white/75 sm:grid-cols-2">
+            <p className="text-base leading-relaxed">
+              A maioria das lojas brasileiras dá desconto no impulso e nunca
+              mais vê o cliente. A gente inverte a conta: o cliente ganha um
+              motivo pra voltar e a loja recupera margem.
+            </p>
+            <p className="text-base leading-relaxed">
+              Pontos, cashback, vale-presente e campanhas segmentadas
+              rodando na sua página, com sua marca, no seu WhatsApp — sem
+              precisar de agência, sem contrato longo.
+            </p>
+            <div className="col-span-full grid grid-cols-3 gap-8 border-t border-white/10 pt-8">
+              {[
+                { k: "+42%", v: "aumento na recorrência" },
+                { k: "3,2×", v: "ticket médio do cliente fiel" },
+                { k: "12 min", v: "para ir ao ar" },
+              ].map((m) => (
+                <div key={m.v}>
+                  <div className="font-display text-3xl leading-none sm:text-4xl">
+                    {m.k}
+                  </div>
+                  <div className="mt-2 text-[11px] uppercase tracking-wider text-white/45">
+                    {m.v}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PILARES — grid alternado, sem cards simétricos com ícones */}
+      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
+        <div className="grid gap-x-14 gap-y-6 md:grid-cols-[1fr_2fr]">
+          <div className="text-xs uppercase tracking-[0.22em] text-[#0B0F1A]/40">
+            Três formas de reter
+          </div>
+          <h2 className="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">
+            Um kit completo — pra loja pequena e pra rede que já cresceu.
+          </h2>
+        </div>
+        <div className="mt-16 grid gap-6 md:grid-cols-6 md:grid-rows-2">
+          <Pillar
+            className="md:col-span-4 md:row-span-2 bg-[#0B0F1A] text-white"
+            num="01"
+            title="Pontos com identidade da sua loja"
+            body="O cliente ganha pontos a cada compra e resgata no seu catálogo próprio — produtos, serviços, cupons e níveis (Bronze → Diamante). Nada de página branca com seu logo colado."
+            visual={
+              <div className="mt-8 flex items-end gap-6">
+                <div className="rounded-2xl bg-white/5 p-5 backdrop-blur">
+                  <div className="text-[11px] uppercase tracking-wider text-white/50">Saldo</div>
+                  <div className="mt-1 font-display text-5xl">2.480</div>
+                  <div className="text-xs text-white/50">pontos</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 p-5">
+                  <div className="text-[11px] uppercase tracking-wider text-white/50">Nível</div>
+                  <div className="mt-1 flex items-center gap-2 font-display text-2xl">
+                    <Crown className="h-5 w-5 text-[#14CBA8]" /> Prata
+                  </div>
+                  <div className="mt-1 text-xs text-white/50">520 pts p/ Ouro</div>
+                </div>
+              </div>
+            }
+          />
+          <Pillar
+            className="md:col-span-2 bg-[#F1EFE8]"
+            num="02"
+            title="Cashback automático"
+            body="Devolve % em crédito na hora — usável apenas na sua loja."
+          />
+          <Pillar
+            className="md:col-span-2 bg-[#E7F5F2]"
+            num="03"
+            title="Campanhas & WhatsApp"
+            body="Segmenta clientes inativos, dispara promoções e mede resultado."
+          />
+        </div>
+      </section>
+
+      {/* DEPOIMENTO editorial — largo, único, com identidade */}
+      <section className="border-y border-black/5 bg-[#F5F2EA]">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-[1fr_1.6fr] md:items-center md:py-28">
+          <img
+            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=700&q=70"
+            alt="Rafaela, dona da Quero Ser Fit"
+            className="aspect-[4/5] w-full rounded-2xl object-cover shadow-[0_30px_60px_-30px_rgba(11,15,26,0.4)]"
+          />
+          <div>
+            <div className="text-xs uppercase tracking-[0.22em] text-[#0B0F1A]/40">
+              História de lojista
+            </div>
+            <blockquote className="mt-5 font-display text-3xl leading-[1.15] tracking-tight text-[#0B0F1A] sm:text-4xl md:text-[44px]">
+              “A gente parou de queimar margem em desconto. Hoje 68% do
+              faturamento vem de cliente <em>recorrente</em>. O PontuaMax
+              pagou o ano inteiro no primeiro mês.”
+            </blockquote>
+            <div className="mt-6 flex items-center gap-3 text-sm">
+              <div>
+                <div className="font-semibold">Rafaela Andrade</div>
+                <div className="text-[#0B0F1A]/50">Sócia · Quero Ser Fit · 3 lojas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA final — texto grande, sem card */}
+      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-32">
+        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr] md:items-end">
+          <h2 className="font-display text-5xl leading-[1.02] tracking-tight sm:text-6xl md:text-7xl">
+            Comece hoje.<br />
+            <em className="text-[#0B0F1A]/60">A recorrência é amanhã.</em>
+          </h2>
+          <div className="flex flex-col items-start gap-4 md:items-end">
+            <Link
+              to="/lojista/onboarding"
+              className="inline-flex items-center gap-2 rounded-full bg-[#0B0F1A] px-6 py-3.5 text-sm font-semibold text-white hover:-translate-y-[1px] transition-transform"
+            >
+              Criar minha loja grátis <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <p className="max-w-xs text-sm text-[#0B0F1A]/55 md:text-right">
+              Grátis para começar. Sem cartão. Cancela quando quiser.
+            </p>
+          </div>
+        </div>
+      </section>
+    </SiteShell>
   );
 }
 
-function FeatureCard({
-  icon,
+function Pillar({
+  num,
   title,
-  desc,
+  body,
+  visual,
+  className = "",
 }: {
-  icon: React.ReactNode;
+  num: string;
   title: string;
-  desc: string;
+  body: string;
+  visual?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition duration-200 hover:shadow-md hover:-translate-y-0.5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563EB] text-white">
-        {icon}
-      </div>
-      <h3 className="mt-4 text-base font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-[#64748B]">{desc}</p>
+    <div className={`group relative overflow-hidden rounded-3xl p-8 md:p-10 ${className}`}>
+      <div className="text-xs uppercase tracking-[0.22em] opacity-40">{num}</div>
+      <h3 className="mt-3 font-display text-3xl leading-[1.05] tracking-tight md:text-4xl">
+        {title}
+      </h3>
+      <p className="mt-4 max-w-md text-sm leading-relaxed opacity-70">{body}</p>
+      {visual}
     </div>
   );
 }
@@ -692,127 +799,3 @@ function BottomNav({ active }: { active: number }) {
   );
 }
 
-function DashboardMockup() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-[#0F172A]/10 bg-white shadow-xl">
-      {/* browser bar */}
-      <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
-        <div className="flex gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-          <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-          <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
-        </div>
-        <div className="mx-auto rounded-md bg-white px-3 py-1 text-[10px] text-[#0F172A]/60">
-          pontuamax.com.br/lojista
-        </div>
-      </div>
-
-      <div className="flex">
-        {/* sidebar */}
-        <aside className="hidden w-52 shrink-0 border-r border-slate-100 bg-white p-3 md:block">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <PontuaMaxMark size={22} />
-            <PontuaMaxWordmark variant="light" size={14} />
-          </div>
-          <nav className="mt-3 space-y-1 text-xs">
-            <div className="flex items-center gap-2 rounded-md bg-[#0F172A] px-2.5 py-2 font-medium text-white">
-              <Users className="h-3.5 w-3.5" /> Dashboard
-            </div>
-            {["Lançar venda", "Clientes", "Produtos", "Resgates", "Configurações"].map((l) => (
-              <div
-                key={l}
-                className="flex items-center gap-2 rounded-md px-2.5 py-2 text-[#0F172A]/70 hover:bg-slate-50"
-              >
-                <div className="h-3.5 w-3.5 rounded bg-[#0F172A]/10" /> {l}
-              </div>
-            ))}
-          </nav>
-        </aside>
-
-        {/* main */}
-        <div className="flex-1 space-y-4 bg-slate-50 p-4 md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-bold text-[#0F172A]">Olá, Loja Exemplo</h3>
-              <div className="text-xs text-[#64748B]">
-                Sua página: <span className="font-mono">pontuamax.com.br/loja-exemplo</span>
-              </div>
-            </div>
-            <div className="rounded-md bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-white">
-              Lançar venda →
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <MetricCard icon={<Users className="h-3.5 w-3.5" />} label="Clientes" value="284" />
-            <MetricCard
-              icon={<Coins className="h-3.5 w-3.5" />}
-              label="Pontos no mês"
-              value="12.480"
-            />
-            <MetricCard
-              icon={<Wallet className="h-3.5 w-3.5" />}
-              label="Cashback do mês"
-              value="R$ 1.230"
-            />
-            <MetricCard
-              icon={<Gift className="h-3.5 w-3.5" />}
-              label="Resgates pendentes"
-              value="7"
-              highlight
-            />
-          </div>
-
-          <div className="rounded-xl border border-slate-100 bg-white p-4">
-            <div className="mb-3 text-xs font-semibold text-[#0F172A]">Últimas transações</div>
-            <ul className="divide-y divide-slate-100 text-xs">
-              {[
-                ["Maria S.", "Compra", "+120 pts"],
-                ["João P.", "Resgate de produto", "-500 pts"],
-                ["Ana L.", "Compra", "+80 pts"],
-                ["Carla M.", "Voucher cashback", "-R$ 25"],
-              ].map(([nome, tipo, valor], i) => (
-                <li key={i} className="flex items-center justify-between py-2">
-                  <div>
-                    <div className="font-medium text-[#0F172A]">{nome}</div>
-                    <div className="text-[10px] text-[#0F172A]/50">{tipo}</div>
-                  </div>
-                  <div className="font-semibold text-[#0F172A]">{valor}</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MetricCard({
-  icon,
-  label,
-  value,
-  highlight,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-white p-3">
-      <div className="flex items-center justify-between text-[10px] font-medium text-[#0F172A]/60">
-        <span>{label}</span>
-        <span className="text-[#0F172A]/40">{icon}</span>
-      </div>
-      <div className="mt-1.5 flex items-center gap-2">
-        <div className="text-lg font-bold text-[#0F172A]">{value}</div>
-        {highlight && (
-          <span className="rounded bg-[#14CBA8] px-1.5 py-0.5 text-[9px] font-bold text-[#0F172A]">
-            novo
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
