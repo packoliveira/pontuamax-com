@@ -47,132 +47,303 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <SiteShell>
-      {/* HERO — editorial, split assimétrico. Mockup do celular preservado. */}
-      <section className="relative overflow-hidden">
+      {/* ============================================================
+          HERO — dark editorial. Celular flutua ao centro-direita,
+          headline serif enorme à esquerda. Preserva PhoneMockup.
+         ============================================================ */}
+      <section className="relative isolate overflow-hidden bg-[#0A0A0A] text-white">
+        {/* Grão + spotlight */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px]"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
           style={{
             background:
-              "radial-gradient(60% 60% at 15% 20%, rgba(37,99,235,0.08), transparent 60%), radial-gradient(50% 50% at 85% 10%, rgba(20,203,168,0.10), transparent 60%)",
+              "radial-gradient(70% 55% at 72% 35%, rgba(20,203,168,0.18), transparent 60%), radial-gradient(50% 45% at 18% 15%, rgba(109,40,217,0.22), transparent 65%)",
           }}
         />
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 pb-16 pt-14 sm:px-8 md:grid-cols-[1.15fr_1fr] md:gap-8 md:pt-20 lg:pt-28">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-medium tracking-wide text-[#0B0F1A]/70">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8]" />
-              Fidelização brasileira — nova temporada 2026
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 mix-blend-overlay opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>\")",
+          }}
+        />
+
+        {/* Fine top rule + eyebrow */}
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 pt-8 text-[11px] uppercase tracking-[0.28em] text-white/45 sm:px-8">
+          <span>Edição 2026 · Fidelização Brasileira</span>
+          <span className="hidden sm:block">Feito em São Paulo · SP</span>
+        </div>
+
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 pb-24 pt-10 sm:px-8 md:grid-cols-12 md:gap-6 md:pb-32 md:pt-16">
+          {/* Coluna texto */}
+          <div className="md:col-span-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-[11px] font-medium tracking-wide text-white/70 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8] shadow-[0_0_10px_#14CBA8]" />
+              Nova temporada · 2.400 lojas ativas
             </div>
-            <h1 className="mt-6 text-[42px] leading-[0.98] tracking-[-0.03em] sm:text-[56px] md:text-[72px] lg:text-[88px]">
-              <span className="font-bold">Faça o cliente</span>
+
+            <h1 className="mt-7 font-display text-[54px] leading-[0.92] tracking-[-0.035em] sm:text-[76px] md:text-[92px] lg:text-[108px]">
+              O cliente
               <br />
-              <span className="font-display italic text-[#0B0F1A]/85">voltar</span>
-              <span className="font-bold"> —</span>
+              <span className="italic text-white/70">volta.</span>
               <br />
-              <span className="font-bold">sem depender</span>
-              <br />
-              <span className="font-bold">de desconto.</span>
+              <span className="relative inline-block">
+                Sem desconto.
+                <span
+                  aria-hidden
+                  className="absolute -bottom-2 left-0 h-[3px] w-[62%] bg-[#14CBA8]"
+                />
+              </span>
             </h1>
-            <p className="mt-8 max-w-md text-[15px] leading-relaxed text-[#0B0F1A]/60 sm:text-base">
+
+            <p className="mt-8 max-w-lg text-[15px] leading-relaxed text-white/60 sm:text-[17px]">
               PontuaMax é o programa de pontos, cashback e campanhas que
-              lojistas brasileiros usam para transformar clientes ocasionais em
-              clientes de recorrência — em uma página com a sua marca.
+              lojistas brasileiros usam pra transformar cliente ocasional em
+              cliente de recorrência — na sua marca, no seu WhatsApp, com
+              resultado no seu caixa.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+
+            <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
                 to="/lojista/onboarding"
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#0B0F1A] px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-[1px]"
+                className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all hover:-translate-y-[1px] hover:shadow-[0_20px_40px_-15px_rgba(20,203,168,0.6)]"
               >
                 Criar minha loja grátis
-                <ArrowUpRight className="h-4 w-4" />
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A0A0A] text-white transition-transform group-hover:translate-x-0.5">
+                  <ArrowUpRight className="h-3 w-3" />
+                </span>
               </Link>
               <Link
                 to="/como-funciona"
-                className="inline-flex items-center gap-1.5 rounded-full border border-black/15 bg-white px-5 py-3 text-sm font-semibold text-[#0B0F1A] hover:border-black/40"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-medium text-white/80 transition-colors hover:border-white/50 hover:text-white"
               >
                 Ver como funciona
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-black/10 pt-6">
-              {[
-                { k: "+2.400", v: "lojas ativas" },
-                { k: "R$ 38M", v: "movimentados" },
-                { k: "4,9/5", v: "satisfação lojista" },
-              ].map((s) => (
-                <div key={s.v}>
-                  <dt className="font-display text-2xl leading-none text-[#0B0F1A] sm:text-3xl">
-                    {s.k}
-                  </dt>
-                  <dd className="mt-1.5 text-[11px] uppercase tracking-wider text-[#0B0F1A]/50">
-                    {s.v}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+
+            <div className="mt-12 flex items-center gap-8 border-t border-white/10 pt-6 text-[11px] text-white/45">
+              <div className="flex items-center gap-2">
+                <Check className="h-3.5 w-3.5 text-[#14CBA8]" /> Sem cartão de crédito
+              </div>
+              <div className="hidden items-center gap-2 sm:flex">
+                <Check className="h-3.5 w-3.5 text-[#14CBA8]" /> No ar em 12 minutos
+              </div>
+              <div className="hidden items-center gap-2 md:flex">
+                <Check className="h-3.5 w-3.5 text-[#14CBA8]" /> Suporte humano em português
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-center md:justify-end">
-            <PhoneMockup />
+          {/* Coluna celular — inalterado */}
+          <div className="relative md:col-span-5">
+            {/* Ambient spotlight atrás do celular */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10"
+              style={{
+                background:
+                  "radial-gradient(60% 55% at 55% 45%, rgba(20,203,168,0.18), transparent 65%)",
+              }}
+            />
+            {/* Legenda editorial ao redor do celular */}
+            <div className="pointer-events-none absolute -left-2 top-8 hidden rotate-[-90deg] origin-top-left text-[10px] uppercase tracking-[0.32em] text-white/30 md:block">
+              Cliente · saldo · resgate
+            </div>
+            <div className="flex justify-center md:justify-end">
+              <PhoneMockup />
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* LOGOS — prova social discreta */}
-      <section className="border-y border-black/5 bg-white/60">
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 px-5 py-8 sm:flex-row sm:items-center sm:px-8">
-          <p className="max-w-[220px] text-xs uppercase tracking-[0.18em] text-[#0B0F1A]/40">
-            Marcas que já rodam PontuaMax
-          </p>
-          <div className="flex flex-1 flex-wrap items-center gap-x-10 gap-y-3">
-            {["Quero Ser Fit", "Café Norte", "Ateliê Rosa", "Empório Bom", "Studio Vitta", "Loja Real"].map((n) => (
-              <span
-                key={n}
-                className="font-display text-lg tracking-tight text-[#0B0F1A]/55 sm:text-xl"
+        {/* Metrics ticker inline (parte do hero, sem parecer strip) */}
+        <div className="border-t border-white/10">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 divide-white/10 px-5 sm:px-8 md:grid-cols-4 md:divide-x">
+            {[
+              { k: "+42%", v: "recorrência média" },
+              { k: "3,2×", v: "ticket do fiel" },
+              { k: "12 min", v: "pra ir ao ar" },
+              { k: "R$ 38M", v: "movimentados" },
+            ].map((m, i) => (
+              <div
+                key={m.v}
+                className={`flex items-baseline gap-3 py-6 ${i >= 2 ? "border-t border-white/10 md:border-t-0" : ""} ${i % 2 === 1 ? "border-l border-white/10 pl-6 md:border-l-0 md:pl-8" : ""} md:pl-8`}
               >
-                {n}
-              </span>
+                <div className="font-display text-3xl leading-none text-white sm:text-4xl">
+                  {m.k}
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">
+                  {m.v}
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* MANIFESTO editorial — bloco escuro, sem cards genéricos */}
-      <section className="bg-[#0B0F1A] text-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-14 px-5 py-20 sm:px-8 md:grid-cols-[1fr_1.3fr] md:py-28">
-          <div>
-            <div className="text-xs uppercase tracking-[0.22em] text-white/40">
-              Manifesto
+      {/* ============================================================
+          MARQUEE — logos rolando sobre fundo cru, com nome editorial
+         ============================================================ */}
+      <section className="border-b border-black/10 bg-[#F5F2EA]">
+        <div className="mx-auto flex max-w-7xl items-center gap-10 px-5 py-6 sm:px-8">
+          <p className="hidden shrink-0 max-w-[180px] text-[10px] uppercase tracking-[0.28em] text-[#0B0F1A]/45 md:block">
+            Rodam PontuaMax
+          </p>
+          <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
+            <div className="flex min-w-max animate-[marquee_28s_linear_infinite] gap-12">
+              {[...Array(2)].flatMap((_, r) =>
+                [
+                  "Quero Ser Fit",
+                  "Café Norte",
+                  "Ateliê Rosa",
+                  "Empório Bom",
+                  "Studio Vitta",
+                  "Loja Real",
+                  "Casa Vinho",
+                  "Bella Moda",
+                ].map((n) => (
+                  <span
+                    key={`${r}-${n}`}
+                    className="font-display text-2xl italic tracking-tight text-[#0B0F1A]/55"
+                  >
+                    {n}
+                  </span>
+                ))
+              )}
             </div>
-            <h2 className="mt-4 font-display text-5xl leading-[1.02] tracking-tight sm:text-6xl">
-              Desconto <br />
-              <em className="text-[#14CBA8]">gasta caro</em>.<br />
-              Fidelidade <br />
-              <em className="text-white/70">rende sempre</em>.
-            </h2>
           </div>
-          <div className="grid gap-10 self-end text-white/75 sm:grid-cols-2">
-            <p className="text-base leading-relaxed">
-              A maioria das lojas brasileiras dá desconto no impulso e nunca
-              mais vê o cliente. A gente inverte a conta: o cliente ganha um
-              motivo pra voltar e a loja recupera margem.
-            </p>
-            <p className="text-base leading-relaxed">
-              Pontos, cashback, vale-presente e campanhas segmentadas
-              rodando na sua página, com sua marca, no seu WhatsApp — sem
-              precisar de agência, sem contrato longo.
-            </p>
-            <div className="col-span-full grid grid-cols-3 gap-8 border-t border-white/10 pt-8">
+        </div>
+      </section>
+
+      {/* ============================================================
+          MANIFESTO editorial — tipografia dominante, sem cards
+         ============================================================ */}
+      <section className="relative bg-[#FAF8F2]">
+        <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-36">
+          <div className="grid gap-12 md:grid-cols-12 md:gap-6">
+            <div className="md:col-span-3">
+              <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
+                — Ensaio 01
+              </div>
+              <div className="mt-4 text-sm text-[#0B0F1A]/60">
+                Por que desconto não fideliza mais ninguém.
+              </div>
+            </div>
+            <div className="md:col-span-9">
+              <h2 className="font-display text-[44px] leading-[1.02] tracking-[-0.02em] text-[#0B0F1A] sm:text-6xl md:text-[80px]">
+                Desconto <em className="text-[#0B0F1A]/50">gasta</em> caro.<br />
+                Fidelidade <em className="text-[#14CBA8]">rende</em> sempre.
+              </h2>
+              <div className="mt-10 grid gap-8 border-t border-black/10 pt-8 text-[15px] leading-relaxed text-[#0B0F1A]/70 sm:grid-cols-2 md:text-base">
+                <p>
+                  A maioria das lojas brasileiras dá desconto no impulso e
+                  nunca mais vê o cliente. Queima margem, treina o consumidor
+                  a esperar promoção e vira refém do preço.
+                </p>
+                <p>
+                  A gente inverte a conta. O cliente ganha um motivo pra
+                  voltar. A loja recupera margem, ticket médio e recorrência
+                  — sem depender de agência ou contrato longo.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          CAPÍTULOS — 3 blocos alternados, tipografia forte, imagem
+          real. Nada de card com ícone azul.
+         ============================================================ */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <Chapter
+            index="01"
+            eyebrow="Programa"
+            title="Pontos com a identidade da sua loja"
+            body="O cliente ganha pontos a cada compra e resgata no seu catálogo próprio — produtos, serviços, cupons e níveis Bronze → Diamante. Nada de página branca com seu logo colado por cima."
+            image="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=70"
+            imageAlt="Vitrine de loja com produtos"
+            side="right"
+            highlight="+42% recorrência"
+          />
+          <Chapter
+            index="02"
+            eyebrow="Retorno"
+            title="Cashback automático — dinheiro que só volta pra você"
+            body="Devolve uma % em crédito na hora, usável apenas na sua loja. Cliente compra hoje, volta amanhã pra queimar o saldo — e leva mais do que pretendia."
+            image="https://images.unsplash.com/photo-1556742526-fc51ed7c9e19?auto=format&fit=crop&w=1200&q=70"
+            imageAlt="Cliente pagando no caixa"
+            side="left"
+            highlight="R$ 47,80 saldo médio"
+          />
+          <Chapter
+            index="03"
+            eyebrow="Comunicação"
+            title="Campanhas e WhatsApp que puxam cliente inativo"
+            body="Segmenta quem sumiu há 30, 60, 90 dias e dispara promoções segmentadas. Você mede quem abriu, quem comprou e quanto voltou pra sua receita."
+            image="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=70"
+            imageAlt="Comerciante enviando mensagem no celular"
+            side="right"
+            highlight="3,2× ticket médio"
+          />
+        </div>
+      </section>
+
+      {/* ============================================================
+          CASE — depoimento largo, imagem editorial, número gigante
+         ============================================================ */}
+      <section className="bg-[#0A0A0A] text-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:items-center md:py-32">
+          <div className="md:col-span-5">
+            <div className="relative overflow-hidden rounded-[28px]">
+              <img
+                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=75"
+                alt="Rafaela, sócia da Quero Ser Fit"
+                className="aspect-[4/5] w-full object-cover"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(180deg, transparent 55%, rgba(10,10,10,0.85) 100%)",
+                }}
+              />
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+                  Case · Quero Ser Fit
+                </div>
+                <div className="mt-1 font-display text-xl">Rafaela Andrade</div>
+                <div className="text-xs text-white/60">Sócia · 3 lojas físicas</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-7 md:pl-6">
+            <div className="text-[11px] uppercase tracking-[0.28em] text-white/40">
+              — Case real
+            </div>
+            <blockquote className="mt-5 font-display text-3xl leading-[1.12] tracking-[-0.01em] sm:text-4xl md:text-[46px]">
+              “A gente parou de queimar margem com desconto. Hoje{" "}
+              <em className="text-[#14CBA8]">68% do faturamento</em> vem de
+              cliente recorrente. Pagou o ano inteiro no primeiro mês.”
+            </blockquote>
+
+            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
               {[
-                { k: "+42%", v: "aumento na recorrência" },
-                { k: "3,2×", v: "ticket médio do cliente fiel" },
-                { k: "12 min", v: "para ir ao ar" },
-              ].map((m) => (
-                <div key={m.v}>
+                { k: "68%", v: "receita de recorrentes" },
+                { k: "R$ 22k", v: "cashback devolvido / mês" },
+                { k: "4,2×", v: "retorno vs. custo mensal" },
+              ].map((s) => (
+                <div key={s.v}>
                   <div className="font-display text-3xl leading-none sm:text-4xl">
-                    {m.k}
+                    {s.k}
                   </div>
-                  <div className="mt-2 text-[11px] uppercase tracking-wider text-white/45">
-                    {m.v}
+                  <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/45">
+                    {s.v}
                   </div>
                 </div>
               ))}
@@ -181,98 +352,47 @@ function Index() {
         </div>
       </section>
 
-      {/* PILARES — grid alternado, sem cards simétricos com ícones */}
-      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
-        <div className="grid gap-x-14 gap-y-6 md:grid-cols-[1fr_2fr]">
-          <div className="text-xs uppercase tracking-[0.22em] text-[#0B0F1A]/40">
-            Três formas de reter
-          </div>
-          <h2 className="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">
-            Um kit completo — pra loja pequena e pra rede que já cresceu.
-          </h2>
-        </div>
-        <div className="mt-16 grid gap-6 md:grid-cols-6 md:grid-rows-2">
-          <Pillar
-            className="md:col-span-4 md:row-span-2 bg-[#0B0F1A] text-white"
-            num="01"
-            title="Pontos com identidade da sua loja"
-            body="O cliente ganha pontos a cada compra e resgata no seu catálogo próprio — produtos, serviços, cupons e níveis (Bronze → Diamante). Nada de página branca com seu logo colado."
-            visual={
-              <div className="mt-8 flex items-end gap-6">
-                <div className="rounded-2xl bg-white/5 p-5 backdrop-blur">
-                  <div className="text-[11px] uppercase tracking-wider text-white/50">Saldo</div>
-                  <div className="mt-1 font-display text-5xl">2.480</div>
-                  <div className="text-xs text-white/50">pontos</div>
-                </div>
-                <div className="rounded-2xl border border-white/10 p-5">
-                  <div className="text-[11px] uppercase tracking-wider text-white/50">Nível</div>
-                  <div className="mt-1 flex items-center gap-2 font-display text-2xl">
-                    <Crown className="h-5 w-5 text-[#14CBA8]" /> Prata
-                  </div>
-                  <div className="mt-1 text-xs text-white/50">520 pts p/ Ouro</div>
-                </div>
+      {/* ============================================================
+          CTA FINAL — tipografia enorme, cru, sem card
+         ============================================================ */}
+      <section className="relative overflow-hidden bg-[#FAF8F2]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(50% 60% at 80% 30%, rgba(20,203,168,0.10), transparent 60%)",
+          }}
+        />
+        <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8 md:py-40">
+          <div className="grid gap-12 md:grid-cols-12 md:items-end md:gap-6">
+            <div className="md:col-span-8">
+              <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
+                — Última página
               </div>
-            }
-          />
-          <Pillar
-            className="md:col-span-2 bg-[#F1EFE8]"
-            num="02"
-            title="Cashback automático"
-            body="Devolve % em crédito na hora — usável apenas na sua loja."
-          />
-          <Pillar
-            className="md:col-span-2 bg-[#E7F5F2]"
-            num="03"
-            title="Campanhas & WhatsApp"
-            body="Segmenta clientes inativos, dispara promoções e mede resultado."
-          />
-        </div>
-      </section>
-
-      {/* DEPOIMENTO editorial — largo, único, com identidade */}
-      <section className="border-y border-black/5 bg-[#F5F2EA]">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-[1fr_1.6fr] md:items-center md:py-28">
-          <img
-            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=700&q=70"
-            alt="Rafaela, dona da Quero Ser Fit"
-            className="aspect-[4/5] w-full rounded-2xl object-cover shadow-[0_30px_60px_-30px_rgba(11,15,26,0.4)]"
-          />
-          <div>
-            <div className="text-xs uppercase tracking-[0.22em] text-[#0B0F1A]/40">
-              História de lojista
+              <h2 className="mt-5 font-display text-[52px] leading-[0.98] tracking-[-0.03em] text-[#0B0F1A] sm:text-7xl md:text-[104px]">
+                Comece <em className="text-[#0B0F1A]/50">hoje</em>.
+                <br />
+                Recorrência <em className="text-[#14CBA8]">amanhã</em>.
+              </h2>
             </div>
-            <blockquote className="mt-5 font-display text-3xl leading-[1.15] tracking-tight text-[#0B0F1A] sm:text-4xl md:text-[44px]">
-              “A gente parou de queimar margem em desconto. Hoje 68% do
-              faturamento vem de cliente <em>recorrente</em>. O PontuaMax
-              pagou o ano inteiro no primeiro mês.”
-            </blockquote>
-            <div className="mt-6 flex items-center gap-3 text-sm">
-              <div>
-                <div className="font-semibold">Rafaela Andrade</div>
-                <div className="text-[#0B0F1A]/50">Sócia · Quero Ser Fit · 3 lojas</div>
+            <div className="md:col-span-4 md:pb-4">
+              <div className="flex flex-col items-start gap-5">
+                <Link
+                  to="/lojista/onboarding"
+                  className="group inline-flex items-center gap-2 rounded-full bg-[#0A0A0A] px-7 py-4 text-sm font-semibold text-white transition-all hover:-translate-y-[1px] hover:shadow-[0_20px_40px_-15px_rgba(10,10,10,0.4)]"
+                >
+                  Criar minha loja grátis
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#0A0A0A] transition-transform group-hover:translate-x-0.5">
+                    <ArrowUpRight className="h-3 w-3" />
+                  </span>
+                </Link>
+                <p className="max-w-xs text-sm text-[#0B0F1A]/55">
+                  Grátis pra começar. Sem cartão. Cancela quando quiser — mas
+                  ninguém cancela.
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA final — texto grande, sem card */}
-      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-32">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr] md:items-end">
-          <h2 className="font-display text-5xl leading-[1.02] tracking-tight sm:text-6xl md:text-7xl">
-            Comece hoje.<br />
-            <em className="text-[#0B0F1A]/60">A recorrência é amanhã.</em>
-          </h2>
-          <div className="flex flex-col items-start gap-4 md:items-end">
-            <Link
-              to="/lojista/onboarding"
-              className="inline-flex items-center gap-2 rounded-full bg-[#0B0F1A] px-6 py-3.5 text-sm font-semibold text-white hover:-translate-y-[1px] transition-transform"
-            >
-              Criar minha loja grátis <ArrowUpRight className="h-4 w-4" />
-            </Link>
-            <p className="max-w-xs text-sm text-[#0B0F1A]/55 md:text-right">
-              Grátis para começar. Sem cartão. Cancela quando quiser.
-            </p>
           </div>
         </div>
       </section>
@@ -280,28 +400,69 @@ function Index() {
   );
 }
 
-function Pillar({
-  num,
+/* ---------- Chapter block: numero editorial + imagem alternada ---------- */
+function Chapter({
+  index,
+  eyebrow,
   title,
   body,
-  visual,
-  className = "",
+  image,
+  imageAlt,
+  side,
+  highlight,
 }: {
-  num: string;
+  index: string;
+  eyebrow: string;
   title: string;
   body: string;
-  visual?: React.ReactNode;
-  className?: string;
+  image: string;
+  imageAlt: string;
+  side: "left" | "right";
+  highlight: string;
 }) {
+  const imgFirst = side === "left";
   return (
-    <div className={`group relative overflow-hidden rounded-3xl p-8 md:p-10 ${className}`}>
-      <div className="text-xs uppercase tracking-[0.22em] opacity-40">{num}</div>
-      <h3 className="mt-3 font-display text-3xl leading-[1.05] tracking-tight md:text-4xl">
-        {title}
-      </h3>
-      <p className="mt-4 max-w-md text-sm leading-relaxed opacity-70">{body}</p>
-      {visual}
-    </div>
+    <article className="grid grid-cols-1 items-center gap-10 border-b border-black/10 py-24 last:border-b-0 md:grid-cols-12 md:gap-8 md:py-32">
+      <div
+        className={`relative md:col-span-6 ${imgFirst ? "md:order-1" : "md:order-2"}`}
+      >
+        <div className="relative overflow-hidden rounded-[28px] bg-[#F5F2EA]">
+          <img
+            src={image}
+            alt={imageAlt}
+            loading="lazy"
+            className="aspect-[4/5] w-full object-cover md:aspect-[5/6]"
+          />
+          <div className="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur">
+            {highlight}
+          </div>
+        </div>
+      </div>
+      <div
+        className={`md:col-span-6 ${imgFirst ? "md:order-2 md:pl-6" : "md:order-1 md:pr-6"}`}
+      >
+        <div className="flex items-baseline gap-6">
+          <div className="font-display text-6xl leading-none tracking-tight text-[#0B0F1A]/15 sm:text-7xl md:text-[96px]">
+            {index}
+          </div>
+          <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
+            {eyebrow}
+          </div>
+        </div>
+        <h3 className="mt-6 font-display text-[36px] leading-[1.05] tracking-[-0.015em] text-[#0B0F1A] sm:text-5xl md:text-[56px]">
+          {title}
+        </h3>
+        <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-[#0B0F1A]/65 md:text-base">
+          {body}
+        </p>
+        <Link
+          to="/como-funciona"
+          className="mt-8 inline-flex items-center gap-2 border-b border-[#0B0F1A]/40 pb-1 text-sm font-semibold text-[#0B0F1A] transition-colors hover:border-[#14CBA8] hover:text-[#0B0F1A]"
+        >
+          Ver detalhes <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </article>
   );
 }
 
