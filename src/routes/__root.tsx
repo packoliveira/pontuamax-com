@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "PontuaMax é o sistema SaaS Whitelabel de Programa de Fidelidade e Cashback para Varejo e E-commerce. Pontuação automática por CPF via Olist, Bling, Tiny e caixa físico.",
+          "PontuaMax é uma plataforma whitelabel de fidelidade e cashback para lojas físicas e e-commerce, com pontuação por CPF, recompensas e relacionamento.",
       },
       { name: "author", content: "PontuaMax" },
       { name: "theme-color", content: "#4f46e5" },

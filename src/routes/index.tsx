@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Plataforma SaaS Whitelabel de Fidelização e Cashback para Varejo e E-commerce. Pontuação automática via Olist, Bling, Tiny e Caixa.",
+          "Plataforma whitelabel de fidelidade e cashback para lojas físicas e e-commerce. Pontuação por CPF, recompensas, campanhas e relacionamento em um só lugar.",
       },
       { property: "og:title", content: "PontuaMax · Fidelidade & Cashback Whitelabel" },
       { property: "og:type", content: "website" },
@@ -101,8 +101,8 @@ function LandingPontuaMax() {
 
           <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-normal">
             Substitua o cartão de papel por uma experiência digital 100% Whitelabel. O cliente
-            compra no e-commerce ou caixa físico, acúmula pontos e cashback por CPF, e troca por
-            prêmios.
+            compra na loja física ou no e-commerce, acumula pontos e cashback por CPF e troca por
+            recompensas.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 pt-4">
@@ -121,23 +121,23 @@ function LandingPontuaMax() {
               asChild
               className="border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm h-12 px-8"
             >
-              <Link to="/$slug" params={{ slug: "loja" }}>
-                <Store className="mr-2 h-5 w-5 text-indigo-400" /> Ver Vitrine do Cliente (/loja)
-              </Link>
+              <a href="#recursos">
+                <Sparkles className="mr-2 h-5 w-5 text-indigo-400" /> Conhecer recursos
+              </a>
             </Button>
           </div>
         </div>
       </section>
 
       {/* Módulos Principais */}
-      <section className="py-16 bg-slate-950/60 border-y border-white/5">
+      <section id="recursos" className="py-16 bg-slate-950/60 border-y border-white/5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center space-y-3">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Acesso Rápido aos Módulos do PontuaMax
+              Recursos do PontuaMax
             </h2>
             <p className="text-sm text-slate-400 max-w-xl mx-auto">
-              Navegue entre o caixa físico da loja, gestão de recompensas, equipe e vitrine pública.
+              Gerencie pontuação, recompensas, equipe e a experiência pública dos seus clientes.
             </p>
           </div>
 
@@ -224,7 +224,7 @@ function LandingPontuaMax() {
                   <Store className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-lg text-white">Vitrine Pública (/$slug)</h3>
+                  <h3 className="font-bold text-lg text-white">Vitrine personalizada</h3>
                   <p className="text-xs text-slate-400">
                     Página whitelabel do cliente para resgate de prêmios com PWA e confetes.
                   </p>
@@ -235,8 +235,8 @@ function LandingPontuaMax() {
                   asChild
                   className="w-full justify-between text-xs text-amber-400 hover:text-amber-300"
                 >
-                  <Link to="/$slug" params={{ slug: "loja" }}>
-                    Abrir Vitrine <ArrowRight className="h-4 w-4" />
+                  <Link to="/lojista/personalizacao">
+                    Personalizar vitrine <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardContent>
