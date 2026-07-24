@@ -138,6 +138,48 @@ function Index() {
             <div className="flex justify-center md:justify-end">
               <PhoneMockup />
             </div>
+
+            {/* Floating cards — mesma pegada da referência */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -left-4 top-6 hidden w-[260px] rotate-[-4deg] rounded-2xl bg-[#111827] p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/10 md:block lg:-left-10 lg:w-[280px] animate-[float-slow_7s_ease-in-out_infinite]"
+            >
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#F5A623]">
+                WhatsApp · Sua marca
+              </div>
+              <p className="text-[13px] font-semibold leading-snug text-white">
+                "Oi Renata! Você tem{" "}
+                <span className="text-[#F5A623]">R$ 24 de cashback</span>{" "}
+                esperando 🎁"
+              </p>
+              <div className="mt-3 flex items-center gap-2 text-[10px] text-white/50">
+                <span>09:42</span>
+                <span>·</span>
+                <span>Régua automática</span>
+              </div>
+            </div>
+
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-6 right-0 hidden w-[220px] rotate-[3deg] rounded-2xl bg-white p-4 text-left shadow-[0_30px_60px_-20px_rgba(0,0,0,0.35)] ring-1 ring-black/5 md:block lg:-right-6 lg:w-[240px] animate-[float-slow_9s_ease-in-out_infinite_reverse]"
+            >
+              <div className="text-[11px] font-medium text-neutral-500">
+                Cliente voltou
+              </div>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span className="font-display text-3xl font-bold tracking-tight text-neutral-900">
+                  +R$ 184
+                </span>
+                <span className="text-emerald-500">↑</span>
+              </div>
+              <div className="mt-1 text-[11px] text-neutral-500">
+                em 22 dias · ticket +18%
+              </div>
+              <div className="mt-2 flex items-center gap-1.5 text-[11px] text-neutral-500">
+                <span className="text-[#F5A623]">★★★★★</span>
+                <span>NPS 92</span>
+              </div>
+            </div>
           </div>
         </div>
 
