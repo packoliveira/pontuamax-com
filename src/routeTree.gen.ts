@@ -13,6 +13,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as LojistasRouteImport } from './routes/lojistas'
 import { Route as LojistaRouteImport } from './routes/lojista'
 import { Route as FuncionarioRouteImport } from './routes/funcionario'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
@@ -81,6 +82,11 @@ const LojistaRoute = LojistaRouteImport.update({
 const FuncionarioRoute = FuncionarioRouteImport.update({
   id: '/funcionario',
   path: '/funcionario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -339,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/lojistas': typeof LojistasRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/cadastro': typeof CadastroRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/lojistas': typeof LojistasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/$slug': typeof SlugRoute
   '/admin': typeof AdminRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/lojistas': typeof LojistasRoute
@@ -504,6 +513,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/admin'
     | '/cadastro'
+    | '/como-funciona'
     | '/funcionario'
     | '/lojista'
     | '/lojistas'
@@ -558,6 +568,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/cadastro'
+    | '/como-funciona'
     | '/lojistas'
     | '/redefinir-senha'
     | '/admin/login'
@@ -611,6 +622,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/admin'
     | '/cadastro'
+    | '/como-funciona'
     | '/funcionario'
     | '/lojista'
     | '/lojistas'
@@ -667,6 +679,7 @@ export interface RootRouteChildren {
   SlugRoute: typeof SlugRoute
   AdminRoute: typeof AdminRouteWithChildren
   CadastroRoute: typeof CadastroRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   FuncionarioRoute: typeof FuncionarioRouteWithChildren
   LojistaRoute: typeof LojistaRouteWithChildren
   LojistasRoute: typeof LojistasRoute
@@ -713,6 +726,13 @@ declare module '@tanstack/react-router' {
       path: '/funcionario'
       fullPath: '/funcionario'
       preLoaderRoute: typeof FuncionarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -1159,6 +1179,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugRoute: SlugRoute,
   AdminRoute: AdminRouteWithChildren,
   CadastroRoute: CadastroRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   FuncionarioRoute: FuncionarioRouteWithChildren,
   LojistaRoute: LojistaRouteWithChildren,
   LojistasRoute: LojistasRoute,
