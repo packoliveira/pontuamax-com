@@ -252,8 +252,8 @@ function Index() {
           <Chapter
             index="03"
             eyebrow="Comunicação"
-            title="Campanhas e WhatsApp que puxam cliente inativo"
-            body="Segmenta quem sumiu há 30, 60, 90 dias e dispara promoções segmentadas. Você mede quem abriu, quem comprou e quanto voltou pra sua receita."
+            title="Campanhas e WhatsApp para trazer cliente de volta."
+            body="Encontre quem parou de comprar e envie campanhas no momento certo. Sua loja vê quem voltou e quanto isso gerou em vendas."
             image="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=70"
             imageAlt="Comerciante enviando mensagem no celular"
             side="right"
