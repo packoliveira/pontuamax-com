@@ -418,18 +418,18 @@ function Chapter({
 }) {
   const imgFirst = side === "left";
   return (
-    <article className="grid grid-cols-1 items-center gap-10 border-b border-black/10 py-24 last:border-b-0 md:grid-cols-12 md:gap-8 md:py-32">
+    <article className="grid grid-cols-1 items-center gap-8 border-b border-black/10 py-16 last:border-b-0 sm:gap-10 sm:py-20 md:grid-cols-12 md:gap-8 md:py-32">
       <div
         className={`relative md:col-span-6 ${imgFirst ? "md:order-1" : "md:order-2"}`}
       >
-        <div className="relative overflow-hidden rounded-[28px] bg-[#F5F2EA]">
+        <div className="relative overflow-hidden rounded-[24px] bg-[#F5F2EA] sm:rounded-[28px]">
           <img
             src={image}
             alt={imageAlt}
             loading="lazy"
-            className="aspect-[4/5] w-full object-cover md:aspect-[5/6]"
+            className="aspect-[4/3] w-full object-cover sm:aspect-[4/5] md:aspect-[5/6]"
           />
-          <div className="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur">
+          <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur sm:left-5 sm:top-5">
             {highlight}
           </div>
         </div>
@@ -437,23 +437,23 @@ function Chapter({
       <div
         className={`md:col-span-6 ${imgFirst ? "md:order-2 md:pl-6" : "md:order-1 md:pr-6"}`}
       >
-        <div className="flex items-baseline gap-6">
-          <div className="font-display text-6xl leading-none tracking-tight text-[#0B0F1A]/15 sm:text-7xl md:text-[96px]">
+        <div className="flex items-baseline gap-4 sm:gap-6">
+          <div className="font-display text-5xl leading-none tracking-tight text-[#0B0F1A]/15 sm:text-7xl md:text-[96px]">
             {index}
           </div>
           <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
             {eyebrow}
           </div>
         </div>
-        <h3 className="mt-6 font-display text-[36px] leading-[1.05] tracking-[-0.015em] text-[#0B0F1A] sm:text-5xl md:text-[56px]">
+        <h3 className="mt-5 font-display text-[30px] leading-[1.05] tracking-[-0.015em] text-[#0B0F1A] sm:mt-6 sm:text-5xl md:text-[56px]">
           {title}
         </h3>
-        <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-[#0B0F1A]/65 md:text-base">
+        <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-[#0B0F1A]/65 sm:mt-6 md:text-base">
           {body}
         </p>
         <Link
           to="/como-funciona"
-          className="mt-8 inline-flex items-center gap-2 border-b border-[#0B0F1A]/40 pb-1 text-sm font-semibold text-[#0B0F1A] transition-colors hover:border-[#14CBA8] hover:text-[#0B0F1A]"
+          className="mt-7 inline-flex items-center gap-2 border-b border-[#0B0F1A]/40 pb-1 text-[14.5px] font-semibold text-[#0B0F1A] transition-colors hover:border-[#14CBA8] hover:text-[#0B0F1A]"
         >
           Ver detalhes <ArrowRight className="h-4 w-4" />
         </Link>
