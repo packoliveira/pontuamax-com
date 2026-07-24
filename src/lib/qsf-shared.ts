@@ -1,9 +1,6 @@
 export type Modalidade = "pontos" | "cashback" | "ambos";
 export type Nivel = "bronze" | "prata" | "ouro";
 
-const CUSTOMER_EMAIL_DOMAIN = "cliente.pontuamax.local";
-const LEGACY_CUSTOMER_EMAIL_DOMAIN = "cliente.qsfclub.local";
-
 export const formatBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
@@ -43,7 +40,7 @@ export function slugify(s: string) {
 
 export function phoneToEmail(phone: string) {
   const digits = phone.replace(/\D/g, "");
-  return `${digits}@${CUSTOMER_EMAIL_DOMAIN}`;
+  return `${digits}@cliente.qsfclub.local`;
 }
 
 export function onlyDigits(s: string) {
@@ -56,23 +53,7 @@ export function cpfToEmail(cpf: string) {
   // final. Qualquer novo fluxo que precise gerar login sintético DEVE
   // importar esta função — não reimplementar a string em outros lugares —
   // para evitar duplicidade de conta pelo mesmo CPF.
-  return `${digits}@${CUSTOMER_EMAIL_DOMAIN}`;
-}
-
-/**
- * Mantém login de clientes criados antes da mudança de marca.
- * Não deve ser usado para criar contas novas.
- */
-export function legacyCpfToEmail(cpf: string) {
-  const digits = cpf.replace(/\D/g, "");
-  return `${digits}@${LEGACY_CUSTOMER_EMAIL_DOMAIN}`;
-}
-
-export function isSyntheticCustomerEmail(email: string) {
-  return (
-    email.endsWith(`@${CUSTOMER_EMAIL_DOMAIN}`) ||
-    email.endsWith(`@${LEGACY_CUSTOMER_EMAIL_DOMAIN}`)
-  );
+  return `${digits}@cliente.qsfclub.local`;
 }
 
 export function formatCPF(v: string) {

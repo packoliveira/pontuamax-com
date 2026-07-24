@@ -9,30 +9,82 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as LojistaRouteImport } from './routes/lojista'
+import { Route as FuncionarioRouteImport } from './routes/funcionario'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugRouteImport } from './routes/$slug'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as SetupRouteImport } from './routes/setup'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
-import { Route as AuthenticatedCaixaRouteImport } from './routes/_authenticated/caixa'
-import { Route as AuthenticatedCargosRouteImport } from './routes/_authenticated/cargos'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedFuncionariosRouteImport } from './routes/_authenticated/funcionarios'
-import { Route as AuthenticatedPremiosRouteImport } from './routes/_authenticated/premios'
-import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
-import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
-import { Route as AuthenticatedConfiguracoesIndexRouteImport } from './routes/_authenticated/configuracoes.index'
-import { Route as AuthenticatedConfiguracoesImportarRouteImport } from './routes/_authenticated/configuracoes.importar'
-import { Route as AuthenticatedConfiguracoesOlistRouteImport } from './routes/_authenticated/configuracoes.olist'
-import { Route as AuthenticatedVendasIdRouteImport } from './routes/_authenticated/vendas.$id'
-import { Route as ApiPublicHooksOlistSyncRouteImport } from './routes/api/public/hooks/olist-sync'
-import { Route as ApiPublicHooksOlistWebhookRouteImport } from './routes/api/public/hooks/olist-webhook'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as LojistaIndexRouteImport } from './routes/lojista.index'
+import { Route as FuncionarioIndexRouteImport } from './routes/funcionario.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ValeCodigoRouteImport } from './routes/vale.$codigo'
+import { Route as NpsIdRouteImport } from './routes/nps.$id'
+import { Route as NotaSlugRouteImport } from './routes/nota.$slug'
+import { Route as LojistaWidgetRouteImport } from './routes/lojista.widget'
+import { Route as LojistaValePresenteRouteImport } from './routes/lojista.vale-presente'
+import { Route as LojistaSorteiosRouteImport } from './routes/lojista.sorteios'
+import { Route as LojistaResgatesRouteImport } from './routes/lojista.resgates'
+import { Route as LojistaPromocoesRouteImport } from './routes/lojista.promocoes'
+import { Route as LojistaProdutosRouteImport } from './routes/lojista.produtos'
+import { Route as LojistaPersonalizacaoRouteImport } from './routes/lojista.personalizacao'
+import { Route as LojistaOnboardingRouteImport } from './routes/lojista.onboarding'
+import { Route as LojistaNpsRouteImport } from './routes/lojista.nps'
+import { Route as LojistaNotasRouteImport } from './routes/lojista.notas'
+import { Route as LojistaLoginRouteImport } from './routes/lojista.login'
+import { Route as LojistaLancarVendaRouteImport } from './routes/lojista.lancar-venda'
+import { Route as LojistaInstagramRouteImport } from './routes/lojista.instagram'
+import { Route as LojistaEquipeRouteImport } from './routes/lojista.equipe'
+import { Route as LojistaConfiguracoesRouteImport } from './routes/lojista.configuracoes'
+import { Route as LojistaClientesRouteImport } from './routes/lojista.clientes'
+import { Route as LojistaCampanhasRouteImport } from './routes/lojista.campanhas'
+import { Route as LojistaAguardandoRouteImport } from './routes/lojista.aguardando'
+import { Route as FuncionarioVouchersRouteImport } from './routes/funcionario.vouchers'
+import { Route as FuncionarioTrocarSenhaRouteImport } from './routes/funcionario.trocar-senha'
+import { Route as FuncionarioResgatesRouteImport } from './routes/funcionario.resgates'
+import { Route as FuncionarioQrRouteImport } from './routes/funcionario.qr'
+import { Route as FuncionarioPontuarRouteImport } from './routes/funcionario.pontuar'
+import { Route as FuncionarioPerfilRouteImport } from './routes/funcionario.perfil'
+import { Route as FuncionarioLoginRouteImport } from './routes/funcionario.login'
+import { Route as FuncionarioHistoricoRouteImport } from './routes/funcionario.historico'
+import { Route as FuncionarioEsqueciSenhaRouteImport } from './routes/funcionario.esqueci-senha'
+import { Route as FuncionarioClientesRouteImport } from './routes/funcionario.clientes'
+import { Route as AdminPlanosRouteImport } from './routes/admin.planos'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as ApiPublicOlistVendasRouteImport } from './routes/api/public/olist-vendas'
+import { Route as ApiPublicWidgetSlugRouteImport } from './routes/api/public/widget.$slug'
+import { Route as ApiPublicWebhookOrigemRouteImport } from './routes/api/public/webhook/$origem'
+import { Route as ApiPublicNpsSubmitRouteImport } from './routes/api/public/nps.submit'
+import { Route as ApiPublicHooksNotificationsDailyRouteImport } from './routes/api/public/hooks/notifications-daily'
+import { Route as ApiPublicHooksExpirarVouchersRouteImport } from './routes/api/public/hooks/expirar-vouchers'
+import { Route as ApiPublicHooksExpirarPontosRouteImport } from './routes/api/public/hooks/expirar-pontos'
+import { Route as ApiPublicHooksCampanhasAgendadasRouteImport } from './routes/api/public/hooks/campanhas-agendadas'
+import { Route as ApiPublicHooksAnonimizarLogsAntigosRouteImport } from './routes/api/public/hooks/anonimizar-logs-antigos'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojistaRoute = LojistaRouteImport.update({
+  id: '/lojista',
+  path: '/lojista',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncionarioRoute = FuncionarioRouteImport.update({
+  id: '/funcionario',
+  path: '/funcionario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -40,252 +92,621 @@ const SlugRoute = SlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const LojistaIndexRoute = LojistaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const FuncionarioIndexRoute = FuncionarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ValeCodigoRoute = ValeCodigoRouteImport.update({
+  id: '/vale/$codigo',
+  path: '/vale/$codigo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SetupRoute = SetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
+const NpsIdRoute = NpsIdRouteImport.update({
+  id: '/nps/$id',
+  path: '/nps/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const NotaSlugRoute = NotaSlugRouteImport.update({
+  id: '/nota/$slug',
+  path: '/nota/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
-  id: '/auditoria',
-  path: '/auditoria',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaWidgetRoute = LojistaWidgetRouteImport.update({
+  id: '/widget',
+  path: '/widget',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const AuthenticatedCaixaRoute = AuthenticatedCaixaRouteImport.update({
-  id: '/caixa',
-  path: '/caixa',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaValePresenteRoute = LojistaValePresenteRouteImport.update({
+  id: '/vale-presente',
+  path: '/vale-presente',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const AuthenticatedCargosRoute = AuthenticatedCargosRouteImport.update({
-  id: '/cargos',
-  path: '/cargos',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaSorteiosRoute = LojistaSorteiosRouteImport.update({
+  id: '/sorteios',
+  path: '/sorteios',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaResgatesRoute = LojistaResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const AuthenticatedFuncionariosRoute =
-  AuthenticatedFuncionariosRouteImport.update({
-    id: '/funcionarios',
-    path: '/funcionarios',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPremiosRoute = AuthenticatedPremiosRouteImport.update({
-  id: '/premios',
-  path: '/premios',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaPromocoesRoute = LojistaPromocoesRouteImport.update({
+  id: '/promocoes',
+  path: '/promocoes',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const AuthenticatedClientesIndexRoute =
-  AuthenticatedClientesIndexRouteImport.update({
-    id: '/clientes/',
-    path: '/clientes/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
-  id: '/clientes/$id',
-  path: '/clientes/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaProdutosRoute = LojistaProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const AuthenticatedConfiguracoesIndexRoute =
-  AuthenticatedConfiguracoesIndexRouteImport.update({
-    id: '/configuracoes/',
-    path: '/configuracoes/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedConfiguracoesImportarRoute =
-  AuthenticatedConfiguracoesImportarRouteImport.update({
-    id: '/configuracoes/importar',
-    path: '/configuracoes/importar',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedConfiguracoesOlistRoute =
-  AuthenticatedConfiguracoesOlistRouteImport.update({
-    id: '/configuracoes/olist',
-    path: '/configuracoes/olist',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedVendasIdRoute = AuthenticatedVendasIdRouteImport.update({
-  id: '/vendas/$id',
-  path: '/vendas/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LojistaPersonalizacaoRoute = LojistaPersonalizacaoRouteImport.update({
+  id: '/personalizacao',
+  path: '/personalizacao',
+  getParentRoute: () => LojistaRoute,
 } as any)
-const ApiPublicHooksOlistSyncRoute = ApiPublicHooksOlistSyncRouteImport.update({
-  id: '/api/public/hooks/olist-sync',
-  path: '/api/public/hooks/olist-sync',
+const LojistaOnboardingRoute = LojistaOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaNpsRoute = LojistaNpsRouteImport.update({
+  id: '/nps',
+  path: '/nps',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaNotasRoute = LojistaNotasRouteImport.update({
+  id: '/notas',
+  path: '/notas',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaLoginRoute = LojistaLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaLancarVendaRoute = LojistaLancarVendaRouteImport.update({
+  id: '/lancar-venda',
+  path: '/lancar-venda',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaInstagramRoute = LojistaInstagramRouteImport.update({
+  id: '/instagram',
+  path: '/instagram',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaEquipeRoute = LojistaEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaConfiguracoesRoute = LojistaConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaClientesRoute = LojistaClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaCampanhasRoute = LojistaCampanhasRouteImport.update({
+  id: '/campanhas',
+  path: '/campanhas',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const LojistaAguardandoRoute = LojistaAguardandoRouteImport.update({
+  id: '/aguardando',
+  path: '/aguardando',
+  getParentRoute: () => LojistaRoute,
+} as any)
+const FuncionarioVouchersRoute = FuncionarioVouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioTrocarSenhaRoute = FuncionarioTrocarSenhaRouteImport.update({
+  id: '/trocar-senha',
+  path: '/trocar-senha',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioResgatesRoute = FuncionarioResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioQrRoute = FuncionarioQrRouteImport.update({
+  id: '/qr',
+  path: '/qr',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioPontuarRoute = FuncionarioPontuarRouteImport.update({
+  id: '/pontuar',
+  path: '/pontuar',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioPerfilRoute = FuncionarioPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioLoginRoute = FuncionarioLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioHistoricoRoute = FuncionarioHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioEsqueciSenhaRoute = FuncionarioEsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const FuncionarioClientesRoute = FuncionarioClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => FuncionarioRoute,
+} as any)
+const AdminPlanosRoute = AdminPlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ApiPublicOlistVendasRoute = ApiPublicOlistVendasRouteImport.update({
+  id: '/api/public/olist-vendas',
+  path: '/api/public/olist-vendas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksOlistWebhookRoute =
-  ApiPublicHooksOlistWebhookRouteImport.update({
-    id: '/api/public/hooks/olist-webhook',
-    path: '/api/public/hooks/olist-webhook',
+const ApiPublicWidgetSlugRoute = ApiPublicWidgetSlugRouteImport.update({
+  id: '/api/public/widget/$slug',
+  path: '/api/public/widget/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWebhookOrigemRoute = ApiPublicWebhookOrigemRouteImport.update({
+  id: '/api/public/webhook/$origem',
+  path: '/api/public/webhook/$origem',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicNpsSubmitRoute = ApiPublicNpsSubmitRouteImport.update({
+  id: '/api/public/nps/submit',
+  path: '/api/public/nps/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksNotificationsDailyRoute =
+  ApiPublicHooksNotificationsDailyRouteImport.update({
+    id: '/api/public/hooks/notifications-daily',
+    path: '/api/public/hooks/notifications-daily',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksExpirarVouchersRoute =
+  ApiPublicHooksExpirarVouchersRouteImport.update({
+    id: '/api/public/hooks/expirar-vouchers',
+    path: '/api/public/hooks/expirar-vouchers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksExpirarPontosRoute =
+  ApiPublicHooksExpirarPontosRouteImport.update({
+    id: '/api/public/hooks/expirar-pontos',
+    path: '/api/public/hooks/expirar-pontos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksCampanhasAgendadasRoute =
+  ApiPublicHooksCampanhasAgendadasRouteImport.update({
+    id: '/api/public/hooks/campanhas-agendadas',
+    path: '/api/public/hooks/campanhas-agendadas',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAnonimizarLogsAntigosRoute =
+  ApiPublicHooksAnonimizarLogsAntigosRouteImport.update({
+    id: '/api/public/hooks/anonimizar-logs-antigos',
+    path: '/api/public/hooks/anonimizar-logs-antigos',
     getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
-  '/auth': typeof AuthRoute
-  '/setup': typeof SetupRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/auditoria': typeof AuthenticatedAuditoriaRoute
-  '/caixa': typeof AuthenticatedCaixaRoute
-  '/cargos': typeof AuthenticatedCargosRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/funcionarios': typeof AuthenticatedFuncionariosRoute
-  '/premios': typeof AuthenticatedPremiosRoute
-  '/clientes/$id': typeof AuthenticatedClientesIdRoute
-  '/configuracoes/importar': typeof AuthenticatedConfiguracoesImportarRoute
-  '/configuracoes/olist': typeof AuthenticatedConfiguracoesOlistRoute
-  '/vendas/$id': typeof AuthenticatedVendasIdRoute
-  '/clientes/': typeof AuthenticatedClientesIndexRoute
-  '/configuracoes/': typeof AuthenticatedConfiguracoesIndexRoute
-  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
-  '/api/public/hooks/olist-webhook': typeof ApiPublicHooksOlistWebhookRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRouteWithChildren
+  '/lojista': typeof LojistaRouteWithChildren
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/planos': typeof AdminPlanosRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/esqueci-senha': typeof FuncionarioEsqueciSenhaRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
+  '/funcionario/login': typeof FuncionarioLoginRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
+  '/funcionario/pontuar': typeof FuncionarioPontuarRoute
+  '/funcionario/qr': typeof FuncionarioQrRoute
+  '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/trocar-senha': typeof FuncionarioTrocarSenhaRoute
+  '/funcionario/vouchers': typeof FuncionarioVouchersRoute
+  '/lojista/aguardando': typeof LojistaAguardandoRoute
+  '/lojista/campanhas': typeof LojistaCampanhasRoute
+  '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
+  '/lojista/instagram': typeof LojistaInstagramRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
+  '/lojista/nps': typeof LojistaNpsRoute
+  '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/personalizacao': typeof LojistaPersonalizacaoRoute
+  '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/promocoes': typeof LojistaPromocoesRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/lojista/widget': typeof LojistaWidgetRoute
+  '/nota/$slug': typeof NotaSlugRoute
+  '/nps/$id': typeof NpsIdRoute
+  '/vale/$codigo': typeof ValeCodigoRoute
+  '/admin/': typeof AdminIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
+  '/lojista/': typeof LojistaIndexRoute
+  '/api/public/olist-vendas': typeof ApiPublicOlistVendasRoute
+  '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
+  '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
+  '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
+  '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
+  '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
+  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
-  '/auth': typeof AuthRoute
-  '/setup': typeof SetupRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/auditoria': typeof AuthenticatedAuditoriaRoute
-  '/caixa': typeof AuthenticatedCaixaRoute
-  '/cargos': typeof AuthenticatedCargosRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/funcionarios': typeof AuthenticatedFuncionariosRoute
-  '/premios': typeof AuthenticatedPremiosRoute
-  '/clientes/$id': typeof AuthenticatedClientesIdRoute
-  '/configuracoes/importar': typeof AuthenticatedConfiguracoesImportarRoute
-  '/configuracoes/olist': typeof AuthenticatedConfiguracoesOlistRoute
-  '/vendas/$id': typeof AuthenticatedVendasIdRoute
-  '/clientes': typeof AuthenticatedClientesIndexRoute
-  '/configuracoes': typeof AuthenticatedConfiguracoesIndexRoute
-  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
-  '/api/public/hooks/olist-webhook': typeof ApiPublicHooksOlistWebhookRoute
+  '/cadastro': typeof CadastroRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/planos': typeof AdminPlanosRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/esqueci-senha': typeof FuncionarioEsqueciSenhaRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
+  '/funcionario/login': typeof FuncionarioLoginRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
+  '/funcionario/pontuar': typeof FuncionarioPontuarRoute
+  '/funcionario/qr': typeof FuncionarioQrRoute
+  '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/trocar-senha': typeof FuncionarioTrocarSenhaRoute
+  '/funcionario/vouchers': typeof FuncionarioVouchersRoute
+  '/lojista/aguardando': typeof LojistaAguardandoRoute
+  '/lojista/campanhas': typeof LojistaCampanhasRoute
+  '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
+  '/lojista/instagram': typeof LojistaInstagramRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
+  '/lojista/nps': typeof LojistaNpsRoute
+  '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/personalizacao': typeof LojistaPersonalizacaoRoute
+  '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/promocoes': typeof LojistaPromocoesRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/lojista/widget': typeof LojistaWidgetRoute
+  '/nota/$slug': typeof NotaSlugRoute
+  '/nps/$id': typeof NpsIdRoute
+  '/vale/$codigo': typeof ValeCodigoRoute
+  '/admin': typeof AdminIndexRoute
+  '/funcionario': typeof FuncionarioIndexRoute
+  '/lojista': typeof LojistaIndexRoute
+  '/api/public/olist-vendas': typeof ApiPublicOlistVendasRoute
+  '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
+  '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
+  '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
+  '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
+  '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
+  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/$slug': typeof SlugRoute
-  '/auth': typeof AuthRoute
-  '/setup': typeof SetupRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
-  '/_authenticated/caixa': typeof AuthenticatedCaixaRoute
-  '/_authenticated/cargos': typeof AuthenticatedCargosRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/funcionarios': typeof AuthenticatedFuncionariosRoute
-  '/_authenticated/premios': typeof AuthenticatedPremiosRoute
-  '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
-  '/_authenticated/configuracoes/importar': typeof AuthenticatedConfiguracoesImportarRoute
-  '/_authenticated/configuracoes/olist': typeof AuthenticatedConfiguracoesOlistRoute
-  '/_authenticated/vendas/$id': typeof AuthenticatedVendasIdRoute
-  '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
-  '/_authenticated/configuracoes/': typeof AuthenticatedConfiguracoesIndexRoute
-  '/api/public/hooks/olist-sync': typeof ApiPublicHooksOlistSyncRoute
-  '/api/public/hooks/olist-webhook': typeof ApiPublicHooksOlistWebhookRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/cadastro': typeof CadastroRoute
+  '/funcionario': typeof FuncionarioRouteWithChildren
+  '/lojista': typeof LojistaRouteWithChildren
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/planos': typeof AdminPlanosRoute
+  '/funcionario/clientes': typeof FuncionarioClientesRoute
+  '/funcionario/esqueci-senha': typeof FuncionarioEsqueciSenhaRoute
+  '/funcionario/historico': typeof FuncionarioHistoricoRoute
+  '/funcionario/login': typeof FuncionarioLoginRoute
+  '/funcionario/perfil': typeof FuncionarioPerfilRoute
+  '/funcionario/pontuar': typeof FuncionarioPontuarRoute
+  '/funcionario/qr': typeof FuncionarioQrRoute
+  '/funcionario/resgates': typeof FuncionarioResgatesRoute
+  '/funcionario/trocar-senha': typeof FuncionarioTrocarSenhaRoute
+  '/funcionario/vouchers': typeof FuncionarioVouchersRoute
+  '/lojista/aguardando': typeof LojistaAguardandoRoute
+  '/lojista/campanhas': typeof LojistaCampanhasRoute
+  '/lojista/clientes': typeof LojistaClientesRoute
+  '/lojista/configuracoes': typeof LojistaConfiguracoesRoute
+  '/lojista/equipe': typeof LojistaEquipeRoute
+  '/lojista/instagram': typeof LojistaInstagramRoute
+  '/lojista/lancar-venda': typeof LojistaLancarVendaRoute
+  '/lojista/login': typeof LojistaLoginRoute
+  '/lojista/notas': typeof LojistaNotasRoute
+  '/lojista/nps': typeof LojistaNpsRoute
+  '/lojista/onboarding': typeof LojistaOnboardingRoute
+  '/lojista/personalizacao': typeof LojistaPersonalizacaoRoute
+  '/lojista/produtos': typeof LojistaProdutosRoute
+  '/lojista/promocoes': typeof LojistaPromocoesRoute
+  '/lojista/resgates': typeof LojistaResgatesRoute
+  '/lojista/sorteios': typeof LojistaSorteiosRoute
+  '/lojista/vale-presente': typeof LojistaValePresenteRoute
+  '/lojista/widget': typeof LojistaWidgetRoute
+  '/nota/$slug': typeof NotaSlugRoute
+  '/nps/$id': typeof NpsIdRoute
+  '/vale/$codigo': typeof ValeCodigoRoute
+  '/admin/': typeof AdminIndexRoute
+  '/funcionario/': typeof FuncionarioIndexRoute
+  '/lojista/': typeof LojistaIndexRoute
+  '/api/public/olist-vendas': typeof ApiPublicOlistVendasRoute
+  '/api/public/hooks/anonimizar-logs-antigos': typeof ApiPublicHooksAnonimizarLogsAntigosRoute
+  '/api/public/hooks/campanhas-agendadas': typeof ApiPublicHooksCampanhasAgendadasRoute
+  '/api/public/hooks/expirar-pontos': typeof ApiPublicHooksExpirarPontosRoute
+  '/api/public/hooks/expirar-vouchers': typeof ApiPublicHooksExpirarVouchersRoute
+  '/api/public/hooks/notifications-daily': typeof ApiPublicHooksNotificationsDailyRoute
+  '/api/public/nps/submit': typeof ApiPublicNpsSubmitRoute
+  '/api/public/webhook/$origem': typeof ApiPublicWebhookOrigemRoute
+  '/api/public/widget/$slug': typeof ApiPublicWidgetSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$slug'
-    | '/auth'
-    | '/setup'
-    | '/sitemap.xml'
-    | '/auditoria'
-    | '/caixa'
-    | '/cargos'
-    | '/dashboard'
-    | '/funcionarios'
-    | '/premios'
-    | '/clientes/$id'
-    | '/configuracoes/importar'
-    | '/configuracoes/olist'
-    | '/vendas/$id'
-    | '/clientes/'
-    | '/configuracoes/'
-    | '/api/public/hooks/olist-sync'
-    | '/api/public/hooks/olist-webhook'
+    | '/admin'
+    | '/cadastro'
+    | '/funcionario'
+    | '/lojista'
+    | '/redefinir-senha'
+    | '/admin/login'
+    | '/admin/planos'
+    | '/funcionario/clientes'
+    | '/funcionario/esqueci-senha'
+    | '/funcionario/historico'
+    | '/funcionario/login'
+    | '/funcionario/perfil'
+    | '/funcionario/pontuar'
+    | '/funcionario/qr'
+    | '/funcionario/resgates'
+    | '/funcionario/trocar-senha'
+    | '/funcionario/vouchers'
+    | '/lojista/aguardando'
+    | '/lojista/campanhas'
+    | '/lojista/clientes'
+    | '/lojista/configuracoes'
+    | '/lojista/equipe'
+    | '/lojista/instagram'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/notas'
+    | '/lojista/nps'
+    | '/lojista/onboarding'
+    | '/lojista/personalizacao'
+    | '/lojista/produtos'
+    | '/lojista/promocoes'
+    | '/lojista/resgates'
+    | '/lojista/sorteios'
+    | '/lojista/vale-presente'
+    | '/lojista/widget'
+    | '/nota/$slug'
+    | '/nps/$id'
+    | '/vale/$codigo'
+    | '/admin/'
+    | '/funcionario/'
+    | '/lojista/'
+    | '/api/public/olist-vendas'
+    | '/api/public/hooks/anonimizar-logs-antigos'
+    | '/api/public/hooks/campanhas-agendadas'
+    | '/api/public/hooks/expirar-pontos'
+    | '/api/public/hooks/expirar-vouchers'
+    | '/api/public/hooks/notifications-daily'
+    | '/api/public/nps/submit'
+    | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$slug'
-    | '/auth'
-    | '/setup'
-    | '/sitemap.xml'
-    | '/auditoria'
-    | '/caixa'
-    | '/cargos'
-    | '/dashboard'
-    | '/funcionarios'
-    | '/premios'
-    | '/clientes/$id'
-    | '/configuracoes/importar'
-    | '/configuracoes/olist'
-    | '/vendas/$id'
-    | '/clientes'
-    | '/configuracoes'
-    | '/api/public/hooks/olist-sync'
-    | '/api/public/hooks/olist-webhook'
+    | '/cadastro'
+    | '/redefinir-senha'
+    | '/admin/login'
+    | '/admin/planos'
+    | '/funcionario/clientes'
+    | '/funcionario/esqueci-senha'
+    | '/funcionario/historico'
+    | '/funcionario/login'
+    | '/funcionario/perfil'
+    | '/funcionario/pontuar'
+    | '/funcionario/qr'
+    | '/funcionario/resgates'
+    | '/funcionario/trocar-senha'
+    | '/funcionario/vouchers'
+    | '/lojista/aguardando'
+    | '/lojista/campanhas'
+    | '/lojista/clientes'
+    | '/lojista/configuracoes'
+    | '/lojista/equipe'
+    | '/lojista/instagram'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/notas'
+    | '/lojista/nps'
+    | '/lojista/onboarding'
+    | '/lojista/personalizacao'
+    | '/lojista/produtos'
+    | '/lojista/promocoes'
+    | '/lojista/resgates'
+    | '/lojista/sorteios'
+    | '/lojista/vale-presente'
+    | '/lojista/widget'
+    | '/nota/$slug'
+    | '/nps/$id'
+    | '/vale/$codigo'
+    | '/admin'
+    | '/funcionario'
+    | '/lojista'
+    | '/api/public/olist-vendas'
+    | '/api/public/hooks/anonimizar-logs-antigos'
+    | '/api/public/hooks/campanhas-agendadas'
+    | '/api/public/hooks/expirar-pontos'
+    | '/api/public/hooks/expirar-vouchers'
+    | '/api/public/hooks/notifications-daily'
+    | '/api/public/nps/submit'
+    | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
     | '/$slug'
-    | '/auth'
-    | '/setup'
-    | '/sitemap.xml'
-    | '/_authenticated/auditoria'
-    | '/_authenticated/caixa'
-    | '/_authenticated/cargos'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/funcionarios'
-    | '/_authenticated/premios'
-    | '/_authenticated/clientes/$id'
-    | '/_authenticated/configuracoes/importar'
-    | '/_authenticated/configuracoes/olist'
-    | '/_authenticated/vendas/$id'
-    | '/_authenticated/clientes/'
-    | '/_authenticated/configuracoes/'
-    | '/api/public/hooks/olist-sync'
-    | '/api/public/hooks/olist-webhook'
+    | '/admin'
+    | '/cadastro'
+    | '/funcionario'
+    | '/lojista'
+    | '/redefinir-senha'
+    | '/admin/login'
+    | '/admin/planos'
+    | '/funcionario/clientes'
+    | '/funcionario/esqueci-senha'
+    | '/funcionario/historico'
+    | '/funcionario/login'
+    | '/funcionario/perfil'
+    | '/funcionario/pontuar'
+    | '/funcionario/qr'
+    | '/funcionario/resgates'
+    | '/funcionario/trocar-senha'
+    | '/funcionario/vouchers'
+    | '/lojista/aguardando'
+    | '/lojista/campanhas'
+    | '/lojista/clientes'
+    | '/lojista/configuracoes'
+    | '/lojista/equipe'
+    | '/lojista/instagram'
+    | '/lojista/lancar-venda'
+    | '/lojista/login'
+    | '/lojista/notas'
+    | '/lojista/nps'
+    | '/lojista/onboarding'
+    | '/lojista/personalizacao'
+    | '/lojista/produtos'
+    | '/lojista/promocoes'
+    | '/lojista/resgates'
+    | '/lojista/sorteios'
+    | '/lojista/vale-presente'
+    | '/lojista/widget'
+    | '/nota/$slug'
+    | '/nps/$id'
+    | '/vale/$codigo'
+    | '/admin/'
+    | '/funcionario/'
+    | '/lojista/'
+    | '/api/public/olist-vendas'
+    | '/api/public/hooks/anonimizar-logs-antigos'
+    | '/api/public/hooks/campanhas-agendadas'
+    | '/api/public/hooks/expirar-pontos'
+    | '/api/public/hooks/expirar-vouchers'
+    | '/api/public/hooks/notifications-daily'
+    | '/api/public/nps/submit'
+    | '/api/public/webhook/$origem'
+    | '/api/public/widget/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SlugRoute: typeof SlugRoute
-  AuthRoute: typeof AuthRoute
-  SetupRoute: typeof SetupRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ApiPublicHooksOlistSyncRoute: typeof ApiPublicHooksOlistSyncRoute
-  ApiPublicHooksOlistWebhookRoute: typeof ApiPublicHooksOlistWebhookRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  CadastroRoute: typeof CadastroRoute
+  FuncionarioRoute: typeof FuncionarioRouteWithChildren
+  LojistaRoute: typeof LojistaRouteWithChildren
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  NotaSlugRoute: typeof NotaSlugRoute
+  NpsIdRoute: typeof NpsIdRoute
+  ValeCodigoRoute: typeof ValeCodigoRoute
+  ApiPublicOlistVendasRoute: typeof ApiPublicOlistVendasRoute
+  ApiPublicHooksAnonimizarLogsAntigosRoute: typeof ApiPublicHooksAnonimizarLogsAntigosRoute
+  ApiPublicHooksCampanhasAgendadasRoute: typeof ApiPublicHooksCampanhasAgendadasRoute
+  ApiPublicHooksExpirarPontosRoute: typeof ApiPublicHooksExpirarPontosRoute
+  ApiPublicHooksExpirarVouchersRoute: typeof ApiPublicHooksExpirarVouchersRoute
+  ApiPublicHooksNotificationsDailyRoute: typeof ApiPublicHooksNotificationsDailyRoute
+  ApiPublicNpsSubmitRoute: typeof ApiPublicNpsSubmitRoute
+  ApiPublicWebhookOrigemRoute: typeof ApiPublicWebhookOrigemRoute
+  ApiPublicWidgetSlugRoute: typeof ApiPublicWidgetSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lojista': {
+      id: '/lojista'
+      path: '/lojista'
+      fullPath: '/lojista'
+      preLoaderRoute: typeof LojistaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionario': {
+      id: '/funcionario'
+      path: '/funcionario'
+      fullPath: '/funcionario'
+      preLoaderRoute: typeof FuncionarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -295,189 +716,446 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
+    '/': {
+      id: '/'
+      path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/lojista/': {
+      id: '/lojista/'
+      path: '/'
+      fullPath: '/lojista/'
+      preLoaderRoute: typeof LojistaIndexRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/funcionario/': {
+      id: '/funcionario/'
+      path: '/'
+      fullPath: '/funcionario/'
+      preLoaderRoute: typeof FuncionarioIndexRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/vale/$codigo': {
+      id: '/vale/$codigo'
+      path: '/vale/$codigo'
+      fullPath: '/vale/$codigo'
+      preLoaderRoute: typeof ValeCodigoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/setup': {
-      id: '/setup'
-      path: '/setup'
-      fullPath: '/setup'
-      preLoaderRoute: typeof SetupRouteImport
+    '/nps/$id': {
+      id: '/nps/$id'
+      path: '/nps/$id'
+      fullPath: '/nps/$id'
+      preLoaderRoute: typeof NpsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/nota/$slug': {
+      id: '/nota/$slug'
+      path: '/nota/$slug'
+      fullPath: '/nota/$slug'
+      preLoaderRoute: typeof NotaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/auditoria': {
-      id: '/_authenticated/auditoria'
-      path: '/auditoria'
-      fullPath: '/auditoria'
-      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/widget': {
+      id: '/lojista/widget'
+      path: '/widget'
+      fullPath: '/lojista/widget'
+      preLoaderRoute: typeof LojistaWidgetRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/caixa': {
-      id: '/_authenticated/caixa'
-      path: '/caixa'
-      fullPath: '/caixa'
-      preLoaderRoute: typeof AuthenticatedCaixaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/vale-presente': {
+      id: '/lojista/vale-presente'
+      path: '/vale-presente'
+      fullPath: '/lojista/vale-presente'
+      preLoaderRoute: typeof LojistaValePresenteRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/cargos': {
-      id: '/_authenticated/cargos'
-      path: '/cargos'
-      fullPath: '/cargos'
-      preLoaderRoute: typeof AuthenticatedCargosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/sorteios': {
+      id: '/lojista/sorteios'
+      path: '/sorteios'
+      fullPath: '/lojista/sorteios'
+      preLoaderRoute: typeof LojistaSorteiosRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/resgates': {
+      id: '/lojista/resgates'
+      path: '/resgates'
+      fullPath: '/lojista/resgates'
+      preLoaderRoute: typeof LojistaResgatesRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/funcionarios': {
-      id: '/_authenticated/funcionarios'
-      path: '/funcionarios'
-      fullPath: '/funcionarios'
-      preLoaderRoute: typeof AuthenticatedFuncionariosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/promocoes': {
+      id: '/lojista/promocoes'
+      path: '/promocoes'
+      fullPath: '/lojista/promocoes'
+      preLoaderRoute: typeof LojistaPromocoesRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/premios': {
-      id: '/_authenticated/premios'
-      path: '/premios'
-      fullPath: '/premios'
-      preLoaderRoute: typeof AuthenticatedPremiosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/produtos': {
+      id: '/lojista/produtos'
+      path: '/produtos'
+      fullPath: '/lojista/produtos'
+      preLoaderRoute: typeof LojistaProdutosRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/clientes/': {
-      id: '/_authenticated/clientes/'
-      path: '/clientes'
-      fullPath: '/clientes/'
-      preLoaderRoute: typeof AuthenticatedClientesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/personalizacao': {
+      id: '/lojista/personalizacao'
+      path: '/personalizacao'
+      fullPath: '/lojista/personalizacao'
+      preLoaderRoute: typeof LojistaPersonalizacaoRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/clientes/$id': {
-      id: '/_authenticated/clientes/$id'
-      path: '/clientes/$id'
-      fullPath: '/clientes/$id'
-      preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/onboarding': {
+      id: '/lojista/onboarding'
+      path: '/onboarding'
+      fullPath: '/lojista/onboarding'
+      preLoaderRoute: typeof LojistaOnboardingRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/configuracoes/': {
-      id: '/_authenticated/configuracoes/'
+    '/lojista/nps': {
+      id: '/lojista/nps'
+      path: '/nps'
+      fullPath: '/lojista/nps'
+      preLoaderRoute: typeof LojistaNpsRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/notas': {
+      id: '/lojista/notas'
+      path: '/notas'
+      fullPath: '/lojista/notas'
+      preLoaderRoute: typeof LojistaNotasRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/login': {
+      id: '/lojista/login'
+      path: '/login'
+      fullPath: '/lojista/login'
+      preLoaderRoute: typeof LojistaLoginRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/lancar-venda': {
+      id: '/lojista/lancar-venda'
+      path: '/lancar-venda'
+      fullPath: '/lojista/lancar-venda'
+      preLoaderRoute: typeof LojistaLancarVendaRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/instagram': {
+      id: '/lojista/instagram'
+      path: '/instagram'
+      fullPath: '/lojista/instagram'
+      preLoaderRoute: typeof LojistaInstagramRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/equipe': {
+      id: '/lojista/equipe'
+      path: '/equipe'
+      fullPath: '/lojista/equipe'
+      preLoaderRoute: typeof LojistaEquipeRouteImport
+      parentRoute: typeof LojistaRoute
+    }
+    '/lojista/configuracoes': {
+      id: '/lojista/configuracoes'
       path: '/configuracoes'
-      fullPath: '/configuracoes/'
-      preLoaderRoute: typeof AuthenticatedConfiguracoesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      fullPath: '/lojista/configuracoes'
+      preLoaderRoute: typeof LojistaConfiguracoesRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/configuracoes/importar': {
-      id: '/_authenticated/configuracoes/importar'
-      path: '/configuracoes/importar'
-      fullPath: '/configuracoes/importar'
-      preLoaderRoute: typeof AuthenticatedConfiguracoesImportarRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/clientes': {
+      id: '/lojista/clientes'
+      path: '/clientes'
+      fullPath: '/lojista/clientes'
+      preLoaderRoute: typeof LojistaClientesRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/configuracoes/olist': {
-      id: '/_authenticated/configuracoes/olist'
-      path: '/configuracoes/olist'
-      fullPath: '/configuracoes/olist'
-      preLoaderRoute: typeof AuthenticatedConfiguracoesOlistRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/campanhas': {
+      id: '/lojista/campanhas'
+      path: '/campanhas'
+      fullPath: '/lojista/campanhas'
+      preLoaderRoute: typeof LojistaCampanhasRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/_authenticated/vendas/$id': {
-      id: '/_authenticated/vendas/$id'
-      path: '/vendas/$id'
-      fullPath: '/vendas/$id'
-      preLoaderRoute: typeof AuthenticatedVendasIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lojista/aguardando': {
+      id: '/lojista/aguardando'
+      path: '/aguardando'
+      fullPath: '/lojista/aguardando'
+      preLoaderRoute: typeof LojistaAguardandoRouteImport
+      parentRoute: typeof LojistaRoute
     }
-    '/api/public/hooks/olist-sync': {
-      id: '/api/public/hooks/olist-sync'
-      path: '/api/public/hooks/olist-sync'
-      fullPath: '/api/public/hooks/olist-sync'
-      preLoaderRoute: typeof ApiPublicHooksOlistSyncRouteImport
+    '/funcionario/vouchers': {
+      id: '/funcionario/vouchers'
+      path: '/vouchers'
+      fullPath: '/funcionario/vouchers'
+      preLoaderRoute: typeof FuncionarioVouchersRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/trocar-senha': {
+      id: '/funcionario/trocar-senha'
+      path: '/trocar-senha'
+      fullPath: '/funcionario/trocar-senha'
+      preLoaderRoute: typeof FuncionarioTrocarSenhaRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/resgates': {
+      id: '/funcionario/resgates'
+      path: '/resgates'
+      fullPath: '/funcionario/resgates'
+      preLoaderRoute: typeof FuncionarioResgatesRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/qr': {
+      id: '/funcionario/qr'
+      path: '/qr'
+      fullPath: '/funcionario/qr'
+      preLoaderRoute: typeof FuncionarioQrRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/pontuar': {
+      id: '/funcionario/pontuar'
+      path: '/pontuar'
+      fullPath: '/funcionario/pontuar'
+      preLoaderRoute: typeof FuncionarioPontuarRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/perfil': {
+      id: '/funcionario/perfil'
+      path: '/perfil'
+      fullPath: '/funcionario/perfil'
+      preLoaderRoute: typeof FuncionarioPerfilRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/login': {
+      id: '/funcionario/login'
+      path: '/login'
+      fullPath: '/funcionario/login'
+      preLoaderRoute: typeof FuncionarioLoginRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/historico': {
+      id: '/funcionario/historico'
+      path: '/historico'
+      fullPath: '/funcionario/historico'
+      preLoaderRoute: typeof FuncionarioHistoricoRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/esqueci-senha': {
+      id: '/funcionario/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/funcionario/esqueci-senha'
+      preLoaderRoute: typeof FuncionarioEsqueciSenhaRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/funcionario/clientes': {
+      id: '/funcionario/clientes'
+      path: '/clientes'
+      fullPath: '/funcionario/clientes'
+      preLoaderRoute: typeof FuncionarioClientesRouteImport
+      parentRoute: typeof FuncionarioRoute
+    }
+    '/admin/planos': {
+      id: '/admin/planos'
+      path: '/planos'
+      fullPath: '/admin/planos'
+      preLoaderRoute: typeof AdminPlanosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/api/public/olist-vendas': {
+      id: '/api/public/olist-vendas'
+      path: '/api/public/olist-vendas'
+      fullPath: '/api/public/olist-vendas'
+      preLoaderRoute: typeof ApiPublicOlistVendasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/olist-webhook': {
-      id: '/api/public/hooks/olist-webhook'
-      path: '/api/public/hooks/olist-webhook'
-      fullPath: '/api/public/hooks/olist-webhook'
-      preLoaderRoute: typeof ApiPublicHooksOlistWebhookRouteImport
+    '/api/public/widget/$slug': {
+      id: '/api/public/widget/$slug'
+      path: '/api/public/widget/$slug'
+      fullPath: '/api/public/widget/$slug'
+      preLoaderRoute: typeof ApiPublicWidgetSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhook/$origem': {
+      id: '/api/public/webhook/$origem'
+      path: '/api/public/webhook/$origem'
+      fullPath: '/api/public/webhook/$origem'
+      preLoaderRoute: typeof ApiPublicWebhookOrigemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/nps/submit': {
+      id: '/api/public/nps/submit'
+      path: '/api/public/nps/submit'
+      fullPath: '/api/public/nps/submit'
+      preLoaderRoute: typeof ApiPublicNpsSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/notifications-daily': {
+      id: '/api/public/hooks/notifications-daily'
+      path: '/api/public/hooks/notifications-daily'
+      fullPath: '/api/public/hooks/notifications-daily'
+      preLoaderRoute: typeof ApiPublicHooksNotificationsDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/expirar-vouchers': {
+      id: '/api/public/hooks/expirar-vouchers'
+      path: '/api/public/hooks/expirar-vouchers'
+      fullPath: '/api/public/hooks/expirar-vouchers'
+      preLoaderRoute: typeof ApiPublicHooksExpirarVouchersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/expirar-pontos': {
+      id: '/api/public/hooks/expirar-pontos'
+      path: '/api/public/hooks/expirar-pontos'
+      fullPath: '/api/public/hooks/expirar-pontos'
+      preLoaderRoute: typeof ApiPublicHooksExpirarPontosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/campanhas-agendadas': {
+      id: '/api/public/hooks/campanhas-agendadas'
+      path: '/api/public/hooks/campanhas-agendadas'
+      fullPath: '/api/public/hooks/campanhas-agendadas'
+      preLoaderRoute: typeof ApiPublicHooksCampanhasAgendadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/anonimizar-logs-antigos': {
+      id: '/api/public/hooks/anonimizar-logs-antigos'
+      path: '/api/public/hooks/anonimizar-logs-antigos'
+      fullPath: '/api/public/hooks/anonimizar-logs-antigos'
+      preLoaderRoute: typeof ApiPublicHooksAnonimizarLogsAntigosRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
-  AuthenticatedCaixaRoute: typeof AuthenticatedCaixaRoute
-  AuthenticatedCargosRoute: typeof AuthenticatedCargosRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedFuncionariosRoute: typeof AuthenticatedFuncionariosRoute
-  AuthenticatedPremiosRoute: typeof AuthenticatedPremiosRoute
-  AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
-  AuthenticatedConfiguracoesImportarRoute: typeof AuthenticatedConfiguracoesImportarRoute
-  AuthenticatedConfiguracoesOlistRoute: typeof AuthenticatedConfiguracoesOlistRoute
-  AuthenticatedVendasIdRoute: typeof AuthenticatedVendasIdRoute
-  AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
-  AuthenticatedConfiguracoesIndexRoute: typeof AuthenticatedConfiguracoesIndexRoute
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminPlanosRoute: typeof AdminPlanosRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
-  AuthenticatedCaixaRoute: AuthenticatedCaixaRoute,
-  AuthenticatedCargosRoute: AuthenticatedCargosRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedFuncionariosRoute: AuthenticatedFuncionariosRoute,
-  AuthenticatedPremiosRoute: AuthenticatedPremiosRoute,
-  AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
-  AuthenticatedConfiguracoesImportarRoute:
-    AuthenticatedConfiguracoesImportarRoute,
-  AuthenticatedConfiguracoesOlistRoute: AuthenticatedConfiguracoesOlistRoute,
-  AuthenticatedVendasIdRoute: AuthenticatedVendasIdRoute,
-  AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
-  AuthenticatedConfiguracoesIndexRoute: AuthenticatedConfiguracoesIndexRoute,
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+  AdminPlanosRoute: AdminPlanosRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface FuncionarioRouteChildren {
+  FuncionarioClientesRoute: typeof FuncionarioClientesRoute
+  FuncionarioEsqueciSenhaRoute: typeof FuncionarioEsqueciSenhaRoute
+  FuncionarioHistoricoRoute: typeof FuncionarioHistoricoRoute
+  FuncionarioLoginRoute: typeof FuncionarioLoginRoute
+  FuncionarioPerfilRoute: typeof FuncionarioPerfilRoute
+  FuncionarioPontuarRoute: typeof FuncionarioPontuarRoute
+  FuncionarioQrRoute: typeof FuncionarioQrRoute
+  FuncionarioResgatesRoute: typeof FuncionarioResgatesRoute
+  FuncionarioTrocarSenhaRoute: typeof FuncionarioTrocarSenhaRoute
+  FuncionarioVouchersRoute: typeof FuncionarioVouchersRoute
+  FuncionarioIndexRoute: typeof FuncionarioIndexRoute
+}
+
+const FuncionarioRouteChildren: FuncionarioRouteChildren = {
+  FuncionarioClientesRoute: FuncionarioClientesRoute,
+  FuncionarioEsqueciSenhaRoute: FuncionarioEsqueciSenhaRoute,
+  FuncionarioHistoricoRoute: FuncionarioHistoricoRoute,
+  FuncionarioLoginRoute: FuncionarioLoginRoute,
+  FuncionarioPerfilRoute: FuncionarioPerfilRoute,
+  FuncionarioPontuarRoute: FuncionarioPontuarRoute,
+  FuncionarioQrRoute: FuncionarioQrRoute,
+  FuncionarioResgatesRoute: FuncionarioResgatesRoute,
+  FuncionarioTrocarSenhaRoute: FuncionarioTrocarSenhaRoute,
+  FuncionarioVouchersRoute: FuncionarioVouchersRoute,
+  FuncionarioIndexRoute: FuncionarioIndexRoute,
+}
+
+const FuncionarioRouteWithChildren = FuncionarioRoute._addFileChildren(
+  FuncionarioRouteChildren,
+)
+
+interface LojistaRouteChildren {
+  LojistaAguardandoRoute: typeof LojistaAguardandoRoute
+  LojistaCampanhasRoute: typeof LojistaCampanhasRoute
+  LojistaClientesRoute: typeof LojistaClientesRoute
+  LojistaConfiguracoesRoute: typeof LojistaConfiguracoesRoute
+  LojistaEquipeRoute: typeof LojistaEquipeRoute
+  LojistaInstagramRoute: typeof LojistaInstagramRoute
+  LojistaLancarVendaRoute: typeof LojistaLancarVendaRoute
+  LojistaLoginRoute: typeof LojistaLoginRoute
+  LojistaNotasRoute: typeof LojistaNotasRoute
+  LojistaNpsRoute: typeof LojistaNpsRoute
+  LojistaOnboardingRoute: typeof LojistaOnboardingRoute
+  LojistaPersonalizacaoRoute: typeof LojistaPersonalizacaoRoute
+  LojistaProdutosRoute: typeof LojistaProdutosRoute
+  LojistaPromocoesRoute: typeof LojistaPromocoesRoute
+  LojistaResgatesRoute: typeof LojistaResgatesRoute
+  LojistaSorteiosRoute: typeof LojistaSorteiosRoute
+  LojistaValePresenteRoute: typeof LojistaValePresenteRoute
+  LojistaWidgetRoute: typeof LojistaWidgetRoute
+  LojistaIndexRoute: typeof LojistaIndexRoute
+}
+
+const LojistaRouteChildren: LojistaRouteChildren = {
+  LojistaAguardandoRoute: LojistaAguardandoRoute,
+  LojistaCampanhasRoute: LojistaCampanhasRoute,
+  LojistaClientesRoute: LojistaClientesRoute,
+  LojistaConfiguracoesRoute: LojistaConfiguracoesRoute,
+  LojistaEquipeRoute: LojistaEquipeRoute,
+  LojistaInstagramRoute: LojistaInstagramRoute,
+  LojistaLancarVendaRoute: LojistaLancarVendaRoute,
+  LojistaLoginRoute: LojistaLoginRoute,
+  LojistaNotasRoute: LojistaNotasRoute,
+  LojistaNpsRoute: LojistaNpsRoute,
+  LojistaOnboardingRoute: LojistaOnboardingRoute,
+  LojistaPersonalizacaoRoute: LojistaPersonalizacaoRoute,
+  LojistaProdutosRoute: LojistaProdutosRoute,
+  LojistaPromocoesRoute: LojistaPromocoesRoute,
+  LojistaResgatesRoute: LojistaResgatesRoute,
+  LojistaSorteiosRoute: LojistaSorteiosRoute,
+  LojistaValePresenteRoute: LojistaValePresenteRoute,
+  LojistaWidgetRoute: LojistaWidgetRoute,
+  LojistaIndexRoute: LojistaIndexRoute,
+}
+
+const LojistaRouteWithChildren =
+  LojistaRoute._addFileChildren(LojistaRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SlugRoute: SlugRoute,
-  AuthRoute: AuthRoute,
-  SetupRoute: SetupRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ApiPublicHooksOlistSyncRoute: ApiPublicHooksOlistSyncRoute,
-  ApiPublicHooksOlistWebhookRoute: ApiPublicHooksOlistWebhookRoute,
+  AdminRoute: AdminRouteWithChildren,
+  CadastroRoute: CadastroRoute,
+  FuncionarioRoute: FuncionarioRouteWithChildren,
+  LojistaRoute: LojistaRouteWithChildren,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
+  NotaSlugRoute: NotaSlugRoute,
+  NpsIdRoute: NpsIdRoute,
+  ValeCodigoRoute: ValeCodigoRoute,
+  ApiPublicOlistVendasRoute: ApiPublicOlistVendasRoute,
+  ApiPublicHooksAnonimizarLogsAntigosRoute:
+    ApiPublicHooksAnonimizarLogsAntigosRoute,
+  ApiPublicHooksCampanhasAgendadasRoute: ApiPublicHooksCampanhasAgendadasRoute,
+  ApiPublicHooksExpirarPontosRoute: ApiPublicHooksExpirarPontosRoute,
+  ApiPublicHooksExpirarVouchersRoute: ApiPublicHooksExpirarVouchersRoute,
+  ApiPublicHooksNotificationsDailyRoute: ApiPublicHooksNotificationsDailyRoute,
+  ApiPublicNpsSubmitRoute: ApiPublicNpsSubmitRoute,
+  ApiPublicWebhookOrigemRoute: ApiPublicWebhookOrigemRoute,
+  ApiPublicWidgetSlugRoute: ApiPublicWidgetSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

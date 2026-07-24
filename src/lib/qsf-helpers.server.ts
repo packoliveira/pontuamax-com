@@ -69,10 +69,8 @@ export function formatVoucherJaUsado(delivered_at: string | null | undefined): s
 
 export function randomGiftCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const random = new Uint8Array(8);
-  crypto.getRandomValues(random);
   let out = "";
-  for (const value of random) out += alphabet[value % alphabet.length];
+  for (let i = 0; i < 8; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
   return out;
 }
 
@@ -183,7 +181,9 @@ export async function processarEnvioCampanha(
   const { formatBrazilPhone, sendWhatsappRaw } = await import("./notify.server");
   const camp = await supabaseAdmin
     .from("campaigns")
-    .select("*, stores:store_id(nome_fantasia, whatsapp_enabled)")
+    .select(
+      "*, stores:store_id(nome_fantasia, whatsapp_enabled)",
+    )
     .eq("id", campaignId)
     .maybeSingle();
   if (!camp.data) throw new Error("Campanha não encontrada.");

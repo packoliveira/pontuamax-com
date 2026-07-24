@@ -7,11 +7,6 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type NotifyEvent = "pontos_ganhos" | "nps_request";
 
-function publicAppUrl(): string | null {
-  const value = process.env.PUBLIC_APP_URL?.trim();
-  return value ? value.replace(/\/+$/, "") : null;
-}
-
 export function formatBrazilPhone(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const digits = String(raw).replace(/\D/g, "");
@@ -168,9 +163,8 @@ export async function notifyClient(params: {
 
     const proximoPremio = prox?.nome?.trim() || VAR_FALLBACKS.proximo_premio;
     const pontosFaltantes = prox ? Math.max(0, prox.custo_pontos - saldo) : 0;
-    const appUrl = publicAppUrl();
-    const linkPortal = appUrl && loja.slug ? `${appUrl}/${loja.slug}` : "";
-    const linkNps = appUrl && params.transactionId ? `${appUrl}/nps/${params.transactionId}` : "";
+    const linkPortal = loja.slug ? `https://qsfclub.com/${loja.slug}` : "";
+    const linkNps = params.transactionId ? `https://qsfclub.com/nps/${params.transactionId}` : "";
 
     let text: string;
     if (params.event === "pontos_ganhos") {

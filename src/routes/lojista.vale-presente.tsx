@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storeGiftCardsQuery } from "@/lib/queries";
-import { criarGiftCards, removerGiftCard } from "@/lib/loyalty.functions";
+import { criarGiftCards, removerGiftCard } from "@/lib/qsf.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

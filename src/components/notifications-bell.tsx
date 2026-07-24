@@ -9,7 +9,7 @@ import { listarNotificacoesLojista, marcarNotificacoesLidas } from "@/lib/team.f
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { timeAgo } from "@/lib/loyalty-shared";
+import { timeAgo } from "@/lib/qsf-shared";
 
 function iconFor(tipo: string) {
   if (tipo === "employee.login") return <LogIn className="h-4 w-4 text-sky-500" />;

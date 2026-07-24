@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   myStoreQuery,
@@ -7,8 +7,8 @@ import {
   storePromotionsQuery,
   storeTransactionsQuery,
 } from "@/lib/queries";
-import { lancarVenda, cadastrarClientePorTelefone, estornarVenda } from "@/lib/loyalty.functions";
-import { formatBRL, onlyDigits, isValidCPF, formatCPF } from "@/lib/loyalty-shared";
+import { lancarVenda, cadastrarClientePorTelefone, estornarVenda } from "@/lib/qsf.functions";
+import { formatBRL, onlyDigits, isValidCPF, formatCPF } from "@/lib/qsf-shared";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -130,7 +130,7 @@ function LancarVenda() {
   };
 
   // Sugestões enquanto o lojista digita (por CPF, telefone ou nome)
-  const sugestoes = (() => {
+  const sugestoes = useMemo(() => {
     const q = contato.trim().toLowerCase();
     if (q.length < 2) return [] as typeof clientes;
     const norm = onlyDigits(contato);
@@ -150,13 +150,16 @@ function LancarVenda() {
         return false;
       })
       .slice(0, 6);
-  })();
+  }, [contato, clientes]);
 
   const clienteSelecionado = findClient();
 
   // Últimas 5 vendas (tipo=venda)
-  const ultimasVendas = (transacoes ?? []).filter((t) => t.tipo === "venda").slice(0, 5);
-  const estornosIds = (() => {
+  const ultimasVendas = useMemo(
+    () => (transacoes ?? []).filter((t) => t.tipo === "venda").slice(0, 5),
+    [transacoes],
+  );
+  const estornosIds = useMemo(() => {
     const set = new Set<string>();
     for (const t of transacoes ?? []) {
       if (typeof t.origem === "string" && t.origem.startsWith("estorno:")) {
@@ -165,13 +168,13 @@ function LancarVenda() {
       }
     }
     return set;
-  })();
+  }, [transacoes]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contato || !valorNum || valorNum <= 0) return;
 
-    const cli = findClient();
+    let cli = findClient();
     let userId = cli?.user_id;
     let nomeCli =
       (cli?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? "";

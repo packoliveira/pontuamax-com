@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { giftCardByCodeQuery, publicStoreByIdQuery } from "@/lib/queries";
-import { resgatarGiftCard } from "@/lib/loyalty.functions";
+import { resgatarGiftCard } from "@/lib/qsf.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

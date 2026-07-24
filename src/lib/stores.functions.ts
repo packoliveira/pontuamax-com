@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { promoSchema } from "./loyalty-helpers.server";
+import { promoSchema } from "./qsf-helpers.server";
 
 export const criarLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         slug: z.string().min(2).max(30),
@@ -49,7 +49,7 @@ export const criarLoja = createServerFn({ method: "POST" })
 
 export const atualizarLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         nome_fantasia: z.string().min(1).max(100).optional(),
@@ -124,7 +124,7 @@ export const atualizarLoja = createServerFn({ method: "POST" })
 
 export const salvarPromocao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => promoSchema.parse(input))
+  .inputValidator((input) => promoSchema.parse(input))
   .handler(async ({ data, context }) => {
     const loja = await context.supabase
       .from("stores")
@@ -155,7 +155,7 @@ export const salvarPromocao = createServerFn({ method: "POST" })
 
 export const removerPromocao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("promotions").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -166,7 +166,7 @@ export const removerPromocao = createServerFn({ method: "POST" })
 
 export const salvarNotificacoes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         notif_birthday_enabled: z.boolean(),
@@ -195,7 +195,7 @@ export const salvarNotificacoes = createServerFn({ method: "POST" })
 
 export const salvarProduto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         id: z.string().uuid().optional(),
@@ -243,7 +243,7 @@ export const salvarProduto = createServerFn({ method: "POST" })
 
 export const removerProduto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("products").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -274,7 +274,7 @@ export const rotacionarWebhookSecret = createServerFn({ method: "POST" })
 
 export const testarWebhook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z.object({ origem: z.enum(["bling", "olist", "teste"]).default("teste") }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -311,8 +311,9 @@ export const testarWebhook = createServerFn({ method: "POST" })
 const PUBLIC_STORE_SELECT =
   "id, slug, nome_fantasia, logo_url, banner_url, banner_url_mobile, banner_mobile_fit, banner_mobile_position_x, banner_mobile_position_y, banner_mobile_zoom, brand_primary, brand_secondary, bg_mode, bg_color_1, bg_color_2, modalidade, regra_pontos, percentual_cashback, cashback_valor_minimo, cashback_compra_minima, indicacao_ativa, bonus_indicador, bonus_indicado, whatsapp_enabled, nps_enabled, created_at, instagram_program_active, instagram_handle, instagram_points_per_post, instagram_min_days_live, instagram_instructions, pontos_expiracao_modo, pontos_validade_dias, pontos_decaimento_dias, pontos_decaimento_valor, voucher_visivel_apos_uso, voucher_mostrar_expirados, brand_accent_points, brand_accent_cashback, brand_cta, brand_vip, brand_price, text_on_dark, header_title_size, header_title_weight, header_kicker_text, header_kicker_show, header_kicker_size, header_title_size_mobile, header_kicker_size_mobile, reward_rain_enabled, reward_rain_colors, reward_rain_opacity";
 
+
 export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
-  .validator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))
+  .inputValidator((input) => z.object({ slug: z.string().min(2).max(80) }).parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const r = await supabaseAdmin
@@ -325,7 +326,7 @@ export const lookupPublicStoreBySlug = createServerFn({ method: "GET" })
   });
 
 export const lookupPublicStoreById = createServerFn({ method: "GET" })
-  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const r = await supabaseAdmin

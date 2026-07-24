@@ -4,8 +4,7 @@ import { handleOlistWebhookAlias } from "./webhook/$origem";
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Requested-With, Accept, Origin, x-pontuamax-secret, x-pontuamax-store, x-qsf-secret, x-qsf-store",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept, Origin, x-qsf-secret, x-qsf-store",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -22,10 +21,7 @@ async function forceHttp200(response: Response): Promise<Response> {
   const body = await response.text().catch(() => "");
   return new Response(body || JSON.stringify({ status: "ok" }), {
     status: 200,
-    headers: {
-      "Content-Type": response.headers.get("Content-Type") ?? "application/json",
-      ...CORS,
-    },
+    headers: { "Content-Type": response.headers.get("Content-Type") ?? "application/json", ...CORS },
   });
 }
 

@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Instagram, ArrowUpRight, Clock, Check, X } from "lucide-react";
-import { formatBRL } from "@/lib/loyalty-shared";
+import { formatBRL } from "@/lib/qsf-shared";
 import type { StorePublic } from "@/lib/queries";
-import { submitInstagramPost, listMyInstagramSubmissions } from "@/lib/instagram.functions";
+import {
+  submitInstagramPost,
+  listMyInstagramSubmissions,
+} from "@/lib/instagram.functions";
 import { type IgSub, formatDateTime } from "./portal-types";
 
 type Loja = StorePublic;

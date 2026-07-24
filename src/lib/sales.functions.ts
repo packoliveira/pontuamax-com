@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { calcularNivel } from "./loyalty-shared";
-import { getActiveMultiplier } from "./loyalty-helpers.server";
+import { calcularNivel } from "./qsf-shared";
+import { getActiveMultiplier } from "./qsf-helpers.server";
 
 export const lancarVenda = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -152,7 +152,7 @@ export const lancarVenda = createServerFn({ method: "POST" })
 
 export const ajustarPontosCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -219,7 +219,7 @@ export const ajustarPontosCliente = createServerFn({ method: "POST" })
 
 export const estornarVenda = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         transaction_id: z.string().uuid(),
@@ -335,3 +335,4 @@ export const dispararNotificacoesAgora = createServerFn({ method: "POST" })
     if (!res.ok) throw new Error(`Falha: ${res.status} ${body.slice(0, 200)}`);
     return JSON.parse(body);
   });
+

@@ -1,18 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Cron hook: processa campanhas cujo horário de envio já chegou (status="agendada").
-// Autenticado por x-cron-secret ou Authorization: Bearer <CRON_SECRET>.
+// Autenticado por header apikey = SUPABASE_PUBLISHABLE_KEY.
 // Roda campanhas em série, com timeout defensivo, para não estourar o Worker.
 export const Route = createFileRoute("/api/public/hooks/campanhas-agendadas")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { authorizeCronRequest } = await import("@/lib/cron-auth.server");
-        const auth = authorizeCronRequest(request);
-        if (!auth.ok) return auth.response;
+        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
+        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
+          return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+        }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { _processarEnvioCampanhaInternal } = await import("@/lib/loyalty.functions");
+        const { _processarEnvioCampanhaInternal } = await import("@/lib/qsf.functions");
 
         const nowIso = new Date().toISOString();
         const pend = await supabaseAdmin

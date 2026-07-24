@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-const KEY = "pontuamax-panel-theme";
-const LEGACY_KEY = "qsf-panel-theme";
+const KEY = "qsf-panel-theme";
 type Theme = "light" | "dark";
 
 let current: Theme = "light";
@@ -9,11 +8,7 @@ const listeners = new Set<() => void>();
 
 function readFromStorage(): Theme {
   if (typeof window === "undefined") return "light";
-  const saved = window.localStorage.getItem(KEY) ?? window.localStorage.getItem(LEGACY_KEY);
-  if (saved) {
-    window.localStorage.setItem(KEY, saved);
-    window.localStorage.removeItem(LEGACY_KEY);
-  }
+  const saved = window.localStorage.getItem(KEY);
   return saved === "dark" ? "dark" : "light";
 }
 

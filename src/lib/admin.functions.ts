@@ -70,7 +70,7 @@ export const listAllStores = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const ownerIds = Array.from(new Set((data ?? []).map((s) => s.owner_id)));
-    const owners: Record<string, { full_name: string | null; phone: string | null }> = {};
+    let owners: Record<string, { full_name: string | null; phone: string | null }> = {};
     if (ownerIds.length) {
       const { data: profs } = await supabaseAdmin
         .from("profiles")
@@ -94,7 +94,7 @@ export const listAllStores = createServerFn({ method: "GET" })
 
 export const updateStoreSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -197,7 +197,7 @@ export const listAdmins = createServerFn({ method: "GET" })
 
 export const addAdminByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ email: z.string().email() }).parse(input))
+  .inputValidator((input) => z.object({ email: z.string().email() }).parse(input))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -235,7 +235,7 @@ export const addAdminByEmail = createServerFn({ method: "POST" })
 
 export const removeAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ user_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ user_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     if (data.user_id === context.userId) {
@@ -290,7 +290,7 @@ export const listAuditLogs = createServerFn({ method: "GET" })
 
 export const changeMyPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         current_password: z.string().min(1),

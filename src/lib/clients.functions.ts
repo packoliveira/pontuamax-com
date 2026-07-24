@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { cpfToEmail, isSyntheticCustomerEmail, isValidCPF } from "./loyalty-shared";
+import {
+  cpfToEmail,
+  isValidCPF,
+} from "./qsf-shared";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
@@ -45,7 +48,7 @@ export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
 
 export const vincularClienteALoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -282,7 +285,7 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
 // normalizamos a conta existente vinculada à loja para o e-mail por CPF.
 
 export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -318,7 +321,7 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
     if (
       !current.data.user ||
       currentEmail === cpfEmail ||
-      !isSyntheticCustomerEmail(currentEmail) ||
+      !currentEmail.endsWith("@cliente.qsfclub.local") ||
       current.data.user.last_sign_in_at
     ) {
       return { normalized: false };
@@ -348,7 +351,7 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
 // escolhidos por ele. Assim NUNCA cria uma segunda conta com o mesmo CPF.
 
 export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         cpf: z.string().min(11).max(20),
@@ -412,7 +415,7 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
 // -------- CLIENTE: criar conta via CPF (sem confirmação de email) --------
 
 export const criarClienteViaCpf = createServerFn({ method: "POST" })
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         cpf: z.string().min(11).max(20),
@@ -492,7 +495,7 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
 
 export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         phone: z.string().min(8).max(20),
@@ -614,7 +617,7 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
 
 export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         client_user_id: z.string().uuid(),
@@ -662,7 +665,7 @@ export const atualizarAniversarioCliente = createServerFn({ method: "POST" })
 
 export const atualizarClienteInfo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -745,7 +748,7 @@ export const atualizarClienteInfo = createServerFn({ method: "POST" })
 
 export const addClientTag = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -782,7 +785,7 @@ export const addClientTag = createServerFn({ method: "POST" })
 
 export const removeClientTag = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const t = await supabaseAdmin
@@ -812,7 +815,7 @@ export const removeClientTag = createServerFn({ method: "POST" })
 
 export const excluirClienteDaLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         store_id: z.string().uuid(),
@@ -897,3 +900,4 @@ export const excluirClienteDaLoja = createServerFn({ method: "POST" })
     }
     return { ok: true, auth_removido };
   });
+

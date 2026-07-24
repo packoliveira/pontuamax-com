@@ -1,6 +1,6 @@
 import { Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { progressoNivel } from "@/lib/loyalty-shared";
+import { progressoNivel } from "@/lib/qsf-shared";
 
 export const NIVEL_COR: Record<string, string> = {
   bronze: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",

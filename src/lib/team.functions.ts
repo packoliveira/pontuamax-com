@@ -15,7 +15,7 @@ import {
   passwordSchema,
 } from "./team-helpers.server";
 
-// Re-export para consumidores externos (importados dinamicamente por loyalty.functions.ts)
+// Re-export para consumidores externos (importados dinamicamente por qsf.functions.ts)
 export { logEmployeeAction, notifyMerchant, resolveActorLabel };
 
 // ============== Notificações do lojista (API) ==============
@@ -37,7 +37,7 @@ export const listarNotificacoesLojista = createServerFn({ method: "GET" })
 
 export const marcarNotificacoesLidas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ ids: z.array(z.string().uuid()).optional() }).parse(i))
+  .inputValidator((i) => z.object({ ids: z.array(z.string().uuid()).optional() }).parse(i))
   .handler(async ({ data, context }) => {
     const storeId = await getOwnedStoreId(context);
     const q = context.supabase
@@ -87,7 +87,7 @@ export const listEmployees = createServerFn({ method: "GET" })
 
 export const getEmployeePermissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ employee_id: z.string().uuid() }).parse(i))
+  .inputValidator((i) => z.object({ employee_id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await getOwnedStoreId(context); // apenas garante que é dono de alguma loja; RLS bloqueia demais
     const { data: rows, error } = await context.supabase
@@ -102,7 +102,7 @@ export const getEmployeePermissions = createServerFn({ method: "GET" })
 
 export const createEmployee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) =>
+  .inputValidator((i) =>
     z
       .object({
         nome: nomeSchema,
@@ -210,7 +210,7 @@ export const createEmployee = createServerFn({ method: "POST" })
 
 export const updateEmployee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) =>
+  .inputValidator((i) =>
     z
       .object({
         id: z.string().uuid(),
@@ -256,7 +256,7 @@ export const updateEmployee = createServerFn({ method: "POST" })
 
 export const setEmployeeStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) =>
+  .inputValidator((i) =>
     z
       .object({
         id: z.string().uuid(),
@@ -287,7 +287,7 @@ export const setEmployeeStatus = createServerFn({ method: "POST" })
 
 export const deleteEmployee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const storeId = await getOwnedStoreId(context);
     const { data: emp, error: gErr } = await context.supabase
@@ -315,7 +315,7 @@ export const deleteEmployee = createServerFn({ method: "POST" })
 
 export const resetEmployeePassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) =>
+  .inputValidator((i) =>
     z
       .object({
         id: z.string().uuid(),
@@ -354,7 +354,7 @@ export const resetEmployeePassword = createServerFn({ method: "POST" })
 
 export const setEmployeePermissionOverrides = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) =>
+  .inputValidator((i) =>
     z
       .object({
         employee_id: z.string().uuid(),
@@ -475,7 +475,7 @@ export const getMyEmployeeContext = createServerFn({ method: "GET" })
 /** Verifica se o usuário atual tem determinada permissão em sua loja de funcionário. */
 export const checkMyPermission = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ permission: z.string() }).parse(i))
+  .inputValidator((i) => z.object({ permission: z.string() }).parse(i))
   .handler(async ({ data, context }) => {
     const { data: emp } = await context.supabase
       .from("store_employees")
@@ -497,7 +497,7 @@ export const checkMyPermission = createServerFn({ method: "GET" })
 
 /** Resolve o e-mail interno do funcionário a partir do CPF, para o formulário de login. */
 export const resolveFuncionarioEmailByCpf = createServerFn({ method: "POST" })
-  .validator((i) => z.object({ cpf: z.string().trim().min(11).max(20) }).parse(i))
+  .inputValidator((i) => z.object({ cpf: z.string().trim().min(11).max(20) }).parse(i))
   .handler(async ({ data }) => {
     const digits = data.cpf.replace(/\D+/g, "");
     if (digits.length < 11) throw new Error("CPF inválido.");
@@ -518,7 +518,7 @@ export const resolveFuncionarioEmailByCpf = createServerFn({ method: "POST" })
 /** Troca a senha do funcionário logado e conclui o onboarding. */
 export const trocarSenhaFuncionario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ password: passwordSchema }).parse(i))
+  .inputValidator((i) => z.object({ password: passwordSchema }).parse(i))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const upd = await supabaseAdmin.auth.admin.updateUserById(context.userId, {
@@ -578,7 +578,7 @@ export const registrarLoginFuncionario = createServerFn({ method: "POST" })
 
 /** Solicita ao gerente da loja a redefinição de senha; registra pedido na trilha de auditoria. */
 export const solicitarRecuperacaoSenhaFuncionario = createServerFn({ method: "POST" })
-  .validator((i) =>
+  .inputValidator((i) =>
     z
       .object({
         cpf: z.string().trim().min(11).max(20),

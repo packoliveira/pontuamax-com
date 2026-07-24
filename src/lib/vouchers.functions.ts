@@ -3,12 +3,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 import { gerarVoucher } from "./voucher.server";
-import { formatVoucherJaUsado } from "./loyalty-helpers.server";
+import { formatVoucherJaUsado } from "./qsf-helpers.server";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
 export const resgatarProduto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z.object({ store_id: z.string().uuid(), product_id: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -39,7 +39,7 @@ export const resgatarProduto = createServerFn({ method: "POST" })
 
 export const resgatarCashback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({ store_id: z.string().uuid(), valor: z.number().positive().max(1_000_000) })
       .parse(input),
@@ -72,7 +72,7 @@ export const resgatarCashback = createServerFn({ method: "POST" })
 
 export const confirmarResgate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ transaction_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ transaction_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
@@ -201,7 +201,7 @@ export const confirmarResgate = createServerFn({ method: "POST" })
 
 export const validarVoucher = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ voucher_code: z.string().min(4).max(40) }).parse(input))
+  .inputValidator((input) => z.object({ voucher_code: z.string().min(4).max(40) }).parse(input))
   .handler(async ({ data, context }) => {
     await rateLimitByIp(`validar-voucher:${context.userId}`, 30, 60);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -335,7 +335,7 @@ export const validarVoucher = createServerFn({ method: "POST" })
 
 export const cancelarVoucher = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) => z.object({ transaction_id: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ transaction_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const tx = await supabaseAdmin
@@ -369,7 +369,7 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
       throw new Error("Voucher já foi entregue ou cancelado.");
     // Devolve pontos/cashback ao cliente.
     if (tx.data.client_user_id) {
-      const { calcularNivel } = await import("@/lib/loyalty-shared");
+      const { calcularNivel } = await import("@/lib/qsf-shared");
       const link = await supabaseAdmin
         .from("store_clients")
         .select("id, pontos, cashback_saldo")
@@ -435,3 +435,4 @@ export const cancelarVoucher = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+

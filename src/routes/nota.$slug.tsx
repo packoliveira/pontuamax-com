@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { storeBySlugQuery, myFiscalNotesQuery } from "@/lib/queries";
-import { submitNotaFiscal } from "@/lib/loyalty.functions";
+import { submitNotaFiscal } from "@/lib/qsf.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

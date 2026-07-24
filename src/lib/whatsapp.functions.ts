@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const salvarWhatsapp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         evolution_url: z.string().max(300).optional().nullable(),
@@ -44,7 +44,7 @@ export const salvarWhatsapp = createServerFn({ method: "POST" })
 
 export const enviarWhatsappTeste = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input) =>
+  .inputValidator((input) =>
     z
       .object({
         telefone: z.string().min(8).max(20),
@@ -101,7 +101,7 @@ export const conectarWhatsappQR = createServerFn({ method: "POST" })
       throw new Error("Configure URL e API Key da Evolution API antes de conectar.");
     }
     const base = secrets.evolution_url.replace(/\/$/, "");
-    const instance = secrets.evolution_instance || `pontuamax-${loja.data.slug}`;
+    const instance = secrets.evolution_instance || `qsf-${loja.data.slug}`;
     const headers = { "Content-Type": "application/json", apikey: secrets.evolution_apikey };
     let qr: string | null = null;
     // Tenta criar (idempotente na maioria das versões — se já existe, cai no connect)
@@ -195,3 +195,4 @@ export const desconectarWhatsapp = createServerFn({ method: "POST" })
     }).catch(() => null);
     return { ok: true };
   });
+

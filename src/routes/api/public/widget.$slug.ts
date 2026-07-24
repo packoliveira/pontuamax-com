@@ -20,7 +20,7 @@ export const Route = createFileRoute("/api/public/widget/$slug")({
         }
         const target = `${origin}/${loja.slug}`;
         const js = `(function(){
-  if (window.__pontuaMaxWidgetLoaded) return; window.__pontuaMaxWidgetLoaded = true;
+  if (window.__qsfWidgetLoaded) return; window.__qsfWidgetLoaded = true;
   var btn = document.createElement('button');
   btn.textContent = '🎁 Ganhe pontos em ${loja.nome_fantasia.replace(/'/g, "\\'")}';
   btn.setAttribute('aria-label', 'Programa de fidelidade');

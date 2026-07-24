@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
 import { PontuaMaxMark, PontuaMaxWordmark } from "@/components/pontuamax-logo";
-import { formatCPF, isValidCPF, onlyDigits } from "@/lib/loyalty-shared";
+import { formatCPF, isValidCPF, onlyDigits } from "@/lib/qsf-shared";
 import { solicitarRecuperacaoSenhaFuncionario } from "@/lib/team.functions";
 
 export const Route = createFileRoute("/funcionario/esqueci-senha")({

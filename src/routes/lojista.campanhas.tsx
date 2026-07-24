@@ -9,7 +9,7 @@ import {
   enviarCampanha,
   excluirCampanha,
   previewDestinatarios,
-} from "@/lib/loyalty.functions";
+} from "@/lib/qsf.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

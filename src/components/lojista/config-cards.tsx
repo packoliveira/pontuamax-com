@@ -12,7 +12,7 @@ import {
   desconectarWhatsapp,
   salvarNotificacoes,
   dispararNotificacoesAgora,
-} from "@/lib/loyalty.functions";
+} from "@/lib/qsf.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,11 +57,12 @@ export function IntegracoesCard({
   const qc = useQueryClient();
   const origin =
     typeof window !== "undefined" ? window.location.origin : "https://pontuamax-com.lovable.app";
-  const webhookOrigin = origin.includes("pontuamax.com") ? origin : "https://pontuamax.com";
+  const webhookOrigin =
+    origin.includes("pontuamax.com")
+      ? origin
+      : "https://pontuamax.com";
   const legacyWebhookOrigin =
-    origin.includes("localhost") ||
-    origin.includes("id-preview--") ||
-    origin.includes("lovableproject.com")
+    origin.includes("localhost") || origin.includes("id-preview--") || origin.includes("lovableproject.com")
       ? "https://pontuamax.com"
       : origin;
   const secretStr = secret ?? "";
@@ -149,21 +150,9 @@ export function IntegracoesCard({
             className="grid grid-cols-1 sm:grid-cols-3 gap-2"
           >
             {[
-              {
-                v: "aprovado",
-                t: "Quando aprovado",
-                d: "Assim que o pedido vira 'aprovado' na Olist (sem NF-e).",
-              },
-              {
-                v: "faturado",
-                t: "Quando faturado",
-                d: "Só depois da NF-e emitida (mais seguro contra cancelamentos).",
-              },
-              {
-                v: "ambos",
-                t: "Ambos",
-                d: "Aceita qualquer notificação com valor total no payload.",
-              },
+              { v: "aprovado", t: "Quando aprovado", d: "Assim que o pedido vira 'aprovado' na Olist (sem NF-e)." },
+              { v: "faturado", t: "Quando faturado", d: "Só depois da NF-e emitida (mais seguro contra cancelamentos)." },
+              { v: "ambos", t: "Ambos", d: "Aceita qualquer notificação com valor total no payload." },
             ].map((opt) => (
               <label
                 key={opt.v}
@@ -179,7 +168,9 @@ export function IntegracoesCard({
               </label>
             ))}
           </RadioGroup>
-          {salvarGatilho.isPending && <p className="text-xs text-[#64748B]">Salvando...</p>}
+          {salvarGatilho.isPending && (
+            <p className="text-xs text-[#64748B]">Salvando...</p>
+          )}
         </div>
 
         <div>
@@ -210,8 +201,7 @@ export function IntegracoesCard({
             </Button>
           </div>
           <p className="mt-1 text-xs text-[#DC2626]">
-            Use esta URL nova na Olist. Remova/desative a URL antiga em{" "}
-            <code>/api/public/webhook/olist</code>.
+            Use esta URL nova na Olist. Remova/desative a URL antiga em <code>/api/public/webhook/olist</code>.
           </p>
         </div>
 
@@ -255,7 +245,7 @@ export function IntegracoesCard({
           <p className="text-xs text-muted-foreground mt-1">
             Para Olist/Tiny, use a URL completa acima. Se a integração permitir headers, use{" "}
             <code>{headerUrlOlist}</code> ou <code>{headerUrlBling}</code> com{" "}
-            <code>x-pontuamax-store</code> e <code>x-pontuamax-secret</code>. Payload esperado:
+            <code>x-qsf-store</code> e <code>x-qsf-secret</code>. Payload esperado:
             <code className="ml-1">{`{ id_venda_externa, valor, telefone_cliente, nome_cliente? }`}</code>
             .
           </p>
