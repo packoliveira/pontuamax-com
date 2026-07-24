@@ -321,30 +321,27 @@ function Index() {
             eyebrow="Programa"
             title="Pontos com a identidade da sua loja"
             body="O cliente ganha pontos a cada compra e resgata no seu catálogo próprio — produtos, serviços, cupons e níveis Bronze → Diamante. Nada de página branca com seu logo colado por cima."
-            image="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=70"
-            imageAlt="Vitrine de loja com produtos"
             side="right"
             highlight="+42% recorrência"
+            visual={<ChapterVisualBalance />}
           />
           <Chapter
             index="02"
             eyebrow="Retorno"
             title="Cashback automático — dinheiro que só volta pra você"
             body="Devolve uma % em crédito na hora, usável apenas na sua loja. Cliente compra hoje, volta amanhã pra queimar o saldo — e leva mais do que pretendia."
-            image="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1200&q=70"
-            imageAlt="Cliente pagando no caixa"
             side="left"
             highlight="R$ 47,80 saldo médio"
+            visual={<ChapterVisualCatalog />}
           />
           <Chapter
             index="03"
             eyebrow="Comunicação"
             title="Campanhas e WhatsApp para trazer cliente de volta."
             body="Encontre quem parou de comprar e envie campanhas no momento certo. Sua loja vê quem voltou e quanto isso gerou em vendas."
-            image="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=70"
-            imageAlt="Comerciante enviando mensagem no celular"
             side="right"
             highlight="3,2× ticket médio"
+            visual={<ChapterVisualCampaign />}
           />
         </div>
       </section>
@@ -356,14 +353,6 @@ function Index() {
           CTA FINAL — tipografia enorme, cru, sem card
          ============================================================ */}
       <section className="relative overflow-hidden bg-[#FAF8F2]">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(50% 60% at 80% 30%, rgba(20,203,168,0.10), transparent 60%)",
-          }}
-        />
         <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-40">
           <div className="grid gap-10 md:grid-cols-12 md:items-end md:gap-6">
             <div className="md:col-span-8">
