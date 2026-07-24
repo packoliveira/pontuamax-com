@@ -282,13 +282,10 @@ function Index() {
         <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8 md:py-40">
           <div className="grid gap-12 md:grid-cols-12 md:items-end md:gap-6">
             <div className="md:col-span-8">
-              <div className="text-[11px] uppercase tracking-[0.28em] text-[#0B0F1A]/45">
-                — Última página
-              </div>
-              <h2 className="mt-5 font-display text-[52px] leading-[0.98] tracking-[-0.03em] text-[#0B0F1A] sm:text-7xl md:text-[104px]">
+              <h2 className="font-display text-[52px] leading-[0.98] tracking-[-0.03em] text-[#0B0F1A] sm:text-7xl md:text-[104px]">
                 Comece <em className="text-[#0B0F1A]/50">hoje</em>.
                 <br />
-                Recorrência <em className="text-[#14CBA8]">amanhã</em>.
+                Veja seu cliente <em className="text-[#14CBA8]">voltar</em>.
               </h2>
             </div>
             <div className="md:col-span-4 md:pb-4">
@@ -303,8 +300,8 @@ function Index() {
                   </span>
                 </Link>
                 <p className="max-w-xs text-sm text-[#0B0F1A]/55">
-                  Grátis pra começar. Sem cartão. Cancela quando quiser — mas
-                  ninguém cancela.
+                  Crie sua página, ative pontos e cashback e comece a gerar
+                  recorrência na sua loja.
                 </p>
               </div>
             </div>
