@@ -23,7 +23,7 @@ export async function processShopifyOrderWebhook(payload: ShopifyWebhookOrderPay
       if (!item.sku) continue;
 
       // Busca a variacao do produto pelo SKU
-      const { data: variant } = await (supabase.from("product_variants") as any)
+      const { data: variant } = await ((supabase as any).from("product_variants") as any)
         .select("id, product_id, sku, balances:inventory_balances(id, physical_quantity)")
         .eq("sku", item.sku)
         .maybeSingle();
@@ -34,7 +34,7 @@ export async function processShopifyOrderWebhook(payload: ShopifyWebhookOrderPay
         const newQty = Math.max(0, currentQty - Number(item.quantity || 1));
 
         // Atualiza saldo fisico no FitGestor ERP
-        await (supabase.from("inventory_balances") as any)
+        await ((supabase as any).from("inventory_balances") as any)
           .update({ physical_quantity: newQty })
           .eq("id", bal.id);
 
@@ -43,7 +43,7 @@ export async function processShopifyOrderWebhook(payload: ShopifyWebhookOrderPay
     }
 
     // 2. Insere a venda no FitGestor com origem "Shopify"
-    const { data: newSale } = await (supabase.from("sales") as any)
+    const { data: newSale } = await ((supabase as any).from("sales") as any)
       .insert({
         sale_number: orderNumberStr,
         subtotal: Number(payload.subtotal_price || totalAmount),
