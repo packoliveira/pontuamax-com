@@ -70,21 +70,10 @@ function Index() {
           }}
         />
 
-        {/* Fine top rule + eyebrow */}
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 pt-8 text-[11px] uppercase tracking-[0.28em] text-white/45 sm:px-8">
-          <span>Edição 2026 · Fidelização Brasileira</span>
-          <span className="hidden sm:block">Feito em São Paulo · SP</span>
-        </div>
-
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 pb-24 pt-10 sm:px-8 md:grid-cols-12 md:gap-6 md:pb-32 md:pt-16">
           {/* Coluna texto */}
           <div className="md:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-[11px] font-medium tracking-wide text-white/70 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#14CBA8] shadow-[0_0_10px_#14CBA8]" />
-              Nova temporada · 2.400 lojas ativas
-            </div>
-
-            <h1 className="mt-7 font-display text-[54px] leading-[0.92] tracking-[-0.035em] sm:text-[76px] md:text-[92px] lg:text-[108px]">
+            <h1 className="font-display text-[54px] leading-[0.92] tracking-[-0.035em] sm:text-[76px] md:text-[92px] lg:text-[108px]">
               O cliente
               <br />
               <span className="italic text-white/70">volta.</span>
@@ -295,63 +284,6 @@ function Index() {
       {/* ============================================================
           CASE — depoimento largo, imagem editorial, número gigante
          ============================================================ */}
-      <section className="bg-[#0A0A0A] text-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-5 py-24 sm:px-8 md:grid-cols-12 md:items-center md:py-32">
-          <div className="md:col-span-5">
-            <div className="relative overflow-hidden rounded-[28px]">
-              <img
-                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=75"
-                alt="Rafaela, sócia da Quero Ser Fit"
-                className="aspect-[4/5] w-full object-cover"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, transparent 55%, rgba(10,10,10,0.85) 100%)",
-                }}
-              />
-              <div className="absolute bottom-6 left-6 right-6">
-                <div className="text-[11px] uppercase tracking-[0.24em] text-white/60">
-                  Case · Quero Ser Fit
-                </div>
-                <div className="mt-1 font-display text-xl">Rafaela Andrade</div>
-                <div className="text-xs text-white/60">Sócia · 3 lojas físicas</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="md:col-span-7 md:pl-6">
-            <div className="text-[11px] uppercase tracking-[0.28em] text-white/40">
-              — Case real
-            </div>
-            <blockquote className="mt-5 font-display text-3xl leading-[1.12] tracking-[-0.01em] sm:text-4xl md:text-[46px]">
-              “A gente parou de queimar margem com desconto. Hoje{" "}
-              <em className="text-[#14CBA8]">68% do faturamento</em> vem de
-              cliente recorrente. Pagou o ano inteiro no primeiro mês.”
-            </blockquote>
-
-            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
-              {[
-                { k: "68%", v: "receita de recorrentes" },
-                { k: "R$ 22k", v: "cashback devolvido / mês" },
-                { k: "4,2×", v: "retorno vs. custo mensal" },
-              ].map((s) => (
-                <div key={s.v}>
-                  <div className="font-display text-3xl leading-none sm:text-4xl">
-                    {s.k}
-                  </div>
-                  <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-white/45">
-                    {s.v}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ============================================================
           CTA FINAL — tipografia enorme, cru, sem card
          ============================================================ */}
