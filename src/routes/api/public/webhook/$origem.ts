@@ -23,10 +23,11 @@ import { cpfToEmail } from "@/lib/qsf-shared";
 
 // ---------- Tipos de gatilho ----------
 type Gatilho = "aprovado" | "faturado" | "ambos";
+type EventoClassificado = Gatilho | "estorno";
 
 // Mapeia o `tipo`/`evento` da notificação Olist para o gatilho equivalente.
 // Retorna null se o evento não é relevante para pontuação (ex.: cancelamento).
-function classificarEvento(tipo: string): Gatilho | null {
+function classificarEvento(tipo: string): EventoClassificado | null {
   const t = tipo.toLowerCase();
   if (!t) return "aprovado"; // payloads sem tipo (nossos testes) → tratamos como aprovado
   // Eventos de estoque/produto/cadastro não são vendas — ignorar silenciosamente.
@@ -38,6 +39,9 @@ function classificarEvento(tipo: string): Gatilho | null {
     t.startsWith("cadastro_")
   )
     return null;
+  // Cancelamento / devolução / estorno — dispara reversão dos pontos.
+  if (t.includes("cancel") || t.includes("devolucao") || t.includes("devolução") || t.includes("estorno"))
+    return "estorno";
   if (
     t.includes("faturamento") ||
     t.includes("faturad") ||
@@ -47,13 +51,13 @@ function classificarEvento(tipo: string): Gatilho | null {
     return "faturado";
   if (t.includes("inclusao") || t.includes("aprovad") || t.includes("alteracao_situacao") || t.includes("alteracao_pedido"))
     return "aprovado";
-  if (t.includes("cancel") || t.includes("devolucao") || t.includes("estorno")) return null;
   // Qualquer outro tipo desconhecido: tratamos como "aprovado" (não bloqueia).
   return "aprovado";
 }
 
-function eventoAtendeGatilho(evento: Gatilho | null, gatilho: Gatilho): boolean {
+function eventoAtendeGatilho(evento: EventoClassificado | null, gatilho: Gatilho): boolean {
   if (!evento) return false;
+  if (evento === "estorno") return true; // estornos sempre são processados
   if (gatilho === "ambos") return true;
   return evento === gatilho;
 }
