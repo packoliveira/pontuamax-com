@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as LojistasRouteImport } from './routes/lojistas'
 import { Route as LojistaRouteImport } from './routes/lojista'
 import { Route as FuncionarioRouteImport } from './routes/funcionario'
@@ -67,6 +68,11 @@ import { Route as ApiPublicHooksAnonimizarLogsAntigosRouteImport } from './route
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LojistasRoute = LojistasRouteImport.update({
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/lojistas': typeof LojistasRoute
+  '/planos': typeof PlanosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/planos': typeof AdminPlanosRoute
@@ -402,6 +409,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/lojistas': typeof LojistasRoute
+  '/planos': typeof PlanosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/planos': typeof AdminPlanosRoute
@@ -459,6 +467,7 @@ export interface FileRoutesById {
   '/funcionario': typeof FuncionarioRouteWithChildren
   '/lojista': typeof LojistaRouteWithChildren
   '/lojistas': typeof LojistasRoute
+  '/planos': typeof PlanosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/planos': typeof AdminPlanosRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/funcionario'
     | '/lojista'
     | '/lojistas'
+    | '/planos'
     | '/redefinir-senha'
     | '/admin/login'
     | '/admin/planos'
@@ -570,6 +580,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/como-funciona'
     | '/lojistas'
+    | '/planos'
     | '/redefinir-senha'
     | '/admin/login'
     | '/admin/planos'
@@ -626,6 +637,7 @@ export interface FileRouteTypes {
     | '/funcionario'
     | '/lojista'
     | '/lojistas'
+    | '/planos'
     | '/redefinir-senha'
     | '/admin/login'
     | '/admin/planos'
@@ -683,6 +695,7 @@ export interface RootRouteChildren {
   FuncionarioRoute: typeof FuncionarioRouteWithChildren
   LojistaRoute: typeof LojistaRouteWithChildren
   LojistasRoute: typeof LojistasRoute
+  PlanosRoute: typeof PlanosRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   NotaSlugRoute: typeof NotaSlugRoute
   NpsIdRoute: typeof NpsIdRoute
@@ -705,6 +718,13 @@ declare module '@tanstack/react-router' {
       path: '/redefinir-senha'
       fullPath: '/redefinir-senha'
       preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lojistas': {
@@ -1183,6 +1203,7 @@ const rootRouteChildren: RootRouteChildren = {
   FuncionarioRoute: FuncionarioRouteWithChildren,
   LojistaRoute: LojistaRouteWithChildren,
   LojistasRoute: LojistasRoute,
+  PlanosRoute: PlanosRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   NotaSlugRoute: NotaSlugRoute,
   NpsIdRoute: NpsIdRoute,
@@ -1201,3 +1222,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
