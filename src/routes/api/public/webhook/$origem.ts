@@ -67,6 +67,7 @@ type Extraido = {
   idVenda: string;
   numeroPedido: string;
   valor: number;
+  valorEstorno: number;
   cpf: string;
   telefone: string;
   nome: string;
@@ -118,6 +119,18 @@ function extrair(p: Record<string, unknown>): Extraido {
     0;
   const valor = parseValor(valorRaw) ?? 0;
 
+  // Valor devolvido/estornado (usado no fluxo de cancelamento parcial).
+  const valorEstornoRaw =
+    p.valor_estornado ??
+    p.valor_devolucao ??
+    p.valor_estorno ??
+    root.valor_estornado ??
+    root.valor_devolucao ??
+    root.valor_estorno ??
+    root.valor_devolvido ??
+    0;
+  const valorEstorno = parseValor(valorEstornoRaw) ?? 0;
+
   const cpfRaw = String(
     p.cpf_cliente ?? cliente.cpfCnpj ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
   );
@@ -150,7 +163,7 @@ function extrair(p: Record<string, unknown>): Extraido {
     ? `${tipoEvento}|${situacao}`
     : tipoEvento;
 
-  return { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento: tipoFinal };
+  return { idVenda, numeroPedido, valor, valorEstorno, cpf, telefone, nome, tipoEvento: tipoFinal };
 }
 
 // ---------- Enriquecimento via API Tiny/Olist V2 ----------
