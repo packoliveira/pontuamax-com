@@ -69,12 +69,15 @@ function SyncClientsButton({ storeId }: { storeId: string }) {
     onSuccess: (r: { criados: number }) => {
       toast.success(
         r.criados > 0
-          ? `${r.criados} cliente(s) sincronizado(s).`
-          : "Nenhum cliente novo para sincronizar.",
+          ? r.criados === 1
+            ? "1 novo cliente adicionado à sua base 🎉"
+            : `${r.criados} novos clientes adicionados à sua base 🎉`
+          : "Tudo em dia! Sua base já está atualizada.",
       );
       qc.invalidateQueries({ queryKey: ["store-clients", storeId] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error("Não conseguimos sincronizar agora", { description: e.message }),
   });
   return (
     <Button
