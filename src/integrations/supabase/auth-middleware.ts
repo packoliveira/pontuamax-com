@@ -85,20 +85,32 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       },
     });
 
-    const { data, error } = await supabase.auth.getClaims(token);
-    if (error || !data?.claims) {
-      throw new Error("Unauthorized: Invalid token");
-    }
+    // Try local JWKS verification first (fast). Fall back to remote getUser()
+    // when the token's kid isn't in the cached JWKS — this happens right after
+    // a Supabase signing-key rotation, or when a client still holds a token
+    // issued under a previous algorithm/kid (e.g. "unrecognized JWT kid <nil>
+    // for algorithm ES256").
+    let userId: string | undefined;
+    let claims: Record<string, unknown> | undefined;
 
-    if (!data.claims.sub) {
-      throw new Error("Unauthorized: No user ID found in token");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (!claimsError && claimsData?.claims?.sub) {
+      userId = claimsData.claims.sub;
+      claims = claimsData.claims as Record<string, unknown>;
+    } else {
+      const { data: userData, error: userError } = await supabase.auth.getUser(token);
+      if (userError || !userData?.user?.id) {
+        throw new Error("Unauthorized: Invalid token");
+      }
+      userId = userData.user.id;
+      claims = { sub: userId, email: userData.user.email } as Record<string, unknown>;
     }
 
     return next({
       context: {
         supabase,
-        userId: data.claims.sub,
-        claims: data.claims,
+        userId,
+        claims,
       },
     });
   },
