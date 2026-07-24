@@ -23,10 +23,11 @@ import { cpfToEmail } from "@/lib/qsf-shared";
 
 // ---------- Tipos de gatilho ----------
 type Gatilho = "aprovado" | "faturado" | "ambos";
+type EventoClassificado = Gatilho | "estorno";
 
 // Mapeia o `tipo`/`evento` da notificação Olist para o gatilho equivalente.
 // Retorna null se o evento não é relevante para pontuação (ex.: cancelamento).
-function classificarEvento(tipo: string): Gatilho | null {
+function classificarEvento(tipo: string): EventoClassificado | null {
   const t = tipo.toLowerCase();
   if (!t) return "aprovado"; // payloads sem tipo (nossos testes) → tratamos como aprovado
   // Eventos de estoque/produto/cadastro não são vendas — ignorar silenciosamente.
@@ -38,6 +39,9 @@ function classificarEvento(tipo: string): Gatilho | null {
     t.startsWith("cadastro_")
   )
     return null;
+  // Cancelamento / devolução / estorno — dispara reversão dos pontos.
+  if (t.includes("cancel") || t.includes("devolucao") || t.includes("devolução") || t.includes("estorno"))
+    return "estorno";
   if (
     t.includes("faturamento") ||
     t.includes("faturad") ||
@@ -47,13 +51,13 @@ function classificarEvento(tipo: string): Gatilho | null {
     return "faturado";
   if (t.includes("inclusao") || t.includes("aprovad") || t.includes("alteracao_situacao") || t.includes("alteracao_pedido"))
     return "aprovado";
-  if (t.includes("cancel") || t.includes("devolucao") || t.includes("estorno")) return null;
   // Qualquer outro tipo desconhecido: tratamos como "aprovado" (não bloqueia).
   return "aprovado";
 }
 
-function eventoAtendeGatilho(evento: Gatilho | null, gatilho: Gatilho): boolean {
+function eventoAtendeGatilho(evento: EventoClassificado | null, gatilho: Gatilho): boolean {
   if (!evento) return false;
+  if (evento === "estorno") return true; // estornos sempre são processados
   if (gatilho === "ambos") return true;
   return evento === gatilho;
 }
@@ -63,6 +67,7 @@ type Extraido = {
   idVenda: string;
   numeroPedido: string;
   valor: number;
+  valorEstorno: number;
   cpf: string;
   telefone: string;
   nome: string;
@@ -114,6 +119,18 @@ function extrair(p: Record<string, unknown>): Extraido {
     0;
   const valor = parseValor(valorRaw) ?? 0;
 
+  // Valor devolvido/estornado (usado no fluxo de cancelamento parcial).
+  const valorEstornoRaw =
+    p.valor_estornado ??
+    p.valor_devolucao ??
+    p.valor_estorno ??
+    root.valor_estornado ??
+    root.valor_devolucao ??
+    root.valor_estorno ??
+    root.valor_devolvido ??
+    0;
+  const valorEstorno = parseValor(valorEstornoRaw) ?? 0;
+
   const cpfRaw = String(
     p.cpf_cliente ?? cliente.cpfCnpj ?? cliente.cpf_cnpj ?? cliente.documento ?? cliente.cpf ?? "",
   );
@@ -146,7 +163,7 @@ function extrair(p: Record<string, unknown>): Extraido {
     ? `${tipoEvento}|${situacao}`
     : tipoEvento;
 
-  return { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento: tipoFinal };
+  return { idVenda, numeroPedido, valor, valorEstorno, cpf, telefone, nome, tipoEvento: tipoFinal };
 }
 
 // ---------- Enriquecimento via API Tiny/Olist V2 ----------
@@ -535,7 +552,8 @@ async function handlePost({
         }
 
         // 4) Extração + gatilho configurado.
-        const { idVenda, numeroPedido, valor, cpf, telefone, nome, tipoEvento } = extrair(payload);
+        const { idVenda, numeroPedido, valor, valorEstorno, cpf, telefone, nome, tipoEvento } =
+          extrair(payload);
         const gatilhoLoja = ((loja as { olist_gatilho_pontuacao?: string })
           .olist_gatilho_pontuacao ?? "ambos") as Gatilho;
         const evento = classificarEvento(tipoEvento);
@@ -559,6 +577,124 @@ async function handlePost({
 
         if (!idVenda) {
           return logAndRespond("erro", "id do pedido é obrigatório (numero/id_venda_externa)", 400);
+        }
+
+        // 4.b) Fluxo de estorno / cancelamento — reverte a transação original.
+        if (evento === "estorno") {
+          const original = await supabaseAdmin
+            .from("transactions")
+            .select("id, valor, pontos_delta, cashback_delta, client_user_id")
+            .eq("store_id", loja.id)
+            .eq("id_venda_externa", idVenda)
+            .eq("tipo", "venda")
+            .maybeSingle();
+          if (!original.data) {
+            return logAndRespond(
+              "sucesso",
+              `Estorno recebido para pedido ${idVenda}, mas nenhuma venda original foi encontrada — nada a reverter.`,
+              200,
+              { estorno: true, sem_original: true },
+            );
+          }
+
+          const idEstorno = `${idVenda}:estorno`;
+          const jaEstornado = await supabaseAdmin
+            .from("transactions")
+            .select("id")
+            .eq("store_id", loja.id)
+            .eq("id_venda_externa", idEstorno)
+            .maybeSingle();
+          if (jaEstornado.data) {
+            return logAndRespond("sucesso", "estorno já processado (idempotente)", 200, {
+              estorno: true,
+              duplicated: true,
+            });
+          }
+
+          const valorOriginal = Number(original.data.valor ?? 0);
+          // Total = valor 0 ou >= original → estorno integral. Caso contrário, proporcional.
+          const parcial =
+            valorEstorno > 0 && valorOriginal > 0 && valorEstorno < valorOriginal;
+          const proporcao = parcial ? valorEstorno / valorOriginal : 1;
+          const pontosReverter = Math.floor(Number(original.data.pontos_delta ?? 0) * proporcao);
+          const cashbackReverter =
+            Math.round(Number(original.data.cashback_delta ?? 0) * proporcao * 100) / 100;
+          const valorReverter = parcial
+            ? Math.round(valorEstorno * 100) / 100
+            : valorOriginal;
+
+          // Vínculo com a loja (usa o cliente da transação original — CPF pode não vir no cancelamento).
+          const linkRes = await supabaseAdmin
+            .from("store_clients")
+            .select("id, pontos, cashback_saldo")
+            .eq("store_id", loja.id)
+            .eq("user_id", original.data.client_user_id)
+            .maybeSingle();
+          if (!linkRes.data) {
+            return logAndRespond(
+              "erro",
+              "cliente da venda original não está mais vinculado à loja",
+              500,
+              { estorno: true },
+            );
+          }
+          const link = linkRes.data;
+
+          // Clampa em 0 — se o cliente já resgatou, não deixamos saldo negativo.
+          const saldoPontosAtual = Number(link.pontos ?? 0);
+          const saldoCashbackAtual = Number(link.cashback_saldo ?? 0);
+          const novoPontos = Math.max(0, saldoPontosAtual - pontosReverter);
+          const novoCashback =
+            Math.max(0, Math.round((saldoCashbackAtual - cashbackReverter) * 100) / 100);
+          const pontosRevertidosReal = saldoPontosAtual - novoPontos;
+          const cashbackRevertidoReal =
+            Math.round((saldoCashbackAtual - novoCashback) * 100) / 100;
+          const nivel: "bronze" | "prata" | "ouro" =
+            novoPontos <= 100 ? "bronze" : novoPontos <= 300 ? "prata" : "ouro";
+
+          const txEstorno = await supabaseAdmin.from("transactions").insert({
+            store_id: loja.id,
+            client_user_id: original.data.client_user_id,
+            tipo: "estorno",
+            valor: valorReverter,
+            pontos_delta: -pontosRevertidosReal,
+            cashback_delta: -cashbackRevertidoReal,
+            status: "entregue",
+            id_venda_externa: idEstorno,
+            origem: `${origem}:estorno${parcial ? ":parcial" : ""}`,
+          });
+          if (txEstorno.error) {
+            if (txEstorno.error.code === "23505") {
+              return logAndRespond("sucesso", "estorno já processado (idempotente)", 200, {
+                estorno: true,
+                duplicated: true,
+              });
+            }
+            return logAndRespond("erro", txEstorno.error.message, 500, { estorno: true });
+          }
+
+          const upd = await supabaseAdmin
+            .from("store_clients")
+            .update({ pontos: novoPontos, cashback_saldo: novoCashback, nivel })
+            .eq("id", link.id);
+          if (upd.error) return logAndRespond("erro", upd.error.message, 500, { estorno: true });
+
+          return logAndRespond(
+            "sucesso",
+            parcial
+              ? `estorno parcial processado (R$ ${valorReverter.toFixed(2)} de R$ ${valorOriginal.toFixed(2)})`
+              : "estorno total processado",
+            200,
+            {
+              estorno: true,
+              parcial,
+              valor_estornado: valorReverter,
+              pontos_revertidos: pontosRevertidosReal,
+              cashback_revertido: cashbackRevertidoReal,
+              novo_saldo_pontos: novoPontos,
+              novo_saldo_cashback: novoCashback,
+            },
+          );
         }
 
         if (!cpf || cpf.length !== 11) {

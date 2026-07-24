@@ -1,0 +1,1 @@
+ALTER TYPE public.transaction_tipo ADD VALUE IF NOT EXISTS 'estorno';
