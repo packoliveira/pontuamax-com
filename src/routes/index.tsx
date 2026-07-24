@@ -145,27 +145,16 @@ function Index() {
           </div>
         </div>
 
-        {/* Metrics ticker inline (parte do hero, sem parecer strip) */}
+        {/* Faixa editorial — frase única de posicionamento */}
         <div className="border-t border-white/10">
-          <div className="mx-auto grid max-w-7xl grid-cols-2 divide-white/10 px-5 sm:px-8 md:grid-cols-4 md:divide-x">
-            {[
-              { k: "+42%", v: "recorrência média" },
-              { k: "3,2×", v: "ticket do fiel" },
-              { k: "12 min", v: "pra ir ao ar" },
-              { k: "R$ 38M", v: "movimentados" },
-            ].map((m, i) => (
-              <div
-                key={m.v}
-                className={`flex items-baseline gap-3 py-6 ${i >= 2 ? "border-t border-white/10 md:border-t-0" : ""} ${i % 2 === 1 ? "border-l border-white/10 pl-6 md:border-l-0 md:pl-8" : ""} md:pl-8`}
-              >
-                <div className="font-display text-3xl leading-none text-white sm:text-4xl">
-                  {m.k}
-                </div>
-                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">
-                  {m.v}
-                </div>
-              </div>
-            ))}
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between md:py-12">
+            <p className="font-display text-2xl italic leading-tight text-white/85 sm:text-3xl md:text-[34px]">
+              "A gente parou de dar desconto — e faturou mais."
+            </p>
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-white/40">
+              <span className="h-[1px] w-8 bg-white/30" />
+              Lojistas PontuaMax · Brasil
+            </div>
           </div>
         </div>
       </section>
