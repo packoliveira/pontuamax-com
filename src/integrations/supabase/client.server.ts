@@ -9,40 +9,101 @@ function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
 
+function decodeJwtPart(value: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+export function isUsableSupabaseServiceRoleKey(value: string | undefined): value is string {
+  if (!value) return false;
+  if (value.startsWith("sb_secret_")) return true;
+  if (value.startsWith("sb_publishable_")) return false;
+
+  const parts = value.split(".");
+  if (parts.length !== 3) return false;
+
+  const header = decodeJwtPart(parts[0]);
+  const payload = decodeJwtPart(parts[1]);
+  if (!header || !payload || payload.role !== "service_role") return false;
+
+  const algorithm = typeof header.alg === "string" ? header.alg : "";
+  if (algorithm === "HS256") return true;
+
+  // Asymmetric Supabase JWTs must identify the signing key. A token using
+  // ES256/RS256 without `kid` is exactly what produces
+  // "unrecognized JWT kid <nil>" and must never be selected as an admin key.
+  return (
+    (algorithm === "ES256" || algorithm === "RS256") &&
+    typeof header.kid === "string" &&
+    header.kid.length > 0
+  );
+}
+
+export function selectSupabaseServiceRoleKey(
+  env: Partial<
+    Record<
+      "SB_SERVICE_ROLE_KEY" | "SUPABASE_SERVICE_ROLE_KEY" | "SERVICE_ROLE_KEY",
+      string | undefined
+    >
+  >,
+): string | undefined {
+  return [
+    env.SB_SERVICE_ROLE_KEY,
+    env.SUPABASE_SERVICE_ROLE_KEY,
+    env.SERVICE_ROLE_KEY,
+  ].find(isUsableSupabaseServiceRoleKey);
+}
+
+export function buildSupabaseAdminHeaders(
+  supabaseKey: string,
+  input: RequestInfo | URL,
+  initHeaders?: HeadersInit,
+): Headers {
+  // Preserve request metadata created by supabase-js (content type, client info,
+  // etc.), but never forward an Authorization header supplied by an external
+  // webhook. The admin client must authenticate only with its own server key.
+  const headers = new Headers(
+    typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
+  );
+
+  if (initHeaders) {
+    new Headers(initHeaders).forEach((value, key) => headers.set(key, value));
+  }
+
+  headers.delete("Authorization");
+
+  // New Supabase secret keys are opaque and authenticate through `apikey`.
+  // Legacy service-role JWTs still require their own Bearer header.
+  if (!isNewSupabaseApiKey(supabaseKey)) {
+    headers.set("Authorization", `Bearer ${supabaseKey}`);
+  }
+
+  headers.set("apikey", supabaseKey);
+  return headers;
+}
+
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
   return (input, init) => {
-    const headers = new Headers(
-      typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
-    );
-
-    if (init?.headers) {
-      new Headers(init.headers).forEach((value, key) => headers.set(key, value));
-    }
-
-    // New Supabase API keys are opaque strings, not bearer JWTs.
-    if (
-      isNewSupabaseApiKey(supabaseKey) &&
-      headers.get("Authorization") === `Bearer ${supabaseKey}`
-    ) {
-      headers.delete("Authorization");
-    }
-
-    headers.set("apikey", supabaseKey);
+    const headers = buildSupabaseAdminHeaders(supabaseKey, input, init?.headers);
     return fetch(input, { ...init, headers });
   };
 }
 
 function createSupabaseAdminClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY =
-    process.env.SB_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_SERVICE_ROLE_KEY = selectSupabaseServiceRoleKey(process.env);
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [
       ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
-      ...(!SUPABASE_SERVICE_ROLE_KEY ? ["SUPABASE_SERVICE_ROLE_KEY"] : []),
+      ...(!SUPABASE_SERVICE_ROLE_KEY
+        ? ["a valid SB_SERVICE_ROLE_KEY / SUPABASE_SERVICE_ROLE_KEY"]
+        : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
+    const message = `Missing or invalid Supabase environment variable(s): ${missing.join(", ")}. Configure a server-only service-role/secret key in Lovable Cloud.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
