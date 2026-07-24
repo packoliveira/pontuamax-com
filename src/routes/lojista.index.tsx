@@ -51,7 +51,7 @@ function Dashboard() {
   const inclP = loja.modalidade !== "cashback";
   const inclC = loja.modalidade !== "pontos";
 
-  const stats: {
+  type Stat = {
     label: string;
     value: string | number;
     icon: LucideIcon;
@@ -61,7 +61,8 @@ function Dashboard() {
     iconBg: string;
     iconColor: string;
     suffix?: string;
-  }[] = [
+  };
+  const stats: Stat[] = ([
     {
       label: "Clientes",
       value: clientes.length.toLocaleString("pt-BR"),
@@ -104,7 +105,7 @@ function Dashboard() {
       iconColor: "text-orange-600",
       suffix: "vouchers",
     },
-  ] as const;
+  ] as Stat[]).filter((s) => s.show);
 
   const quickActions: {
     to: string;
