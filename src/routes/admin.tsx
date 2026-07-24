@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin")({
   }),
   beforeLoad: async ({ location }) => {
     // /admin/login é público
-    if (location.pathname === "/admin/login") return;
+    if (location.pathname === "/admin/login") return { accessDenied: false as const };
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/admin/login" });
     const { data: roles } = await supabase
