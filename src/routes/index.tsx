@@ -23,7 +23,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { SiteShell } from "@/components/site-chrome";
-import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,7 +55,7 @@ function Index() {
         {/* Grão + spotlight */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18]"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
           style={{
             background:
               "radial-gradient(70% 55% at 72% 35%, rgba(20,203,168,0.18), transparent 60%), radial-gradient(50% 45% at 18% 15%, rgba(109,40,217,0.22), transparent 65%)",
@@ -321,27 +320,30 @@ function Index() {
             eyebrow="Programa"
             title="Pontos com a identidade da sua loja"
             body="O cliente ganha pontos a cada compra e resgata no seu catálogo próprio — produtos, serviços, cupons e níveis Bronze → Diamante. Nada de página branca com seu logo colado por cima."
+            image="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=70"
+            imageAlt="Vitrine de loja com produtos"
             side="right"
             highlight="+42% recorrência"
-            visual={<ChapterVisualBalance />}
           />
           <Chapter
             index="02"
             eyebrow="Retorno"
             title="Cashback automático — dinheiro que só volta pra você"
             body="Devolve uma % em crédito na hora, usável apenas na sua loja. Cliente compra hoje, volta amanhã pra queimar o saldo — e leva mais do que pretendia."
+            image="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1200&q=70"
+            imageAlt="Cliente pagando no caixa"
             side="left"
             highlight="R$ 47,80 saldo médio"
-            visual={<ChapterVisualCatalog />}
           />
           <Chapter
             index="03"
             eyebrow="Comunicação"
             title="Campanhas e WhatsApp para trazer cliente de volta."
             body="Encontre quem parou de comprar e envie campanhas no momento certo. Sua loja vê quem voltou e quanto isso gerou em vendas."
+            image="https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&w=1200&q=70"
+            imageAlt="Comerciante enviando mensagem no celular"
             side="right"
             highlight="3,2× ticket médio"
-            visual={<ChapterVisualCampaign />}
           />
         </div>
       </section>
@@ -353,6 +355,14 @@ function Index() {
           CTA FINAL — tipografia enorme, cru, sem card
          ============================================================ */}
       <section className="relative overflow-hidden bg-[#FAF8F2]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(50% 60% at 80% 30%, rgba(20,203,168,0.10), transparent 60%)",
+          }}
+        />
         <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 md:py-40">
           <div className="grid gap-10 md:grid-cols-12 md:items-end md:gap-6">
             <div className="md:col-span-8">
@@ -392,7 +402,8 @@ function Chapter({
   eyebrow,
   title,
   body,
-  visual,
+  image,
+  imageAlt,
   side,
   highlight,
 }: {
@@ -400,7 +411,8 @@ function Chapter({
   eyebrow: string;
   title: string;
   body: string;
-  visual: ReactNode;
+  image: string;
+  imageAlt: string;
   side: "left" | "right";
   highlight: string;
 }) {
@@ -410,9 +422,14 @@ function Chapter({
       <div
         className={`relative md:col-span-6 ${imgFirst ? "md:order-1" : "md:order-2"}`}
       >
-        <div className="relative overflow-hidden rounded-[24px] bg-[#F5F2EA] p-5 shadow-[0_30px_60px_-30px_rgba(15,23,42,0.35)] sm:rounded-[28px] sm:p-7">
-          {visual}
-          <div className="absolute left-4 top-4 z-10 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur sm:left-5 sm:top-5">
+        <div className="relative overflow-hidden rounded-[24px] bg-[#F5F2EA] sm:rounded-[28px]">
+          <img
+            src={image}
+            alt={imageAlt}
+            loading="lazy"
+            className="aspect-[4/3] w-full object-cover sm:aspect-[4/5] md:aspect-[5/6]"
+          />
+          <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold tracking-wide text-[#0A0A0A] shadow-sm backdrop-blur sm:left-5 sm:top-5">
             {highlight}
           </div>
         </div>
@@ -442,202 +459,6 @@ function Chapter({
         </Link>
       </div>
     </article>
-  );
-}
-
-/* ---------- Chapter visuals: recortes reais das telas do app ---------- */
-function ChapterVisualBalance() {
-  return (
-    <div
-      className="relative overflow-hidden rounded-[20px] p-5 text-white shadow-[0_20px_40px_-20px_rgba(15,23,42,0.5)]"
-      style={{
-        background: "linear-gradient(135deg, #6D28D9 0%, #2563EB 55%, #14CBA8 100%)",
-      }}
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-30"
-        style={{ background: "radial-gradient(circle, #ffffff 0%, transparent 70%)" }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-8 -bottom-12 h-36 w-36 rounded-full opacity-20"
-        style={{ background: "radial-gradient(circle, #ffffff 0%, transparent 70%)" }}
-      />
-      <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.14em] text-white/80">
-        <span className="inline-flex items-center gap-1.5">
-          <Coins className="h-3.5 w-3.5" /> Saldo de pontos
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] backdrop-blur">
-          <Crown className="h-3 w-3" /> Prata
-        </span>
-      </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <div className="font-display text-5xl font-bold leading-none tracking-tight tabular-nums sm:text-6xl">
-          2.480
-        </div>
-        <div className="text-sm font-medium text-white/80">pts</div>
-      </div>
-      <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-white/80">
-        <ArrowUpRight className="h-3 w-3" /> +180 pts esta semana
-      </div>
-      <div className="mt-5">
-        <div className="mb-2 flex items-center justify-between text-[11px] text-white/85">
-          <span className="font-medium">Nível Prata</span>
-          <span>520 pts p/ Ouro</span>
-        </div>
-        <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-white/20">
-          <div
-            className="h-full rounded-full shadow-[0_0_10px_rgba(255,255,255,0.6)]"
-            style={{
-              width: "72%",
-              background: "linear-gradient(90deg, #ffffff 0%, #E0F2FE 40%, #14CBA8 100%)",
-            }}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between text-[10px] font-medium text-white/70">
-          <span>Bronze</span>
-          <span>Prata</span>
-          <span>Ouro</span>
-          <span>Diamante</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ChapterVisualCatalog() {
-  return (
-    <div className="rounded-[20px] bg-[#F8FAFC] p-4 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 sm:p-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-[11px] text-[#64748B]">Recompensas</div>
-          <div className="font-display text-xl font-bold text-[#0F172A]">Catálogo</div>
-        </div>
-        <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#6D28D9]/10 to-[#14CBA8]/10 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] ring-1 ring-[#E2E8F0]">
-          <Coins className="h-3 w-3 text-[#F59E0B]" /> 2.480
-        </div>
-      </div>
-      <div className="mt-3 flex gap-1.5 overflow-hidden">
-        {["Todos", "Descontos", "Produtos", "Serviços"].map((f, i) => (
-          <span
-            key={f}
-            className={`whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-semibold ${
-              i === 0
-                ? "bg-[#0F172A] text-white"
-                : "bg-white text-[#64748B] ring-1 ring-[#E2E8F0]"
-            }`}
-          >
-            {f}
-          </span>
-        ))}
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
-        {PRODUCTS.map((p) => (
-          <div
-            key={p.name}
-            className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm"
-          >
-            <div className="relative h-24 w-full overflow-hidden bg-[#F1F5F9] sm:h-28">
-              <img src={p.img} alt={p.name} loading="lazy" className="h-full w-full object-cover" />
-              <span className="absolute left-1.5 top-1.5 rounded-full bg-white/95 px-1.5 py-0.5 text-[9px] font-bold text-[#0F172A] backdrop-blur">
-                {p.tag}
-              </span>
-            </div>
-            <div className="p-2.5">
-              <div className="truncate text-[11px] font-semibold text-[#0F172A]">{p.name}</div>
-              <div className="mt-0.5 flex items-center gap-1 text-[10px] text-[#64748B]">
-                <Coins className="h-2.5 w-2.5 text-[#F59E0B]" />
-                <span className="font-semibold text-[#0F172A]">
-                  {p.pts.toLocaleString("pt-BR")}
-                </span>{" "}
-                pts
-              </div>
-              <button
-                className="mt-2 w-full rounded-lg py-1 text-[10px] font-bold text-white shadow-sm"
-                style={{ background: "linear-gradient(90deg, #6D28D9, #2563EB)" }}
-              >
-                Resgatar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ChapterVisualCampaign() {
-  return (
-    <div className="space-y-3 rounded-[20px] bg-[#F8FAFC] p-4 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 sm:p-5">
-      <div
-        className="relative overflow-hidden rounded-2xl p-4 text-white shadow-lg"
-        style={{
-          background: "linear-gradient(135deg, #F59E0B 0%, #EF4444 55%, #6D28D9 100%)",
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur">
-            <Zap className="h-3 w-3" /> Promo da semana
-          </div>
-          <span className="text-[10px] text-white/85">2d restantes</span>
-        </div>
-        <div className="mt-2 font-display text-2xl font-bold leading-tight">Ganhe 3× pontos</div>
-        <div className="text-[12px] text-white/90">em toda compra acima de R$ 100</div>
-        <button className="mt-3 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#0F172A]">
-          Participar <ArrowRight className="h-3 w-3" />
-        </button>
-      </div>
-      <div className="flex items-stretch overflow-hidden rounded-2xl border border-dashed border-[#2563EB]/40 bg-gradient-to-r from-white to-[#EFF6FF] shadow-sm">
-        <div className="flex flex-col items-center justify-center bg-[#2563EB] px-3 text-white">
-          <Ticket className="h-4 w-4" />
-          <div className="mt-1 text-[9px] font-bold uppercase tracking-wider">Ativo</div>
-        </div>
-        <div className="flex-1 p-3">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold text-[#0F172A]">
-              R$ 25 OFF na próxima compra
-            </div>
-            <Percent className="h-3 w-3 text-[#2563EB]" />
-          </div>
-          <div className="mt-0.5 text-[10px] text-[#64748B]">
-            Válido até 30/nov · código FIDELI25
-          </div>
-        </div>
-      </div>
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-sm">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="text-[11px] font-semibold text-[#0F172A]">Últimas compras</div>
-          <span className="text-[10px] font-medium text-[#2563EB]">Ver histórico</span>
-        </div>
-        <div className="divide-y divide-[#F1F5F9]">
-          {[
-            { d: "Hoje", loja: "Café da Manhã", v: "R$ 42,00", p: "+42" },
-            { d: "Ontem", loja: "Loja Fashion", v: "R$ 189,90", p: "+190" },
-          ].map((x, i) => (
-            <div key={i} className="flex items-center justify-between py-1.5">
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-white"
-                  style={{ background: "linear-gradient(135deg, #6D28D9, #2563EB, #14CBA8)" }}
-                >
-                  <ShoppingBag className="h-3 w-3" />
-                </div>
-                <div>
-                  <div className="text-[11px] font-semibold text-[#0F172A]">{x.loja}</div>
-                  <div className="text-[10px] text-[#64748B]">
-                    {x.d} · {x.v}
-                  </div>
-                </div>
-              </div>
-              <span className="rounded-full bg-[#22C55E]/10 px-2 py-0.5 text-[10px] font-bold text-[#15803D]">
-                {x.p} pts
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }
 
