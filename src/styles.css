@@ -191,6 +191,11 @@
   50% { transform: translateY(-12px); }
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 /* Animação leve de entrada usada em páginas do painel */
 @keyframes panel-fade-in {
   from { opacity: 0; transform: translateY(4px); }
