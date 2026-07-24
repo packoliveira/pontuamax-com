@@ -104,7 +104,7 @@ function Dashboard() {
       iconColor: "text-orange-600",
       suffix: "vouchers",
     },
-  ].filter((s) => s.show);
+  ] as const;
 
   const quickActions: {
     to: string;
