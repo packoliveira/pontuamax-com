@@ -612,7 +612,9 @@ async function handlePost({
           if (created.error || !created.data.user) {
             return logAndRespond(
               "erro",
-              `falha criando cliente: ${created.error?.message ?? "?"}`,
+              `Não foi possível cadastrar o cliente automaticamente${
+                created.error?.message ? ` (${created.error.message})` : ""
+              }. Tente novamente ou cadastre manualmente no painel.`,
               500,
             );
           }
