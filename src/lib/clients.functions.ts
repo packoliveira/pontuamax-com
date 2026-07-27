@@ -528,9 +528,10 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       const patch: { phone: string; cpf?: string } = { phone: digits };
       if (cpfDigits) patch.cpf = cpfDigits;
       await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
+      // SEGURANÇA: não definimos senha aqui. O cliente define a própria senha
+      // ao ativar a conta na página da loja (CPF + telefone conferem).
       const normalized = await supabaseAdmin.auth.admin.updateUserById(userId, {
         email,
-        password: cpfDigits,
         email_confirm: true,
         user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits },
       });
@@ -540,7 +541,6 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
     } else {
       const created = await supabaseAdmin.auth.admin.createUser({
         email,
-        password: cpfDigits,
         email_confirm: true,
         user_metadata: { full_name: data.nome, phone: digits, cpf: cpfDigits || null },
       });
