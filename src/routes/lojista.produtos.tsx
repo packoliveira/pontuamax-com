@@ -80,25 +80,20 @@ function ProdutosPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
-            Catálogo
-          </div>
-          <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">
-            Produtos para resgate
-          </h1>
-          <p className="mt-1 text-sm text-[#64748B]">
-            Produtos que seus clientes trocam por pontos.
-          </p>
-        </div>
-        <Button
-          onClick={openNew}
-          size="lg"
-          className="w-full shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
-        >
-          <Plus className="h-4 w-4" /> Novo produto
-        </Button>
+      <PageHeader
+        eyebrow="Catálogo"
+        title="Produtos para resgate"
+        description="Produtos que seus clientes trocam por pontos."
+        actions={
+          <Button
+            onClick={openNew}
+            size="lg"
+            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+          >
+            <Plus className="h-4 w-4" /> Novo produto
+          </Button>
+        }
+      />
       </div>
 
       {produtos.length === 0 ? (
