@@ -30,20 +30,20 @@ function Historico() {
   return (
     <div className="space-y-4">
       <PageHeader title="Histórico" />
-      <Card className="rounded-2xl border-[#E5E7EB]">
+      <Card className="rounded-2xl border-border">
         <CardContent className="p-0">
           <div className="divide-y divide-[#F1F5F9]">
             {(txs as any[]).length === 0 ? (
-              <div className="p-10 text-center text-sm text-[#64748B]">Sem transações ainda.</div>
+              <div className="p-10 text-center text-sm text-muted-foreground">Sem transações ainda.</div>
             ) : (
               (txs as any[]).map((t) => (
                 <div key={t.id} className="p-3 flex items-center gap-3 text-sm">
-                  <div className="text-[11px] text-[#64748B] w-32 shrink-0">
+                  <div className="text-[11px] text-muted-foreground w-32 shrink-0">
                     {new Date(t.created_at).toLocaleString("pt-BR")}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-[#0F172A]">{t.tipo}</div>
-                    <div className="text-xs text-[#64748B] truncate">
+                    <div className="font-semibold text-foreground">{t.tipo}</div>
+                    <div className="text-xs text-muted-foreground truncate">
                       {t.profiles?.full_name ?? "—"}
                     </div>
                   </div>

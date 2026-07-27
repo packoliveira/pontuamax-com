@@ -57,12 +57,12 @@ function ProdutosPage() {
 
   if (loja.modalidade === "cashback") {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-[#E5E7EB] bg-white p-10 text-center shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#F1F5F9] text-[#64748B]">
+      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-white p-10 text-center shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
           <PackageX className="h-5 w-5" />
         </div>
-        <h2 className="mt-4 text-lg font-semibold text-[#0F172A]">Produtos indisponíveis</h2>
-        <p className="mt-2 text-sm text-[#64748B]">
+        <h2 className="mt-4 text-lg font-semibold text-foreground">Produtos indisponíveis</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           Sua loja está no modo cashback. Ative pontos em Configurações para cadastrar produtos.
         </p>
       </div>
@@ -88,7 +88,7 @@ function ProdutosPage() {
           <Button
             onClick={openNew}
             size="lg"
-            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="rounded-xl bg-primary text-white shadow-sm hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" /> Novo produto
           </Button>
@@ -96,17 +96,17 @@ function ProdutosPage() {
       />
 
       {produtos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-white p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
             <Package className="h-5 w-5" />
           </div>
-          <h3 className="mt-4 text-base font-semibold text-[#0F172A]">Nenhum produto cadastrado</h3>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <h3 className="mt-4 text-base font-semibold text-foreground">Nenhum produto cadastrado</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             Adicione seu primeiro produto para que os clientes possam resgatar com pontos.
           </p>
           <Button
             onClick={openNew}
-            className="mt-5 rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+            className="mt-5 rounded-xl bg-primary text-white hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" /> Criar produto
           </Button>
@@ -116,9 +116,9 @@ function ProdutosPage() {
           {produtos.map((p) => (
             <Card
               key={p.id}
-              className="group overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white p-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="group overflow-hidden rounded-2xl border border-border bg-white p-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="relative aspect-video w-full overflow-hidden bg-[#F1F5F9]">
+              <div className="relative aspect-video w-full overflow-hidden bg-muted">
                 {p.foto_url ? (
                   <img
                     src={p.foto_url}
@@ -126,7 +126,7 @@ function ProdutosPage() {
                     className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[#94A3B8]">
+                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                     <ImageIcon className="h-8 w-8" />
                   </div>
                 )}
@@ -135,7 +135,7 @@ function ProdutosPage() {
                     "absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm " +
                     (p.ativo
                       ? "bg-[#22C55E]/15 text-[#15803D] ring-1 ring-inset ring-[#22C55E]/30"
-                      : "bg-[#F1F5F9] text-[#64748B] ring-1 ring-inset ring-[#E5E7EB]")
+                      : "bg-muted text-muted-foreground ring-1 ring-inset ring-[#E5E7EB]")
                   }
                 >
                   <span
@@ -146,8 +146,8 @@ function ProdutosPage() {
               </div>
               <CardContent className="space-y-3 p-5">
                 <div>
-                  <div className="truncate text-base font-semibold text-[#0F172A]">{p.nome}</div>
-                  <div className="mt-1 line-clamp-2 min-h-[2rem] text-xs text-[#64748B]">
+                  <div className="truncate text-base font-semibold text-foreground">{p.nome}</div>
+                  <div className="mt-1 line-clamp-2 min-h-[2rem] text-xs text-muted-foreground">
                     {p.descricao || "Sem descrição"}
                   </div>
                 </div>
@@ -155,13 +155,13 @@ function ProdutosPage() {
                   <span className="bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] bg-clip-text text-lg font-bold text-transparent">
                     {p.custo_pontos.toLocaleString("pt-BR")}
                   </span>
-                  <span className="text-xs font-medium text-[#64748B]">pts</span>
+                  <span className="text-xs font-medium text-muted-foreground">pts</span>
                 </div>
                 <div className="flex gap-2 pt-1">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1 rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9]"
+                    className="flex-1 rounded-xl border-border text-foreground hover:bg-muted"
                     onClick={() => openEdit(p)}
                   >
                     <Pencil className="h-3.5 w-3.5" /> Editar
@@ -169,7 +169,7 @@ function ProdutosPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="rounded-xl border-[#E5E7EB] text-[#EF4444] hover:border-[#EF4444]/40 hover:bg-[#EF4444]/5"
+                    className="rounded-xl border-border text-destructive hover:border-[#EF4444]/40 hover:bg-destructive/5"
                     onClick={() =>
                       remover.mutate(p.id, { onSuccess: () => toast.success("Removido") })
                     }

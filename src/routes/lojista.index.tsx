@@ -154,7 +154,7 @@ function Dashboard() {
         description={
           <>
             Sua página:{" "}
-            <span className="break-all font-mono text-[#0F172A]">
+            <span className="break-all font-mono text-foreground">
               pontuamax.com.br/{loja.slug}
             </span>
           </>
@@ -163,7 +163,7 @@ function Dashboard() {
           <Link to="/lojista/lancar-venda" className="w-full sm:w-auto">
             <Button
               size="lg"
-              className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
+              className="w-full rounded-xl bg-primary text-white shadow-sm hover:bg-primary/90 sm:w-auto"
             >
               <ShoppingCart className="h-4 w-4" /> Lançar venda
             </Button>
@@ -180,14 +180,14 @@ function Dashboard() {
               ? "text-emerald-600"
               : s.hintTone === "warn"
                 ? "text-amber-600"
-                : "text-[#64748B]";
+                : "text-muted-foreground";
           return (
             <div
               key={s.label}
               className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="mb-4 flex items-start justify-between">
-                <span className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {s.label}
                 </span>
                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${s.iconBg} ${s.iconColor}`}>
@@ -195,7 +195,7 @@ function Dashboard() {
                 </div>
               </div>
               <div className="flex flex-col">
-                <h3 className="text-3xl font-bold tracking-tight text-[#0F172A]">
+                <h3 className="text-3xl font-bold tracking-tight text-foreground">
                   {s.value}
                   {s.suffix && (
                     <span className="ml-1 text-lg font-medium opacity-50">{s.suffix}</span>
@@ -215,7 +215,7 @@ function Dashboard() {
 
       {/* Ações rápidas */}
       <section className="space-y-4">
-        <h3 className="text-xl font-bold text-[#0F172A]">Ações Rápidas</h3>
+        <h3 className="text-xl font-bold text-foreground">Ações Rápidas</h3>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {quickActions.map((a) => {
             const Icon = a.icon;
@@ -228,7 +228,7 @@ function Dashboard() {
                 <div className={`flex h-12 w-12 items-center justify-center rounded-full ${a.iconBg} ${a.iconColor} transition-transform group-hover:scale-110`}>
                   <Icon className="h-6 w-6" />
                 </div>
-                <span className="text-sm font-bold text-[#0F172A]">{a.label}</span>
+                <span className="text-sm font-bold text-foreground">{a.label}</span>
               </Link>
             );
           })}
@@ -238,21 +238,21 @@ function Dashboard() {
       {/* Últimas transações */}
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h3 className="text-xl font-bold text-[#0F172A]">Últimas Transações</h3>
-          <Link to="/lojista/clientes" className="text-sm font-bold text-[#2563EB] hover:underline">
+          <h3 className="text-xl font-bold text-foreground">Últimas Transações</h3>
+          <Link to="/lojista/clientes" className="text-sm font-bold text-primary hover:underline">
             Ver todas
           </Link>
         </div>
         {txs.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-[#94A3B8]">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-muted-foreground">
               <Coins className="h-4 w-4" />
             </div>
-            <p className="mt-3 text-sm text-[#64748B]">Nenhuma transação ainda.</p>
+            <p className="mt-3 text-sm text-muted-foreground">Nenhuma transação ainda.</p>
             <Link to="/lojista/lancar-venda">
               <Button
                 variant="outline"
-                className="mt-4 rounded-xl border-[#E5E7EB] text-[#2563EB] hover:bg-[#2563EB]/5"
+                className="mt-4 rounded-xl border-border text-primary hover:bg-primary/5"
               >
                 Lançar primeira venda
               </Button>
@@ -263,11 +263,11 @@ function Dashboard() {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50">
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-[#64748B]">Cliente</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-[#64748B]">Valor Venda</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-[#64748B]">Pontos</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-[#64748B]">Cashback</th>
-                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-[#64748B]">Data</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Cliente</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Valor Venda</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Pontos</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Cashback</th>
+                  <th className="px-6 py-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Data</th>
                   <th className="px-6 py-4"></th>
                 </tr>
               </thead>
@@ -299,42 +299,42 @@ function Dashboard() {
                     <tr key={t.id} className="group transition-colors hover:bg-slate-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-[#0F172A]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-foreground">
                             {initials}
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-[#0F172A]">{nomeCli}</span>
-                            <span className="text-xs text-[#64748B]">{tipoLabel}</span>
+                            <span className="text-sm font-bold text-foreground">{nomeCli}</span>
+                            <span className="text-xs text-muted-foreground">{tipoLabel}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm font-bold text-[#0F172A]">
+                      <td className="px-6 py-4 text-sm font-bold text-foreground">
                         {t.tipo === "venda" ? formatBRL(Number(t.valor)) : "—"}
                       </td>
                       <td className="px-6 py-4">
                         {t.pontos_delta ? (
-                          <span className={`text-sm font-bold ${t.pontos_delta > 0 ? "text-purple-600" : "text-[#EF4444]"}`}>
+                          <span className={`text-sm font-bold ${t.pontos_delta > 0 ? "text-purple-600" : "text-destructive"}`}>
                             {t.pontos_delta > 0 ? "+" : ""}
                             {t.pontos_delta} pts
                           </span>
                         ) : (
-                          <span className="text-sm text-[#94A3B8]">—</span>
+                          <span className="text-sm text-muted-foreground">—</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
                         {Number(t.cashback_delta) ? (
-                          <span className={`text-sm font-bold ${Number(t.cashback_delta) > 0 ? "text-emerald-600" : "text-[#EF4444]"}`}>
+                          <span className={`text-sm font-bold ${Number(t.cashback_delta) > 0 ? "text-emerald-600" : "text-destructive"}`}>
                             {Number(t.cashback_delta) > 0 ? "+" : ""}
                             {formatBRL(Number(t.cashback_delta))}
                           </span>
                         ) : (
-                          <span className="text-sm text-[#94A3B8]">—</span>
+                          <span className="text-sm text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-[#64748B]">{data}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{data}</td>
                       <td className="px-6 py-4 text-right">
                         <button className="rounded-lg p-2 opacity-0 transition-all hover:bg-slate-100 group-hover:opacity-100">
-                          <MoreVertical className="h-4 w-4 text-[#64748B]" />
+                          <MoreVertical className="h-4 w-4 text-muted-foreground" />
                         </button>
                       </td>
                     </tr>

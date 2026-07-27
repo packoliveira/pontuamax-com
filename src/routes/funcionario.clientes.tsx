@@ -242,7 +242,7 @@ function FuncClientes() {
             <Button
               size="lg"
               onClick={() => setOpenNew(true)}
-              className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+              className="rounded-xl bg-primary text-white shadow-sm hover:bg-primary/90"
             >
               <UserPlus className="h-4 w-4" /> Cadastrar cliente
             </Button>
@@ -250,9 +250,9 @@ function FuncClientes() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="relative min-w-[240px] max-w-md flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={
               filtroCampo === "nome"
@@ -265,11 +265,11 @@ function FuncClientes() {
             }
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="h-10 rounded-xl border-[#E5E7EB] bg-white pl-9 text-sm focus-visible:ring-[#2563EB]/30"
+            className="h-10 rounded-xl border-border bg-white pl-9 text-sm focus-visible:ring-primary/30"
           />
         </div>
         <Select value={filtroCampo} onValueChange={(v) => setFiltroCampo(v as FiltroCampo)}>
-          <SelectTrigger className="h-10 w-[150px] rounded-xl border-[#E5E7EB]">
+          <SelectTrigger className="h-10 w-[150px] rounded-xl border-border">
             <SelectValue placeholder="Campo" />
           </SelectTrigger>
           <SelectContent>
@@ -281,7 +281,7 @@ function FuncClientes() {
         </Select>
         {inclP && (
           <Select value={filtroNivel} onValueChange={(v) => setFiltroNivel(v as FiltroNivel)}>
-            <SelectTrigger className="h-10 w-[140px] rounded-xl border-[#E5E7EB]">
+            <SelectTrigger className="h-10 w-[140px] rounded-xl border-border">
               <SelectValue placeholder="Nível" />
             </SelectTrigger>
             <SelectContent>
@@ -293,7 +293,7 @@ function FuncClientes() {
           </Select>
         )}
         <Select value={filtroStatus} onValueChange={(v) => setFiltroStatus(v as FiltroStatus)}>
-          <SelectTrigger className="h-10 w-[170px] rounded-xl border-[#E5E7EB]">
+          <SelectTrigger className="h-10 w-[170px] rounded-xl border-border">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -312,14 +312,14 @@ function FuncClientes() {
               setFiltroNivel("todos");
               setFiltroStatus("todos");
             }}
-            className="rounded-xl text-[#2563EB] hover:bg-[#2563EB]/5"
+            className="rounded-xl text-primary hover:bg-primary/5"
           >
             Limpar
           </Button>
         )}
       </div>
 
-      <Card className="rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <CardContent className="p-0">
           <div className="divide-y divide-[#F1F5F9]">
             {filtered.map((c: any) => {
@@ -337,7 +337,7 @@ function FuncClientes() {
               return (
                 <div
                   key={c.id}
-                  className="flex flex-wrap items-start justify-between gap-4 p-5 transition duration-200 hover:bg-[#F8FAFC]"
+                  className="flex flex-wrap items-start justify-between gap-4 p-5 transition duration-200 hover:bg-muted/40"
                 >
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-xs font-semibold text-white shadow-sm">
@@ -345,7 +345,7 @@ function FuncClientes() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="truncate font-semibold text-[#0F172A]">{nome}</span>
+                        <span className="truncate font-semibold text-foreground">{nome}</span>
                         {c.pending_registration && (
                           <Badge
                             variant="secondary"
@@ -358,7 +358,7 @@ function FuncClientes() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-6 rounded-md px-2 text-xs text-[#2563EB] hover:bg-[#2563EB]/5"
+                            className="h-6 rounded-md px-2 text-xs text-primary hover:bg-primary/5"
                             onClick={() =>
                               setEditInfo({
                                 user_id: c.user_id,
@@ -372,14 +372,14 @@ function FuncClientes() {
                           </Button>
                         )}
                       </div>
-                      <div className="mt-0.5 text-xs text-[#64748B]">
+                      <div className="mt-0.5 text-xs text-muted-foreground">
                         {p?.phone ? <>Tel: {formatPhone(p.phone)}</> : <>Sem telefone</>} ·{" "}
                         {p?.cpf ? <>CPF: {formatCPF(p.cpf)}</> : <>Sem CPF</>}
                       </div>
-                      <div className="text-xs text-[#94A3B8]">
+                      <div className="text-xs text-muted-foreground">
                         Cadastrado: {formatDate(c.created_at)}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <Cake className="h-3 w-3" />
                         {canEdit && isEditing ? (
                           <>
@@ -389,11 +389,11 @@ function FuncClientes() {
                               onChange={(e) =>
                                 setEditing({ userId: c.user_id, value: e.target.value })
                               }
-                              className="h-7 w-40 rounded-lg border-[#E5E7EB]"
+                              className="h-7 w-40 rounded-lg border-border"
                             />
                             <Button
                               size="sm"
-                              className="h-7 rounded-lg bg-[#2563EB] px-2 text-white hover:bg-[#1D4ED8]"
+                              className="h-7 rounded-lg bg-primary px-2 text-white hover:bg-primary/90"
                               onClick={() =>
                                 salvarBirth.mutate({
                                   user_id: c.user_id,
@@ -419,7 +419,7 @@ function FuncClientes() {
                               : "sem aniversário"}
                             {canEdit && (
                               <button
-                                className="font-medium text-[#2563EB] hover:underline"
+                                className="font-medium text-primary hover:underline"
                                 onClick={() =>
                                   setEditing({ userId: c.user_id, value: p?.birthdate ?? "" })
                                 }
@@ -437,13 +437,13 @@ function FuncClientes() {
                             <Badge
                               key={t.id}
                               variant="outline"
-                              className="gap-1 rounded-full border-[#E5E7EB] bg-[#F8FAFC] px-2 py-0.5 text-[11px] font-medium text-[#0F172A]"
+                              className="gap-1 rounded-full border-border bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-foreground"
                             >
                               #{t.tag}
                               {canEdit && (
                                 <button
                                   onClick={() => rmTag.mutate(t.id)}
-                                  className="text-[#94A3B8] hover:text-[#EF4444]"
+                                  className="text-muted-foreground hover:text-destructive"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -458,12 +458,12 @@ function FuncClientes() {
                                 setTagInput((s) => ({ ...s, [c.user_id]: e.target.value }))
                               }
                               placeholder="nova tag"
-                              className="h-7 w-28 rounded-lg border-[#E5E7EB] text-xs"
+                              className="h-7 w-28 rounded-lg border-border text-xs"
                             />
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-7 rounded-lg px-1.5 text-[#2563EB] hover:bg-[#2563EB]/5"
+                              className="h-7 rounded-lg px-1.5 text-primary hover:bg-primary/5"
                               disabled={!(tagInput[c.user_id] ?? "").trim()}
                               onClick={() => {
                                 addTag.mutate({ user_id: c.user_id, tag: tagInput[c.user_id] });
@@ -481,12 +481,12 @@ function FuncClientes() {
                     {inclP && (
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="text-[10px] font-medium uppercase tracking-wider text-[#64748B]">
+                          <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                             Saldo
                           </div>
-                          <div className="text-lg font-bold text-[#0F172A]">
+                          <div className="text-lg font-bold text-foreground">
                             {c.pontos.toLocaleString("pt-BR")}{" "}
-                            <span className="text-xs font-normal text-[#64748B]">pts</span>
+                            <span className="text-xs font-normal text-muted-foreground">pts</span>
                           </div>
                         </div>
                         <NivelBadge pontos={c.pontos} nivel={c.nivel} />
@@ -503,7 +503,7 @@ function FuncClientes() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 rounded-lg border-[#E5E7EB] px-2.5 text-xs text-[#0F172A] hover:bg-[#F1F5F9]"
+                            className="h-8 rounded-lg border-border px-2.5 text-xs text-foreground hover:bg-muted"
                             onClick={() =>
                               setPontosDlg({
                                 user_id: c.user_id,
@@ -522,7 +522,7 @@ function FuncClientes() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 rounded-lg border-[#E5E7EB] px-2.5 text-xs text-[#0F172A] hover:bg-[#F1F5F9]"
+                            className="h-8 rounded-lg border-border px-2.5 text-xs text-foreground hover:bg-muted"
                             disabled={c.pontos <= 0}
                             onClick={() =>
                               setPontosDlg({
@@ -546,10 +546,10 @@ function FuncClientes() {
             })}
             {filtered.length === 0 && (
               <div className="p-12 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#F1F5F9] text-[#94A3B8]">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                   <Search className="h-5 w-5" />
                 </div>
-                <p className="mt-3 text-sm text-[#64748B]">Nenhum cliente encontrado.</p>
+                <p className="mt-3 text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
               </div>
             )}
           </div>
