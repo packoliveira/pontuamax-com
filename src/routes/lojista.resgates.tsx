@@ -335,13 +335,11 @@ function ResgatesPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Operação</div>
-        <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Resgates</h1>
-        <p className="mt-1 text-sm text-[#64748B]">
-          Valide o voucher do cliente pelo código ou pela lista abaixo.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Operação"
+        title="Resgates"
+        description="Valide o voucher do cliente pelo código ou pela lista abaixo."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Pendentes" value={pendentes.length} icon={Clock} tone="pending" />
