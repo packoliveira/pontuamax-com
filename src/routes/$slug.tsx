@@ -775,7 +775,7 @@ function Auth({
               </button>
               {mode === "login" && (
                 <p className="text-[11px] text-center text-slate-500 leading-relaxed">
-                  Se a loja cadastrou você, sua senha inicial é o seu próprio CPF (só números).
+                  Se a loja cadastrou você numa compra, use “Criar conta” com o mesmo CPF e telefone para definir sua senha.
                 </p>
               )}
             </form>
