@@ -501,7 +501,7 @@ function PersonalizacaoPage() {
                         className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
                           mobileFit === "cover"
                             ? "border-primary bg-[#EFF6FF]"
-                            : "border-border bg-white"
+                            : "border-border bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -516,7 +516,7 @@ function PersonalizacaoPage() {
                         className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
                           mobileFit === "contain"
                             ? "border-primary bg-[#EFF6FF]"
-                            : "border-border bg-white"
+                            : "border-border bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -803,7 +803,7 @@ function PersonalizacaoPage() {
                     <select
                       value={titleSize}
                       onChange={(e) => setTitleSize(e.target.value as typeof titleSize)}
-                      className="w-full h-10 rounded-md border border-border bg-white px-3 text-sm"
+                      className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm"
                     >
                       <option value="sm">Pequeno</option>
                       <option value="md">Médio (padrão)</option>
@@ -828,7 +828,7 @@ function PersonalizacaoPage() {
                     <select
                       value={titleWeight}
                       onChange={(e) => setTitleWeight(e.target.value as typeof titleWeight)}
-                      className="w-full h-10 rounded-md border border-border bg-white px-3 text-sm"
+                      className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm"
                     >
                       <option value="normal">Normal</option>
                       <option value="semibold">Semi-negrito</option>
@@ -852,7 +852,7 @@ function PersonalizacaoPage() {
                     <select
                       value={kickerSize}
                       onChange={(e) => setKickerSize(e.target.value as typeof kickerSize)}
-                      className="w-full h-10 rounded-md border border-border bg-white px-3 text-sm"
+                      className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm"
                     >
                       <option value="xs">Muito pequeno</option>
                       <option value="sm">Pequeno (padrão)</option>
@@ -1061,7 +1061,7 @@ function PersonalizacaoPage() {
                       className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
                         bgMode === opt.v
                           ? "border-primary bg-[#EFF6FF]"
-                          : "border-border bg-white"
+                          : "border-border bg-card"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1115,7 +1115,7 @@ function PersonalizacaoPage() {
                         setBgColor1(p.c1);
                         setBgColor2(p.c2);
                       }}
-                      className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs hover:border-primary"
+                      className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs hover:border-primary"
                     >
                       <span
                         className="h-4 w-8 rounded"
@@ -1141,7 +1141,7 @@ function PersonalizacaoPage() {
               <CardTitle className="text-base text-foreground">Efeitos visuais</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-white p-4">
+              <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4">
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-foreground">Chuva de Recompensas</div>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -1170,7 +1170,7 @@ function PersonalizacaoPage() {
               </div>
 
               {rewardRain && (
-                <div className="space-y-4 rounded-xl border border-border bg-white p-4">
+                <div className="space-y-4 rounded-xl border border-border bg-card p-4">
                   <div>
                     <div className="flex items-center justify-between">
                       <Label className="text-xs font-semibold text-foreground">
@@ -1198,7 +1198,7 @@ function PersonalizacaoPage() {
                               next[i] = e.target.value;
                               setRainColors(next);
                             }}
-                            className="h-9 w-9 cursor-pointer rounded-lg border border-border bg-white p-0.5"
+                            className="h-9 w-9 cursor-pointer rounded-lg border border-border bg-card p-0.5"
                             aria-label={`Cor ${i + 1}`}
                           />
                           {rainColors.length > 1 && (
@@ -1329,7 +1329,7 @@ function PersonalizacaoPage() {
                   e.currentTarget.value = "";
                 }}
               />
-              <span className="inline-flex items-center gap-1 rounded-xl border border-border bg-white px-4 h-11 text-sm font-medium cursor-pointer hover:bg-muted/40">
+              <span className="inline-flex items-center gap-1 rounded-xl border border-border bg-card px-4 h-11 text-sm font-medium cursor-pointer hover:bg-muted/40">
                 <Upload className="h-4 w-4" /> Importar tema
               </span>
             </label>

@@ -75,7 +75,7 @@ export function LivePreview({
   const chipBorder = isLightBg ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
   return (
     <div className="space-y-2">
-      <div className="inline-flex rounded-lg border border-border bg-white p-0.5 text-xs">
+      <div className="inline-flex rounded-lg border border-border bg-card p-0.5 text-xs">
         <button
           type="button"
           onClick={() => setDevice("mobile")}

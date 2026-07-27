@@ -276,7 +276,7 @@ export function IntegracoesCard({
               Nenhum evento recebido ainda.
             </div>
           ) : (
-            <div className="rounded-xl border border-border divide-y divide-border bg-white">
+            <div className="rounded-xl border border-border divide-y divide-border bg-card">
               {logs.map((log) => (
                 <div key={log.id} className="p-2 text-xs flex items-start gap-2">
                   <span
@@ -837,7 +837,7 @@ export function WhatsappQRConnect({ storeId }: { storeId: string }) {
           <img
             src={qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`}
             alt="QR Code do WhatsApp"
-            className="w-56 h-56 border border-border rounded-xl bg-white p-2"
+            className="w-56 h-56 border border-border rounded-xl bg-card p-2"
           />
           <p className="text-xs text-muted-foreground text-center max-w-xs">
             Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> →{" "}
@@ -1129,7 +1129,7 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
         </p>
 
         {/* Aniversário */}
-        <div className="rounded-xl border border-border bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
               <Cake className="h-4 w-4 text-[#EC4899]" /> Aniversário
@@ -1163,7 +1163,7 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
         </div>
 
         {/* Inatividade */}
-        <div className="rounded-xl border border-border bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
               <Clock className="h-4 w-4 text-[#F59E0B]" /> Cliente sumido
@@ -1195,7 +1195,7 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
         </div>
 
         {/* Expiração */}
-        <div className="rounded-xl border border-border bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
               <TimerReset className="h-4 w-4 text-destructive" /> Pontos a expirar

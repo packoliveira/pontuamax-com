@@ -205,7 +205,7 @@ function EquipePage() {
 
           <Card className="rounded-2xl border-border">
             <CardContent className="p-0">
-              <div className="divide-y divide-[#F1F5F9]">
+              <div className="divide-y divide-border">
                 {filtered.length === 0 ? (
                   <div className="p-10 text-center text-sm text-muted-foreground">
                     Nenhum vendedor encontrado. Clique em <strong>Cadastrar vendedor</strong>{" "}
@@ -778,7 +778,7 @@ function PermissionsDialog({
               <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 {cat}
               </div>
-              <div className="rounded-xl border border-border divide-y divide-[#F1F5F9]">
+              <div className="rounded-xl border border-border divide-y divide-border">
                 {list.map((p) => {
                   const on = eff.get(p.key) === true;
                   const isDefault = roleDefault.has(p.key);
@@ -844,7 +844,7 @@ function AuditLogsPanel() {
   return (
     <Card className="rounded-2xl border-border">
       <CardContent className="p-0">
-        <div className="divide-y divide-[#F1F5F9]">
+        <div className="divide-y divide-border">
           {logs.length === 0 ? (
             <div className="p-10 text-center text-sm text-muted-foreground">Sem registros ainda.</div>
           ) : (

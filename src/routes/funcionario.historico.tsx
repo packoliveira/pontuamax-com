@@ -32,7 +32,7 @@ function Historico() {
       <PageHeader title="Histórico" />
       <Card className="rounded-2xl border-border">
         <CardContent className="p-0">
-          <div className="divide-y divide-[#F1F5F9]">
+          <div className="divide-y divide-border">
             {(txs as any[]).length === 0 ? (
               <div className="p-10 text-center text-sm text-muted-foreground">Sem transações ainda.</div>
             ) : (

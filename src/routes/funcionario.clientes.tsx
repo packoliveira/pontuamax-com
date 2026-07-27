@@ -250,7 +250,7 @@ function FuncClientes() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="relative min-w-[240px] max-w-md flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -265,7 +265,7 @@ function FuncClientes() {
             }
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="h-10 rounded-xl border-border bg-white pl-9 text-sm focus-visible:ring-primary/30"
+            className="h-10 rounded-xl border-border bg-card pl-9 text-sm focus-visible:ring-primary/30"
           />
         </div>
         <Select value={filtroCampo} onValueChange={(v) => setFiltroCampo(v as FiltroCampo)}>
@@ -319,9 +319,9 @@ function FuncClientes() {
         )}
       </div>
 
-      <Card className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <CardContent className="p-0">
-          <div className="divide-y divide-[#F1F5F9]">
+          <div className="divide-y divide-border">
             {filtered.map((c: any) => {
               const p = c.profiles as ClienteProfile | null;
               const isEditing = editing?.userId === c.user_id;

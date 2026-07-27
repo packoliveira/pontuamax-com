@@ -184,7 +184,7 @@ function Dashboard() {
           return (
             <div
               key={s.label}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              className="rounded-2xl border border-slate-200 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="mb-4 flex items-start justify-between">
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -223,7 +223,7 @@ function Dashboard() {
               <Link
                 key={a.to}
                 to={a.to as "/lojista/clientes"}
-                className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center transition-colors hover:bg-slate-50 active:scale-[0.98]"
+                className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-card p-6 text-center transition-colors hover:bg-slate-50 active:scale-[0.98]"
               >
                 <div className={`flex h-12 w-12 items-center justify-center rounded-full ${a.iconBg} ${a.iconColor} transition-transform group-hover:scale-110`}>
                   <Icon className="h-6 w-6" />
@@ -236,7 +236,7 @@ function Dashboard() {
       </section>
 
       {/* Últimas transações */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <h3 className="text-xl font-bold text-foreground">Últimas Transações</h3>
           <Link to="/lojista/clientes" className="text-sm font-bold text-primary hover:underline">

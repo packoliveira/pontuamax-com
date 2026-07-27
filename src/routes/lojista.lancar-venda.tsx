@@ -246,7 +246,7 @@ function LancarVenda() {
         description="Credite pontos e/ou cashback para um cliente em poucos segundos."
       />
 
-      <Card className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="flex items-center gap-3 border-b border-[#F1F5F9] bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
             <ShoppingCart className="h-4 w-4" />
@@ -274,11 +274,11 @@ function LancarVenda() {
                 }}
                 inputMode="search"
                 autoComplete="off"
-                className="h-11 rounded-xl border-border bg-white focus-visible:ring-primary/30"
+                className="h-11 rounded-xl border-border bg-card focus-visible:ring-primary/30"
                 required
               />
               {sugestoes.length > 0 && !clienteSelecionado && (
-                <div className="mt-1 max-h-56 divide-y divide-[#F1F5F9] overflow-auto rounded-xl border border-border bg-white shadow-sm">
+                <div className="mt-1 max-h-56 divide-y divide-border overflow-auto rounded-xl border border-border bg-card shadow-sm">
                   {sugestoes.map((c) => {
                     const p = c.profiles as unknown as {
                       full_name: string | null;
@@ -359,7 +359,7 @@ function LancarVenda() {
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
                 inputMode="decimal"
-                className="h-11 rounded-xl border-border bg-white text-lg font-semibold focus-visible:ring-primary/30"
+                className="h-11 rounded-xl border-border bg-card text-lg font-semibold focus-visible:ring-primary/30"
                 required
               />
             </div>
@@ -374,21 +374,21 @@ function LancarVenda() {
                   placeholder="Nome do cliente"
                   value={nomeNovo}
                   onChange={(e) => setNomeNovo(e.target.value)}
-                  className="h-11 rounded-xl border-border bg-white focus-visible:ring-primary/30"
+                  className="h-11 rounded-xl border-border bg-card focus-visible:ring-primary/30"
                 />
                 <Input
                   placeholder="Telefone (com DDD)"
                   value={telefoneNovo}
                   onChange={(e) => setTelefoneNovo(e.target.value)}
                   inputMode="tel"
-                  className="h-11 rounded-xl border-border bg-white focus-visible:ring-primary/30"
+                  className="h-11 rounded-xl border-border bg-card focus-visible:ring-primary/30"
                 />
                 <Input
                   placeholder="CPF (000.000.000-00)"
                   value={cpfNovo}
                   onChange={(e) => setCpfNovo(formatCPF(e.target.value))}
                   inputMode="numeric"
-                  className="h-11 rounded-xl border-border bg-white focus-visible:ring-primary/30"
+                  className="h-11 rounded-xl border-border bg-card focus-visible:ring-primary/30"
                 />
                 {cpfNovo.trim() && !isValidCPF(cpfNovo) && (
                   <p className="text-xs font-medium text-destructive">CPF inválido</p>
@@ -415,7 +415,7 @@ function LancarVenda() {
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {inclP && (
-                    <div className="flex items-center gap-3 rounded-xl border border-border bg-white p-3">
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] to-[#2563EB] text-white">
                         <Coins className="h-4 w-4" />
                       </div>
@@ -430,7 +430,7 @@ function LancarVenda() {
                     </div>
                   )}
                   {inclC && (
-                    <div className="flex items-center gap-3 rounded-xl border border-border bg-white p-3">
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563EB] to-[#14CBA8] text-white">
                         <Wallet className="h-4 w-4" />
                       </div>
@@ -461,7 +461,7 @@ function LancarVenda() {
       </Card>
 
       {ultimo && (
-        <Card className="overflow-hidden rounded-2xl border border-[#22C55E]/30 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <Card className="overflow-hidden rounded-2xl border border-[#22C55E]/30 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <div className="flex items-center gap-3 bg-gradient-to-r from-[#22C55E]/10 to-[#14CBA8]/10 px-6 py-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#14CBA8] text-white shadow-sm">
               <CheckCircle2 className="h-4 w-4" />
@@ -473,7 +473,7 @@ function LancarVenda() {
           </div>
           <CardContent className="grid gap-3 p-6 sm:grid-cols-2">
             {ultimo.pontos > 0 && (
-              <div className="flex items-center gap-3 rounded-xl border border-border bg-white p-3">
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] to-[#2563EB] text-white">
                   <Coins className="h-4 w-4" />
                 </div>
@@ -488,7 +488,7 @@ function LancarVenda() {
               </div>
             )}
             {ultimo.cashback > 0 && (
-              <div className="flex items-center gap-3 rounded-xl border border-border bg-white p-3">
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563EB] to-[#14CBA8] text-white">
                   <Wallet className="h-4 w-4" />
                 </div>
@@ -507,13 +507,13 @@ function LancarVenda() {
       )}
 
       {ultimasVendas.length > 0 && (
-        <Card className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <CardContent className="p-6">
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm font-semibold text-foreground">Últimas vendas</div>
               <span className="text-xs text-muted-foreground">{ultimasVendas.length} recentes</span>
             </div>
-            <ul className="divide-y divide-[#F1F5F9]">
+            <ul className="divide-y divide-border">
               {ultimasVendas.map((t) => {
                 const p = t.profiles as unknown as {
                   full_name: string | null;

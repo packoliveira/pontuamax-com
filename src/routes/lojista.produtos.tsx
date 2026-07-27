@@ -57,7 +57,7 @@ function ProdutosPage() {
 
   if (loja.modalidade === "cashback") {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-white p-10 text-center shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-10 text-center shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
           <PackageX className="h-5 w-5" />
         </div>
@@ -96,7 +96,7 @@ function ProdutosPage() {
       />
 
       {produtos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
             <Package className="h-5 w-5" />
           </div>
@@ -116,7 +116,7 @@ function ProdutosPage() {
           {produtos.map((p) => (
             <Card
               key={p.id}
-              className="group overflow-hidden rounded-2xl border border-border bg-white p-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="group overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="relative aspect-video w-full overflow-hidden bg-muted">
                 {p.foto_url ? (
@@ -135,7 +135,7 @@ function ProdutosPage() {
                     "absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm " +
                     (p.ativo
                       ? "bg-[#22C55E]/15 text-[#15803D] ring-1 ring-inset ring-[#22C55E]/30"
-                      : "bg-muted text-muted-foreground ring-1 ring-inset ring-[#E5E7EB]")
+                      : "bg-muted text-muted-foreground ring-1 ring-inset ring-border")
                   }
                 >
                   <span

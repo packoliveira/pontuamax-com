@@ -104,7 +104,7 @@ const StatCard = memo(function StatCard({
     cancelled: "from-[#EF4444] to-[#B91C1C]",
   }[tone];
   return (
-    <Card className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
@@ -247,9 +247,9 @@ const Section = memo(function Section({
           {title} <span className="ml-1 font-medium text-muted-foreground">({items.length})</span>
         </h2>
       </div>
-      <Card className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <CardContent className="p-0">
-          <div className="divide-y divide-[#F1F5F9]">
+          <div className="divide-y divide-border">
             {shown.map((r) => (
               <Row
                 key={r.id}
@@ -348,7 +348,7 @@ function ResgatesPage() {
         <StatCard label="Cancelados" value={cancelados.length} icon={XCircle} tone="cancelled" />
       </div>
 
-      <Card className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="border-b border-[#F1F5F9] bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
@@ -375,7 +375,7 @@ function ResgatesPage() {
               value={codigo}
               onChange={(e) => setCodigo(e.target.value.toUpperCase())}
               placeholder="QSF-XXXXXX"
-              className="h-11 rounded-xl border-border bg-white font-mono uppercase tracking-widest focus-visible:ring-primary/30"
+              className="h-11 rounded-xl border-border bg-card font-mono uppercase tracking-widest focus-visible:ring-primary/30"
               autoComplete="off"
             />
             <Button
@@ -408,7 +408,7 @@ function ResgatesPage() {
           cancelling={cancelar.isPending}
         />
       ) : (
-        <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
             <CheckCircle2 className="h-5 w-5" />
           </div>
@@ -471,7 +471,7 @@ function ResgatesPage() {
             {comprovante && (
               <div
                 id="comprovante-print"
-                className="space-y-3 rounded-2xl border border-border bg-white p-5 text-sm"
+                className="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm"
               >
                 <div className="text-center">
                   <div className="text-base font-bold text-foreground">

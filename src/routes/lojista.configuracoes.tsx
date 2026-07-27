@@ -43,7 +43,7 @@ const ValidadePontosCard = lazy(() =>
 
 function CardSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="h-4 w-40 animate-pulse rounded bg-muted" />
       <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-muted" />
       <div className="mt-6 h-32 animate-pulse rounded-xl bg-muted/40" />
@@ -175,7 +175,7 @@ function ConfigPage() {
                   className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     active
                       ? "border-primary bg-primary text-white"
-                      : "border-border bg-white text-[#334155] hover:bg-muted/40"
+                      : "border-border bg-card text-[#334155] hover:bg-muted/40"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -185,7 +185,7 @@ function ConfigPage() {
             })}
           </div>
           {/* Desktop: lista vertical */}
-          <div className="hidden lg:block rounded-2xl border border-border bg-white p-2 shadow-sm">
+          <div className="hidden lg:block rounded-2xl border border-border bg-card p-2 shadow-sm">
             {SECTIONS.map((s) => {
               const Icon = s.icon;
               const active = section === s.id;
@@ -201,7 +201,7 @@ function ConfigPage() {
                 >
                   <span
                     className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
-                      active ? "bg-white text-primary" : "bg-muted text-muted-foreground"
+                      active ? "bg-card text-primary" : "bg-muted text-muted-foreground"
                     }`}
                   >
                     <Icon className="h-4 w-4" />

@@ -119,7 +119,7 @@ function Dashboard() {
     <div className="space-y-8">
       {showWelcome && (
         <div className="rounded-2xl border border-[#14CBA8]/30 bg-gradient-to-r from-[#14CBA8]/10 via-[#2563EB]/10 to-[#6D28D9]/10 p-4 flex items-start gap-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-[#14CBA8] shadow-sm">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-card text-[#14CBA8] shadow-sm">
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="text-sm text-foreground">
@@ -155,7 +155,7 @@ function Dashboard() {
           return (
             <Card
               key={s.label}
-              className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
@@ -183,7 +183,7 @@ function Dashboard() {
               <Link
                 key={a.to}
                 to={a.to as "/funcionario"}
-                className="group flex items-center gap-3 rounded-2xl border border-border bg-white p-4 transition duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-primary transition group-hover:bg-primary/10">
                   <Icon className="h-4 w-4" />
@@ -196,7 +196,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <Card className="rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <CardContent className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <div className="text-sm font-semibold text-foreground">Últimas transações</div>
@@ -206,13 +206,13 @@ function Dashboard() {
           </div>
           {(txs as any[]).length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-muted/40 p-8 text-center">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white text-muted-foreground shadow-sm">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-card text-muted-foreground shadow-sm">
                 <LayoutDashboard className="h-4 w-4" />
               </div>
               <p className="mt-3 text-sm text-muted-foreground">Nenhuma transação ainda.</p>
             </div>
           ) : (
-            <ul className="divide-y divide-[#F1F5F9]">
+            <ul className="divide-y divide-border">
               {(txs as any[]).slice(0, 8).map((t) => {
                 const nomeCli = t.profiles?.full_name ?? "—";
                 const tipoLabel =
