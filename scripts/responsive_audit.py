@@ -11,6 +11,7 @@ import sys
 from playwright.async_api import async_playwright
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
+ONLY = [r for r in sys.argv[2:]]
 WIDTHS = [320, 360, 390]
 
 ROUTES = [
@@ -64,7 +65,7 @@ async def main():
                                             is_mobile=True, has_touch=True,
                                             device_scale_factor=2)
             page = await ctx.new_page()
-            for route in ROUTES:
+            for route in (ONLY or ROUTES):
                 try:
                     await page.goto(BASE + route, wait_until="networkidle", timeout=20000)
                 except Exception:
