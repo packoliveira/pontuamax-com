@@ -13,7 +13,6 @@ import {
 } from "@/lib/queries";
 import {
   vincularClienteALoja,
-  prepararLoginClientePorCpf,
   reivindicarCadastroPendente,
   resgatarProduto,
   resgatarCashback,
@@ -552,6 +551,14 @@ function Auth({
         const claim = await reivindicarCadastroPendente({
           data: { cpf: cpfDigits, senha, nome: nome.trim(), phone: phoneDigits || null },
         });
+        if (!claim.claimed && claim.reason === "phone_mismatch") {
+          setErroPhone(
+            "Este CPF já foi cadastrado pela loja. Informe o mesmo telefone usado na compra para ativar sua conta.",
+          );
+          setLoading(false);
+          onAuthError?.();
+          return;
+        }
         if (!claim.claimed) {
           // Cria via server (admin) com email_confirm=true — o email é
           // sintético (@cliente.qsfclub.local) e não existe, então NÃO
@@ -578,17 +585,7 @@ function Auth({
         toast.success(`Bem-vindo(a), ${nome}!`);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-        if (error) {
-          const prepared = await prepararLoginClientePorCpf({
-            data: { store_id: loja.id, cpf: cpfDigits, senha },
-          });
-          if (!prepared.normalized) throw error;
-          const { error: retryError } = await supabase.auth.signInWithPassword({
-            email,
-            password: senha,
-          });
-          if (retryError) throw retryError;
-        }
+        if (error) throw error;
         // Ensure link exists (marca como "acabou de entrar" para evitar sign-out
         // se a query my-link demorar 1 tick para refletir o vínculo)
         try {
@@ -607,7 +604,7 @@ function Auth({
         switchTo("login", "Já existe uma conta com esse CPF. Entre com sua senha abaixo.");
       } else if (mode === "login" && isCredenciaisInvalidas(err)) {
         setAviso(
-          "CPF ou senha incorretos. Confira os dois campos. Se a loja cadastrou você, sua senha inicial é o CPF com apenas números.",
+          "CPF ou senha incorretos. Se a loja cadastrou você numa compra, use a opção de criar conta com o mesmo CPF e telefone para definir sua senha.",
         );
       } else {
         toast.error(traduzirErroAuth(err));

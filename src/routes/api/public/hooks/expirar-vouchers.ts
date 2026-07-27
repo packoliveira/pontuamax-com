@@ -1,13 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Cron hook: expira vouchers de resgate vencidos e devolve pontos/cashback ao cliente.
-// Chamado por pg_cron. Autenticado por header apikey = SUPABASE_PUBLISHABLE_KEY.
+// Chamado por pg_cron. Autenticado por header x-cron-secret = CRON_SECRET (segredo privado).
 export const Route = createFileRoute("/api/public/hooks/expirar-vouchers")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
+        const secret = process.env.CRON_SECRET;
+        const key =
+          request.headers.get("x-cron-secret") ??
+          request.headers.get("apikey") ??
+          request.headers.get("x-api-key");
+        if (!secret || !key || key !== secret) {
           return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -40,8 +40,12 @@ export const Route = createFileRoute("/api/public/hooks/notifications-daily")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
+        const secret = process.env.CRON_SECRET;
+        const key =
+          request.headers.get("x-cron-secret") ??
+          request.headers.get("apikey") ??
+          request.headers.get("x-api-key");
+        if (!secret || !key || key !== secret) {
           return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
         }
 

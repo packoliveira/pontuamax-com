@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Cron hook: processa campanhas cujo horário de envio já chegou (status="agendada").
-// Autenticado por header apikey = SUPABASE_PUBLISHABLE_KEY.
+// Autenticado por header x-cron-secret = CRON_SECRET (segredo privado).
 // Roda campanhas em série, com timeout defensivo, para não estourar o Worker.
 export const Route = createFileRoute("/api/public/hooks/campanhas-agendadas")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-        if (!key || key !== process.env.SUPABASE_PUBLISHABLE_KEY) {
+        const secret = process.env.CRON_SECRET;
+        const key =
+          request.headers.get("x-cron-secret") ??
+          request.headers.get("apikey") ??
+          request.headers.get("x-api-key");
+        if (!secret || !key || key !== secret) {
           return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
         }
 
