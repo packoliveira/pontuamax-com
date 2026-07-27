@@ -72,7 +72,7 @@ export const Route = createFileRoute("/funcionario")({
 });
 
 function FuncionarioLayout() {
-  usePanelTheme();
+  usePanelTheme({ scope: true });
   const [open, setOpen] = useState(false);
   const { data, hasAny, loading } = useEmployeeContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });

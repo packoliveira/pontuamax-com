@@ -47,7 +47,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  usePanelTheme();
+  usePanelTheme({ scope: true });
   const ctx = Route.useRouteContext();
   const qc = useQueryClient();
 

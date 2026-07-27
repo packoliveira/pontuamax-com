@@ -57,7 +57,7 @@ export const Route = createFileRoute("/lojista")({
 });
 
 function LojistaLayout() {
-  usePanelTheme();
+  usePanelTheme({ scope: true });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // Rotas públicas / standalone: sem shell
   const standalone = ["/lojista/login", "/lojista/onboarding", "/lojista/aguardando"];
