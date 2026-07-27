@@ -343,7 +343,7 @@ export function FuncionarioResgatesPanel({ title = "Resgates" }: { title?: strin
       </div>
       {canValidate && (
         <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="border-b border-[#F1F5F9] bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">
+          <div className="border-b border-border bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
                 <ScanLine className="h-4 w-4" />
@@ -475,7 +475,7 @@ export function FuncionarioResgatesPanel({ title = "Resgates" }: { title?: strin
                   </div>
                   <div className="text-xs text-muted-foreground">Comprovante de entrega</div>
                 </div>
-                <div className="grid grid-cols-[110px_1fr] gap-y-1.5 border-t border-[#F1F5F9] pt-3">
+                <div className="grid grid-cols-[110px_1fr] gap-y-1.5 border-t border-border pt-3">
                   <span className="text-muted-foreground">Cliente</span>
                   <span className="font-medium text-foreground">{comprovante.cliente}</span>
                   {comprovante.cliente_telefone && (
@@ -493,7 +493,7 @@ export function FuncionarioResgatesPanel({ title = "Resgates" }: { title?: strin
                     {new Date(comprovante.delivered_at).toLocaleString("pt-BR")}
                   </span>
                 </div>
-                <div className="space-y-1.5 border-t border-[#F1F5F9] pt-3">
+                <div className="space-y-1.5 border-t border-border pt-3">
                   {comprovante.produto && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Produto resgatado</span>

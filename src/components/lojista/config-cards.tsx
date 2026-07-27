@@ -996,7 +996,7 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
               <button
                 key={v}
                 type="button"
-                className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground hover:bg-[#E5E7EB] font-mono transition-colors duration-200"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground hover:bg-muted/70 font-mono transition-colors duration-200"
                 onClick={() => setTemplate((t) => `${t}${v}`)}
               >
                 {v}
