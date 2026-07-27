@@ -144,8 +144,9 @@ function EquipePage() {
           >
             <UserPlus className="h-4 w-4" /> Cadastrar vendedor
           </Button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Tabs defaultValue="lista" className="space-y-4">
         <TabsList>
