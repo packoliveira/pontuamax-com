@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/page-header";
+import { useHasSession } from "@/hooks/use-has-session";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -63,8 +64,9 @@ export const Route = createFileRoute("/lojista/equipe")({
 
 function EquipePage() {
   const qc = useQueryClient();
-  const { data: catalog } = useQuery(rolesAndPermsQuery());
-  const { data: employees = [] } = useQuery(employeesQuery());
+  const hasSession = useHasSession() === true;
+  const { data: catalog } = useQuery(rolesAndPermsQuery(hasSession));
+  const { data: employees = [] } = useQuery(employeesQuery(hasSession));
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("todos");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
@@ -837,7 +839,7 @@ function PermissionsDialog({
 }
 
 function AuditLogsPanel() {
-  const { data: logs = [] } = useQuery(teamAuditLogsQuery());
+  const { data: logs = [] } = useQuery(teamAuditLogsQuery(hasSession));
   return (
     <Card className="rounded-2xl border-[#E5E7EB]">
       <CardContent className="p-0">
