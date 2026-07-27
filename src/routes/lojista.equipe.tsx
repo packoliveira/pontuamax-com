@@ -839,6 +839,7 @@ function PermissionsDialog({
 }
 
 function AuditLogsPanel() {
+  const hasSession = useHasSession() === true;
   const { data: logs = [] } = useQuery(teamAuditLogsQuery(hasSession));
   return (
     <Card className="rounded-2xl border-[#E5E7EB]">
