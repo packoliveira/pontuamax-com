@@ -43,15 +43,23 @@ if (typeof window !== "undefined") {
 
 function subscribe(cb: () => void) {
   listeners.add(cb);
-  return () => listeners.delete(cb);
+  return () => {
+    listeners.delete(cb);
+  };
 }
+
+// Quantos painéis estão montados. Só removemos a classe `dark` do <html>
+// quando o último painel desmonta — assim o ThemeToggle (que também usa este
+// hook) não apaga o tema ao ser desmontado/remontado.
+let mounted = 0;
 
 /**
  * Aplica o tema (claro/escuro) do painel enquanto o componente estiver montado
  * e expõe um toggle. A preferência é compartilhada entre os painéis do lojista
  * e do admin via localStorage.
  */
-export function usePanelTheme() {
+export function usePanelTheme(options?: { scope?: boolean }) {
+  const scope = options?.scope ?? false;
   const theme = useSyncExternalStore(
     subscribe,
     () => current,
@@ -59,12 +67,22 @@ export function usePanelTheme() {
   );
 
   useEffect(() => {
-    applyToDom(theme);
+    if (!scope) return;
+    mounted += 1;
+    applyToDom(current);
     return () => {
-      // volta pro tema claro ao desmontar o painel (portais/páginas públicas)
-      if (typeof document !== "undefined") document.documentElement.classList.remove("dark");
+      mounted -= 1;
+      // volta pro tema claro apenas quando nenhum painel está montado
+      // (páginas públicas / portais do cliente).
+      if (mounted <= 0 && typeof document !== "undefined") {
+        document.documentElement.classList.remove("dark");
+      }
     };
-  }, [theme]);
+  }, [scope]);
+
+  useEffect(() => {
+    if (scope) applyToDom(theme);
+  }, [scope, theme]);
 
   const toggle = useCallback(() => {
     setCurrent(current === "dark" ? "light" : "dark");
