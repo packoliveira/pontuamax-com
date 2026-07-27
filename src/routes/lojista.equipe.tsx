@@ -116,14 +116,14 @@ function EquipePage() {
     <div className="space-y-6">
       <PageHeader
         title="Equipe"
-        icon={<Users className="h-6 w-6 text-[#2563EB]" />}
+        icon={<Users className="h-6 w-6 text-primary" />}
         description="Gerencie vendedores, cargos e permissões da sua loja."
         actions={
           <>
           <Button
             asChild
             variant="outline"
-            className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F8FAFC]"
+            className="rounded-xl border-border text-foreground hover:bg-muted/40"
           >
             <a href="/funcionario/login" target="_blank" rel="noreferrer">
               <LogIn className="h-4 w-4" /> Acesso do vendedor
@@ -131,7 +131,7 @@ function EquipePage() {
           </Button>
           <Button
             variant="outline"
-            className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F8FAFC]"
+            className="rounded-xl border-border text-foreground hover:bg-muted/40"
             onClick={() => {
               const url = `${window.location.origin}/funcionario/login`;
               navigator.clipboard?.writeText(url);
@@ -161,11 +161,11 @@ function EquipePage() {
         </TabsList>
 
         <TabsContent value="lista" className="space-y-4">
-          <Card className="rounded-2xl border-[#E5E7EB]">
+          <Card className="rounded-2xl border-border">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     className="pl-9 rounded-xl"
                     placeholder="Buscar por nome, e-mail, CPF ou telefone…"
@@ -203,11 +203,11 @@ function EquipePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-[#E5E7EB]">
+          <Card className="rounded-2xl border-border">
             <CardContent className="p-0">
-              <div className="divide-y divide-[#F1F5F9]">
+              <div className="divide-y divide-border">
                 {filtered.length === 0 ? (
-                  <div className="p-10 text-center text-sm text-[#64748B]">
+                  <div className="p-10 text-center text-sm text-muted-foreground">
                     Nenhum vendedor encontrado. Clique em <strong>Cadastrar vendedor</strong>{" "}
                     para começar.
                   </div>
@@ -224,8 +224,8 @@ function EquipePage() {
                             {emp.nome.slice(0, 1).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-semibold text-[#0F172A] truncate">{emp.nome}</div>
-                            <div className="text-xs text-[#64748B] truncate">
+                            <div className="font-semibold text-foreground truncate">{emp.nome}</div>
+                            <div className="text-xs text-muted-foreground truncate">
                               {emp.email}
                               {emp.phone ? ` • ${emp.phone}` : ""}
                             </div>
@@ -562,7 +562,7 @@ function CreateOrEditDialog({
                 </Label>
                 <button
                   type="button"
-                  className="text-xs text-[#2563EB] hover:underline"
+                  className="text-xs text-primary hover:underline"
                   onClick={() => {
                     const m = new Map<string, boolean>();
                     for (const p of permissions) m.set(p.key, roleDefault.has(p.key));
@@ -572,14 +572,14 @@ function CreateOrEditDialog({
                   Restaurar padrão do cargo
                 </button>
               </div>
-              <div className="text-xs text-[#64748B]">
+              <div className="text-xs text-muted-foreground">
                 Marque ou desmarque o que este vendedor poderá acessar. Você pode ajustar depois
                 em "Permissões".
               </div>
-              <div className="space-y-3 max-h-72 overflow-y-auto rounded-xl border border-[#E5E7EB] p-3">
+              <div className="space-y-3 max-h-72 overflow-y-auto rounded-xl border border-border p-3">
                 {groupedPerms.map(([cat, list]) => (
                   <div key={cat}>
-                    <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#64748B]">
+                    <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                       {cat}
                     </div>
                     <div className="grid sm:grid-cols-2 gap-1.5">
@@ -589,12 +589,12 @@ function CreateOrEditDialog({
                         return (
                           <label
                             key={p.key}
-                            className="flex items-start gap-2 text-sm p-2 rounded-lg hover:bg-[#F8FAFC] cursor-pointer"
+                            className="flex items-start gap-2 text-sm p-2 rounded-lg hover:bg-muted/40 cursor-pointer"
                             title={p.description}
                           >
                             <input
                               type="checkbox"
-                              className="mt-0.5 h-4 w-4 rounded border-[#CBD5E1] text-[#2563EB]"
+                              className="mt-0.5 h-4 w-4 rounded border-[#CBD5E1] text-primary"
                               checked={on}
                               onChange={(e) => {
                                 const next = new Map(permState);
@@ -603,7 +603,7 @@ function CreateOrEditDialog({
                               }}
                             />
                             <span className="flex-1">
-                              <span className="text-[#0F172A]">{p.label}</span>
+                              <span className="text-foreground">{p.label}</span>
                               {on !== def && (
                                 <span className="ml-1 text-[10px] text-amber-700">(alterado)</span>
                               )}
@@ -775,10 +775,10 @@ function PermissionsDialog({
         <div className="space-y-5">
           {grouped.map(([cat, list]) => (
             <div key={cat}>
-              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-[#64748B]">
+              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 {cat}
               </div>
-              <div className="rounded-xl border border-[#E5E7EB] divide-y divide-[#F1F5F9]">
+              <div className="rounded-xl border border-border divide-y divide-border">
                 {list.map((p) => {
                   const on = eff.get(p.key) === true;
                   const isDefault = roleDefault.has(p.key);
@@ -794,7 +794,7 @@ function PermissionsDialog({
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium text-sm text-[#0F172A]">{p.label}</span>
+                          <span className="font-medium text-sm text-foreground">{p.label}</span>
                           {isDefault && (
                             <Badge variant="secondary" className="text-[10px]">
                               padrão do cargo
@@ -806,7 +806,7 @@ function PermissionsDialog({
                             </Badge>
                           )}
                         </div>
-                        <div className="text-xs text-[#64748B]">{p.description}</div>
+                        <div className="text-xs text-muted-foreground">{p.description}</div>
                       </div>
                     </div>
                   );
@@ -842,25 +842,25 @@ function AuditLogsPanel() {
   const hasSession = useHasSession() === true;
   const { data: logs = [] } = useQuery(teamAuditLogsQuery(hasSession));
   return (
-    <Card className="rounded-2xl border-[#E5E7EB]">
+    <Card className="rounded-2xl border-border">
       <CardContent className="p-0">
-        <div className="divide-y divide-[#F1F5F9]">
+        <div className="divide-y divide-border">
           {logs.length === 0 ? (
-            <div className="p-10 text-center text-sm text-[#64748B]">Sem registros ainda.</div>
+            <div className="p-10 text-center text-sm text-muted-foreground">Sem registros ainda.</div>
           ) : (
             logs.map((l: any) => (
               <div
                 key={l.id}
                 className="p-3 text-sm flex flex-col md:flex-row md:items-center gap-2"
               >
-                <div className="text-[11px] text-[#64748B] w-40 shrink-0">
+                <div className="text-[11px] text-muted-foreground w-40 shrink-0">
                   {new Date(l.created_at).toLocaleString("pt-BR")}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="font-semibold text-[#0F172A]">{l.action}</span>
-                  {l.target_label && <span className="text-[#64748B]"> — {l.target_label}</span>}
+                  <span className="font-semibold text-foreground">{l.action}</span>
+                  {l.target_label && <span className="text-muted-foreground"> — {l.target_label}</span>}
                 </div>
-                <div className="text-[11px] text-[#64748B] truncate max-w-xs">
+                <div className="text-[11px] text-muted-foreground truncate max-w-xs">
                   {l.ip ?? ""} {l.user_agent ? `• ${String(l.user_agent).slice(0, 40)}…` : ""}
                 </div>
               </div>

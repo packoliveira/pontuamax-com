@@ -75,24 +75,24 @@ export function LivePreview({
   const chipBorder = isLightBg ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
   return (
     <div className="space-y-2">
-      <div className="inline-flex rounded-lg border border-[#E5E7EB] bg-white p-0.5 text-xs">
+      <div className="inline-flex rounded-lg border border-border bg-card p-0.5 text-xs">
         <button
           type="button"
           onClick={() => setDevice("mobile")}
-          className={`px-3 py-1 rounded-md transition ${device === "mobile" ? "bg-[#0F172A] text-white" : "text-[#64748B]"}`}
+          className={`px-3 py-1 rounded-md transition ${device === "mobile" ? "bg-[#0F172A] text-white" : "text-muted-foreground"}`}
         >
           📱 Celular
         </button>
         <button
           type="button"
           onClick={() => setDevice("desktop")}
-          className={`px-3 py-1 rounded-md transition ${device === "desktop" ? "bg-[#0F172A] text-white" : "text-[#64748B]"}`}
+          className={`px-3 py-1 rounded-md transition ${device === "desktop" ? "bg-[#0F172A] text-white" : "text-muted-foreground"}`}
         >
           🖥️ Desktop
         </button>
       </div>
       <div
-        className="rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden relative"
+        className="rounded-2xl border border-border shadow-sm overflow-hidden relative"
         style={{
           background: `radial-gradient(120% 80% at 0% 0%, ${bgAccent}22, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${cor2}22, transparent 60%), ${bgBase}`,
         }}
@@ -401,14 +401,14 @@ const COLOR_PRESETS: { name: string; a: string; b: string }[] = [
 export function ColorPresets({ onPick }: { onPick: (a: string, b: string) => void }) {
   return (
     <div className="space-y-2">
-      <Label className="text-xs uppercase tracking-wide text-[#64748B]">Paletas prontas</Label>
+      <Label className="text-xs uppercase tracking-wide text-muted-foreground">Paletas prontas</Label>
       <div className="flex flex-wrap gap-2">
         {COLOR_PRESETS.map((p) => (
           <button
             key={p.name}
             type="button"
             onClick={() => onPick(p.a, p.b)}
-            className="group flex items-center gap-2 rounded-full border border-[#E5E7EB] pl-1 pr-3 py-1 text-xs font-medium text-[#0F172A] hover:border-[#2563EB] hover:shadow-sm transition-all"
+            className="group flex items-center gap-2 rounded-full border border-border pl-1 pr-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:shadow-sm transition-all"
             title={`${p.a} + ${p.b}`}
           >
             <span
@@ -453,7 +453,7 @@ const SUGGESTED_BANNERS: { label: string; url: string }[] = [
 export function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) {
   return (
     <div className="space-y-2">
-      <Label className="text-xs uppercase tracking-wide text-[#64748B]">
+      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
         Ou escolha um banner sugerido
       </Label>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -465,7 +465,7 @@ export function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) 
               onPick(b.url);
               toast.success(`Banner "${b.label}" aplicado — salve para publicar.`);
             }}
-            className="group relative rounded-lg overflow-hidden border border-[#E5E7EB] hover:border-[#2563EB] hover:shadow-md transition-all"
+            className="group relative rounded-lg overflow-hidden border border-border hover:border-primary hover:shadow-md transition-all"
           >
             <img
               src={b.url}
@@ -480,7 +480,7 @@ export function SuggestedBanners({ onPick }: { onPick: (url: string) => void }) 
           </button>
         ))}
       </div>
-      <p className="text-[11px] text-[#64748B]">
+      <p className="text-[11px] text-muted-foreground">
         Aplica em desktop e celular. Você pode substituir por uma imagem própria a qualquer momento.
       </p>
     </div>

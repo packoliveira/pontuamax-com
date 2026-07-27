@@ -30,16 +30,16 @@ export function PageHeader({
     >
       <div className="min-w-0 flex-1">
         {eyebrow ? (
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
+          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {eyebrow}
           </div>
         ) : null}
-        <h1 className="mt-1 flex min-w-0 items-center gap-2 text-xl font-bold text-[#0F172A] sm:text-2xl md:text-3xl">
+        <h1 className="mt-1 flex min-w-0 items-center gap-2 text-xl font-bold text-foreground sm:text-2xl md:text-3xl">
           {icon ? <span className="shrink-0">{icon}</span> : null}
           <span className="min-w-0 break-words">{title}</span>
         </h1>
         {description ? (
-          <p className="mt-1 text-sm leading-relaxed text-[#64748B]">{description}</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {actions ? <PageHeaderActions>{actions}</PageHeaderActions> : null}

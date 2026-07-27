@@ -104,17 +104,17 @@ const StatCard = memo(function StatCard({
     cancelled: "from-[#EF4444] to-[#B91C1C]",
   }[tone];
   return (
-    <Card className="rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">{label}</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
           <div
             className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-sm`}
           >
             <Icon className="h-4 w-4" />
           </div>
         </div>
-        <div className="mt-3 text-2xl font-bold text-[#0F172A]">
+        <div className="mt-3 text-2xl font-bold text-foreground">
           {value.toLocaleString("pt-BR")}
         </div>
       </CardContent>
@@ -147,7 +147,7 @@ const Row = memo(function Row({
       .join("")
       .toUpperCase() || "—";
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 p-5 transition duration-200 hover:bg-[#F8FAFC]">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 p-5 transition duration-200 hover:bg-muted/40">
       <div className="flex min-w-0 items-start gap-3">
         <div className="relative shrink-0">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-xs font-semibold text-white shadow-sm">
@@ -161,10 +161,10 @@ const Row = memo(function Row({
         </div>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate font-semibold text-[#0F172A]">{nomeCli}</span>
+            <span className="truncate font-semibold text-foreground">{nomeCli}</span>
             <StatusBadge status={r.status ?? "pendente"} />
           </div>
-          <div className="mt-0.5 text-sm text-[#64748B]">
+          <div className="mt-0.5 text-sm text-muted-foreground">
             {isProduto
               ? `${r.products?.nome ?? "Produto"} • ${Math.abs(r.pontos_delta)} pts`
               : `Voucher de cashback • ${formatBRL(Math.abs(Number(r.cashback_delta)))}`}
@@ -175,11 +175,11 @@ const Row = memo(function Row({
               {r.voucher_code}
             </span>
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#94A3B8]">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span>{formatDate(r.created_at)}</span>
             {tr && r.status === "pendente" && (
               <span
-                className={`inline-flex items-center gap-1 ${tr.danger ? "font-semibold text-[#F97316]" : "text-[#64748B]"}`}
+                className={`inline-flex items-center gap-1 ${tr.danger ? "font-semibold text-[#F97316]" : "text-muted-foreground"}`}
               >
                 <Clock className="h-3 w-3" /> {tr.label}
               </span>
@@ -193,14 +193,14 @@ const Row = memo(function Row({
             size="sm"
             disabled={confirming}
             onClick={() => onConfirm(r.id)}
-            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="rounded-xl bg-primary text-white shadow-sm hover:bg-primary/90"
           >
             <CheckCircle2 className="mr-1 h-4 w-4" /> Confirmar entrega
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            className="rounded-xl text-[#EF4444] hover:bg-[#EF4444]/5"
+            className="rounded-xl text-destructive hover:bg-destructive/5"
             disabled={cancelling}
             onClick={() => {
               if (confirm("Cancelar este voucher e devolver o saldo ao cliente?")) onCancel(r.id);
@@ -243,13 +243,13 @@ const Section = memo(function Section({
         <div className={`flex h-6 w-6 items-center justify-center rounded-lg ${tone}`}>
           <Icon className="h-3.5 w-3.5 text-white" />
         </div>
-        <h2 className="text-sm font-semibold text-[#0F172A]">
-          {title} <span className="ml-1 font-medium text-[#64748B]">({items.length})</span>
+        <h2 className="text-sm font-semibold text-foreground">
+          {title} <span className="ml-1 font-medium text-muted-foreground">({items.length})</span>
         </h2>
       </div>
-      <Card className="rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <Card className="rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <CardContent className="p-0">
-          <div className="divide-y divide-[#F1F5F9]">
+          <div className="divide-y divide-border">
             {shown.map((r) => (
               <Row
                 key={r.id}
@@ -348,15 +348,15 @@ function ResgatesPage() {
         <StatCard label="Cancelados" value={cancelados.length} icon={XCircle} tone="cancelled" />
       </div>
 
-      <Card className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        <div className="border-b border-[#F1F5F9] bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">
+      <Card className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <div className="border-b border-border bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
               <ScanLine className="h-4 w-4" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-[#0F172A]">Validar voucher</div>
-              <div className="text-xs text-[#64748B]">
+              <div className="text-sm font-semibold text-foreground">Validar voucher</div>
+              <div className="text-xs text-muted-foreground">
                 Cole ou digite o código apresentado pelo cliente.
               </div>
             </div>
@@ -375,20 +375,20 @@ function ResgatesPage() {
               value={codigo}
               onChange={(e) => setCodigo(e.target.value.toUpperCase())}
               placeholder="QSF-XXXXXX"
-              className="h-11 rounded-xl border-[#E5E7EB] bg-white font-mono uppercase tracking-widest focus-visible:ring-[#2563EB]/30"
+              className="h-11 rounded-xl border-border bg-card font-mono uppercase tracking-widest focus-visible:ring-primary/30"
               autoComplete="off"
             />
             <Button
               type="submit"
               disabled={validar.isPending || !codigo.trim()}
-              className="h-11 shrink-0 rounded-xl bg-[#2563EB] px-6 text-white shadow-sm hover:bg-[#1D4ED8]"
+              className="h-11 shrink-0 rounded-xl bg-primary px-6 text-white shadow-sm hover:bg-primary/90"
             >
               {validar.isPending ? "Validando..." : "Validar e entregar"}
             </Button>
           </form>
-          <p className="mt-3 text-xs text-[#64748B]">
+          <p className="mt-3 text-xs text-muted-foreground">
             Vouchers vencem em{" "}
-            <span className="font-semibold text-[#0F172A]">
+            <span className="font-semibold text-foreground">
               {loja?.voucher_validade_dias ?? 7} dias
             </span>{" "}
             — depois disso o saldo volta pro cliente automaticamente.
@@ -408,12 +408,12 @@ function ResgatesPage() {
           cancelling={cancelar.isPending}
         />
       ) : (
-        <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white shadow-sm">
             <CheckCircle2 className="h-5 w-5" />
           </div>
-          <h3 className="mt-4 text-base font-semibold text-[#0F172A]">Nenhum resgate pendente</h3>
-          <p className="mt-1 text-sm text-[#64748B]">
+          <h3 className="mt-4 text-base font-semibold text-foreground">Nenhum resgate pendente</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             Assim que um cliente gerar um voucher ele aparece aqui.
           </p>
         </div>
@@ -458,7 +458,7 @@ function ResgatesPage() {
           if (!o) setComprovante(null);
         }}
       >
-        <DialogContent className="max-w-md rounded-[20px] border border-[#E5E7EB] p-0 shadow-xl">
+        <DialogContent className="max-w-md rounded-[20px] border border-border p-0 shadow-xl">
           <div className="rounded-t-[20px] bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8] p-6 text-white">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-white">
@@ -471,50 +471,50 @@ function ResgatesPage() {
             {comprovante && (
               <div
                 id="comprovante-print"
-                className="space-y-3 rounded-2xl border border-[#E5E7EB] bg-white p-5 text-sm"
+                className="space-y-3 rounded-2xl border border-border bg-card p-5 text-sm"
               >
                 <div className="text-center">
-                  <div className="text-base font-bold text-[#0F172A]">
+                  <div className="text-base font-bold text-foreground">
                     {comprovante.loja ?? "Loja"}
                   </div>
-                  <div className="text-xs text-[#64748B]">Comprovante de entrega</div>
+                  <div className="text-xs text-muted-foreground">Comprovante de entrega</div>
                 </div>
-                <div className="grid grid-cols-[110px_1fr] gap-y-1.5 border-t border-[#F1F5F9] pt-3">
-                  <span className="text-[#64748B]">Cliente</span>
-                  <span className="font-medium text-[#0F172A]">{comprovante.cliente}</span>
+                <div className="grid grid-cols-[110px_1fr] gap-y-1.5 border-t border-border pt-3">
+                  <span className="text-muted-foreground">Cliente</span>
+                  <span className="font-medium text-foreground">{comprovante.cliente}</span>
                   {comprovante.cliente_telefone && (
                     <>
-                      <span className="text-[#64748B]">Telefone</span>
-                      <span className="text-[#0F172A]">{comprovante.cliente_telefone}</span>
+                      <span className="text-muted-foreground">Telefone</span>
+                      <span className="text-foreground">{comprovante.cliente_telefone}</span>
                     </>
                   )}
-                  <span className="text-[#64748B]">Voucher</span>
-                  <span className="font-mono font-bold text-[#0F172A]">
+                  <span className="text-muted-foreground">Voucher</span>
+                  <span className="font-mono font-bold text-foreground">
                     {comprovante.voucher_code ?? "—"}
                   </span>
-                  <span className="text-[#64748B]">Entregue em</span>
-                  <span className="text-[#0F172A]">
+                  <span className="text-muted-foreground">Entregue em</span>
+                  <span className="text-foreground">
                     {new Date(comprovante.delivered_at).toLocaleString("pt-BR")}
                   </span>
                 </div>
-                <div className="space-y-1.5 border-t border-[#F1F5F9] pt-3">
+                <div className="space-y-1.5 border-t border-border pt-3">
                   {comprovante.produto && (
                     <div className="flex justify-between">
-                      <span className="text-[#64748B]">Produto resgatado</span>
-                      <span className="font-medium text-[#0F172A]">{comprovante.produto}</span>
+                      <span className="text-muted-foreground">Produto resgatado</span>
+                      <span className="font-medium text-foreground">{comprovante.produto}</span>
                     </div>
                   )}
                   {comprovante.pontos_usados > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-[#64748B]">Pontos usados</span>
-                      <span className="font-semibold text-[#0F172A]">
+                      <span className="text-muted-foreground">Pontos usados</span>
+                      <span className="font-semibold text-foreground">
                         {comprovante.pontos_usados} pts
                       </span>
                     </div>
                   )}
                   {comprovante.cashback_aplicado > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-[#64748B]">Cashback aplicado</span>
+                      <span className="text-muted-foreground">Cashback aplicado</span>
                       <span className="font-semibold text-[#15803D]">
                         {formatBRL(comprovante.cashback_aplicado)}
                       </span>
@@ -527,13 +527,13 @@ function ResgatesPage() {
               <Button
                 variant="outline"
                 onClick={() => window.print()}
-                className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9]"
+                className="rounded-xl border-border text-foreground hover:bg-muted"
               >
                 <Printer className="mr-1 h-4 w-4" /> Imprimir
               </Button>
               <Button
                 onClick={() => setComprovante(null)}
-                className="rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+                className="rounded-xl bg-primary text-white hover:bg-primary/90"
               >
                 Fechar
               </Button>

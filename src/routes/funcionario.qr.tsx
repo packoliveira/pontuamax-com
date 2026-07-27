@@ -32,18 +32,18 @@ function MeuQR() {
         title="Meu QR Code"
         description="O cliente escaneia esse QR pra abrir a página da loja e acumular/resgatar direto pelo celular dele."
       />
-      <Card className="rounded-2xl border-[#E5E7EB]">
+      <Card className="rounded-2xl border-border">
         <CardContent className="p-6 flex flex-col items-center gap-4" id="qr-print">
           <div className="text-center">
-            <div className="text-base font-bold text-[#0F172A]">{nomeLoja}</div>
-            <div className="text-xs text-[#64748B]">Escaneie e ganhe pontos</div>
+            <div className="text-base font-bold text-foreground">{nomeLoja}</div>
+            <div className="text-xs text-muted-foreground">Escaneie e ganhe pontos</div>
           </div>
           <div className="rounded-2xl bg-white p-3 ring-1 ring-[#E5E7EB]">
             <QRCodeImage value={url} size={260} />
           </div>
-          <code className="text-xs text-[#64748B] break-all">{url}</code>
+          <code className="text-xs text-muted-foreground break-all">{url}</code>
           {nomeVend && (
-            <div className="text-xs text-[#94A3B8]">Atendido por {nomeVend}</div>
+            <div className="text-xs text-muted-foreground">Atendido por {nomeVend}</div>
           )}
         </CardContent>
       </Card>
@@ -62,7 +62,7 @@ function MeuQR() {
           <Printer className="h-4 w-4" /> Imprimir
         </Button>
       </div>
-      <div className="text-center text-xs text-[#94A3B8] flex items-center justify-center gap-1">
+      <div className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
         <QrCode className="h-3.5 w-3.5" /> Dica: cole na vitrine, no balcão ou embale no pacote.
       </div>
     </div>

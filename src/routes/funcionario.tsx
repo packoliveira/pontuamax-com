@@ -72,7 +72,7 @@ export const Route = createFileRoute("/funcionario")({
 });
 
 function FuncionarioLayout() {
-  usePanelTheme();
+  usePanelTheme({ scope: true });
   const [open, setOpen] = useState(false);
   const { data, hasAny, loading } = useEmployeeContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -134,7 +134,7 @@ function FuncionarioLayout() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
+    <div className="flex min-h-screen bg-muted/40">
       <aside className="hidden md:flex md:w-64 md:flex-col bg-[#0B132B] text-white">
         <Brand />
         <div className="flex-1">

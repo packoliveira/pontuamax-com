@@ -116,14 +116,14 @@ export function IntegracoesCard({
   };
 
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between text-[#0F172A]">
+        <CardTitle className="text-base flex items-center justify-between text-foreground">
           <span>Integrações (Bling / Olist)</span>
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              conectada ? "bg-[#22C55E]/10 text-[#15803D]" : "bg-[#F1F5F9] text-[#64748B]"
+              conectada ? "bg-[#22C55E]/10 text-[#15803D]" : "bg-muted text-muted-foreground"
             }`}
           >
             {conectada ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
@@ -132,14 +132,14 @@ export function IntegracoesCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-[#64748B]">
+        <p className="text-xs text-muted-foreground">
           Configure a URL completa abaixo no painel do Bling ou Olist. Cada venda enviada será
           lançada automaticamente no PontuaMax, creditando pontos/cashback para o cliente sem
           precisar digitar em <em>Lançar Venda</em>.
         </p>
 
-        <div className="rounded-xl border border-[#E5E7EB] p-3 space-y-2">
-          <Label className="text-[#0F172A]">Quando pontuar as vendas da Olist?</Label>
+        <div className="rounded-xl border border-border p-3 space-y-2">
+          <Label className="text-foreground">Quando pontuar as vendas da Olist?</Label>
           <RadioGroup
             value={gatilhoLocal}
             onValueChange={(v) => {
@@ -157,19 +157,19 @@ export function IntegracoesCard({
               <label
                 key={opt.v}
                 className={`flex gap-2 rounded-lg border p-2 cursor-pointer text-xs ${
-                  gatilhoLocal === opt.v ? "border-[#2563EB] bg-[#2563EB]/5" : "border-[#E5E7EB]"
+                  gatilhoLocal === opt.v ? "border-primary bg-primary/5" : "border-border"
                 }`}
               >
                 <RadioGroupItem value={opt.v} id={`gt-${opt.v}`} className="mt-0.5" />
                 <div>
-                  <div className="font-medium text-[#0F172A]">{opt.t}</div>
-                  <div className="text-[#64748B]">{opt.d}</div>
+                  <div className="font-medium text-foreground">{opt.t}</div>
+                  <div className="text-muted-foreground">{opt.d}</div>
                 </div>
               </label>
             ))}
           </RadioGroup>
           {salvarGatilho.isPending && (
-            <p className="text-xs text-[#64748B]">Salvando...</p>
+            <p className="text-xs text-muted-foreground">Salvando...</p>
           )}
         </div>
 
@@ -200,7 +200,7 @@ export function IntegracoesCard({
               <Copy className="h-4 w-4" />
             </Button>
           </div>
-          <p className="mt-1 text-xs text-[#DC2626]">
+          <p className="mt-1 text-xs text-destructive">
             Use esta URL nova na Olist. Remova/desative a URL antiga em <code>/api/public/webhook/olist</code>.
           </p>
         </div>
@@ -263,38 +263,38 @@ export function IntegracoesCard({
             {test.isPending ? "Enviando..." : "Testar integração"}
           </Button>
           {lastAt && (
-            <span className="text-xs text-[#64748B]">
+            <span className="text-xs text-muted-foreground">
               Último evento: {new Date(lastAt).toLocaleString("pt-BR")}
             </span>
           )}
         </div>
 
         <div>
-          <div className="text-sm font-semibold mb-2 text-[#0F172A]">Últimos 20 eventos</div>
+          <div className="text-sm font-semibold mb-2 text-foreground">Últimos 20 eventos</div>
           {!logs || logs.length === 0 ? (
-            <div className="text-xs text-[#64748B] rounded-xl border border-dashed border-[#E5E7EB] bg-[#F8FAFC] p-4">
+            <div className="text-xs text-muted-foreground rounded-xl border border-dashed border-border bg-muted/40 p-4">
               Nenhum evento recebido ainda.
             </div>
           ) : (
-            <div className="rounded-xl border border-[#E5E7EB] divide-y divide-[#E5E7EB] bg-white">
+            <div className="rounded-xl border border-border divide-y divide-border bg-card">
               {logs.map((log) => (
                 <div key={log.id} className="p-2 text-xs flex items-start gap-2">
                   <span
                     className={`mt-0.5 inline-block h-2 w-2 rounded-full ${
-                      log.status === "sucesso" ? "bg-[#22C55E]" : "bg-[#EF4444]"
+                      log.status === "sucesso" ? "bg-[#22C55E]" : "bg-destructive"
                     }`}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium uppercase text-[#0F172A]">{log.origem}</span>
-                      <span className="text-[#64748B]">
+                      <span className="font-medium uppercase text-foreground">{log.origem}</span>
+                      <span className="text-muted-foreground">
                         {new Date(log.created_at).toLocaleString("pt-BR")}
                       </span>
                     </div>
-                    {log.mensagem_erro && <div className="text-[#EF4444]">{log.mensagem_erro}</div>}
+                    {log.mensagem_erro && <div className="text-destructive">{log.mensagem_erro}</div>}
                     <details className="mt-1">
-                      <summary className="cursor-pointer text-[#64748B]">Payload</summary>
-                      <pre className="mt-1 whitespace-pre-wrap break-all bg-[#F1F5F9] p-2 rounded-lg text-[#0F172A]">
+                      <summary className="cursor-pointer text-muted-foreground">Payload</summary>
+                      <pre className="mt-1 whitespace-pre-wrap break-all bg-muted p-2 rounded-lg text-foreground">
                         {JSON.stringify(log.payload_recebido, null, 2)}
                       </pre>
                     </details>
@@ -353,10 +353,10 @@ export function InstagramCard({ loja }: { loja: IgLoja }) {
   });
 
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
             <Instagram className="h-4 w-4" />
           </span>
@@ -367,10 +367,10 @@ export function InstagramCard({ loja }: { loja: IgLoja }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-[#64748B]">
+        <p className="text-xs text-muted-foreground">
           Quando ativo, os clientes enviam o link do post do Instagram pela página de vocês e você
           aprova em{" "}
-          <a href="/lojista/instagram" className="text-[#2563EB] hover:underline">
+          <a href="/lojista/instagram" className="text-primary hover:underline">
             Posts do Instagram
           </a>{" "}
           para creditar os pontos.
@@ -422,7 +422,7 @@ export function InstagramCard({ loja }: { loja: IgLoja }) {
         <Button
           onClick={() => salvar.mutate()}
           disabled={salvar.isPending}
-          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          className="rounded-xl bg-primary hover:bg-primary/90 text-white"
         >
           {salvar.isPending ? "Salvando..." : "Salvar configurações"}
         </Button>
@@ -474,10 +474,10 @@ export function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
   });
 
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
             <Hourglass className="h-4 w-4" />
           </span>
@@ -485,24 +485,24 @@ export function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-[#64748B]">
+        <p className="text-xs text-muted-foreground">
           Defina se e como os pontos dos clientes expiram. A execução é automática (todo dia) e cria
           uma movimentação de "expiração" no histórico.
         </p>
 
         <RadioGroup value={modo} onValueChange={(v) => setModo(v as never)} className="space-y-2">
-          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
+          <label className="flex items-start gap-2 rounded-xl border border-border p-3 cursor-pointer hover:bg-muted/40 transition-colors duration-200">
             <RadioGroupItem value="nenhum" id="mp-nenhum" className="mt-0.5" />
             <div>
-              <div className="text-sm font-medium text-[#0F172A]">Sem expiração</div>
-              <div className="text-xs text-[#64748B]">Os pontos nunca expiram.</div>
+              <div className="text-sm font-medium text-foreground">Sem expiração</div>
+              <div className="text-xs text-muted-foreground">Os pontos nunca expiram.</div>
             </div>
           </label>
-          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
+          <label className="flex items-start gap-2 rounded-xl border border-border p-3 cursor-pointer hover:bg-muted/40 transition-colors duration-200">
             <RadioGroupItem value="validade" id="mp-validade" className="mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-medium text-[#0F172A]">Validade por data</div>
-              <div className="text-xs text-[#64748B]">
+              <div className="text-sm font-medium text-foreground">Validade por data</div>
+              <div className="text-xs text-muted-foreground">
                 Cada ponto ganho expira depois de N dias.
               </div>
               {modo === "validade" && (
@@ -514,16 +514,16 @@ export function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
                     value={validadeDias}
                     onChange={(e) => setValidadeDias(e.target.value)}
                   />
-                  <span className="text-xs text-[#64748B]">dias de validade</span>
+                  <span className="text-xs text-muted-foreground">dias de validade</span>
                 </div>
               )}
             </div>
           </label>
-          <label className="flex items-start gap-2 rounded-xl border border-[#E5E7EB] p-3 cursor-pointer hover:bg-[#F8FAFC] transition-colors duration-200">
+          <label className="flex items-start gap-2 rounded-xl border border-border p-3 cursor-pointer hover:bg-muted/40 transition-colors duration-200">
             <RadioGroupItem value="decaimento" id="mp-decai" className="mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-medium text-[#0F172A]">Decaimento periódico</div>
-              <div className="text-xs text-[#64748B]">Cliente perde X pontos a cada N dias.</div>
+              <div className="text-sm font-medium text-foreground">Decaimento periódico</div>
+              <div className="text-xs text-muted-foreground">Cliente perde X pontos a cada N dias.</div>
               {modo === "decaimento" && (
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div>
@@ -551,7 +551,7 @@ export function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
         </RadioGroup>
 
         {loja.pontos_expiracao_last_run_at && (
-          <p className="text-[11px] text-[#64748B]">
+          <p className="text-[11px] text-muted-foreground">
             Última execução: {new Date(loja.pontos_expiracao_last_run_at).toLocaleString("pt-BR")}
           </p>
         )}
@@ -559,7 +559,7 @@ export function ValidadePontosCard({ loja }: { loja: ValidadeLoja }) {
         <Button
           onClick={() => salvar.mutate()}
           disabled={salvar.isPending}
-          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          className="rounded-xl bg-primary hover:bg-primary/90 text-white"
         >
           {salvar.isPending ? "Salvando..." : "Salvar validade"}
         </Button>
@@ -606,10 +606,10 @@ export function IndicacaoCard({
   const link =
     typeof window !== "undefined" ? `${window.location.origin}/${loja.slug}?indicou=TELEFONE` : "";
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
             <Gift className="h-4 w-4" />
           </span>
@@ -617,13 +617,13 @@ export function IndicacaoCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-[#64748B]">
+        <p className="text-xs text-muted-foreground">
           Cada cliente ganha um link único (com o telefone dele) para compartilhar. Quando o amigo
           se cadastrar por esse link e fizer a 1ª compra, os dois recebem pontos.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={ativa} onCheckedChange={setAtiva} />
-          <span className="text-sm text-[#0F172A]">Ativar programa de indicação</span>
+          <span className="text-sm text-foreground">Ativar programa de indicação</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -647,13 +647,13 @@ export function IndicacaoCard({
             />
           </div>
         </div>
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-3 text-xs text-[#64748B] break-all">
-          Formato do link: <code className="text-[#0F172A]">{link}</code>
+        <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground break-all">
+          Formato do link: <code className="text-foreground">{link}</code>
         </div>
         <Button
           onClick={() => salvar.mutate()}
           disabled={salvar.isPending}
-          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          className="rounded-xl bg-primary hover:bg-primary/90 text-white"
         >
           {salvar.isPending ? "Salvando..." : "Salvar indicação"}
         </Button>
@@ -686,10 +686,10 @@ export function NpsCard({
     onError: (e) => toast.error((e as Error).message),
   });
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
             <Star className="h-4 w-4" />
           </span>
@@ -697,22 +697,22 @@ export function NpsCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-xs text-[#64748B]">
+        <p className="text-xs text-muted-foreground">
           Após cada venda lançada, o cliente recebe um link no WhatsApp para dar uma nota de 0 a 10.
           Requer WhatsApp ativo.
         </p>
         <div className="flex items-center gap-2">
           <Switch checked={on} onCheckedChange={setOn} />
-          <span className="text-sm text-[#0F172A]">Ativar pesquisa NPS pós-venda</span>
+          <span className="text-sm text-foreground">Ativar pesquisa NPS pós-venda</span>
         </div>
         <div className="flex items-center gap-2">
           <Switch checked={askC} onCheckedChange={setAskC} disabled={!on} />
-          <span className="text-sm text-[#0F172A]">Pedir comentário opcional</span>
+          <span className="text-sm text-foreground">Pedir comentário opcional</span>
         </div>
         <div>
           <Label>Mensagem enviada</Label>
           <Textarea rows={4} value={tpl} onChange={(e) => setTpl(e.target.value)} disabled={!on} />
-          <p className="text-[11px] text-[#64748B] mt-1">
+          <p className="text-[11px] text-muted-foreground mt-1">
             Variáveis: <code>{"{nome_cliente}"}</code>, <code>{"{nome_loja}"}</code>,{" "}
             <code>{"{link_nps}"}</code>
           </p>
@@ -720,7 +720,7 @@ export function NpsCard({
         <Button
           onClick={() => salvar.mutate()}
           disabled={salvar.isPending}
-          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          className="rounded-xl bg-primary hover:bg-primary/90 text-white"
         >
           {salvar.isPending ? "Salvando..." : "Salvar NPS"}
         </Button>
@@ -788,15 +788,15 @@ export function WhatsappQRConnect({ storeId }: { storeId: string }) {
       : state === "connecting"
         ? { text: "Aguardando leitura do QR", cls: "bg-[#F59E0B]/10 text-[#B45309]" }
         : state === "unconfigured"
-          ? { text: "Não configurado", cls: "bg-[#F1F5F9] text-[#64748B]" }
-          : { text: "Desconectado", cls: "bg-[#EF4444]/10 text-[#B91C1C]" };
+          ? { text: "Não configurado", cls: "bg-muted text-muted-foreground" }
+          : { text: "Desconectado", cls: "bg-destructive/10 text-[#B91C1C]" };
 
   return (
-    <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
+    <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <QrCode className="h-4 w-4 text-[#2563EB]" />
-          <span className="text-sm font-medium text-[#0F172A]">Conexão WhatsApp</span>
+          <QrCode className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Conexão WhatsApp</span>
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}`}
           >
@@ -810,7 +810,7 @@ export function WhatsappQRConnect({ storeId }: { storeId: string }) {
             size="sm"
             onClick={desconectar}
             disabled={loading}
-            className="rounded-xl border-[#E5E7EB]"
+            className="rounded-xl border-border"
           >
             <Power className="h-3 w-3 mr-1" />
             Desconectar
@@ -821,7 +821,7 @@ export function WhatsappQRConnect({ storeId }: { storeId: string }) {
             size="sm"
             onClick={conectar}
             disabled={loading}
-            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+            className="rounded-xl bg-primary hover:bg-primary/90 text-white"
           >
             {loading ? (
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -837,15 +837,15 @@ export function WhatsappQRConnect({ storeId }: { storeId: string }) {
           <img
             src={qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`}
             alt="QR Code do WhatsApp"
-            className="w-56 h-56 border border-[#E5E7EB] rounded-xl bg-white p-2"
+            className="w-56 h-56 border border-border rounded-xl bg-card p-2"
           />
-          <p className="text-xs text-[#64748B] text-center max-w-xs">
+          <p className="text-xs text-muted-foreground text-center max-w-xs">
             Abra o WhatsApp no celular → <strong>Aparelhos conectados</strong> →{" "}
             <strong>Conectar aparelho</strong> e aponte a câmera para este QR.
           </p>
         </div>
       )}
-      <p className="text-xs text-[#64748B]">
+      <p className="text-xs text-muted-foreground">
         Salve a URL, API Key e nome da instância acima antes de gerar o QR. A conexão fica ativa até
         você desconectar ou o WhatsApp derrubar a sessão.
       </p>
@@ -926,10 +926,10 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
   ];
 
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
             <MessageCircle className="h-4 w-4" />
           </span>
@@ -937,12 +937,12 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-4">
           <div>
-            <div className="text-sm font-medium text-[#0F172A]">
+            <div className="text-sm font-medium text-foreground">
               Envio automático de "pontos ganhos"
             </div>
-            <div className="text-xs text-[#64748B]">
+            <div className="text-xs text-muted-foreground">
               Dispara toda vez que o cliente ganha pontos (manual ou via Bling/Olist).
             </div>
           </div>
@@ -975,7 +975,7 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
             onChange={(e) => setApikey(e.target.value)}
             placeholder="••••••••"
           />
-          <p className="text-xs text-[#64748B] mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             A chave fica armazenada com segurança no banco e nunca é exposta ao navegador do cliente
             final.
           </p>
@@ -996,7 +996,7 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
               <button
                 key={v}
                 type="button"
-                className="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#0F172A] hover:bg-[#E5E7EB] font-mono transition-colors duration-200"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground hover:bg-muted/70 font-mono transition-colors duration-200"
                 onClick={() => setTemplate((t) => `${t}${v}`)}
               >
                 {v}
@@ -1008,12 +1008,12 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
         <Button
           onClick={() => salvar.mutate()}
           disabled={salvar.isPending}
-          className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+          className="rounded-xl bg-primary hover:bg-primary/90 text-white"
         >
           {salvar.isPending ? "Salvando..." : "Salvar WhatsApp"}
         </Button>
 
-        <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-2">
+        <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-2">
           <Label>Enviar mensagem de teste</Label>
           <div className="flex gap-2">
             <Input
@@ -1032,7 +1032,7 @@ export function WhatsappCard({ loja }: { loja: LojaRow }) {
               {testar.isPending ? "Enviando..." : "Testar"}
             </Button>
           </div>
-          <p className="text-xs text-[#64748B]">
+          <p className="text-xs text-muted-foreground">
             Prefixo 55 é adicionado automaticamente. Sucessos e erros aparecem em "Últimos 20
             eventos" acima.
           </p>
@@ -1112,10 +1112,10 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
   });
 
   return (
-    <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+    <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-[#0F172A]">
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#6D28D9] via-[#2563EB] to-[#14CBA8] text-white">
             <Bell className="h-4 w-4" />
           </span>
@@ -1123,15 +1123,15 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <p className="text-xs text-[#64748B]">
+        <p className="text-xs text-muted-foreground">
           Cron diário (09:00 Brasília) envia estas mensagens via WhatsApp. Requer WhatsApp ativado e
           Evolution API conectada acima.
         </p>
 
         {/* Aniversário */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]">
+            <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
               <Cake className="h-4 w-4 text-[#EC4899]" /> Aniversário
             </div>
             <Switch checked={bDayOn} onCheckedChange={setBDayOn} />
@@ -1156,16 +1156,16 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
               onChange={(e) => setBDayTpl(e.target.value)}
               disabled={!bDayOn}
             />
-            <p className="text-[10px] text-[#64748B] mt-1">
+            <p className="text-[10px] text-muted-foreground mt-1">
               Variáveis: {"{nome}"} {"{loja}"} {"{bonus}"} {"{pontos}"}
             </p>
           </div>
         </div>
 
         {/* Inatividade */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]">
+            <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
               <Clock className="h-4 w-4 text-[#F59E0B]" /> Cliente sumido
             </div>
             <Switch checked={inatOn} onCheckedChange={setInatOn} />
@@ -1188,17 +1188,17 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
               onChange={(e) => setInatTpl(e.target.value)}
               disabled={!inatOn}
             />
-            <p className="text-[10px] text-[#64748B] mt-1">
+            <p className="text-[10px] text-muted-foreground mt-1">
               Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"}
             </p>
           </div>
         </div>
 
         {/* Expiração */}
-        <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-sm text-[#0F172A]">
-              <TimerReset className="h-4 w-4 text-[#EF4444]" /> Pontos a expirar
+            <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+              <TimerReset className="h-4 w-4 text-destructive" /> Pontos a expirar
             </div>
             <Switch checked={expOn} onCheckedChange={setExpOn} />
           </div>
@@ -1232,7 +1232,7 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
               onChange={(e) => setExpTpl(e.target.value)}
               disabled={!expOn}
             />
-            <p className="text-[10px] text-[#64748B] mt-1">
+            <p className="text-[10px] text-muted-foreground mt-1">
               Variáveis: {"{nome}"} {"{loja}"} {"{pontos}"} {"{dias}"}
             </p>
           </div>
@@ -1242,7 +1242,7 @@ export function NotificacoesCard({ loja }: { loja: LojaLite }) {
           <Button
             onClick={() => salvar.mutate()}
             disabled={salvar.isPending}
-            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
+            className="rounded-xl bg-primary hover:bg-primary/90 text-white"
           >
             {salvar.isPending ? "Salvando..." : "Salvar notificações"}
           </Button>

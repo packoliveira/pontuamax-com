@@ -387,31 +387,31 @@ function PersonalizacaoPage() {
       size="sm"
       onClick={onReset}
       disabled={disabled}
-      className="h-8 text-xs text-[#64748B] hover:text-[#0F172A]"
+      className="h-8 text-xs text-muted-foreground hover:text-foreground"
     >
       <RotateCcw className="h-3 w-3 mr-1" />
       Restaurar padrão
     </Button>
   );
 
-  if (!loja) return <div className="p-6 text-sm text-[#64748B]">Carregando...</div>;
+  if (!loja) return <div className="p-6 text-sm text-muted-foreground">Carregando...</div>;
 
   return (
     <div className="space-y-8 max-w-5xl">
       <div className="space-y-1">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
           Aparência
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           Personalização da loja
         </h1>
-        <p className="text-sm text-[#64748B]">
+        <p className="text-sm text-muted-foreground">
           Ajuste o logo, banners e cores da sua marca — tudo o que o cliente vê na página pública.
           <a
             href={`/${loja.slug}`}
             target="_blank"
             rel="noreferrer"
-            className="ml-1 underline text-[#2563EB]"
+            className="ml-1 underline text-primary"
           >
             Ver como o cliente vê →
           </a>
@@ -420,10 +420,10 @@ function PersonalizacaoPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+          <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base text-[#0F172A]">Logo e banners</CardTitle>
+              <CardTitle className="text-base text-foreground">Logo e banners</CardTitle>
               <ResetButton
                 onReset={() => {
                   setLogo("");
@@ -470,13 +470,13 @@ function PersonalizacaoPage() {
                 {bannerMobile && <ResetButton onReset={() => setBannerMobile("")} />}
               </div>
               {bannerMobile && (
-                <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
+                <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-[#0F172A]">
+                      <div className="text-sm font-semibold text-foreground">
                         Encaixe do banner celular
                       </div>
-                      <div className="text-xs text-[#64748B]">
+                      <div className="text-xs text-muted-foreground">
                         Como sua imagem se encaixa na tela do celular.
                       </div>
                     </div>
@@ -500,30 +500,30 @@ function PersonalizacaoPage() {
                       <label
                         className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
                           mobileFit === "cover"
-                            ? "border-[#2563EB] bg-[#EFF6FF]"
-                            : "border-[#E5E7EB] bg-white"
+                            ? "border-primary bg-[#EFF6FF]"
+                            : "border-border bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <RadioGroupItem value="cover" />
-                          <span className="font-semibold text-[#0F172A]">Preencher</span>
+                          <span className="font-semibold text-foreground">Preencher</span>
                         </div>
-                        <span className="mt-1 text-[#64748B]">
+                        <span className="mt-1 text-muted-foreground">
                           Ocupa todo o espaço, pode cortar bordas.
                         </span>
                       </label>
                       <label
                         className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
                           mobileFit === "contain"
-                            ? "border-[#2563EB] bg-[#EFF6FF]"
-                            : "border-[#E5E7EB] bg-white"
+                            ? "border-primary bg-[#EFF6FF]"
+                            : "border-border bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <RadioGroupItem value="contain" />
-                          <span className="font-semibold text-[#0F172A]">Mostrar tudo</span>
+                          <span className="font-semibold text-foreground">Mostrar tudo</span>
                         </div>
-                        <span className="mt-1 text-[#64748B]">
+                        <span className="mt-1 text-muted-foreground">
                           Mostra a imagem inteira, com margens.
                         </span>
                       </label>
@@ -534,7 +534,7 @@ function PersonalizacaoPage() {
                     <div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs">Posição horizontal</Label>
-                        <span className="text-xs text-[#64748B]">{mobilePosX}%</span>
+                        <span className="text-xs text-muted-foreground">{mobilePosX}%</span>
                       </div>
                       <Slider
                         min={0}
@@ -548,7 +548,7 @@ function PersonalizacaoPage() {
                     <div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs">Posição vertical</Label>
-                        <span className="text-xs text-[#64748B]">{mobilePosY}%</span>
+                        <span className="text-xs text-muted-foreground">{mobilePosY}%</span>
                       </div>
                       <Slider
                         min={0}
@@ -562,7 +562,7 @@ function PersonalizacaoPage() {
                     <div className="sm:col-span-2">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs">Zoom</Label>
-                        <span className="text-xs text-[#64748B]">{mobileZoom}%</span>
+                        <span className="text-xs text-muted-foreground">{mobileZoom}%</span>
                       </div>
                       <Slider
                         min={100}
@@ -574,7 +574,7 @@ function PersonalizacaoPage() {
                         disabled={mobileFit === "contain"}
                       />
                       {mobileFit === "contain" && (
-                        <p className="mt-1 text-[11px] text-[#94A3B8]">
+                        <p className="mt-1 text-[11px] text-muted-foreground">
                           Zoom só se aplica no modo Preencher.
                         </p>
                       )}
@@ -588,17 +588,17 @@ function PersonalizacaoPage() {
                   setBannerMobile(url);
                 }}
               />
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-muted-foreground">
                 Ao clicar em Salvar, os arquivos removidos ou substituídos são apagados do
                 armazenamento.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+          <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#6D28D9] via-[#2563EB] to-[#14CBA8]" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base text-[#0F172A]">Cores da marca</CardTitle>
+              <CardTitle className="text-base text-foreground">Cores da marca</CardTitle>
               <ResetButton
                 onReset={() => {
                   setCor1(DEFAULT_COR1);
@@ -639,17 +639,17 @@ function PersonalizacaoPage() {
                   setCor2(b);
                 }}
               />
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-muted-foreground">
                 As cores pintam a aura de fundo, o logo, a barra de progresso e o botão de resgate
                 na página do cliente.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+          <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#22C55E] via-[#F59E0B] to-[#6D28D9]" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base text-[#0F172A]">Cores de apoio & cabeçalho</CardTitle>
+              <CardTitle className="text-base text-foreground">Cores de apoio & cabeçalho</CardTitle>
               <ResetButton
                 onReset={() => {
                   setAccentPoints(DEFAULT_ACCENT_POINTS);
@@ -720,7 +720,7 @@ function PersonalizacaoPage() {
                         <button
                           type="button"
                           onClick={() => c.set(c.def)}
-                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1"
                           title="Restaurar padrão desta cor"
                         >
                           <RotateCcw className="h-3 w-3" /> reset
@@ -740,7 +740,7 @@ function PersonalizacaoPage() {
                         onChange={(e) => c.set(e.target.value)}
                       />
                     </div>
-                    <div className="text-[11px] text-[#94A3B8]">{c.hint}</div>
+                    <div className="text-[11px] text-muted-foreground">{c.hint}</div>
                   </div>
                 ))}
               </div>
@@ -753,8 +753,8 @@ function PersonalizacaoPage() {
                 </div>
               )}
 
-              <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-4">
-                <div className="text-sm font-semibold text-[#0F172A]">
+              <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-4">
+                <div className="text-sm font-semibold text-foreground">
                   Cabeçalho da página do cliente
                 </div>
 
@@ -766,7 +766,7 @@ function PersonalizacaoPage() {
                         <button
                           type="button"
                           onClick={() => setKickerText(DEFAULT_KICKER_TEXT)}
-                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1"
                         >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
@@ -778,7 +778,7 @@ function PersonalizacaoPage() {
                       onChange={(e) => setKickerText(e.target.value.slice(0, 40))}
                       maxLength={40}
                     />
-                    <label className="flex items-center gap-2 text-xs text-[#475569] mt-1">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                       <input
                         type="checkbox"
                         checked={kickerShow}
@@ -794,7 +794,7 @@ function PersonalizacaoPage() {
                         <button
                           type="button"
                           onClick={() => setTitleSize(DEFAULT_TITLE_SIZE)}
-                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1"
                         >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
@@ -803,7 +803,7 @@ function PersonalizacaoPage() {
                     <select
                       value={titleSize}
                       onChange={(e) => setTitleSize(e.target.value as typeof titleSize)}
-                      className="w-full h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm"
+                      className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm"
                     >
                       <option value="sm">Pequeno</option>
                       <option value="md">Médio (padrão)</option>
@@ -819,7 +819,7 @@ function PersonalizacaoPage() {
                         <button
                           type="button"
                           onClick={() => setTitleWeight(DEFAULT_TITLE_WEIGHT)}
-                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1"
                         >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
@@ -828,7 +828,7 @@ function PersonalizacaoPage() {
                     <select
                       value={titleWeight}
                       onChange={(e) => setTitleWeight(e.target.value as typeof titleWeight)}
-                      className="w-full h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm"
+                      className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm"
                     >
                       <option value="normal">Normal</option>
                       <option value="semibold">Semi-negrito</option>
@@ -843,7 +843,7 @@ function PersonalizacaoPage() {
                         <button
                           type="button"
                           onClick={() => setKickerSize(DEFAULT_KICKER_SIZE)}
-                          className="text-[10px] text-[#64748B] hover:text-[#0F172A] flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1"
                         >
                           <RotateCcw className="h-3 w-3" /> reset
                         </button>
@@ -852,7 +852,7 @@ function PersonalizacaoPage() {
                     <select
                       value={kickerSize}
                       onChange={(e) => setKickerSize(e.target.value as typeof kickerSize)}
-                      className="w-full h-10 rounded-md border border-[#E5E7EB] bg-white px-3 text-sm"
+                      className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm"
                     >
                       <option value="xs">Muito pequeno</option>
                       <option value="sm">Pequeno (padrão)</option>
@@ -863,7 +863,7 @@ function PersonalizacaoPage() {
 
                 <div className="rounded-lg bg-[#0a0a1a] p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[11px] text-[#94A3B8]">Prévia do cabeçalho</div>
+                    <div className="text-[11px] text-muted-foreground">Prévia do cabeçalho</div>
                     <div className="flex items-center gap-1 rounded-md bg-white/5 p-0.5">
                       <button
                         type="button"
@@ -939,8 +939,8 @@ function PersonalizacaoPage() {
                 </div>
 
                 {/* Prévia ao vivo da página de pontos */}
-                <div className="rounded-xl border border-[#E5E7EB] bg-[#F8FAFC] p-4 space-y-3">
-                  <div className="text-sm font-semibold text-[#0F172A]">
+                <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
+                  <div className="text-sm font-semibold text-foreground">
                     Prévia — página de pontos
                   </div>
                   <div
@@ -1024,17 +1024,17 @@ function PersonalizacaoPage() {
                 </div>
               </div>
 
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-muted-foreground">
                 Essas cores aparecem na página que seus clientes veem — saldo de pontos, cashback,
                 botão de resgatar, selo VIP, preços em R$ e o cabeçalho com o nome da sua loja.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+          <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#0F172A] via-[#334155] to-[#F8FAFC]" />
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base text-[#0F172A]">Fundo da página do cliente</CardTitle>
+              <CardTitle className="text-base text-foreground">Fundo da página do cliente</CardTitle>
               <ResetButton
                 onReset={() => {
                   setBgMode(DEFAULT_BG_MODE);
@@ -1060,15 +1060,15 @@ function PersonalizacaoPage() {
                       key={opt.v}
                       className={`flex cursor-pointer flex-col rounded-lg border p-3 text-xs transition ${
                         bgMode === opt.v
-                          ? "border-[#2563EB] bg-[#EFF6FF]"
-                          : "border-[#E5E7EB] bg-white"
+                          ? "border-primary bg-[#EFF6FF]"
+                          : "border-border bg-card"
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <RadioGroupItem value={opt.v} />
-                        <span className="font-semibold text-[#0F172A]">{opt.label}</span>
+                        <span className="font-semibold text-foreground">{opt.label}</span>
                       </div>
-                      <span className="mt-1 text-[#64748B]">{opt.desc}</span>
+                      <span className="mt-1 text-muted-foreground">{opt.desc}</span>
                     </label>
                   ))}
                 </RadioGroup>
@@ -1104,7 +1104,7 @@ function PersonalizacaoPage() {
               )}
 
               <div>
-                <div className="text-xs text-[#64748B] mb-2">Presets</div>
+                <div className="text-xs text-muted-foreground mb-2">Presets</div>
                 <div className="flex flex-wrap gap-2">
                   {BG_PRESETS.map((p) => (
                     <button
@@ -1115,7 +1115,7 @@ function PersonalizacaoPage() {
                         setBgColor1(p.c1);
                         setBgColor2(p.c2);
                       }}
-                      className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-xs hover:border-[#2563EB]"
+                      className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs hover:border-primary"
                     >
                       <span
                         className="h-4 w-8 rounded"
@@ -1135,16 +1135,16 @@ function PersonalizacaoPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border-[#E5E7EB] shadow-sm overflow-hidden">
+          <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#FB7185]" />
             <CardHeader className="space-y-0">
-              <CardTitle className="text-base text-[#0F172A]">Efeitos visuais</CardTitle>
+              <CardTitle className="text-base text-foreground">Efeitos visuais</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start justify-between gap-4 rounded-xl border border-[#E5E7EB] bg-white p-4">
+              <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4">
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-[#0F172A]">Chuva de Recompensas</div>
-                  <p className="mt-1 text-xs text-[#64748B]">
+                  <div className="text-sm font-semibold text-foreground">Chuva de Recompensas</div>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Exibe moedas, cashback, cupons e símbolos de premiação caindo suavemente no
                     fundo da página de login dos clientes.
                   </p>
@@ -1163,28 +1163,28 @@ function PersonalizacaoPage() {
                 </div>
                 <div className="flex flex-col items-end gap-1 pt-1">
                   <Switch checked={rewardRain} onCheckedChange={setRewardRain} />
-                  <span className="text-[10px] font-medium text-[#64748B]">
+                  <span className="text-[10px] font-medium text-muted-foreground">
                     {rewardRain ? "Ativada" : "Desativada"}
                   </span>
                 </div>
               </div>
 
               {rewardRain && (
-                <div className="space-y-4 rounded-xl border border-[#E5E7EB] bg-white p-4">
+                <div className="space-y-4 rounded-xl border border-border bg-card p-4">
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-[#0F172A]">
+                      <Label className="text-xs font-semibold text-foreground">
                         Cores dos ícones
                       </Label>
                       <button
                         type="button"
                         onClick={() => setRainColors(DEFAULT_RAIN_COLORS)}
-                        className="text-[11px] text-[#2563EB] hover:underline"
+                        className="text-[11px] text-primary hover:underline"
                       >
                         Restaurar padrão
                       </button>
                     </div>
-                    <p className="mt-1 text-[11px] text-[#64748B]">
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                       Adicione até 8 cores. Os ícones caem aleatoriamente nessas cores.
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -1198,7 +1198,7 @@ function PersonalizacaoPage() {
                               next[i] = e.target.value;
                               setRainColors(next);
                             }}
-                            className="h-9 w-9 cursor-pointer rounded-lg border border-[#E5E7EB] bg-white p-0.5"
+                            className="h-9 w-9 cursor-pointer rounded-lg border border-border bg-card p-0.5"
                             aria-label={`Cor ${i + 1}`}
                           />
                           {rainColors.length > 1 && (
@@ -1217,7 +1217,7 @@ function PersonalizacaoPage() {
                         <button
                           type="button"
                           onClick={() => setRainColors([...rainColors, "#FFFFFF"])}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-[#CBD5E1] text-lg text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-[#CBD5E1] text-lg text-muted-foreground hover:border-primary hover:text-primary"
                           aria-label="Adicionar cor"
                         >
                           +
@@ -1228,10 +1228,10 @@ function PersonalizacaoPage() {
 
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-[#0F172A]">
+                      <Label className="text-xs font-semibold text-foreground">
                         Opacidade dos ícones
                       </Label>
-                      <span className="text-[11px] font-medium tabular-nums text-[#64748B]">
+                      <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
                         {Math.round(rainOpacity * 100)}%
                       </span>
                     </div>
@@ -1243,7 +1243,7 @@ function PersonalizacaoPage() {
                       value={[Math.round(rainOpacity * 100)]}
                       onValueChange={(v) => setRainOpacity((v[0] ?? 75) / 100)}
                     />
-                    <p className="mt-1 text-[11px] text-[#64748B]">
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                       Menor = mais discreto. Maior = destaca sobre qualquer cor de fundo.
                     </p>
                   </div>
@@ -1258,7 +1258,7 @@ function PersonalizacaoPage() {
                 <DialogTitle>Prévia — Chuva de Recompensas</DialogTitle>
               </DialogHeader>
               <div
-                className="relative overflow-hidden rounded-xl border border-[#E5E7EB]"
+                className="relative overflow-hidden rounded-xl border border-border"
                 style={{
                   height: 420,
                   background: `linear-gradient(135deg, ${bgMode === "custom" ? bgColor1 : bgMode === "light" ? "#f8fafc" : "#0B1020"}, ${bgMode === "custom" ? bgColor2 : bgMode === "light" ? "#e2e8f0" : "#1e1b4b"})`,
@@ -1281,7 +1281,7 @@ function PersonalizacaoPage() {
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-muted-foreground">
                 Os elementos caem em baixa opacidade e ignoram cliques — não atrapalham o formulário
                 de login.
               </p>
@@ -1293,7 +1293,7 @@ function PersonalizacaoPage() {
               onClick={() => salvar.mutate()}
               disabled={salvar.isPending}
               size="lg"
-              className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-all duration-200"
+              className="rounded-xl bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200"
             >
               {salvar.isPending ? "Salvando..." : "Salvar personalização"}
             </Button>
@@ -1329,7 +1329,7 @@ function PersonalizacaoPage() {
                   e.currentTarget.value = "";
                 }}
               />
-              <span className="inline-flex items-center gap-1 rounded-xl border border-[#E5E7EB] bg-white px-4 h-11 text-sm font-medium cursor-pointer hover:bg-[#F8FAFC]">
+              <span className="inline-flex items-center gap-1 rounded-xl border border-border bg-card px-4 h-11 text-sm font-medium cursor-pointer hover:bg-muted/40">
                 <Upload className="h-4 w-4" /> Importar tema
               </span>
             </label>
@@ -1337,7 +1337,7 @@ function PersonalizacaoPage() {
         </div>
 
         <div className="lg:sticky lg:top-8 lg:self-start">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB] mb-2">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary mb-2">
             Prévia ao vivo
           </div>
           <LivePreview
@@ -1357,7 +1357,7 @@ function PersonalizacaoPage() {
             bgColor1={bgColor1}
             bgColor2={bgColor2}
           />
-          <p className="mt-2 text-[11px] text-[#64748B]">
+          <p className="mt-2 text-[11px] text-muted-foreground">
             Atualiza em tempo real. A área tracejada mostra a "zona segura" — mantenha logo e textos
             dentro dela para não cortar em celulares pequenos.
           </p>
