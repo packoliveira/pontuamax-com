@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,13 +50,11 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <FileText className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Notas fiscais</h1>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Clientes enviam foto da nota; a IA extrai valor e CNPJ. Você aprova ou rejeita.
-      </p>
+      <PageHeader
+        title="Notas fiscais"
+        icon={<FileText className="h-6 w-6 text-primary" />}
+        description="Clientes enviam foto da nota; a IA extrai valor e CNPJ. Você aprova ou rejeita."
+      />
 
       <Card>
         <CardHeader>

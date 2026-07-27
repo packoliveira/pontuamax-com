@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useQuery } from "@tanstack/react-query";
 import { myEmployeeContextQuery } from "@/lib/team-queries";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,14 +27,11 @@ function MeuQR() {
 
   return (
     <div className="max-w-xl mx-auto space-y-4">
-      <div>
-        <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Atalho</div>
-        <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Meu QR Code</h1>
-        <p className="mt-1 text-sm text-[#64748B]">
-          O cliente escaneia esse QR pra abrir a página da loja e acumular/resgatar direto pelo
-          celular dele.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Atalho"
+        title="Meu QR Code"
+        description="O cliente escaneia esse QR pra abrir a página da loja e acumular/resgatar direto pelo celular dele."
+      />
       <Card className="rounded-2xl border-[#E5E7EB]">
         <CardContent className="p-6 flex flex-col items-center gap-4" id="qr-print">
           <div className="text-center">

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -111,16 +112,12 @@ function EquipePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-            <Users className="h-6 w-6 text-[#2563EB]" /> Equipe
-          </h1>
-          <p className="text-sm text-[#64748B]">
-            Gerencie vendedores, cargos e permissões da sua loja.
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+      <PageHeader
+        title="Equipe"
+        icon={<Users className="h-6 w-6 text-[#2563EB]" />}
+        description="Gerencie vendedores, cargos e permissões da sua loja."
+        actions={
+          <>
           <Button
             asChild
             variant="outline"
@@ -147,8 +144,9 @@ function EquipePage() {
           >
             <UserPlus className="h-4 w-4" /> Cadastrar vendedor
           </Button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <Tabs defaultValue="lista" className="space-y-4">
         <TabsList>

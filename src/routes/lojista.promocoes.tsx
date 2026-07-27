@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { myStoreQuery, storePromotionsQuery } from "@/lib/queries";
@@ -137,15 +138,12 @@ function Promocoes() {
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Zap className="h-6 w-6 text-orange-500" /> Promoções
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Multiplique os pontos ganhos em dias e horários específicos
-          </p>
-        </div>
+      <PageHeader
+        title="Promoções"
+        icon={<Zap className="h-6 w-6 text-orange-500" />}
+        description="Multiplique os pontos ganhos em dias e horários específicos"
+      />
+      <div className="flex flex-col gap-3">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={abrirNovo}>

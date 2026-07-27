@@ -170,6 +170,7 @@ export function RewardRain({
     <div
       ref={rootRef}
       aria-hidden
+      data-audit-ignore
       className="reward-rain-root"
       style={{
         position: contained ? "absolute" : "fixed",

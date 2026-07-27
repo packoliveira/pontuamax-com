@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { myStoreQuery, storeNpsResponsesQuery, storeClientsQuery } from "@/lib/queries";
@@ -52,10 +53,11 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Star className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">NPS · Satisfação</h1>
-      </div>
+      <PageHeader
+        title="NPS · Satisfação"
+        icon={<Star className="h-6 w-6 text-primary" />}
+        description="Acompanhe a satisfação dos clientes após cada venda."
+      />
 
       {!loja?.nps_enabled && (
         <Card className="border-yellow-400 bg-yellow-50">

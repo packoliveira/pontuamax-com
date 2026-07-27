@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useQuery } from "@tanstack/react-query";
 import { formatBRL } from "@/lib/qsf-shared";
 import { storeClientsQuery, storeTransactionsQuery } from "@/lib/queries";
@@ -130,29 +131,23 @@ function Dashboard() {
           </div>
         </div>
       )}
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
-            Dashboard
-          </div>
-          <h1 className="mt-1 truncate text-2xl font-bold text-[#0F172A] md:text-3xl">
-            Olá, {data.employee.nome.split(" ")[0]}!
-          </h1>
-          <p className="mt-1 truncate text-sm text-[#64748B]">
-            {data.store?.nome_fantasia} · Cargo: {data.employee.role_key}
-          </p>
-        </div>
-        {perms.has("pontos.adicionar") && (
-          <Link to="/funcionario/pontuar" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              className="w-full shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
-            >
-              <ShoppingCart className="h-4 w-4" /> Lançar venda
-            </Button>
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        eyebrow="Dashboard"
+        title={`Olá, ${data.employee.nome.split(" ")[0]}!`}
+        description={`${data.store?.nome_fantasia ?? ""} · Cargo: ${data.employee.role_key}`}
+        actions={
+          perms.has("pontos.adicionar") ? (
+            <Link to="/funcionario/pontuar" className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
+              >
+                <ShoppingCart className="h-4 w-4" /> Lançar venda
+              </Button>
+            </Link>
+          ) : null
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => {

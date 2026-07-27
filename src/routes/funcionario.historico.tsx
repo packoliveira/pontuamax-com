@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useQuery } from "@tanstack/react-query";
 import { myEmployeeContextQuery } from "@/lib/team-queries";
 import { storeTransactionsQuery } from "@/lib/queries";
@@ -28,7 +29,7 @@ function Historico() {
   }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-[#0F172A]">Histórico</h1>
+      <PageHeader title="Histórico" />
       <Card className="rounded-2xl border-[#E5E7EB]">
         <CardContent className="p-0">
           <div className="divide-y divide-[#F1F5F9]">

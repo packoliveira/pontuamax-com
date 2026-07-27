@@ -246,7 +246,10 @@ function Index() {
             Rodam PontuaMax
           </p>
           <div className="relative flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-            <div className="flex min-w-max animate-[marquee_28s_linear_infinite] gap-8 sm:gap-12">
+            <div
+              data-audit-ignore
+              className="flex min-w-max animate-[marquee_28s_linear_infinite] gap-8 sm:gap-12"
+            >
               {[...Array(2)].flatMap((_, r) =>
                 [
                   "Quero Ser Fit",
@@ -470,7 +473,7 @@ function PhoneMockup() {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" data-audit-ignore>
       {/* soft ambient glow */}
       <div
         aria-hidden

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useQuery } from "@tanstack/react-query";
 import { myStoreQuery } from "@/lib/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +29,11 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Code className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Widget para site</h1>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Cole este código em qualquer site (WordPress, Wix, HTML puro). Um botão flutuante "Ganhe
-        pontos" aparece e abre a página do cliente.
-      </p>
+      <PageHeader
+        title="Widget para site"
+        icon={<Code className="h-6 w-6 text-primary" />}
+        description={'Cole este código em qualquer site (WordPress, Wix, HTML puro). Um botão flutuante "Ganhe pontos" aparece e abre a página do cliente.'}
+      />
       <Card>
         <CardHeader>
           <CardTitle>Código de incorporação</CardTitle>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -134,12 +135,10 @@ function CampanhasPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-semibold">Campanhas WhatsApp</h1>
-        <p className="text-sm text-muted-foreground">
-          Envie mensagens em massa segmentadas para seus clientes.
-        </p>
-      </div>
+      <PageHeader
+        title="Campanhas WhatsApp"
+        description="Envie mensagens em massa segmentadas para seus clientes."
+      />
 
       <Card>
         <CardHeader>
