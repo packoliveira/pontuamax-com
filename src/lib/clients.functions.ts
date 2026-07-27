@@ -7,6 +7,59 @@ import {
 } from "./qsf-shared";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
+const SYNTHETIC_EMAIL_DOMAIN = "@cliente.qsfclub.local";
+
+/** E-mail sintético (derivado do CPF) usado quando o cliente não informou e-mail real. */
+function isSyntheticEmail(email: string | null | undefined): boolean {
+  return !email || email.toLowerCase().endsWith(SYNTHETIC_EMAIL_DOMAIN);
+}
+
+/**
+ * Envia o link de definição de senha pelo e-mail nativo do Supabase (grátis).
+ * Usado quando o lojista/vendedor informa o e-mail real do cliente: nenhuma
+ * senha provisória previsível é criada — o cliente define a própria senha.
+ */
+async function enviarLinkDefinirSenha(email: string): Promise<boolean> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const base = (process.env.PUBLIC_APP_URL ?? "https://pontuamax.com").replace(/\/+$/, "");
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+      redirectTo: `${base}/redefinir-senha`,
+    });
+    if (error) {
+      console.error("[clientes] falha ao enviar link de senha:", error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[clientes] falha ao enviar link de senha:", (e as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Resolve o e-mail de login a partir do CPF. O cliente sempre digita o CPF;
+ * internamente a conta pode ter e-mail real (informado pela loja) ou o
+ * e-mail sintético. Rate-limited para evitar enumeração em massa.
+ */
+export const resolveClienteEmailByCpf = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.object({ cpf: z.string().min(11).max(20) }).parse(input))
+  .handler(async ({ data }) => {
+    const cpfDigits = data.cpf.replace(/\D/g, "");
+    const fallback = cpfToEmail(cpfDigits);
+    if (!isValidCPF(cpfDigits)) return { email: fallback };
+    await rateLimitByIp("resolve-cliente-email", 20, 300);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profile = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("cpf", cpfDigits)
+      .maybeSingle();
+    if (!profile.data) return { email: fallback };
+    const user = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
+    return { email: user.data.user?.email ?? fallback };
+  });
+
 export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
