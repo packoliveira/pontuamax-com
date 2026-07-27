@@ -265,13 +265,11 @@ function ClientesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
-            Relacionamento
-          </div>
-          <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Clientes</h1>
-          <p className="mt-1 text-sm text-[#64748B]">
+      <PageHeader
+        eyebrow="Relacionamento"
+        title="Clientes"
+        description={
+          <>
             {filtered.length} de {clientes.length} cliente(s)
             {pendentesCount > 0 && (
               <>
@@ -285,19 +283,21 @@ function ClientesPage() {
                 </button>
               </>
             )}
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
-          <SyncClientsButton storeId={loja.id} />
-          <Button
-            size="lg"
-            onClick={() => setOpenNew(true)}
-            className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
-          >
-            <UserPlus className="h-4 w-4" /> Cadastrar cliente
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <SyncClientsButton storeId={loja.id} />
+            <Button
+              size="lg"
+              onClick={() => setOpenNew(true)}
+              className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            >
+              <UserPlus className="h-4 w-4" /> Cadastrar cliente
+            </Button>
+          </>
+        }
+      />
 
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="relative min-w-[240px] flex-1 max-w-md">
