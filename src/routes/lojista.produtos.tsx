@@ -94,7 +94,6 @@ function ProdutosPage() {
           </Button>
         }
       />
-      </div>
 
       {produtos.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white p-12 text-center">
