@@ -473,7 +473,7 @@ function PhoneMockup() {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" data-audit-ignore>
       {/* soft ambient glow */}
       <div
         aria-hidden
