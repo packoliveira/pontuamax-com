@@ -84,7 +84,7 @@ function SyncClientsButton({ storeId }: { storeId: string }) {
       variant="outline"
       onClick={() => m.mutate()}
       disabled={m.isPending}
-      className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9]"
+      className="w-full rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9] sm:w-auto"
     >
       <RefreshCw className={`h-4 w-4 ${m.isPending ? "animate-spin" : ""}`} />
       Sincronizar clientes
@@ -264,7 +264,7 @@ function ClientesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
             Relacionamento
@@ -286,12 +286,12 @@ function ClientesPage() {
             )}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
           <SyncClientsButton storeId={loja.id} />
           <Button
             size="lg"
             onClick={() => setOpenNew(true)}
-            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
           >
             <UserPlus className="h-4 w-4" /> Cadastrar cliente
           </Button>

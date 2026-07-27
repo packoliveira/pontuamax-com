@@ -211,7 +211,7 @@ function FuncClientes() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
             Relacionamento
@@ -238,7 +238,7 @@ function FuncClientes() {
           <Button
             size="lg"
             onClick={() => setOpenNew(true)}
-            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
           >
             <UserPlus className="h-4 w-4" /> Cadastrar cliente
           </Button>
