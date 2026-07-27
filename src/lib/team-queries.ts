@@ -7,17 +7,21 @@ import {
   getMyEmployeeContext,
 } from "@/lib/team.functions";
 
-export const rolesAndPermsQuery = () =>
+export const rolesAndPermsQuery = (enabled = true) =>
   queryOptions({
     queryKey: ["team", "catalog"],
     queryFn: () => listRolesAndPermissions(),
     staleTime: 5 * 60_000,
+    enabled,
+    retry: false,
   });
 
-export const employeesQuery = () =>
+export const employeesQuery = (enabled = true) =>
   queryOptions({
     queryKey: ["team", "employees"],
     queryFn: () => listEmployees(),
+    enabled,
+    retry: false,
   });
 
 export const employeePermsQuery = (employeeId: string | null) =>
@@ -30,14 +34,18 @@ export const employeePermsQuery = (employeeId: string | null) =>
         : Promise.resolve([]),
   });
 
-export const teamAuditLogsQuery = () =>
+export const teamAuditLogsQuery = (enabled = true) =>
   queryOptions({
     queryKey: ["team", "audit"],
     queryFn: () => listEmployeeAuditLogs(),
+    enabled,
+    retry: false,
   });
 
-export const myEmployeeContextQuery = () =>
+export const myEmployeeContextQuery = (enabled = true) =>
   queryOptions({
     queryKey: ["me", "employee-context"],
     queryFn: () => getMyEmployeeContext(),
+    enabled,
+    retry: false,
   });
