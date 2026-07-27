@@ -17,12 +17,12 @@ import {
   resgatarProduto,
   resgatarCashback,
   criarClienteViaCpf,
+  resolveClienteEmailByCpf,
 } from "@/lib/qsf.functions";
 import {
   formatBRL,
   calcularNivel,
   progressoNivel,
-  cpfToEmail,
   formatCPF,
   isValidCPF,
   onlyDigits,
@@ -541,7 +541,8 @@ function Auth({
     setLoading(true);
     onAuthStart?.();
     try {
-      const email = cpfToEmail(cpfDigits);
+      // A conta pode ter e-mail real (informado pela loja) ou sintético.
+      const { email } = await resolveClienteEmailByCpf({ data: { cpf: cpfDigits } });
       if (mode === "signup") {
         const phoneDigits = onlyDigits(phone);
         // Se já existe um profile "pendente" com este CPF (criado por venda

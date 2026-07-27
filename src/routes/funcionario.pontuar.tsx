@@ -201,7 +201,7 @@ function Pontuar() {
         });
         userId = r.user_id;
         nomeCli = nomeNovo.trim();
-        toast.success(`Cliente cadastrado. Senha inicial (CPF): ${r.senha_temporaria}`);
+        toast.success("Cliente cadastrado. Ele ativa a conta na página da loja com CPF + telefone.");
       } catch (err) {
         toast.error((err as Error).message);
         return;

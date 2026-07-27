@@ -63,7 +63,7 @@ function FuncClientes() {
   const [editing, setEditing] = useState<{ userId: string; value: string } | null>(null);
   const [tagInput, setTagInput] = useState<Record<string, string>>({});
   const [openNew, setOpenNew] = useState(false);
-  const [novo, setNovo] = useState({ nome: "", phone: "", cpf: "" });
+  const [novo, setNovo] = useState({ nome: "", phone: "", cpf: "", email: "" });
   const [editInfo, setEditInfo] = useState<{
     user_id: string;
     full_name: string;
@@ -96,13 +96,18 @@ function FuncClientes() {
           nome: novo.nome.trim(),
           phone: novo.phone.trim(),
           cpf: novo.cpf.trim(),
+          email: novo.email.trim() || null,
         },
       });
     },
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["store-clients", storeId] });
-      toast.success(`Cliente cadastrado. Senha inicial (CPF): ${res.senha_temporaria}`);
-      setNovo({ nome: "", phone: "", cpf: "" });
+      toast.success(
+        res.email_enviado
+          ? "Cliente cadastrado. Enviamos por e-mail o link para ele criar a senha."
+          : "Cliente cadastrado. Ele ativa a conta na página da loja com CPF + telefone.",
+      );
+      setNovo({ nome: "", phone: "", cpf: "", email: "" });
       setOpenNew(false);
     },
     onError: (e) => toast.error((e as Error).message),
@@ -589,8 +594,23 @@ function FuncClientes() {
                 <p className="mt-1 text-xs text-red-600">CPF inválido</p>
               )}
             </div>
+            <div>
+              <Label htmlFor="novo-email">E-mail (opcional)</Label>
+              <Input
+                id="novo-email"
+                type="email"
+                value={novo.email}
+                onChange={(e) => setNovo((s) => ({ ...s, email: e.target.value }))}
+                placeholder="cliente@email.com"
+                inputMode="email"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Se informado, enviamos por e-mail o link para o cliente criar a própria senha.
+              </p>
+            </div>
             <p className="text-xs text-muted-foreground">
-              O cliente entra sempre pelo CPF. Ele define a própria senha ao ativar a conta na página da loja, informando CPF + o telefone cadastrado aqui.
+              O cliente entra sempre pelo CPF. Com e-mail, ele recebe o link para criar a senha.
+              Sem e-mail, ele ativa a conta na página da loja informando CPF + este telefone.
             </p>
           </div>
           <DialogFooter>

@@ -7,6 +7,59 @@ import {
 } from "./qsf-shared";
 import { rateLimitByIp } from "./sfn-rate-limit.server";
 
+const SYNTHETIC_EMAIL_DOMAIN = "@cliente.qsfclub.local";
+
+/** E-mail sintético (derivado do CPF) usado quando o cliente não informou e-mail real. */
+function isSyntheticEmail(email: string | null | undefined): boolean {
+  return !email || email.toLowerCase().endsWith(SYNTHETIC_EMAIL_DOMAIN);
+}
+
+/**
+ * Envia o link de definição de senha pelo e-mail nativo do Supabase (grátis).
+ * Usado quando o lojista/vendedor informa o e-mail real do cliente: nenhuma
+ * senha provisória previsível é criada — o cliente define a própria senha.
+ */
+async function enviarLinkDefinirSenha(email: string): Promise<boolean> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const base = (process.env.PUBLIC_APP_URL ?? "https://pontuamax.com").replace(/\/+$/, "");
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+      redirectTo: `${base}/redefinir-senha`,
+    });
+    if (error) {
+      console.error("[clientes] falha ao enviar link de senha:", error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[clientes] falha ao enviar link de senha:", (e as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Resolve o e-mail de login a partir do CPF. O cliente sempre digita o CPF;
+ * internamente a conta pode ter e-mail real (informado pela loja) ou o
+ * e-mail sintético. Rate-limited para evitar enumeração em massa.
+ */
+export const resolveClienteEmailByCpf = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.object({ cpf: z.string().min(11).max(20) }).parse(input))
+  .handler(async ({ data }) => {
+    const cpfDigits = data.cpf.replace(/\D/g, "");
+    const fallback = cpfToEmail(cpfDigits);
+    if (!isValidCPF(cpfDigits)) return { email: fallback };
+    await rateLimitByIp("resolve-cliente-email", 20, 300);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profile = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("cpf", cpfDigits)
+      .maybeSingle();
+    if (!profile.data) return { email: fallback };
+    const user = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
+    return { email: user.data.user?.email ?? fallback };
+  });
+
 export const sincronizarClientesDaLoja = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -336,7 +389,9 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
       }
     }
     const phoneDigits = informado || registrado || null;
-    const email = cpfToEmail(cpfDigits);
+    // Preserva e-mail real informado pela loja; só normaliza para o sintético
+    // quando a conta ainda não tem e-mail de verdade.
+    const email = isSyntheticEmail(user.email) ? cpfToEmail(cpfDigits) : user.email!;
     const updated = await supabaseAdmin.auth.admin.updateUserById(profile.data.id, {
       email,
       password: data.senha,
@@ -384,7 +439,7 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
     const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || null;
-    const email = cpfToEmail(cpfDigits);
+    let email = cpfToEmail(cpfDigits);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const existing = await supabaseAdmin
       .from("profiles")
@@ -396,6 +451,8 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
       if (cur.data.user && cur.data.user.last_sign_in_at) {
         throw new Error("Já existe uma conta com este CPF. Faça login.");
       }
+      // Preserva e-mail real cadastrado pela loja.
+      if (!isSyntheticEmail(cur.data.user?.email)) email = cur.data.user!.email!;
       const upd = await supabaseAdmin.auth.admin.updateUserById(existing.data.id, {
         email,
         password: data.senha,
@@ -459,6 +516,9 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         // para evitar cadastros incompletos que colidem depois com o
         // auto-cadastro do cliente pelo mesmo CPF.
         cpf: z.string().min(11).max(20),
+        // E-mail real (opcional). Se informado, o cliente recebe por e-mail
+        // o link para definir a própria senha — nenhuma senha previsível.
+        email: z.string().email().max(120).optional().nullable(),
       })
       .parse(input),
   )
@@ -517,14 +577,20 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       }
     }
 
-    // Login do cliente é SEMPRE pelo CPF.
-    const email = cpfToEmail(cpfDigits);
+    // Cliente sempre digita o CPF para entrar. O e-mail da conta é o real
+    // (quando informado) ou o sintético derivado do CPF.
+    const emailReal = (data.email ?? "").trim().toLowerCase() || null;
+    let email = emailReal ?? cpfToEmail(cpfDigits);
     let userId: string | undefined;
     const existing = existingByCpf
       ? { data: { id: existingByCpf.id } }
       : await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
     if (existing.data) {
       userId = existing.data.id;
+      if (!emailReal) {
+        const cur = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (!isSyntheticEmail(cur.data.user?.email)) email = cur.data.user!.email!;
+      }
       const patch: { phone: string; cpf?: string } = { phone: digits };
       if (cpfDigits) patch.cpf = cpfDigits;
       await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
@@ -564,7 +630,8 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { user_id: userId, link, senha_temporaria: cpfDigits };
+    const emailEnviado = emailReal ? await enviarLinkDefinirSenha(emailReal) : false;
+    return { user_id: userId, link, login_email: email, email_enviado: emailEnviado };
   });
 
 // -------- Lançar venda (lojista) --------
