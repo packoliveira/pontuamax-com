@@ -369,7 +369,7 @@ function LancarVenda() {
                 <div className="flex items-center gap-2 text-sm font-semibold text-[#B45309]">
                   <Sparkles className="h-4 w-4" /> Cliente novo — preencha os dados
                 </div>
-                <p className="text-xs text-[#92400E]">Login e senha inicial = CPF.</p>
+                <p className="text-xs text-[#92400E]">O cliente ativa a conta na página da loja usando CPF + este telefone.</p>
                 <Input
                   placeholder="Nome do cliente"
                   value={nomeNovo}

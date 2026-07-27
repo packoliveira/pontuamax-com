@@ -590,7 +590,7 @@ function FuncClientes() {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              O cliente entra sempre pelo CPF. A senha inicial é o próprio CPF (só números).
+              O cliente entra sempre pelo CPF. Ele define a própria senha ao ativar a conta na página da loja, informando CPF + o telefone cadastrado aqui.
             </p>
           </div>
           <DialogFooter>
