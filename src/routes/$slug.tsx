@@ -23,7 +23,6 @@ import {
   formatBRL,
   calcularNivel,
   progressoNivel,
-  cpfToEmail,
   formatCPF,
   isValidCPF,
   onlyDigits,
