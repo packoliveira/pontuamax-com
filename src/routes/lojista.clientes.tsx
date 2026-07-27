@@ -286,12 +286,12 @@ function ClientesPage() {
             )}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
           <SyncClientsButton storeId={loja.id} />
           <Button
             size="lg"
             onClick={() => setOpenNew(true)}
-            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
           >
             <UserPlus className="h-4 w-4" /> Cadastrar cliente
           </Button>

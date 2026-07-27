@@ -238,7 +238,7 @@ function FuncClientes() {
           <Button
             size="lg"
             onClick={() => setOpenNew(true)}
-            className="rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
           >
             <UserPlus className="h-4 w-4" /> Cadastrar cliente
           </Button>

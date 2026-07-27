@@ -160,10 +160,10 @@ function Dashboard() {
             <span className="font-mono text-[#0F172A]">pontuamax.com.br/{loja.slug}</span>
           </p>
         </div>
-        <Link to="/lojista/lancar-venda">
+        <Link to="/lojista/lancar-venda" className="w-full sm:w-auto">
           <Button
             size="lg"
-            className="shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="w-full shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
           >
             <ShoppingCart className="h-4 w-4" /> Lançar venda
           </Button>

@@ -143,10 +143,10 @@ function Dashboard() {
           </p>
         </div>
         {perms.has("pontos.adicionar") && (
-          <Link to="/funcionario/pontuar">
+          <Link to="/funcionario/pontuar" className="w-full sm:w-auto">
             <Button
               size="lg"
-              className="shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8]"
+              className="w-full shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
             >
               <ShoppingCart className="h-4 w-4" /> Lançar venda
             </Button>
