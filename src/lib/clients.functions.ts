@@ -306,7 +306,7 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await rateLimitByIp("claim-cadastro-pendente", 5, 300);
     const cpfDigits = data.cpf.replace(/\D/g, "");
-    if (!isValidCPF(cpfDigits)) return { claimed: false as const };
+    if (!isValidCPF(cpfDigits)) return { claimed: false as const, reason: "invalid" as const };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const profile = await supabaseAdmin
@@ -314,7 +314,7 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
       .select("id, full_name, phone")
       .eq("cpf", cpfDigits)
       .maybeSingle();
-    if (!profile.data) return { claimed: false as const };
+    if (!profile.data) return { claimed: false as const, reason: "not_found" as const };
 
     const current = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
     const user = current.data.user;
@@ -322,7 +322,8 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
     // já tem last_sign_in_at, o cadastro foi completado antes — nesse caso
     // devolve claimed:false e o frontend segue para o fluxo normal, que vai
     // detectar "usuário já cadastrado" e sugerir login.
-    if (!user || user.last_sign_in_at) return { claimed: false as const };
+    if (!user || user.last_sign_in_at)
+      return { claimed: false as const, reason: "already_active" as const };
 
     const informado = (data.phone ?? "").replace(/\D/g, "");
     const registrado = (profile.data.phone ?? "").replace(/\D/g, "");
@@ -362,7 +363,7 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
       .eq("user_id", profile.data.id)
       .eq("pending_registration", true);
 
-    return { claimed: true as const, email };
+    return { claimed: true as const, reason: "ok" as const, email };
   });
 
 // -------- CLIENTE: criar conta via CPF (sem confirmação de email) --------
