@@ -32,10 +32,20 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
+function pickServiceRoleKey(): string | undefined {
+  const candidates = [
+    process.env.SB_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  ].filter((v): v is string => !!v && v.length > 0);
+  // Prefer the modern opaque `sb_secret_` key. Legacy HS256 service JWTs are
+  // rejected ("unrecognized JWT kid <nil> for algorithm ES256") on projects
+  // that already migrated to asymmetric signing keys.
+  return candidates.find((v) => v.startsWith("sb_secret_")) ?? candidates[0];
+}
+
 function createSupabaseAdminClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY =
-    process.env.SB_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const SUPABASE_SERVICE_ROLE_KEY = pickServiceRoleKey();
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     const missing = [
