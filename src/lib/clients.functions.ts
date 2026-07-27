@@ -279,69 +279,6 @@ export const vincularClienteALoja = createServerFn({ method: "POST" })
     return link;
   });
 
-// -------- CLIENTE: normalizar login legado para CPF --------
-// Clientes criados pelo lojista em versões antigas podiam estar com e-mail
-// sintético por telefone. Se o cliente entra com CPF + senha inicial CPF,
-// normalizamos a conta existente vinculada à loja para o e-mail por CPF.
-
-export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
-  .inputValidator((input) =>
-    z
-      .object({
-        store_id: z.string().uuid(),
-        cpf: z.string().min(11).max(20),
-        senha: z.string().min(6).max(72),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data }) => {
-    await rateLimitByIp("prep-login-cpf", 5, 60);
-    const cpfDigits = data.cpf.replace(/\D/g, "");
-    if (!isValidCPF(cpfDigits) || data.senha !== cpfDigits) return { normalized: false };
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const profile = await supabaseAdmin
-      .from("profiles")
-      .select("id, full_name, phone, cpf")
-      .eq("cpf", cpfDigits)
-      .maybeSingle();
-    if (!profile.data) return { normalized: false };
-
-    const link = await supabaseAdmin
-      .from("store_clients")
-      .select("id")
-      .eq("store_id", data.store_id)
-      .eq("user_id", profile.data.id)
-      .maybeSingle();
-    if (!link.data) return { normalized: false };
-
-    const current = await supabaseAdmin.auth.admin.getUserById(profile.data.id);
-    const currentEmail = current.data.user?.email ?? "";
-    const cpfEmail = cpfToEmail(cpfDigits);
-    if (
-      !current.data.user ||
-      currentEmail === cpfEmail ||
-      !currentEmail.endsWith("@cliente.qsfclub.local") ||
-      current.data.user.last_sign_in_at
-    ) {
-      return { normalized: false };
-    }
-
-    const updated = await supabaseAdmin.auth.admin.updateUserById(profile.data.id, {
-      email: cpfEmail,
-      password: cpfDigits,
-      email_confirm: true,
-      user_metadata: {
-        ...(current.data.user.user_metadata ?? {}),
-        full_name: profile.data.full_name,
-        phone: profile.data.phone,
-        cpf: cpfDigits,
-      },
-    });
-    if (updated.error) return { normalized: false };
-    return { normalized: true };
-  });
-
 // -------- CLIENTE: reivindicar cadastro pendente criado por venda --------
 // Quando o lojista lança uma venda (ou o webhook recebe uma venda) para um CPF
 // que ainda não tem conta, criamos um profile "pendente" — sem senha real
@@ -349,6 +286,11 @@ export const prepararLoginClientePorCpf = createServerFn({ method: "POST" })
 // pública com o mesmo CPF, esta função REAPROVEITA a conta existente (mesmo
 // user_id, mesmo saldo de pontos/cashback), apenas definindo a senha e o nome
 // escolhidos por ele. Assim NUNCA cria uma segunda conta com o mesmo CPF.
+//
+// SEGURANÇA: conhecer o CPF não é prova de posse. Quando o cadastro pendente
+// já tem telefone registrado (caso do cadastro feito pelo lojista/vendedor),
+// exigimos que o telefone informado confira. Só é possível reivindicar contas
+// que NUNCA fizeram login.
 
 export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
   .inputValidator((input) =>
@@ -362,6 +304,7 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    await rateLimitByIp("claim-cadastro-pendente", 5, 300);
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits)) return { claimed: false as const };
 
@@ -381,7 +324,17 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
     // detectar "usuário já cadastrado" e sugerir login.
     if (!user || user.last_sign_in_at) return { claimed: false as const };
 
-    const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || profile.data.phone || null;
+    const informado = (data.phone ?? "").replace(/\D/g, "");
+    const registrado = (profile.data.phone ?? "").replace(/\D/g, "");
+    // Prova de posse: se a loja registrou telefone, ele precisa bater
+    // (comparação pelos últimos 8 dígitos, ignorando DDI/DDD divergentes).
+    if (registrado.length >= 8) {
+      const tail = (v: string) => v.slice(-8);
+      if (informado.length < 8 || tail(informado) !== tail(registrado)) {
+        return { claimed: false as const, reason: "phone_mismatch" as const };
+      }
+    }
+    const phoneDigits = informado || registrado || null;
     const email = cpfToEmail(cpfDigits);
     const updated = await supabaseAdmin.auth.admin.updateUserById(profile.data.id, {
       email,
