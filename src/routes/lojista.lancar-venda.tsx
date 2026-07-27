@@ -240,13 +240,11 @@ function LancarVenda() {
 
   return (
     <div className="max-w-3xl space-y-8">
-      <div>
-        <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">Operação</div>
-        <h1 className="mt-1 text-2xl font-bold text-[#0F172A] md:text-3xl">Lançar venda</h1>
-        <p className="mt-1 text-sm text-[#64748B]">
-          Credite pontos e/ou cashback para um cliente em poucos segundos.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Operação"
+        title="Lançar venda"
+        description="Credite pontos e/ou cashback para um cliente em poucos segundos."
+      />
 
       <Card className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="flex items-center gap-3 border-b border-[#F1F5F9] bg-gradient-to-r from-[#6D28D9]/5 via-[#2563EB]/5 to-[#14CBA8]/5 px-6 py-4">

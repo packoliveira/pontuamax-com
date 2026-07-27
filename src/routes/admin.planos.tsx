@@ -130,22 +130,20 @@ function AdminPlanos() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2">
-            <Link to="/admin">
-              <ArrowLeft className="h-4 w-4" /> Voltar ao painel
-            </Link>
+      <Button asChild variant="ghost" size="sm" className="-ml-2">
+        <Link to="/admin">
+          <ArrowLeft className="h-4 w-4" /> Voltar ao painel
+        </Link>
+      </Button>
+      <PageHeader
+        title="Planos de assinatura"
+        description="Configure preços, limites e recursos de cada plano da PontuaMax."
+        actions={
+          <Button onClick={openNew}>
+            <Plus className="h-4 w-4" /> Novo plano
           </Button>
-          <h1 className="text-2xl font-bold">Planos de assinatura</h1>
-          <p className="text-sm text-muted-foreground">
-            Configure preços, limites e recursos de cada plano da PontuaMax.
-          </p>
-        </div>
-        <Button onClick={openNew}>
-          <Plus className="h-4 w-4" /> Novo plano
-        </Button>
-      </div>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {plans.data?.map((p) => (
