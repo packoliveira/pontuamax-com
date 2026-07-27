@@ -84,7 +84,7 @@ function SyncClientsButton({ storeId }: { storeId: string }) {
       variant="outline"
       onClick={() => m.mutate()}
       disabled={m.isPending}
-      className="rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9]"
+      className="w-full rounded-xl border-[#E5E7EB] text-[#0F172A] hover:bg-[#F1F5F9] sm:w-auto"
     >
       <RefreshCw className={`h-4 w-4 ${m.isPending ? "animate-spin" : ""}`} />
       Sincronizar clientes
