@@ -514,6 +514,9 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
         // para evitar cadastros incompletos que colidem depois com o
         // auto-cadastro do cliente pelo mesmo CPF.
         cpf: z.string().min(11).max(20),
+        // E-mail real (opcional). Se informado, o cliente recebe por e-mail
+        // o link para definir a própria senha — nenhuma senha previsível.
+        email: z.string().email().max(120).optional().nullable(),
       })
       .parse(input),
   )
@@ -572,14 +575,20 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       }
     }
 
-    // Login do cliente é SEMPRE pelo CPF.
-    const email = cpfToEmail(cpfDigits);
+    // Cliente sempre digita o CPF para entrar. O e-mail da conta é o real
+    // (quando informado) ou o sintético derivado do CPF.
+    const emailReal = (data.email ?? "").trim().toLowerCase() || null;
+    let email = emailReal ?? cpfToEmail(cpfDigits);
     let userId: string | undefined;
     const existing = existingByCpf
       ? { data: { id: existingByCpf.id } }
       : await supabaseAdmin.from("profiles").select("id").eq("phone", digits).maybeSingle();
     if (existing.data) {
       userId = existing.data.id;
+      if (!emailReal) {
+        const cur = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (!isSyntheticEmail(cur.data.user?.email)) email = cur.data.user!.email!;
+      }
       const patch: { phone: string; cpf?: string } = { phone: digits };
       if (cpfDigits) patch.cpf = cpfDigits;
       await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
@@ -619,7 +628,8 @@ export const cadastrarClientePorTelefone = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { user_id: userId, link, senha_temporaria: cpfDigits };
+    const emailEnviado = emailReal ? await enviarLinkDefinirSenha(emailReal) : false;
+    return { user_id: userId, link, login_email: email, email_enviado: emailEnviado };
   });
 
 // -------- Lançar venda (lojista) --------
