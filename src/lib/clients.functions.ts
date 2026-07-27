@@ -389,7 +389,9 @@ export const reivindicarCadastroPendente = createServerFn({ method: "POST" })
       }
     }
     const phoneDigits = informado || registrado || null;
-    const email = cpfToEmail(cpfDigits);
+    // Preserva e-mail real informado pela loja; só normaliza para o sintético
+    // quando a conta ainda não tem e-mail de verdade.
+    const email = isSyntheticEmail(user.email) ? cpfToEmail(cpfDigits) : user.email!;
     const updated = await supabaseAdmin.auth.admin.updateUserById(profile.data.id, {
       email,
       password: data.senha,
