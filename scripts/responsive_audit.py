@@ -36,12 +36,18 @@ COLLECT = """() => {
     if (!text) continue;
     if (el.querySelector("h1,h2,h3,p,span,a,button,label,li,td,th")) continue;
     if (el.closest("[data-audit-ignore]")) continue;
+    // conteudo dentro de trilhos com rolagem horizontal pode ficar fora da tela de proposito
+    let scroller = false;
+    for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+      const ov = getComputedStyle(n).overflowX;
+      if (ov === "auto" || ov === "scroll") { scroller = true; break; }
+    }
     const r = el.getBoundingClientRect();
     if (r.width < 4 || r.height < 4) continue;
     // elementos inline podem ocupar varias linhas: o rect e a uniao das linhas,
     // o que gera falso positivo de sobreposicao. Marcamos para ignorar na checagem.
     const inline = style.display.startsWith("inline") && el.getClientRects().length > 1;
-    out.push({ tag: el.tagName, text: text.slice(0, 50), x: r.x, y: r.y, w: r.width, h: r.height, inline });
+    out.push({ tag: el.tagName, text: text.slice(0, 50), x: r.x, y: r.y, w: r.width, h: r.height, inline, scroller });
   }
   return { items: out, docW: document.documentElement.clientWidth,
            scrollW: document.documentElement.scrollWidth };
@@ -76,6 +82,8 @@ async def main():
                 if scrollW > docW + 2:
                     problems.append((width, route, "overflow-horizontal", f"{scrollW} > {docW}"))
                 for it in items:
+                    if it.get("scroller"):
+                        continue
                     if it["x"] < -2 or it["x"] + it["w"] > docW + 2:
                         problems.append((width, route, "fora-da-tela", f'{it["tag"]} "{it["text"]}"'))
                 for i in range(len(items)):
