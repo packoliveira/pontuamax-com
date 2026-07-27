@@ -15,7 +15,7 @@ function Perfil() {
   const e = data.employee;
   return (
     <div className="max-w-2xl space-y-4">
-      <h1 className="text-2xl font-bold text-[#0F172A]">Meu perfil</h1>
+      <PageHeader title="Meu perfil" />
       <Card className="rounded-2xl border-[#E5E7EB]">
         <CardContent className="p-5 grid gap-3 text-sm">
           <Row label="Nome" value={e.nome} />

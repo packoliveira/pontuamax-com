@@ -135,12 +135,10 @@ function CampanhasPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-semibold">Campanhas WhatsApp</h1>
-        <p className="text-sm text-muted-foreground">
-          Envie mensagens em massa segmentadas para seus clientes.
-        </p>
-      </div>
+      <PageHeader
+        title="Campanhas WhatsApp"
+        description="Envie mensagens em massa segmentadas para seus clientes."
+      />
 
       <Card>
         <CardHeader>

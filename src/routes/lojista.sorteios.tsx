@@ -70,10 +70,11 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Trophy className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Sorteios</h1>
-      </div>
+      <PageHeader
+        title="Sorteios"
+        icon={<Trophy className="h-6 w-6 text-primary" />}
+        description="Crie sorteios e escolha ganhadores entre seus clientes."
+      />
       <Card>
         <CardHeader>
           <CardTitle>Novo sorteio</CardTitle>

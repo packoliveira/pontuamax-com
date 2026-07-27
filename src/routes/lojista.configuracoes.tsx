@@ -154,15 +154,11 @@ function ConfigPage() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <div className="space-y-1">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">
-          Ajustes
-        </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-[#0F172A]">Configurações</h1>
-        <p className="text-sm text-[#64748B]">
-          Personalize a página do cliente, regras de recompensa e integrações
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Ajustes"
+        title="Configurações"
+        description="Personalize a página do cliente, regras de recompensa e integrações"
+      />
 
       <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
         {/* Sidebar de categorias */}

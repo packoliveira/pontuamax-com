@@ -57,14 +57,11 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Ticket className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Vale-presente</h1>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Gere códigos que valem pontos. O cliente resgata pelo link e recebe os pontos
-        automaticamente.
-      </p>
+      <PageHeader
+        title="Vale-presente"
+        icon={<Ticket className="h-6 w-6 text-primary" />}
+        description="Gere códigos que valem pontos. O cliente resgata pelo link e recebe os pontos automaticamente."
+      />
 
       <Card>
         <CardHeader>

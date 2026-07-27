@@ -106,18 +106,19 @@ function InstagramPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Instagram className="h-6 w-6" /> Posts do Instagram
-          </h1>
-          <p className="text-sm text-muted-foreground">
+      <PageHeader
+        title="Posts do Instagram"
+        icon={<Instagram className="h-6 w-6" />}
+        description={
+          <>
             Aprove os posts em que seus clientes marcam{" "}
-            <span className="font-semibold">@{loja.instagram_handle || "sua_loja"}</span> e credite
-            pontos.
-          </p>
-        </div>
-      </div>
+            <span className="font-semibold break-all">
+              @{loja.instagram_handle || "sua_loja"}
+            </span>{" "}
+            e credite pontos.
+          </>
+        }
+      />
 
       {!active && (
         <Card className="border-dashed">
