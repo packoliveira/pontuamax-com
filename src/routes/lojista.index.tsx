@@ -147,28 +147,28 @@ function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-xs font-medium uppercase tracking-wider text-[#64748B]">
-            Dashboard
-          </div>
-          <h1 className="mt-1 truncate text-2xl font-bold text-[#0F172A] md:text-3xl">
-            Olá, {loja.nome_fantasia}
-          </h1>
-          <p className="mt-1 truncate text-sm text-[#64748B]">
+      <PageHeader
+        eyebrow="Dashboard"
+        title={`Olá, ${loja.nome_fantasia}`}
+        description={
+          <>
             Sua página:{" "}
-            <span className="font-mono text-[#0F172A]">pontuamax.com.br/{loja.slug}</span>
-          </p>
-        </div>
-        <Link to="/lojista/lancar-venda" className="w-full sm:w-auto">
-          <Button
-            size="lg"
-            className="w-full shrink-0 rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
-          >
-            <ShoppingCart className="h-4 w-4" /> Lançar venda
-          </Button>
-        </Link>
-      </div>
+            <span className="break-all font-mono text-[#0F172A]">
+              pontuamax.com.br/{loja.slug}
+            </span>
+          </>
+        }
+        actions={
+          <Link to="/lojista/lancar-venda" className="w-full sm:w-auto">
+            <Button
+              size="lg"
+              className="w-full rounded-xl bg-[#2563EB] text-white shadow-sm hover:bg-[#1D4ED8] sm:w-auto"
+            >
+              <ShoppingCart className="h-4 w-4" /> Lançar venda
+            </Button>
+          </Link>
+        }
+      />
 
       {/* Métricas */}
       <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
