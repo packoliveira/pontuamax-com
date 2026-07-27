@@ -37,7 +37,10 @@ COLLECT = """() => {
     if (el.closest("[data-audit-ignore]")) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 4 || r.height < 4) continue;
-    out.push({ tag: el.tagName, text: text.slice(0, 50), x: r.x, y: r.y, w: r.width, h: r.height });
+    // elementos inline podem ocupar varias linhas: o rect e a uniao das linhas,
+    // o que gera falso positivo de sobreposicao. Marcamos para ignorar na checagem.
+    const inline = style.display.startsWith("inline") && el.getClientRects().length > 1;
+    out.push({ tag: el.tagName, text: text.slice(0, 50), x: r.x, y: r.y, w: r.width, h: r.height, inline });
   }
   return { items: out, docW: document.documentElement.clientWidth,
            scrollW: document.documentElement.scrollWidth };
@@ -76,6 +79,8 @@ async def main():
                         problems.append((width, route, "fora-da-tela", f'{it["tag"]} "{it["text"]}"'))
                 for i in range(len(items)):
                     for j in range(i + 1, len(items)):
+                        if items[i].get("inline") or items[j].get("inline"):
+                            continue
                         r = overlap_ratio(items[i], items[j])
                         if r > 0.35:
                             problems.append((width, route, "sobreposicao",
