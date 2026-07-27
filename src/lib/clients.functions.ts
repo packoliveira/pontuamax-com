@@ -439,7 +439,7 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
     const cpfDigits = data.cpf.replace(/\D/g, "");
     if (!isValidCPF(cpfDigits)) throw new Error("CPF inválido.");
     const phoneDigits = (data.phone ?? "").replace(/\D/g, "") || null;
-    const email = cpfToEmail(cpfDigits);
+    let email = cpfToEmail(cpfDigits);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const existing = await supabaseAdmin
       .from("profiles")
@@ -451,6 +451,8 @@ export const criarClienteViaCpf = createServerFn({ method: "POST" })
       if (cur.data.user && cur.data.user.last_sign_in_at) {
         throw new Error("Já existe uma conta com este CPF. Faça login.");
       }
+      // Preserva e-mail real cadastrado pela loja.
+      if (!isSyntheticEmail(cur.data.user?.email)) email = cur.data.user!.email!;
       const upd = await supabaseAdmin.auth.admin.updateUserById(existing.data.id, {
         email,
         password: data.senha,
