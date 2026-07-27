@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PageHeader } from "@/components/page-header";
 import { useQuery } from "@tanstack/react-query";
 import { formatBRL } from "@/lib/qsf-shared";
 import { storeClientsQuery, storeTransactionsQuery } from "@/lib/queries";
